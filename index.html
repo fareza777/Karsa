@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/ide.css">
+  <link rel="stylesheet" href="css/ai.css">
 </head>
 <body data-theme="dark">
 
@@ -99,14 +100,38 @@
 
     <div class="ide-body">
       <aside id="sidebar" class="sidebar">
-        <div class="sidebar-head">
-          <span class="sidebar-title">FILE</span>
-          <div class="sidebar-actions">
-            <button id="btn-new-file" class="icon-btn-sm" title="File baru">＋</button>
-            <button id="btn-new-folder" class="icon-btn-sm" title="Folder baru">🗀</button>
+        <div class="sidebar-tabs">
+          <button id="side-tab-files" class="side-tab active">🗂 File</button>
+          <button id="side-tab-ai" class="side-tab">✨ AI</button>
+        </div>
+
+        <div id="panel-files" class="side-panel">
+          <div class="sidebar-head">
+            <span class="sidebar-title">FILE</span>
+            <div class="sidebar-actions">
+              <button id="btn-new-file" class="icon-btn-sm" title="File baru">＋</button>
+              <button id="btn-new-folder" class="icon-btn-sm" title="Folder baru">🗀</button>
+            </div>
+          </div>
+          <div id="file-tree" class="file-tree"></div>
+        </div>
+
+        <div id="panel-ai" class="side-panel hidden">
+          <div class="ai-head">
+            <span class="sidebar-title">KARSA AI · VIBECODING</span>
+            <button id="ai-settings-btn" class="icon-btn-sm" title="Pengaturan AI">⚙</button>
+          </div>
+          <div id="ai-chat" class="ai-chat"></div>
+          <div class="ai-input-box">
+            <textarea id="ai-input" rows="3"
+              placeholder="Jelaskan aplikasi atau perubahan yang kamu mau… (Enter untuk kirim, Shift+Enter baris baru)"></textarea>
+            <div class="ai-input-actions">
+              <span id="ai-status" class="ai-status"></span>
+              <button id="ai-stop" class="btn btn-ghost btn-sm hidden">⏹ Stop</button>
+              <button id="ai-send" class="btn btn-primary btn-sm">Kirim ✨</button>
+            </div>
           </div>
         </div>
-        <div id="file-tree" class="file-tree"></div>
       </aside>
 
       <div class="resizer" id="resizer-left"></div>
@@ -205,5 +230,6 @@
   <script src="js/filetree.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/ai.js"></script>
 </body>
 </html>

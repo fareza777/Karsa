@@ -11,6 +11,7 @@ live preview.
 
 | Fitur | Keterangan |
 |---|---|
+| ✨ **KARSA AI (vibecoding)** | Jelaskan idemu dalam bahasa natural — AI (MiniMax-M3) menulis file HTML/CSS/JS lengkap, klik **Terapkan** dan preview langsung jalan |
 | 🗂️ **Multi-proyek** | Kelola banyak proyek sekaligus — buat, duplikat, ganti nama, hapus |
 | 🧩 **8 Template siap pakai** | Landing page, Todo, Kalkulator, Game Ular, Kuis, Portofolio, Dashboard Statistik, atau kosong |
 | 📝 **Editor kode profesional** | CodeMirror: syntax highlighting, autocomplete (`Ctrl+Space`), cari dalam file (`Ctrl+F`), toggle komentar (`Ctrl+/`), auto-close bracket & tag, ukuran font bisa diatur |
@@ -55,6 +56,25 @@ vercel --prod   # deploy produksi
 
 Atau impor repo GitHub ini langsung di [vercel.com/new](https://vercel.com/new) —
 tanpa build command, tanpa output directory (situs statis murni).
+
+## ✨ KARSA AI (Vibecoding)
+
+Panel **✨ AI** di sidebar IDE terhubung ke **MiniMax-M3** lewat fungsi serverless
+[`api/chat.js`](api/chat.js). AI menerima seluruh konteks file proyekmu, lalu
+membalas dengan file utuh dalam blok kode — satu klik **⚡ Terapkan** menulis
+file ke proyek dan memuat ulang preview.
+
+Konfigurasi yang dibutuhkan (sekali saja):
+
+```bash
+vercel env add MINIMAX_API_KEY production   # tempel API key MiniMax kamu
+vercel deploy --prod
+```
+
+> 🔒 API key **tidak pernah** dikirim ke browser — semua permintaan AI melewati
+> proxy serverless. Untuk penggunaan lokal tanpa server (file:// atau
+> `python -m http.server`), buka ⚙ di panel AI dan isi API key — mode langsung
+> ini hanya untuk mesinmu sendiri, jangan dipakai di situs publik.
 
 ## ⌨ Shortcut
 
