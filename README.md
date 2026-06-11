@@ -17,7 +17,7 @@ live preview.
 | 📝 **Editor kode profesional** | CodeMirror: syntax highlighting, autocomplete (`Ctrl+Space`), cari dalam file (`Ctrl+F`), toggle komentar (`Ctrl+/`), auto-close bracket & tag, ukuran font bisa diatur |
 | 🌲 **File explorer** | Folder bersarang, tab editor, menu klik kanan (rename/duplikat/hapus/unduh) |
 | ⚡ **Live preview** | Hasil kode langsung terlihat, auto-refresh saat mengetik, mode layar penuh |
-| 📱 **Mode device** | Pratinjau tampilan desktop, tablet (768px), dan ponsel (375px) |
+| 📱 **Mode device** | Pratinjau desktop, tablet (768×1024), dan ponsel Android modern (412×915) — frame menskala otomatis agar selalu utuh |
 | ⌨ **Console + REPL** | `console.log`, warning, error tampil real-time — plus ketik JavaScript langsung ke preview dengan riwayat perintah |
 | 🔗 **Bagikan tautan** | Proyek ter-encode di URL — penerima langsung mendapat salinan lengkap |
 | 💾 **Auto-save** | Semua perubahan tersimpan otomatis di browser (localStorage) |

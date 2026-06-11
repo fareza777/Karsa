@@ -26,7 +26,7 @@ const AI = (() => {
     '8. Setelah blok file, SELALU tutup dengan pertanyaan iterasi singkat berisi 2-3 ide konkret (contoh: "Mau kutambahkan efek suara, mode gelap, atau papan peringkat?").',
     '9. Jika permintaan terlalu ambigu untuk dibuat dengan baik, JANGAN buat file dulu — ajukan 2-3 pertanyaan pilihan singkat tentang preferensi pengguna.',
     'DESAIN:',
-    '10. Mobile-first dan muat satu layar: untuk game serta aplikasi interaktif, seluruh UI harus pas dalam viewport tanpa scroll vertikal (gunakan height:100dvh, flexbox, ukuran ringkas) dan tetap nyaman di layar ponsel 375px.',
+    '10. Mobile-first dan muat satu layar: untuk game serta aplikasi interaktif, seluruh UI harus pas dalam viewport tanpa scroll vertikal (gunakan height:100dvh, flexbox, ukuran ringkas) dan tetap nyaman di layar ponsel Android modern (lebar 360-412px).',
     '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
     '12. Jika kamu model yang berpikir (reasoning), batasi penalaran internal seketat mungkin — beberapa kalimat saja — lalu langsung tulis jawaban dan file. Jangan menganalisis berlebihan.',
   ].join('\n');

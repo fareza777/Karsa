@@ -141,12 +141,39 @@ const Preview = (() => {
     setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
 
+  // Dimensi viewport device (CSS px) + lebar bingkai ponsel
+  const DEVICE_DIMS = { phone: [412, 915, 12], tablet: [768, 1024, 0] };
+  let currentDevice = 'desktop';
+
   function setDevice(device) {
+    currentDevice = device;
     const wrap = $('#preview-frame-wrap');
     wrap.className = 'preview-frame-wrap device-' + device;
     $$('.device-btn').forEach((btn) =>
       btn.classList.toggle('active', btn.dataset.device === device)
     );
+    fitDevice();
+  }
+
+  // Skalakan frame device agar selalu utuh terlihat di panel (ala DevTools)
+  function fitDevice() {
+    const wrap = $('#preview-frame-wrap');
+    const stage = $('#preview-stage');
+    const dims = DEVICE_DIMS[currentDevice];
+    stage.classList.toggle('device-mode', !!dims);
+    if (!dims) { wrap.style.transform = ''; return; }
+    const rect = stage.getBoundingClientRect();
+    const scale = Math.min(
+      1,
+      (rect.width - 20) / (dims[0] + dims[2]),
+      (rect.height - 20) / (dims[1] + dims[2])
+    );
+    wrap.style.transform = scale < 1 ? 'scale(' + scale.toFixed(3) + ')' : '';
+  }
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const stageEl = document.getElementById('preview-stage');
+    if (stageEl) new ResizeObserver(debounce(fitDevice, 80)).observe(stageEl);
   }
 
   function runInPreview(code) {

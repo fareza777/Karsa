@@ -266,29 +266,29 @@
 }
 .preview-frame-wrap {
   background: #fff;
-  transition: width .25s ease, margin .25s ease, border-radius .25s ease;
+  /* Hanya transform & radius: transisi width memicu loop dengan ResizeObserver */
+  transition: transform .25s ease, border-radius .25s ease;
   display: flex;
   width: 100%;
 }
-/* Ukuran viewport device nyata, berada di tengah panel */
+/* Ukuran viewport device nyata; diskalakan otomatis agar pas panel (JS fitDevice) */
+.preview-stage.device-mode { overflow: hidden; }
 .preview-frame-wrap.device-tablet {
   width: 768px;
   height: 1024px;
-  max-width: calc(100% - 24px);
-  max-height: calc(100% - 24px);
-  margin: auto;
+  margin: 10px auto auto;
+  transform-origin: top center;
   border-radius: 14px;
   box-shadow: var(--shadow);
   overflow: hidden;
   flex: none;
 }
 .preview-frame-wrap.device-phone {
-  width: 375px;
-  height: 667px;
-  max-width: calc(100% - 24px);
-  max-height: calc(100% - 24px);
-  margin: auto;
-  border-radius: 22px;
+  width: 412px;
+  height: 915px;
+  margin: 10px auto auto;
+  transform-origin: top center;
+  border-radius: 26px;
   border: 6px solid #2a2f3e;
   box-shadow: var(--shadow);
   overflow: hidden;
