@@ -51,6 +51,8 @@ export default async function handler(req, res) {
     return;
   }
 
+  const chosenModel = ALLOWED_MODELS.includes(model) ? model : 'MiniMax-M2.7-highspeed';
+
   let upstream;
   try {
     upstream = await fetch(MINIMAX_URL, {
@@ -60,11 +62,13 @@ export default async function handler(req, res) {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: ALLOWED_MODELS.includes(model) ? model : 'MiniMax-M3',
+        model: chosenModel,
         messages,
         stream: true,
-        max_tokens: 8192,
+        max_tokens: 16384,
         temperature: 0.7,
+        // Model reasoning (M3): pangkas penalaran agar respons lebih cepat
+        ...(chosenModel.includes('M3') ? { reasoning_effort: 'low' } : {}),
       }),
     });
   } catch (err) {

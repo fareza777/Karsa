@@ -119,7 +119,19 @@
         <div id="panel-ai" class="side-panel hidden">
           <div class="ai-head">
             <span class="sidebar-title">KARSA AI · VIBECODING</span>
-            <button id="ai-settings-btn" class="icon-btn-sm" title="Pengaturan AI">⚙</button>
+            <div class="sidebar-actions">
+              <button id="ai-clear-btn" class="icon-btn-sm" title="Bersihkan percakapan">🗑</button>
+              <button id="ai-settings-btn" class="icon-btn-sm" title="Pengaturan AI">⚙</button>
+            </div>
+          </div>
+          <div class="ai-mode-row">
+            <div class="ai-mode-toggle" role="group" aria-label="Mode AI">
+              <button id="ai-mode-fast" class="ai-mode-btn" title="MiniMax-M2.7-highspeed — langsung menjawab tanpa berpikir panjang">⚡ Cepat</button>
+              <button id="ai-mode-smart" class="ai-mode-btn" title="MiniMax-M3 — berpikir dalam, hasil lebih matang (1-2 menit)">🧠 Cermat</button>
+            </div>
+            <label class="ai-auto-apply" title="Langsung terapkan file ke proyek begitu AI selesai">
+              <input type="checkbox" id="ai-auto-apply"> Auto&#8209;terapkan
+            </label>
           </div>
           <div id="ai-chat" class="ai-chat"></div>
           <div class="ai-input-box">

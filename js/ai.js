@@ -2,7 +2,10 @@
 
 const AI = (() => {
   const SETTINGS_KEY = 'karsa.ai.v1';
-  const DEFAULT_SETTINGS = { endpoint: '/api/chat', model: 'MiniMax-M3', apiKey: '' };
+  const HISTORY_KEY = 'karsa.ai.history.v1';
+  const MODEL_FAST = 'MiniMax-M2.7-highspeed';
+  const MODEL_SMART = 'MiniMax-M3';
+  const DEFAULT_SETTINGS = { v: 2, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: false };
   const DIRECT_URL = 'https://api.minimax.io/v1/chat/completions';
   const MAX_FILE_CHARS = 6000;
   const MAX_CONTEXT_CHARS = 30000;
@@ -25,10 +28,11 @@ const AI = (() => {
     'DESAIN:',
     '10. Mobile-first dan muat satu layar: untuk game serta aplikasi interaktif, seluruh UI harus pas dalam viewport tanpa scroll vertikal (gunakan height:100dvh, flexbox, ukuran ringkas) dan tetap nyaman di layar ponsel 375px.',
     '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
+    '12. Jika kamu model yang berpikir (reasoning), batasi penalaran internal seketat mungkin — beberapa kalimat saja — lalu langsung tulis jawaban dan file. Jangan menganalisis berlebihan.',
   ].join('\n');
 
   let settings = loadSettings();
-  let historyByProject = {};
+  let historyByProject = loadHistory();
   let renderedProjectId = null;
   let busy = false;
   let abortCtrl = null;
@@ -36,7 +40,14 @@ const AI = (() => {
   function loadSettings() {
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
-      return { ...DEFAULT_SETTINGS, ...(raw ? JSON.parse(raw) : {}) };
+      const saved = raw ? JSON.parse(raw) : {};
+      const merged = { ...DEFAULT_SETTINGS, ...saved };
+      // Migrasi v1→v2: default lama (M3) diganti mode Cepat sebagai bawaan
+      if (!saved.v) {
+        merged.v = 2;
+        merged.model = MODEL_FAST;
+      }
+      return merged;
     } catch (err) {
       return { ...DEFAULT_SETTINGS };
     }
@@ -45,6 +56,34 @@ const AI = (() => {
   function saveSettings(patch) {
     settings = { ...settings, ...patch };
     try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (err) { /* abaikan */ }
+  }
+
+  // --- Persistensi riwayat chat (per proyek, maks 20 pesan) ---
+  function loadHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return typeof parsed === 'object' && parsed !== null ? parsed : {};
+    } catch (err) {
+      return {};
+    }
+  }
+
+  function saveHistory() {
+    try {
+      const trimmed = {};
+      Object.keys(historyByProject).forEach((id) => {
+        trimmed[id] = historyByProject[id].slice(-20);
+      });
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
+    } catch (err) {
+      // Penyimpanan penuh: buang riwayat lama, simpan ulang hanya proyek aktif
+      try {
+        const project = State.getCurrentProject();
+        const id = project ? project.id : '_global';
+        localStorage.setItem(HISTORY_KEY, JSON.stringify({ [id]: (historyByProject[id] || []).slice(-10) }));
+      } catch (err2) { /* menyerah dengan anggun */ }
+    }
   }
 
   // --- Konteks proyek untuk AI ---
@@ -126,8 +165,18 @@ const AI = (() => {
     scrollChat();
   }
 
-  function appendErrorBubble(text) {
-    chatEl().appendChild(el('div', { class: 'ai-msg ai-msg-error', text: '⚠ ' + text }));
+  function appendErrorBubble(text, onRetry) {
+    const bubble = el('div', { class: 'ai-msg ai-msg-error' }, [
+      el('div', { text: '⚠ ' + text }),
+    ]);
+    if (onRetry) {
+      bubble.appendChild(el('button', {
+        class: 'ai-retry-btn',
+        text: '🔄 Coba lagi',
+        onclick: () => { bubble.remove(); onRetry(); },
+      }));
+    }
+    chatEl().appendChild(bubble);
     scrollChat();
   }
 
@@ -260,6 +309,7 @@ const AI = (() => {
     $('#ai-send').disabled = value;
     $('#ai-stop').classList.toggle('hidden', !value);
     $('#ai-status').textContent = statusText || '';
+    $('#side-tab-ai').classList.toggle('busy', value);
   }
 
   async function send() {
@@ -309,12 +359,17 @@ const AI = (() => {
     const url = useDirect ? DIRECT_URL : settings.endpoint;
     const headers = { 'Content-Type': 'application/json' };
     if (useDirect) headers.Authorization = 'Bearer ' + settings.apiKey;
+    const directPayload = {
+      model: settings.model, messages, stream: true, max_tokens: 16384, temperature: 0.7,
+      ...(settings.model.includes('M3') ? { reasoning_effort: 'low' } : {}),
+    };
     const body = useDirect
-      ? JSON.stringify({ model: settings.model, messages, stream: true, max_tokens: 8192, temperature: 0.7 })
+      ? JSON.stringify(directPayload)
       : JSON.stringify({ model: settings.model, messages });
 
     let rawText = '';
     let lastRenderAt = 0;
+    let finishReason = null;
     try {
       const response = await fetch(url, { method: 'POST', headers, body, signal: abortCtrl.signal });
       if (!response.ok) {
@@ -343,6 +398,7 @@ const AI = (() => {
           try {
             const json = JSON.parse(payload);
             if (json.error) throw new Error(json.error.message || json.error);
+            if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
             const delta = json.choices?.[0]?.delta?.content;
             if (delta) {
               rawText += delta;
@@ -375,26 +431,41 @@ const AI = (() => {
 
       const { visible, thinking } = stripThink(rawText);
       if (!visible.trim()) {
+        if (finishReason === 'length') {
+          throw new Error('Jatah token habis terpakai untuk penalaran AI sebelum jawaban sempat ditulis. Coba kirim ulang (klik Kirim), atau ganti model ke MiniMax-M2.7-highspeed di pengaturan ⚙ — model itu langsung menjawab tanpa berpikir panjang.');
+        }
         throw new Error(thinking
           ? 'Koneksi terputus saat AI masih berpikir (penalaran terlalu panjang). Coba lagi, atau ganti model ke MiniMax-M2.7-highspeed di pengaturan ⚙ untuk jawaban lebih cepat.'
-          : 'AI tidak mengembalikan jawaban. Coba lagi.');
+          : (rawText.length === 0
+            ? 'Tidak ada respons dari server AI. Periksa koneksi internetmu lalu coba lagi.'
+            : 'AI selesai tanpa jawaban yang bisa ditampilkan. Klik Kirim untuk mencoba lagi.'));
       }
       renderAssistantHtml(bubble, visible);
       attachApplyBox(bubble, visible, true);
+      const elapsed = Math.round((Date.now() - startedAt) / 1000);
+      bubble.appendChild(el('div', {
+        class: 'ai-meta',
+        text: '⚡ ' + elapsed + ' dtk · ' + settings.model.replace('MiniMax-', ''),
+      }));
       history.push({ role: 'assistant', content: visible });
+      saveHistory();
+      if (settings.autoApply) {
+        const applyBtn = $('.btn-apply', bubble);
+        if (applyBtn) applyBtn.click();
+      }
     } catch (err) {
       bubble.remove();
       if (err.name === 'AbortError') {
         appendErrorBubble('Dihentikan. Jawaban parsial dibuang.');
-        history.pop(); // buang pesan user agar bisa dikirim ulang
       } else {
         let hint = err.message;
         if (!useDirect && (hint.includes('Failed to fetch') || hint.includes('404'))) {
           hint += ' — Endpoint /api/chat butuh server Vercel. Untuk penggunaan lokal, isi API key di pengaturan (⚙).';
         }
-        appendErrorBubble(hint);
-        history.pop();
+        appendErrorBubble(hint, () => send());
       }
+      history.pop(); // buang pesan user dari riwayat…
+      input.value = prompt; // …tapi kembalikan ke kotak input agar tinggal klik Kirim / Coba lagi
     } finally {
       clearInterval(ticker);
       setBusy(false, '');
@@ -426,6 +497,7 @@ const AI = (() => {
               model: modelInput.value.trim() || DEFAULT_SETTINGS.model,
               apiKey: keyInput.value.trim(),
             });
+            updateModeButtons();
             showToast('Pengaturan AI disimpan.', 'ok');
           },
         },
@@ -447,12 +519,47 @@ const AI = (() => {
     }
   }
 
+  // --- Mode Cepat / Cermat ---
+  function updateModeButtons() {
+    const isFast = settings.model.includes('highspeed');
+    $('#ai-mode-fast').classList.toggle('active', isFast);
+    $('#ai-mode-smart').classList.toggle('active', !isFast);
+  }
+
+  function setMode(fast) {
+    saveSettings({ model: fast ? MODEL_FAST : MODEL_SMART });
+    updateModeButtons();
+    showToast(fast
+      ? 'Mode ⚡ Cepat: jawaban langsung tanpa berpikir panjang.'
+      : 'Mode 🧠 Cermat: hasil lebih matang, butuh 1-2 menit.', 'ok');
+  }
+
+  function clearChat() {
+    const project = State.getCurrentProject();
+    const id = project ? project.id : '_global';
+    historyByProject[id] = [];
+    saveHistory();
+    renderedProjectId = null;
+    renderHistoryForCurrentProject();
+    showToast('Percakapan dibersihkan.', 'ok');
+  }
+
   function init() {
     $('#side-tab-files').addEventListener('click', () => switchTab('files'));
     $('#side-tab-ai').addEventListener('click', () => switchTab('ai'));
     $('#ai-send').addEventListener('click', send);
     $('#ai-stop').addEventListener('click', () => { if (abortCtrl) abortCtrl.abort(); });
     $('#ai-settings-btn').addEventListener('click', settingsDialog);
+    $('#ai-clear-btn').addEventListener('click', clearChat);
+    $('#ai-mode-fast').addEventListener('click', () => setMode(true));
+    $('#ai-mode-smart').addEventListener('click', () => setMode(false));
+    const autoApplyToggle = $('#ai-auto-apply');
+    autoApplyToggle.checked = !!settings.autoApply;
+    autoApplyToggle.addEventListener('change', () => {
+      saveSettings({ autoApply: autoApplyToggle.checked });
+      if (autoApplyToggle.checked) showToast('File dari AI akan langsung diterapkan otomatis. ⚡', 'ok');
+    });
+    updateModeButtons();
     $('#ai-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
