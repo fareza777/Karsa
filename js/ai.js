@@ -9,7 +9,7 @@ const AI = (() => {
   const MAX_HISTORY = 12;
 
   const SYSTEM_PROMPT = [
-    'Kamu adalah KARSA AI, asisten vibe-coding di dalam KARSA — pembuat aplikasi berbasis browser.',
+    'Kamu adalah KARSA AI, rekan vibe-coding di dalam KARSA — pembuat aplikasi berbasis browser.',
     'Proyek pengguna hanya berisi file statis HTML/CSS/JavaScript murni (tanpa framework, tanpa npm, tanpa backend).',
     'ATURAN WAJIB saat membuat atau mengubah file:',
     '1. Tulis setiap file secara UTUH (bukan potongan) dalam blok kode berformat persis: ```html file=index.html (lalu isi file, lalu ```). Atribut file= wajib ada.',
@@ -17,7 +17,14 @@ const AI = (() => {
     '3. Rujuk CSS via <link href="css/style.css"> dan JS via <script src="js/app.js"> — KARSA otomatis menyatukannya di live preview.',
     '4. Library eksternal boleh lewat CDN https penuh.',
     '5. Jangan pakai fitur server (API backend sendiri, database). localStorage boleh.',
-    '6. Jawab dalam bahasa Indonesia: penjelasan singkat dulu, lalu blok file. Jangan ulangi file yang tidak berubah.',
+    '6. Jawab dalam bahasa Indonesia. Jangan ulangi file yang tidak berubah.',
+    'GAYA PERCAKAPAN:',
+    '7. Hangat dan kolaboratif seperti rekan satu tim. Buka dengan 1-2 kalimat tentang apa yang akan kamu buat beserta pilihan desain utamanya, baru blok file.',
+    '8. Setelah blok file, SELALU tutup dengan pertanyaan iterasi singkat berisi 2-3 ide konkret (contoh: "Mau kutambahkan efek suara, mode gelap, atau papan peringkat?").',
+    '9. Jika permintaan terlalu ambigu untuk dibuat dengan baik, JANGAN buat file dulu — ajukan 2-3 pertanyaan pilihan singkat tentang preferensi pengguna.',
+    'DESAIN:',
+    '10. Mobile-first dan muat satu layar: untuk game serta aplikasi interaktif, seluruh UI harus pas dalam viewport tanpa scroll vertikal (gunakan height:100dvh, flexbox, ukuran ringkas) dan tetap nyaman di layar ponsel 375px.',
+    '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
   ].join('\n');
 
   let settings = loadSettings();
@@ -132,34 +139,57 @@ const AI = (() => {
     return { visible: cleaned, thinking: false };
   }
 
-  // Render markdown ringan: blok kode (dengan label file), inline code, paragraf
-  function renderAssistantHtml(container, text) {
+  // Render markdown ringan: prosa + kartu kode (rapi, bukan wall of text)
+  function renderAssistantHtml(container, text, streaming) {
     container.innerHTML = '';
-    const parts = text.split(/```/);
+    const parts = text.split('```');
     parts.forEach((part, i) => {
       if (i % 2 === 1) {
-        // Bagian blok kode: baris pertama = info (lang + file=…)
-        const newline = part.indexOf('\n');
-        const info = newline === -1 ? part : part.slice(0, newline);
-        const code = newline === -1 ? '' : part.slice(newline + 1);
-        const fileMatch = info.match(/file=([^\s]+)/);
-        if (fileMatch) {
-          container.appendChild(el('div', { class: 'ai-file-header' }, [
-            el('span', { text: fileIcon(fileMatch[1]) }),
-            el('span', { text: fileMatch[1] }),
-          ]));
-        }
-        const pre = el('pre', {}, [el('code', { text: code })]);
-        container.appendChild(pre);
+        const isWriting = !!streaming && i === parts.length - 1;
+        container.appendChild(buildCodeCard(part, isWriting));
       } else if (part.trim()) {
         part.split(/\n{2,}/).forEach((para) => {
           if (!para.trim()) return;
           const p = el('p');
-          p.innerHTML = escapeHtml(para.trim()).replace(/`([^`]+)`/g, '<code>$1</code>');
+          let html = escapeHtml(para.trim())
+            .replace(/`([^`]+)`/g, '<code>$1</code>')
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+          if (/^#{1,4}\s/.test(para.trim())) {
+            html = '<strong>' + html.replace(/^#{1,4}\s+/, '') + '</strong>';
+          }
+          p.innerHTML = html;
           container.appendChild(p);
         });
       }
     });
+  }
+
+  // Kartu kode: saat ditulis tampil spinner + hitungan baris; setelah selesai bisa dibuka-tutup
+  function buildCodeCard(rawBlock, isWriting) {
+    const newline = rawBlock.indexOf('\n');
+    const info = newline === -1 ? rawBlock : rawBlock.slice(0, newline);
+    const code = newline === -1 ? '' : rawBlock.slice(newline + 1).replace(/\n$/, '');
+    const fileMatch = info.match(/file=([^\s]+)/);
+    const title = fileMatch ? fileMatch[1] : (info.trim().split(/\s+/)[0] || 'kode');
+    const lineCount = code ? code.split('\n').length : 0;
+
+    const card = el('div', { class: 'ai-code-card' + (isWriting ? ' writing' : '') });
+    const head = el('button', { class: 'ai-code-head', type: 'button' }, [
+      el('span', { text: isWriting ? '✍' : fileIcon(title) }),
+      el('span', { class: 'ai-code-name', text: title }),
+      el('span', { class: 'ai-code-meta', text: isWriting ? 'menulis… ' + lineCount + ' baris' : lineCount + ' baris' }),
+      isWriting ? el('span', { class: 'ai-spinner' }) : el('span', { class: 'ai-code-caret', text: '▾' }),
+    ]);
+    card.appendChild(head);
+    if (!isWriting) {
+      const body = el('pre', { class: 'ai-code-body hidden' }, [el('code', { text: code })]);
+      card.appendChild(body);
+      head.addEventListener('click', () => {
+        body.classList.toggle('hidden');
+        card.classList.toggle('open');
+      });
+    }
+    return card;
   }
 
   function appendAssistantBubble(fullText, fromHistory) {
@@ -284,6 +314,7 @@ const AI = (() => {
       : JSON.stringify({ model: settings.model, messages });
 
     let rawText = '';
+    let lastRenderAt = 0;
     try {
       const response = await fetch(url, { method: 'POST', headers, body, signal: abortCtrl.signal });
       if (!response.ok) {
@@ -317,16 +348,22 @@ const AI = (() => {
               rawText += delta;
               const { visible, thinking } = stripThink(rawText);
               phase = thinking && !visible.trim() ? 'berpikir' : 'menulis';
+              const now = Date.now();
               if (visible.trim()) {
-                bubble.textContent = visible; // cepat selama streaming
-              } else if (thinking) {
+                if (now - lastRenderAt > 180) {
+                  lastRenderAt = now;
+                  renderAssistantHtml(bubble, visible, true);
+                  scrollChat();
+                }
+              } else if (thinking && now - lastRenderAt > 400) {
+                lastRenderAt = now;
                 bubble.innerHTML = '';
                 bubble.appendChild(el('span', {
                   class: 'ai-thinking',
                   text: 'AI menyusun rencana… (' + rawText.length + ' karakter penalaran)',
                 }));
+                scrollChat();
               }
-              scrollChat();
             }
           } catch (parseErr) {
             if (parseErr.message && !payload.startsWith('{')) continue;
