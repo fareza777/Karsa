@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KARSA — Dari Ide, Jadi Aplikasi</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>✦</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/ide.css">
+</head>
+<body data-theme="dark">
+
+  <!-- ============ DASHBOARD ============ -->
+  <div id="view-dashboard" class="view">
+    <header class="dash-header">
+      <div class="brand">
+        <span class="brand-mark">✦</span>
+        <span class="brand-name">KARSA</span>
+      </div>
+      <div class="dash-header-right">
+        <button id="dash-theme-toggle" class="icon-btn" title="Ganti tema">🌙</button>
+      </div>
+    </header>
+
+    <main class="dash-main">
+      <div class="hero">
+        <h1 class="hero-title">Mau bikin apa hari ini?</h1>
+        <p class="hero-sub">Tulis kode, lihat hasilnya langsung. Semua di browser — tanpa instalasi apa pun.</p>
+        <div class="hero-actions">
+          <button id="btn-new-project" class="btn btn-primary btn-lg">＋ Proyek Baru</button>
+          <button id="btn-import-project" class="btn btn-ghost btn-lg">📂 Impor Proyek</button>
+          <input type="file" id="import-input" accept=".json" hidden>
+        </div>
+      </div>
+
+      <section class="dash-section" id="section-projects">
+        <div class="dash-section-head">
+          <h2>Proyek Kamu</h2>
+          <span id="project-count" class="badge"></span>
+        </div>
+        <div id="project-grid" class="project-grid"></div>
+        <div id="empty-projects" class="empty-state hidden">
+          <div class="empty-icon">🌱</div>
+          <p>Belum ada proyek. Mulai dari template di bawah, atau buat dari nol!</p>
+        </div>
+      </section>
+
+      <section class="dash-section">
+        <div class="dash-section-head">
+          <h2>Mulai Cepat dari Template</h2>
+        </div>
+        <div id="template-strip" class="template-grid"></div>
+      </section>
+
+      <footer class="dash-footer">
+        <span class="brand-mark">✦</span> KARSA — Dari ide, jadi aplikasi. Data tersimpan aman di browser kamu.
+      </footer>
+    </main>
+  </div>
+
+  <!-- ============ IDE ============ -->
+  <div id="view-ide" class="view hidden">
+    <header class="ide-topbar">
+      <div class="topbar-left">
+        <button id="btn-home" class="icon-btn" title="Kembali ke Beranda">✦</button>
+        <input id="project-name-input" class="project-name-input" spellcheck="false" title="Klik untuk ganti nama proyek">
+      </div>
+      <div class="topbar-center">
+        <button id="btn-run" class="btn btn-run" title="Jalankan (Ctrl+Enter)">▶ Jalankan</button>
+        <label class="switch-label" title="Otomatis jalankan saat kode berubah">
+          <input type="checkbox" id="auto-run-toggle" checked>
+          <span class="switch"></span>
+          <span class="switch-text">Auto</span>
+        </label>
+      </div>
+      <div class="topbar-right">
+        <div class="device-group" role="group" aria-label="Mode tampilan">
+          <button class="device-btn active" data-device="desktop" title="Desktop">🖥️</button>
+          <button class="device-btn" data-device="tablet" title="Tablet (768px)">📱</button>
+          <button class="device-btn" data-device="phone" title="Ponsel (375px)">📲</button>
+        </div>
+        <button id="btn-open-tab" class="icon-btn" title="Buka preview di tab baru">↗</button>
+        <button id="btn-export" class="icon-btn" title="Ekspor proyek">⬇</button>
+        <button id="ide-theme-toggle" class="icon-btn" title="Ganti tema">🌙</button>
+      </div>
+    </header>
+
+    <div class="ide-body">
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-head">
+          <span class="sidebar-title">FILE</span>
+          <div class="sidebar-actions">
+            <button id="btn-new-file" class="icon-btn-sm" title="File baru">＋</button>
+            <button id="btn-new-folder" class="icon-btn-sm" title="Folder baru">🗀</button>
+          </div>
+        </div>
+        <div id="file-tree" class="file-tree"></div>
+      </aside>
+
+      <div class="resizer" id="resizer-left"></div>
+
+      <section class="editor-pane">
+        <div id="tabbar" class="tabbar"></div>
+        <div id="editor-host" class="editor-host">
+          <div id="editor-empty" class="editor-empty">
+            <div class="empty-icon">✦</div>
+            <p>Pilih file di panel kiri untuk mulai menulis kode.</p>
+          </div>
+        </div>
+        <div class="statusbar">
+          <span id="status-file">—</span>
+          <span id="status-cursor"></span>
+          <span class="statusbar-spacer"></span>
+          <span id="status-save" class="status-save">Tersimpan ✓</span>
+        </div>
+      </section>
+
+      <div class="resizer" id="resizer-right"></div>
+
+      <section class="preview-pane">
+        <div class="preview-head">
+          <span class="preview-title">⚡ Live Preview</span>
+          <span id="preview-url" class="preview-url">karsa.app/preview</span>
+          <button id="btn-refresh-preview" class="icon-btn-sm" title="Muat ulang preview">⟳</button>
+        </div>
+        <div class="preview-stage" id="preview-stage">
+          <div id="preview-frame-wrap" class="preview-frame-wrap device-desktop">
+            <iframe id="preview-frame" title="Preview aplikasi" sandbox="allow-scripts allow-modals allow-forms allow-popups"></iframe>
+          </div>
+        </div>
+        <div id="console-panel" class="console-panel">
+          <div class="console-head" id="console-head">
+            <span class="console-title">⌨ Console</span>
+            <span id="console-badge" class="console-badge hidden">0</span>
+            <span class="statusbar-spacer"></span>
+            <button id="btn-clear-console" class="icon-btn-sm" title="Bersihkan console">🗑</button>
+            <button id="btn-toggle-console" class="icon-btn-sm" title="Tampilkan/sembunyikan console">▾</button>
+          </div>
+          <div id="console-log" class="console-log"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ============ OVERLAYS ============ -->
+  <div id="modal-root"></div>
+  <div id="toast-root" class="toast-root"></div>
+  <div id="context-menu" class="context-menu hidden"></div>
+
+  <!-- ============ LIBS (CDN) ============ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- ============ APP ============ -->
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/components.js"></script>
+  <script src="js/console.js"></script>
+  <script src="js/preview.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/tabs.js"></script>
+  <script src="js/filetree.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

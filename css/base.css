@@ -1,0 +1,110 @@
+/* ===== KARSA — base: tokens, reset, tema ===== */
+
+:root {
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-code: 'JetBrains Mono', 'Consolas', monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --accent: #7c5cff;
+  --accent-2: #22d3ee;
+  --gradient: linear-gradient(135deg, #7c5cff 0%, #22d3ee 100%);
+  --danger: #f43f5e;
+  --warn: #f59e0b;
+  --ok: #34d399;
+  --shadow: 0 8px 30px rgba(0, 0, 0, .25);
+  --transition: .18s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #0a0c12;
+  --bg-2: #10131c;
+  --bg-3: #171c28;
+  --bg-hover: #1d2433;
+  --border: #232b3d;
+  --text: #e8ecf4;
+  --muted: #8b94a7;
+  --editor-bg: #131722;
+  --console-bg: #0c0f16;
+}
+
+[data-theme="light"] {
+  --bg: #f4f6fb;
+  --bg-2: #ffffff;
+  --bg-3: #eceff7;
+  --bg-hover: #e3e8f4;
+  --border: #dbe1ef;
+  --text: #1a2233;
+  --muted: #64708a;
+  --editor-bg: #ffffff;
+  --console-bg: #f7f8fc;
+  --shadow: 0 8px 30px rgba(30, 40, 80, .12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+  transition: background var(--transition), color var(--transition);
+}
+
+.view { height: 100vh; display: flex; flex-direction: column; }
+.hidden { display: none !important; }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+input, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: var(--muted); }
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px; height: 34px;
+  border-radius: 10px;
+  background: var(--gradient);
+  color: #fff;
+  font-size: 17px;
+}
+.brand-name {
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: 3px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 40px; margin-bottom: 12px; }

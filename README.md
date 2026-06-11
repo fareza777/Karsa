@@ -1,0 +1,89 @@
+# ✦ KARSA — Dari Ide, Jadi Aplikasi
+
+**KARSA** (dari bahasa Sanskerta: *kehendak mencipta*) adalah aplikasi pembuat aplikasi
+ala Replit yang berjalan **sepenuhnya di browser** — tanpa instalasi, tanpa server,
+tanpa akun. Tulis kode HTML/CSS/JavaScript dan lihat hasilnya langsung di panel
+live preview.
+
+![KARSA](https://img.shields.io/badge/KARSA-Dari%20Ide%2C%20Jadi%20Aplikasi-7c5cff)
+
+## ✨ Fitur
+
+| Fitur | Keterangan |
+|---|---|
+| 🗂️ **Multi-proyek** | Kelola banyak proyek sekaligus — buat, duplikat, ganti nama, hapus |
+| 🧩 **6 Template siap pakai** | Landing page, Todo, Kalkulator, Game Ular, Kuis, atau mulai dari kosong |
+| 📝 **Editor kode profesional** | CodeMirror: syntax highlighting, nomor baris, auto-close bracket & tag |
+| 🌲 **File explorer** | Folder bersarang, tab editor, menu klik kanan (rename/duplikat/hapus/unduh) |
+| ⚡ **Live preview** | Hasil kode langsung terlihat, auto-refresh saat mengetik (bisa dimatikan) |
+| 📱 **Mode device** | Pratinjau tampilan desktop, tablet (768px), dan ponsel (375px) |
+| ⌨ **Console terintegrasi** | `console.log`, warning, dan error dari preview tampil real-time |
+| 💾 **Auto-save** | Semua perubahan tersimpan otomatis di browser (localStorage) |
+| ⬇️ **Ekspor fleksibel** | ZIP, HTML mandiri satu file, atau JSON (bisa diimpor kembali) |
+| 🌙 **Tema gelap & terang** | Satu klik untuk berganti suasana |
+| ↔️ **Panel resizable** | Atur lebar sidebar & preview sesuka hati |
+
+## 🚀 Cara Menjalankan
+
+Cukup buka `index.html` di browser modern (Chrome, Edge, Firefox). Selesai!
+
+> Koneksi internet diperlukan untuk memuat editor CodeMirror & JSZip dari CDN.
+> Tanpa internet, KARSA tetap berjalan dengan editor sederhana (fallback otomatis).
+
+Atau jalankan lewat server lokal:
+
+```bash
+# Python
+python -m http.server 8080
+
+# Node.js
+npx serve .
+```
+
+lalu buka `http://localhost:8080`.
+
+## ⌨ Shortcut
+
+| Tombol | Aksi |
+|---|---|
+| `Ctrl + Enter` | Jalankan / muat ulang preview |
+| `Ctrl + S` | Simpan (otomatis) + muat ulang preview |
+| `Esc` | Tutup modal / menu |
+| Klik kanan pada file | Menu konteks (rename, duplikat, unduh, hapus) |
+
+## 🏗️ Arsitektur
+
+Vanilla HTML/CSS/JS murni — tanpa framework, tanpa build step.
+
+```
+index.html          — kerangka UI (dashboard + IDE)
+css/
+  base.css          — design tokens, tema gelap/terang
+  components.css    — tombol, modal, toast, menu konteks
+  dashboard.css     — beranda & galeri template
+  ide.css           — layout IDE, editor, preview, console
+js/
+  utils.js          — helper umum
+  storage.js        — persistensi localStorage
+  templates.js      — 6 template proyek bawaan
+  state.js          — state aplikasi (pola immutable)
+  components.js     — toast, modal, menu konteks
+  console.js        — panel console (jembatan postMessage)
+  preview.js        — bundler in-memory → iframe sandbox
+  editor.js         — CodeMirror + fallback textarea
+  tabs.js           — bilah tab editor
+  filetree.js       — file explorer
+  dashboard.js      — beranda & manajemen proyek
+  app.js            — bootstrap & event global
+```
+
+**Keamanan:** preview berjalan dalam `<iframe sandbox>` tanpa `allow-same-origin`,
+sehingga kode pengguna terisolasi dari data KARSA.
+
+## 📄 Lisensi
+
+MIT — bebas digunakan, dimodifikasi, dan disebarkan.
+
+---
+
+Dibuat dengan ❤️ — *KARSA: Dari ide, jadi aplikasi.*
