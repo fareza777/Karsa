@@ -42,8 +42,18 @@ const Editor = (() => {
         autoCloseBrackets: true,
         autoCloseTags: true,
         styleActiveLine: true,
+        matchBrackets: true,
         lineWrapping: false,
+        extraKeys: {
+          'Ctrl-Space': 'autocomplete',
+          'Ctrl-/': 'toggleComment',
+          'Cmd-/': 'toggleComment',
+          'Ctrl-F': 'findPersistent',
+          'Cmd-F': 'findPersistent',
+        },
+        hintOptions: { completeSingle: false },
       });
+      applyFontSize();
       cm.on('change', () => onContentChanged(cm.getValue()));
       cm.on('cursorActivity', () => {
         const pos = cm.getCursor();
@@ -122,7 +132,25 @@ const Editor = (() => {
     if (cm) cm.setOption('theme', theme === 'dark' ? 'material-darker' : 'default');
   }
 
+  // --- Ukuran font editor ---
+  function applyFontSize() {
+    const size = State.getSettings().fontSize || 13.5;
+    const target = cm ? cm.getWrapperElement() : fallback;
+    if (target) target.style.fontSize = size + 'px';
+    if (cm) cm.refresh();
+  }
+
+  function changeFontSize(delta) {
+    const current = State.getSettings().fontSize || 13.5;
+    const next = Math.max(10, Math.min(24, current + delta));
+    State.updateSettings({ fontSize: next });
+    applyFontSize();
+  }
+
   function getCurrentPath() { return currentPath; }
 
-  return { init, openFile, closeFile, handleRename, resetForProject, setTheme, getCurrentPath };
+  return {
+    init, openFile, closeFile, handleRename, resetForProject,
+    setTheme, changeFontSize, getCurrentPath,
+  };
 })();

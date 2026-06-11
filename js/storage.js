@@ -38,9 +38,10 @@ const Storage = (() => {
       return {
         theme: settings.theme === 'light' ? 'light' : 'dark',
         autoRun: settings.autoRun !== false,
+        fontSize: typeof settings.fontSize === 'number' ? settings.fontSize : 13.5,
       };
     } catch (err) {
-      return { theme: 'dark', autoRun: true };
+      return { theme: 'dark', autoRun: true, fontSize: 13.5 };
     }
   }
 

@@ -326,7 +326,7 @@ document.querySelectorAll('.keys button').forEach((btn) => {
 function hitung() {
   if (!expr) return;
   // Hanya izinkan karakter aman sebelum evaluasi
-  if (!/^[\d+\-*/.% ()]+$/.test(expr)) { expr = ''; return; }
+  if (!/^[\\d+\\-*/.% ()]+$/.test(expr)) { expr = ''; return; }
   try {
     const hasil = Function('"use strict"; return (' + expr.replace(/%/g, '/100') + ')')();
     expr = String(Math.round(hasil * 1e10) / 1e10);
@@ -593,6 +593,201 @@ function selesai() {
 }
 
 tampilkan();
+`,
+    },
+  },
+  {
+    id: 'portfolio',
+    name: 'Portofolio',
+    desc: 'Halaman profil pribadi yang elegan & responsif.',
+    icon: '🎨',
+    color: 'linear-gradient(135deg,#ec4899,#8b5cf6)',
+    files: {
+      'index.html': `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raka — Web Developer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <div class="avatar">R</div>
+    <h1>Raka Pratama</h1>
+    <p class="role">Web Developer · Jakarta</p>
+    <p class="bio">Suka membangun antarmuka yang cepat, rapi, dan menyenangkan dipakai.</p>
+  </header>
+  <section class="skills">
+    <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span><span>UI Design</span>
+  </section>
+  <section class="works">
+    <h2>Karya Pilihan</h2>
+    <div class="grid">
+      <article><div class="thumb t1"></div><h3>Aplikasi Kasir</h3><p>POS web untuk UMKM.</p></article>
+      <article><div class="thumb t2"></div><h3>Galeri Foto</h3><p>Galeri masonry responsif.</p></article>
+      <article><div class="thumb t3"></div><h3>Blog Pribadi</h3><p>Blog statis super ringan.</p></article>
+    </div>
+  </section>
+  <footer>
+    <button onclick="hubungi()">📬 Hubungi Saya</button>
+  </footer>
+  <script src="js/app.js"></script>
+</body>
+</html>
+`,
+      'css/style.css': `* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: Georgia, 'Times New Roman', serif;
+  background: #faf7f2; color: #2d2a26;
+  max-width: 720px; margin: 0 auto; padding: 60px 24px;
+}
+header { text-align: center; margin-bottom: 36px; }
+.avatar {
+  width: 88px; height: 88px; margin: 0 auto 18px;
+  border-radius: 50%; display: grid; place-content: center;
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  color: #fff; font-size: 38px; font-weight: 700;
+}
+h1 { font-size: 34px; letter-spacing: -.5px; }
+.role { color: #8b5cf6; font-weight: 600; margin: 6px 0 14px; font-family: system-ui; font-size: 14px; }
+.bio { color: #6b6660; max-width: 400px; margin: 0 auto; }
+.skills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 44px; }
+.skills span {
+  font-family: system-ui; font-size: 12.5px; font-weight: 600;
+  background: #fff; border: 1px solid #e8e2d8;
+  padding: 6px 14px; border-radius: 99px;
+}
+h2 { font-size: 22px; margin-bottom: 18px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+article { background: #fff; border: 1px solid #e8e2d8; border-radius: 14px; overflow: hidden; }
+.thumb { height: 110px; }
+.t1 { background: linear-gradient(135deg, #fbbf24, #f87171); }
+.t2 { background: linear-gradient(135deg, #34d399, #3b82f6); }
+.t3 { background: linear-gradient(135deg, #a78bfa, #ec4899); }
+article h3 { font-size: 16px; padding: 12px 14px 2px; }
+article p { font-family: system-ui; font-size: 13px; color: #6b6660; padding: 0 14px 14px; }
+footer { text-align: center; margin-top: 44px; }
+footer button {
+  font-family: system-ui; font-size: 15px; font-weight: 600;
+  background: #2d2a26; color: #faf7f2; border: none;
+  padding: 13px 28px; border-radius: 99px; cursor: pointer;
+}
+footer button:hover { background: #8b5cf6; }
+`,
+      'js/app.js': `function hubungi() {
+  alert('Terima kasih! Email: raka@contoh.id 📬');
+  console.log('Tombol kontak diklik');
+}
+`,
+    },
+  },
+
+  {
+    id: 'stats',
+    name: 'Dashboard Statistik',
+    desc: 'Kartu metrik & grafik batang animasi.',
+    icon: '📊',
+    color: 'linear-gradient(135deg,#0ea5e9,#10b981)',
+    files: {
+      'index.html': `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Penjualan</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <h1>📊 Dashboard Penjualan</h1>
+  <p class="sub">Ringkasan performa minggu ini</p>
+  <section class="cards" id="cards"></section>
+  <section class="chart-box">
+    <h2>Penjualan per Hari</h2>
+    <div class="chart" id="chart"></div>
+  </section>
+  <script src="js/app.js"></script>
+</body>
+</html>
+`,
+      'css/style.css': `* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: system-ui, sans-serif;
+  background: #f1f5f9; color: #0f172a;
+  max-width: 860px; margin: 0 auto; padding: 44px 24px;
+}
+h1 { font-size: 26px; }
+.sub { color: #64748b; margin: 4px 0 26px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.card {
+  background: #fff; border-radius: 16px; padding: 18px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .06);
+}
+.card .label { font-size: 12.5px; color: #64748b; font-weight: 600; }
+.card .value { font-size: 26px; font-weight: 800; margin: 4px 0; }
+.card .delta { font-size: 12px; font-weight: 700; }
+.card .delta.naik { color: #10b981; }
+.card .delta.turun { color: #f43f5e; }
+.chart-box {
+  background: #fff; border-radius: 16px; padding: 22px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, .06);
+}
+h2 { font-size: 16px; margin-bottom: 18px; }
+.chart { display: flex; align-items: flex-end; gap: 12px; height: 180px; }
+.bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+.bar {
+  width: 100%; max-width: 46px; border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(180deg, #0ea5e9, #10b981);
+  transition: height 1s cubic-bezier(.2, .8, .2, 1);
+  cursor: pointer;
+}
+.bar:hover { filter: brightness(1.12); }
+.bar-label { font-size: 12px; color: #64748b; font-weight: 600; }
+`,
+      'js/app.js': `const METRIK = [
+  { label: 'Pendapatan', value: 'Rp 24,8 jt', delta: '+12%', naik: true },
+  { label: 'Pesanan', value: '342', delta: '+8%', naik: true },
+  { label: 'Pelanggan Baru', value: '57', delta: '-3%', naik: false },
+  { label: 'Rating Toko', value: '4.9 ★', delta: '+0.2', naik: true },
+];
+
+const PENJUALAN = [
+  { hari: 'Sen', nilai: 42 }, { hari: 'Sel', nilai: 65 }, { hari: 'Rab', nilai: 51 },
+  { hari: 'Kam', nilai: 78 }, { hari: 'Jum', nilai: 95 }, { hari: 'Sab', nilai: 120 },
+  { hari: 'Min', nilai: 88 },
+];
+
+const cards = document.getElementById('cards');
+METRIK.forEach((m) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML =
+    '<div class="label">' + m.label + '</div>' +
+    '<div class="value">' + m.value + '</div>' +
+    '<div class="delta ' + (m.naik ? 'naik' : 'turun') + '">' + (m.naik ? '▲' : '▼') + ' ' + m.delta + '</div>';
+  cards.appendChild(card);
+});
+
+const chart = document.getElementById('chart');
+const maks = Math.max(...PENJUALAN.map((d) => d.nilai));
+PENJUALAN.forEach((d) => {
+  const wrap = document.createElement('div');
+  wrap.className = 'bar-wrap';
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  bar.style.height = '0%';
+  bar.title = d.hari + ': ' + d.nilai + ' penjualan';
+  bar.onclick = () => console.log(d.hari + ':', d.nilai, 'penjualan');
+  const label = document.createElement('div');
+  label.className = 'bar-label';
+  label.textContent = d.hari;
+  wrap.append(bar, label);
+  chart.appendChild(wrap);
+  // Animasi naik saat dimuat
+  setTimeout(() => { bar.style.height = (d.nilai / maks) * 100 + '%'; }, 100);
+});
+
+console.log('Dashboard dimuat dengan', METRIK.length, 'metrik');
 `,
     },
   },

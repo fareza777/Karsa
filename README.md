@@ -12,12 +12,13 @@ live preview.
 | Fitur | Keterangan |
 |---|---|
 | 🗂️ **Multi-proyek** | Kelola banyak proyek sekaligus — buat, duplikat, ganti nama, hapus |
-| 🧩 **6 Template siap pakai** | Landing page, Todo, Kalkulator, Game Ular, Kuis, atau mulai dari kosong |
-| 📝 **Editor kode profesional** | CodeMirror: syntax highlighting, nomor baris, auto-close bracket & tag |
+| 🧩 **8 Template siap pakai** | Landing page, Todo, Kalkulator, Game Ular, Kuis, Portofolio, Dashboard Statistik, atau kosong |
+| 📝 **Editor kode profesional** | CodeMirror: syntax highlighting, autocomplete (`Ctrl+Space`), cari dalam file (`Ctrl+F`), toggle komentar (`Ctrl+/`), auto-close bracket & tag, ukuran font bisa diatur |
 | 🌲 **File explorer** | Folder bersarang, tab editor, menu klik kanan (rename/duplikat/hapus/unduh) |
-| ⚡ **Live preview** | Hasil kode langsung terlihat, auto-refresh saat mengetik (bisa dimatikan) |
+| ⚡ **Live preview** | Hasil kode langsung terlihat, auto-refresh saat mengetik, mode layar penuh |
 | 📱 **Mode device** | Pratinjau tampilan desktop, tablet (768px), dan ponsel (375px) |
-| ⌨ **Console terintegrasi** | `console.log`, warning, dan error dari preview tampil real-time |
+| ⌨ **Console + REPL** | `console.log`, warning, error tampil real-time — plus ketik JavaScript langsung ke preview dengan riwayat perintah |
+| 🔗 **Bagikan tautan** | Proyek ter-encode di URL — penerima langsung mendapat salinan lengkap |
 | 💾 **Auto-save** | Semua perubahan tersimpan otomatis di browser (localStorage) |
 | ⬇️ **Ekspor fleksibel** | ZIP, HTML mandiri satu file, atau JSON (bisa diimpor kembali) |
 | 🌙 **Tema gelap & terang** | Satu klik untuk berganti suasana |
@@ -42,13 +43,30 @@ npx serve .
 
 lalu buka `http://localhost:8080`.
 
+## ☁️ Deploy ke Vercel
+
+Repo ini sudah siap deploy — `vercel.json` berisi konfigurasi cache & header keamanan.
+
+```bash
+npm i -g vercel
+vercel          # deploy preview
+vercel --prod   # deploy produksi
+```
+
+Atau impor repo GitHub ini langsung di [vercel.com/new](https://vercel.com/new) —
+tanpa build command, tanpa output directory (situs statis murni).
+
 ## ⌨ Shortcut
 
 | Tombol | Aksi |
 |---|---|
 | `Ctrl + Enter` | Jalankan / muat ulang preview |
 | `Ctrl + S` | Simpan (otomatis) + muat ulang preview |
-| `Esc` | Tutup modal / menu |
+| `Ctrl + Space` | Autocomplete kode |
+| `Ctrl + F` | Cari di dalam file |
+| `Ctrl + /` | Komentari / batalkan komentar baris |
+| `Esc` | Tutup modal / menu / pencarian |
+| `↑` / `↓` di console | Riwayat perintah REPL |
 | Klik kanan pada file | Menu konteks (rename, duplikat, unduh, hapus) |
 
 ## 🏗️ Arsitektur

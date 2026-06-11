@@ -19,6 +19,7 @@ const App = (() => {
 
     $('#view-dashboard').classList.add('hidden');
     $('#view-ide').classList.remove('hidden');
+    $('.ide-body').classList.remove('preview-full');
     $('#project-name-input').value = project.name;
 
     FileTree.render();
@@ -107,6 +108,80 @@ const App = (() => {
     showToast('JSON berhasil diunduh!', 'ok');
   }
 
+  // --- Bagikan tautan: proyek ter-encode di hash URL ---
+  function shareProject() {
+    const project = State.getCurrentProject();
+    if (!project) return;
+    const payload = JSON.stringify({
+      karsa: 1, name: project.name, files: project.files, folders: project.folders || [],
+    });
+    const url = location.origin + location.pathname + '#k=' + encodeBase64Url(payload);
+    if (url.length > 50000) {
+      showToast('Proyek terlalu besar untuk dibagikan lewat tautan. Gunakan ekspor JSON.', 'warn');
+      return;
+    }
+    const input = el('input', { type: 'text', value: url, readonly: 'readonly' });
+    showModal({
+      title: '🔗 Bagikan Proyek',
+      body: el('div', {}, [
+        el('p', { class: 'modal-desc', text: 'Siapa pun yang membuka tautan ini akan mendapat salinan proyek "' + project.name + '" lengkap dengan semua filenya.' }),
+        el('div', { class: 'field' }, [input]),
+      ]),
+      actions: [
+        { label: 'Tutup' },
+        {
+          label: '📋 Salin Tautan', primary: true,
+          onClick: () => {
+            input.select();
+            const copied = navigator.clipboard
+              ? navigator.clipboard.writeText(url).then(() => true).catch(() => document.execCommand('copy'))
+              : Promise.resolve(document.execCommand('copy'));
+            Promise.resolve(copied).then(() => showToast('Tautan disalin! 🔗', 'ok'));
+          },
+        },
+      ],
+    });
+    input.select();
+  }
+
+  function importFromHash() {
+    const match = location.hash.match(/^#k=(.+)$/);
+    if (!match) return;
+    history.replaceState(null, '', location.pathname + location.search);
+    try {
+      const data = JSON.parse(decodeBase64Url(match[1]));
+      if (!data || data.karsa !== 1 || typeof data.files !== 'object') throw new Error('format');
+      const project = State.createProject(data.name || 'Proyek Bagikan', data.files);
+      if (Array.isArray(data.folders)) State.updateProject(project.id, { folders: data.folders });
+      openProject(project.id);
+      showToast('Proyek "' + project.name + '" diterima dari tautan! 🎁', 'ok');
+    } catch (err) {
+      showToast('Tautan berbagi tidak valid atau rusak.', 'error');
+    }
+  }
+
+  // --- Modal bantuan shortcut ---
+  function shortcutsDialog() {
+    const rows = [
+      ['Ctrl + Enter', 'Jalankan / muat ulang preview'],
+      ['Ctrl + S', 'Simpan + muat ulang preview'],
+      ['Ctrl + Space', 'Autocomplete kode'],
+      ['Ctrl + F', 'Cari di dalam file'],
+      ['Ctrl + /', 'Komentari / batalkan komentar baris'],
+      ['Esc', 'Tutup modal, menu, atau pencarian'],
+      ['Klik kanan file', 'Menu konteks (rename, duplikat, unduh, hapus)'],
+      ['↑ / ↓ di console', 'Riwayat perintah REPL'],
+    ];
+    const table = el('table', { class: 'shortcut-table' });
+    rows.forEach(([key, desc]) => {
+      table.appendChild(el('tr', {}, [
+        el('td', { html: '<kbd>' + escapeHtml(key) + '</kbd>' }),
+        el('td', { text: desc }),
+      ]));
+    });
+    showModal({ title: '⌨ Shortcut Keyboard', body: table, actions: [{ label: 'Tutup' }] });
+  }
+
   // --- Panel resizable ---
   function setupResizers() {
     const sidebar = $('#sidebar');
@@ -160,7 +235,15 @@ const App = (() => {
     $('#btn-run').addEventListener('click', () => Preview.refresh());
     $('#btn-refresh-preview').addEventListener('click', () => Preview.refresh());
     $('#btn-open-tab').addEventListener('click', () => Preview.openInNewTab());
+    $('#btn-share').addEventListener('click', shareProject);
     $('#btn-export').addEventListener('click', exportDialog);
+    $('#btn-fullscreen-preview').addEventListener('click', (e) => {
+      e.stopPropagation();
+      $('.ide-body').classList.toggle('preview-full');
+    });
+    $('#btn-font-minus').addEventListener('click', () => Editor.changeFontSize(-1));
+    $('#btn-font-plus').addEventListener('click', () => Editor.changeFontSize(1));
+    $('#btn-shortcuts').addEventListener('click', shortcutsDialog);
 
     $('#auto-run-toggle').addEventListener('change', (e) => {
       State.updateSettings({ autoRun: e.target.checked });
@@ -182,6 +265,9 @@ const App = (() => {
     // Sidebar
     $('#btn-new-file').addEventListener('click', () => FileTree.newFilePrompt());
     $('#btn-new-folder').addEventListener('click', () => FileTree.newFolderPrompt());
+
+    // Terima tautan berbagi yang ditempel saat aplikasi sudah terbuka
+    window.addEventListener('hashchange', importFromHash);
 
     // Shortcut keyboard
     document.addEventListener('keydown', (e) => {
@@ -209,6 +295,7 @@ const App = (() => {
     setupResizers();
     bindEvents();
     showDashboard();
+    importFromHash();
   }
 
   return { init, openProject, showDashboard };

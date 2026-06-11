@@ -29,6 +29,44 @@
   background: radial-gradient(ellipse, rgba(124, 92, 255, .18), transparent 70%);
   pointer-events: none;
 }
+
+/* Blob gradien animasi di belakang hero */
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: .35;
+  pointer-events: none;
+  animation: blobFloat 9s ease-in-out infinite;
+}
+.hero-blob-1 {
+  width: 280px; height: 280px;
+  background: #7c5cff;
+  top: -10%; left: 18%;
+}
+.hero-blob-2 {
+  width: 230px; height: 230px;
+  background: #22d3ee;
+  top: 20%; right: 16%;
+  animation-delay: -3s;
+}
+.hero-blob-3 {
+  width: 180px; height: 180px;
+  background: #f43f5e;
+  bottom: -20%; left: 44%;
+  opacity: .18;
+  animation-delay: -6s;
+}
+[data-theme="light"] .hero-blob { opacity: .22; }
+[data-theme="light"] .hero-blob-3 { opacity: .1; }
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(28px, -22px) scale(1.08); }
+  66% { transform: translate(-20px, 16px) scale(.94); }
+}
+
+.hero > h1, .hero > p, .hero > .hero-actions { position: relative; }
 .hero-title {
   font-size: clamp(28px, 4.5vw, 44px);
   font-weight: 800;
@@ -75,7 +113,7 @@
 .project-card:hover {
   transform: translateY(-3px);
   border-color: var(--accent);
-  box-shadow: var(--shadow);
+  box-shadow: 0 12px 36px rgba(124, 92, 255, .22);
 }
 .project-card-top {
   display: flex;

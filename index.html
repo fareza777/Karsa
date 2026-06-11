@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/dashboard.css">
@@ -30,6 +32,9 @@
 
     <main class="dash-main">
       <div class="hero">
+        <div class="hero-blob hero-blob-1"></div>
+        <div class="hero-blob hero-blob-2"></div>
+        <div class="hero-blob hero-blob-3"></div>
         <h1 class="hero-title">Mau bikin apa hari ini?</h1>
         <p class="hero-sub">Tulis kode, lihat hasilnya langsung. Semua di browser — tanpa instalasi apa pun.</p>
         <div class="hero-actions">
@@ -86,6 +91,7 @@
           <button class="device-btn" data-device="phone" title="Ponsel (375px)">📲</button>
         </div>
         <button id="btn-open-tab" class="icon-btn" title="Buka preview di tab baru">↗</button>
+        <button id="btn-share" class="icon-btn" title="Bagikan tautan proyek">🔗</button>
         <button id="btn-export" class="icon-btn" title="Ekspor proyek">⬇</button>
         <button id="ide-theme-toggle" class="icon-btn" title="Ganti tema">🌙</button>
       </div>
@@ -117,6 +123,9 @@
           <span id="status-file">—</span>
           <span id="status-cursor"></span>
           <span class="statusbar-spacer"></span>
+          <button id="btn-font-minus" class="icon-btn-sm" title="Perkecil font editor">A−</button>
+          <button id="btn-font-plus" class="icon-btn-sm" title="Perbesar font editor">A＋</button>
+          <button id="btn-shortcuts" class="icon-btn-sm" title="Bantuan shortcut">⌨</button>
           <span id="status-save" class="status-save">Tersimpan ✓</span>
         </div>
       </section>
@@ -127,6 +136,7 @@
         <div class="preview-head">
           <span class="preview-title">⚡ Live Preview</span>
           <span id="preview-url" class="preview-url">karsa.app/preview</span>
+          <button id="btn-fullscreen-preview" class="icon-btn-sm" title="Preview layar penuh">⛶</button>
           <button id="btn-refresh-preview" class="icon-btn-sm" title="Muat ulang preview">⟳</button>
         </div>
         <div class="preview-stage" id="preview-stage">
@@ -143,6 +153,12 @@
             <button id="btn-toggle-console" class="icon-btn-sm" title="Tampilkan/sembunyikan console">▾</button>
           </div>
           <div id="console-log" class="console-log"></div>
+          <div class="console-input-row">
+            <span class="console-prompt">»</span>
+            <input id="console-input" class="console-input" type="text"
+                   placeholder="Ketik JavaScript lalu Enter untuk jalankan di preview…"
+                   autocomplete="off" spellcheck="false">
+          </div>
         </div>
       </section>
     </div>
@@ -163,6 +179,17 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/search.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/xml-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/css-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/javascript-hint.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/anyword-hint.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <!-- ============ APP ============ -->

@@ -46,6 +46,17 @@ const Preview = (() => {
   window.addEventListener('unhandledrejection', function (e) {
     kirim('error', ['Promise ditolak: ' + format(e.reason)]);
   });
+  // REPL: jalankan kode yang dikirim dari panel console KARSA
+  window.addEventListener('message', function (e) {
+    var data = e.data;
+    if (!data || typeof data.__karsa_eval !== 'string') return;
+    try {
+      var hasil = (0, eval)(data.__karsa_eval);
+      kirim('result', [hasil === undefined ? 'undefined' : format(hasil)]);
+    } catch (err) {
+      kirim('error', [format(err)]);
+    }
+  });
 })();<\/script>`;
 
   function isLocalRef(src) {
@@ -138,5 +149,10 @@ const Preview = (() => {
     );
   }
 
-  return { refresh, refreshDebounced, openInNewTab, setDevice, buildBundle };
+  function runInPreview(code) {
+    const frame = $('#preview-frame');
+    if (frame.contentWindow) frame.contentWindow.postMessage({ __karsa_eval: code }, '*');
+  }
+
+  return { refresh, refreshDebounced, openInNewTab, setDevice, buildBundle, runInPreview };
 })();

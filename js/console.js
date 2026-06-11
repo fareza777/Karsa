@@ -10,7 +10,7 @@ const ConsolePanel = (() => {
     const placeholder = $('.console-empty-msg', log);
     if (placeholder) placeholder.remove();
 
-    const prefix = { log: '›', info: 'ℹ', warn: '⚠', error: '✖' }[level] || '›';
+    const prefix = { log: '›', info: 'ℹ', warn: '⚠', error: '✖', input: '»', result: '←' }[level] || '›';
     log.appendChild(el('div', {
       class: 'console-entry level-' + level,
       text: prefix + ' ' + text,
@@ -49,6 +49,30 @@ const ConsolePanel = (() => {
     $('#btn-clear-console').addEventListener('click', (e) => { e.stopPropagation(); clear(); });
     $('#btn-toggle-console').addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
     $('#console-head').addEventListener('click', toggle);
+
+    // Input REPL: jalankan JavaScript langsung di konteks preview
+    const replHistory = [];
+    let historyIndex = -1;
+    const input = $('#console-input');
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const code = input.value.trim();
+        if (!code) return;
+        append('input', code);
+        Preview.runInPreview(code);
+        replHistory.unshift(code);
+        historyIndex = -1;
+        input.value = '';
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (historyIndex < replHistory.length - 1) input.value = replHistory[++historyIndex] || '';
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        historyIndex = Math.max(-1, historyIndex - 1);
+        input.value = historyIndex === -1 ? '' : replHistory[historyIndex];
+      }
+    });
+
     clear();
   }
 

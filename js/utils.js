@@ -99,6 +99,22 @@ const ICON_COLORS = [
   'linear-gradient(135deg,#06b6d4,#3b82f6)',
 ];
 
+// Base64-url aman unicode (untuk tautan berbagi proyek)
+function encodeBase64Url(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  bytes.forEach((b) => { binary += String.fromCharCode(b); });
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function decodeBase64Url(encoded) {
+  const padded = encoded.replace(/-/g, '+').replace(/_/g, '/');
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
 function colorForId(id) {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
