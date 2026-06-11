@@ -264,6 +264,17 @@ const AI = (() => {
     abortCtrl = new AbortController();
     setBusy(true, 'AI sedang bekerja…');
 
+    // Timer progres agar pengguna tahu prosesnya hidup
+    const startedAt = Date.now();
+    let phase = 'menghubungi';
+    const ticker = setInterval(() => {
+      const secs = Math.round((Date.now() - startedAt) / 1000);
+      const label = phase === 'menghubungi' ? 'menghubungi KARSA AI'
+        : phase === 'berpikir' ? 'AI sedang berpikir 💭'
+        : 'AI sedang menulis ✍';
+      $('#ai-status').textContent = label + '… ' + secs + ' dtk';
+    }, 1000);
+
     const useDirect = !!settings.apiKey;
     const url = useDirect ? DIRECT_URL : settings.endpoint;
     const headers = { 'Content-Type': 'application/json' };
@@ -305,9 +316,15 @@ const AI = (() => {
             if (delta) {
               rawText += delta;
               const { visible, thinking } = stripThink(rawText);
-              $('#ai-status').textContent = thinking ? 'AI sedang berpikir… 💭' : 'AI sedang menulis…';
+              phase = thinking && !visible.trim() ? 'berpikir' : 'menulis';
               if (visible.trim()) {
                 bubble.textContent = visible; // cepat selama streaming
+              } else if (thinking) {
+                bubble.innerHTML = '';
+                bubble.appendChild(el('span', {
+                  class: 'ai-thinking',
+                  text: 'AI menyusun rencana… (' + rawText.length + ' karakter penalaran)',
+                }));
               }
               scrollChat();
             }
@@ -319,8 +336,12 @@ const AI = (() => {
         }
       }
 
-      const { visible } = stripThink(rawText);
-      if (!visible.trim()) throw new Error('AI tidak mengembalikan jawaban. Coba lagi.');
+      const { visible, thinking } = stripThink(rawText);
+      if (!visible.trim()) {
+        throw new Error(thinking
+          ? 'Koneksi terputus saat AI masih berpikir (penalaran terlalu panjang). Coba lagi, atau ganti model ke MiniMax-M2.7-highspeed di pengaturan ⚙ untuk jawaban lebih cepat.'
+          : 'AI tidak mengembalikan jawaban. Coba lagi.');
+      }
       renderAssistantHtml(bubble, visible);
       attachApplyBox(bubble, visible, true);
       history.push({ role: 'assistant', content: visible });
@@ -338,6 +359,7 @@ const AI = (() => {
         history.pop();
       }
     } finally {
+      clearInterval(ticker);
       setBusy(false, '');
       abortCtrl = null;
       scrollChat();

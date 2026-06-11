@@ -1,5 +1,12 @@
 /* ===== KARSA AI — proxy serverless ke MiniMax (API key aman di server) ===== */
 
+// Wajib: tanpa ini Vercel mem-buffer seluruh respons sebelum dikirim ke browser,
+// sehingga streaming tidak pernah tampil dan permintaan panjang mati kena timeout.
+export const config = {
+  supportsResponseStreaming: true,
+  maxDuration: 300,
+};
+
 const MINIMAX_URL = 'https://api.minimax.io/v1/chat/completions';
 const ALLOWED_MODELS = [
   'MiniMax-M3',
@@ -77,12 +84,15 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-cache, no-transform');
   res.setHeader('Connection', 'keep-alive');
 
+  if (typeof res.flushHeaders === 'function') res.flushHeaders();
+
   const reader = upstream.body.getReader();
   try {
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
       res.write(Buffer.from(value));
+      if (typeof res.flush === 'function') res.flush();
     }
   } catch (err) {
     res.write('data: ' + JSON.stringify({ error: 'Stream terputus: ' + err.message }) + '\n\n');
