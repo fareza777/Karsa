@@ -27,6 +27,8 @@
         <span class="brand-name">KARSA</span>
       </div>
       <div class="dash-header-right">
+        <button id="dash-about-btn" class="btn btn-ghost btn-sm" title="Tentang KARSA">Tentang</button>
+        <button id="dash-pro-btn" class="btn btn-pro btn-sm" title="KARSA Pro">✦ Pro</button>
         <button id="dash-theme-toggle" class="icon-btn" title="Ganti tema">🌙</button>
       </div>
     </header>
@@ -53,6 +55,29 @@
           <input type="file" id="import-folder-input" webkitdirectory hidden>
         </div>
       </div>
+
+      <section class="feature-strip" aria-label="Fitur KARSA">
+        <div class="feature-card">
+          <span class="feature-icon">✨</span>
+          <strong>AI Vibecoding</strong>
+          <span>Tulis ide, AI bangun kodenya</span>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">📱</span>
+          <strong>Mobile Preview</strong>
+          <span>Expo Snack di browser</span>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🚀</span>
+          <strong>Publish</strong>
+          <span>Situs live + subdomain</span>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon">🏪</span>
+          <strong>Play Store</strong>
+          <span>Checklist &amp; EAS build</span>
+        </div>
+      </section>
 
       <section class="dash-section" id="section-projects">
         <div class="dash-section-head">
@@ -131,6 +156,7 @@
         <div id="panel-ai" class="side-panel hidden">
           <div class="ai-head">
             <span class="sidebar-title">KARSA AI · VIBECODING</span>
+            <span id="ai-plan-badge" class="ai-plan-badge" title="Sisa kuota AI harian"></span>
             <div class="sidebar-actions">
               <button id="ai-clear-btn" class="icon-btn-sm" title="Bersihkan percakapan">🗑</button>
               <button id="ai-settings-btn" class="icon-btn-sm" title="Pengaturan AI">⚙</button>
@@ -274,6 +300,7 @@
   <script src="js/tabs.js"></script>
   <script src="js/filetree.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/plan.js"></script>
   <script src="js/publish.js"></script>
   <script src="js/playstore.js"></script>
   <script src="js/app.js"></script>

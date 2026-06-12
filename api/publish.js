@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { slug: rawSlug, html, name, customDomain: rawDomain, previousDomain: rawPrev } = req.body || {};
+  const { slug: rawSlug, html, name, customDomain: rawDomain, previousDomain: rawPrev, proCode } = req.body || {};
   const slug = normalizeSlug(rawSlug);
   const slugErr = validateSlug(slug);
   if (slugErr) {
@@ -86,7 +86,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  const finalHtml = watermark(html);
+  const skipWatermark = process.env.KARSA_WATERMARK === 'off' ||
+    (process.env.KARSA_PRO_TOKEN && proCode === process.env.KARSA_PRO_TOKEN);
+  const finalHtml = skipWatermark ? html : watermark(html);
 
   const htmlRes = await kvSet('karsa:pub:' + slug + ':html', finalHtml);
   if (htmlRes.error) {

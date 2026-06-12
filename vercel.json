@@ -10,7 +10,8 @@
     "api/publish.js": { "maxDuration": 60 },
     "api/site/[slug].js": { "maxDuration": 30 },
     "api/domain.js": { "maxDuration": 15 },
-    "api/config.js": { "maxDuration": 10 }
+    "api/config.js": { "maxDuration": 10 },
+    "api/verify-pro.js": { "maxDuration": 10 }
   },
   "headers": [
     {

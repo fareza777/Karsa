@@ -304,6 +304,8 @@ const App = (() => {
     // Dashboard
     $('#btn-new-project').addEventListener('click', () => Dashboard.newProjectDialog());
     $('#btn-import-project').addEventListener('click', () => Dashboard.importDialog());
+    $('#dash-about-btn').addEventListener('click', () => Plan.openAboutDialog());
+    $('#dash-pro-btn').addEventListener('click', () => Plan.openProDialog());
     $('#import-input').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) Dashboard.importProjectJson(file);
@@ -402,6 +404,11 @@ const App = (() => {
     const settings = State.getSettings();
     applyTheme(settings.theme);
     $('#auto-run-toggle').checked = settings.autoRun;
+    Plan.loadConfig().then(() => {
+      Plan.updateAiBadge();
+      const proBtn = $('#dash-pro-btn');
+      if (proBtn) proBtn.classList.toggle('active', Plan.isPro());
+    });
 
     ConsolePanel.init();
     Editor.init();

@@ -13,5 +13,7 @@ export default async function handler(req, res) {
     cnameTarget: cnameTarget(),
     publishEnabled: kvConfigured(),
     subdomainExample: publishHost() ? 'namabisnis.' + publishHost() : null,
+    freeAiDaily: Number(process.env.KARSA_FREE_AI_DAILY) || 30,
+    proAvailable: !!process.env.KARSA_PRO_TOKEN,
   });
 }

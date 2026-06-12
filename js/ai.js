@@ -426,6 +426,12 @@ const AI = (() => {
     const project = State.getCurrentProject();
     if (!project) { showToast('Buka proyek dulu untuk vibecoding.', 'warn'); return; }
 
+    if (!Plan.canUseAi()) {
+      showToast('Limit AI harian habis. Upgrade ke Pro untuk lanjut tanpa batas.', 'warn');
+      Plan.openProDialog();
+      return;
+    }
+
     // Hapus sapaan bila masih ada
     const welcome = $('.ai-welcome', chatEl());
     if (welcome) welcome.remove();
@@ -587,6 +593,7 @@ const AI = (() => {
       }));
       history.push({ role: 'assistant', content: visible });
       saveHistory();
+      Plan.recordAiUse();
       if (settings.autoApply || autoApplyOnce) {
         const applyBtn = $('.btn-apply', bubble);
         if (applyBtn) applyBtn.click();
@@ -702,6 +709,7 @@ const AI = (() => {
       if (autoApplyToggle.checked) showToast('File dari AI akan langsung diterapkan otomatis. ⚡', 'ok');
     });
     updateModeButtons();
+    Plan.loadConfig().then(() => Plan.updateAiBadge());
     $('#ai-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();

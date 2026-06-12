@@ -4,6 +4,14 @@ const Publish = (() => {
   let checkTimer = null;
   let publishConfig = null;
 
+  async function fetchProCode() {
+    try {
+      const saved = localStorage.getItem('karsa.pro.code');
+      if (saved) return saved;
+    } catch (e) { /* abaikan */ }
+    return null;
+  }
+
   async function loadConfig() {
     if (publishConfig) return publishConfig;
     try {
@@ -67,6 +75,10 @@ const Publish = (() => {
     const body = { slug, html, name: project.name };
     if (customDomain) body.customDomain = customDomain;
     if (previousDomain) body.previousDomain = previousDomain;
+    if (Plan.isPro() && publishConfig && publishConfig.proAvailable) {
+      const code = await fetchProCode();
+      if (code) body.proCode = code;
+    }
     const res = await fetch('/api/publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
