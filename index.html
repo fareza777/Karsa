@@ -42,6 +42,7 @@
           <button id="btn-new-project" class="btn btn-primary btn-lg">＋ Proyek Baru</button>
           <button id="btn-import-project" class="btn btn-ghost btn-lg">📂 Impor Proyek</button>
           <input type="file" id="import-input" accept=".json" hidden>
+          <input type="file" id="import-folder-input" webkitdirectory hidden>
         </div>
       </div>
 
@@ -135,9 +136,13 @@
           </div>
           <div id="ai-chat" class="ai-chat"></div>
           <div class="ai-input-box">
+            <div id="ai-attachments" class="ai-attachments hidden"></div>
             <textarea id="ai-input" rows="3"
-              placeholder="Jelaskan aplikasi atau perubahan yang kamu mau… (Enter untuk kirim, Shift+Enter baris baru)"></textarea>
+              placeholder="Jelaskan aplikasi atau perubahan yang kamu mau… Tempel (Ctrl+V) screenshot juga bisa!"></textarea>
             <div class="ai-input-actions">
+              <button id="ai-attach-btn" class="icon-btn-sm" title="Lampirkan gambar atau file">📎</button>
+              <input type="file" id="ai-file-input" multiple hidden
+                     accept="image/*,.txt,.md,.json,.csv,.html,.css,.js,.svg,.xml">
               <span id="ai-status" class="ai-status"></span>
               <button id="ai-stop" class="btn btn-ghost btn-sm hidden">⏹ Stop</button>
               <button id="ai-send" class="btn btn-primary btn-sm">Kirim ✨</button>
@@ -173,6 +178,8 @@
         <div class="preview-head">
           <span class="preview-title">⚡ Live Preview</span>
           <span id="preview-url" class="preview-url">karsa.app/preview</span>
+          <button id="btn-shot-full" class="icon-btn-sm" title="Screenshot satu layar preview">📸</button>
+          <button id="btn-shot-region" class="icon-btn-sm" title="Screenshot area tertentu (seret untuk memilih)">✂️</button>
           <button id="btn-fullscreen-preview" class="icon-btn-sm" title="Preview layar penuh">⛶</button>
           <button id="btn-refresh-preview" class="icon-btn-sm" title="Muat ulang preview">⟳</button>
         </div>

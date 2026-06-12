@@ -16,19 +16,44 @@ const ALLOWED_MODELS = [
   'MiniMax-M2',
 ];
 const MAX_MESSAGES = 40;
-const MAX_TOTAL_CHARS = 200000;
+const MAX_TEXT_CHARS = 200000;
+const MAX_TOTAL_CHARS = 3500000; // termasuk gambar data-URL (batas body Vercel ±4,5 MB)
+
+// Konten boleh string, atau array bagian {type:'text'}|{type:'image_url'} (vision)
+function contentSize(content) {
+  if (typeof content === 'string') return { text: content.length, total: content.length };
+  if (!Array.isArray(content)) return null;
+  let text = 0, total = 0;
+  for (const part of content) {
+    if (part && part.type === 'text' && typeof part.text === 'string') {
+      text += part.text.length;
+      total += part.text.length;
+    } else if (
+      part && part.type === 'image_url' &&
+      part.image_url && typeof part.image_url.url === 'string' &&
+      part.image_url.url.startsWith('data:image/')
+    ) {
+      total += part.image_url.url.length;
+    } else {
+      return null;
+    }
+  }
+  return { text, total };
+}
 
 function validateMessages(messages) {
   if (!Array.isArray(messages) || messages.length === 0) return 'messages harus berupa array berisi pesan.';
   if (messages.length > MAX_MESSAGES) return 'Terlalu banyak pesan (maks ' + MAX_MESSAGES + ').';
-  let total = 0;
+  let textTotal = 0, grandTotal = 0;
   for (const msg of messages) {
-    if (!msg || typeof msg.content !== 'string' || !['system', 'user', 'assistant'].includes(msg.role)) {
-      return 'Format pesan tidak valid.';
-    }
-    total += msg.content.length;
+    if (!msg || !['system', 'user', 'assistant'].includes(msg.role)) return 'Format pesan tidak valid.';
+    const size = contentSize(msg.content);
+    if (!size) return 'Format konten pesan tidak valid.';
+    textTotal += size.text;
+    grandTotal += size.total;
   }
-  if (total > MAX_TOTAL_CHARS) return 'Total konteks terlalu besar (maks ' + MAX_TOTAL_CHARS + ' karakter).';
+  if (textTotal > MAX_TEXT_CHARS) return 'Total teks terlalu besar (maks ' + MAX_TEXT_CHARS + ' karakter).';
+  if (grandTotal > MAX_TOTAL_CHARS) return 'Lampiran terlalu besar (maks ±3 MB total).';
   return null;
 }
 

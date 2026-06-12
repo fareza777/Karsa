@@ -46,10 +46,82 @@ const Preview = (() => {
   window.addEventListener('unhandledrejection', function (e) {
     kirim('error', ['Promise ditolak: ' + format(e.reason)]);
   });
-  // REPL: jalankan kode yang dikirim dari panel console KARSA
+  // --- Screenshot: dom-to-image 2.6.0 (html2canvas & dom-to-image-more gagal
+  //     di iframe sandbox karena memakai iframe internal lintas-origin) ---
+  var d2iAntrian = null;
+  function muatD2I(cb) {
+    if (window.domtoimage) return cb();
+    if (d2iAntrian) { d2iAntrian.push(cb); return; }
+    d2iAntrian = [cb];
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js';
+    s.onload = function () { var antri = d2iAntrian; d2iAntrian = null; antri.forEach(function (f) { f(); }); };
+    s.onerror = function () { d2iAntrian = null; parent.postMessage({ __karsa_shot_err: 'Gagal memuat pustaka screenshot (periksa internet).' }, '*'); };
+    document.head.appendChild(s);
+  }
+  function ambilShot(area) {
+    muatD2I(function () {
+      window.domtoimage.toPng(document.body, { bgcolor: '#ffffff' }).then(function (dataUrl) {
+        if (!area) { parent.postMessage({ __karsa_shot_done: dataUrl }, '*'); return; }
+        var img = new Image();
+        img.onload = function () {
+          var skala = img.width / Math.max(1, document.body.scrollWidth);
+          var c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(area.width * skala));
+          c.height = Math.max(1, Math.round(area.height * skala));
+          c.getContext('2d').drawImage(
+            img,
+            area.x * skala, area.y * skala, area.width * skala, area.height * skala,
+            0, 0, c.width, c.height
+          );
+          parent.postMessage({ __karsa_shot_done: c.toDataURL('image/png') }, '*');
+        };
+        img.onerror = function () { parent.postMessage({ __karsa_shot_err: 'Gagal memotong area.' }, '*'); };
+        img.src = dataUrl;
+      }).catch(function (err) {
+        parent.postMessage({ __karsa_shot_err: String(err) }, '*');
+      });
+    });
+  }
+  function pilihAreaShot() {
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147483646;cursor:crosshair;background:rgba(8,10,18,.25);';
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;border:2px dashed #22d3ee;background:rgba(34,211,238,.15);display:none;z-index:2147483647;pointer-events:none;';
+    document.body.appendChild(ov);
+    document.body.appendChild(box);
+    var sx = 0, sy = 0, aktif = false;
+    function bersih() { ov.remove(); box.remove(); document.removeEventListener('keydown', esc); }
+    function esc(e) { if (e.key === 'Escape') { bersih(); parent.postMessage({ __karsa_shot_err: 'dibatalkan' }, '*'); } }
+    document.addEventListener('keydown', esc);
+    ov.addEventListener('mousedown', function (e) { aktif = true; sx = e.clientX; sy = e.clientY; });
+    ov.addEventListener('mousemove', function (e) {
+      if (!aktif) return;
+      var x = Math.min(sx, e.clientX), y = Math.min(sy, e.clientY);
+      box.style.display = 'block';
+      box.style.left = x + 'px'; box.style.top = y + 'px';
+      box.style.width = Math.abs(e.clientX - sx) + 'px';
+      box.style.height = Math.abs(e.clientY - sy) + 'px';
+    });
+    ov.addEventListener('mouseup', function (e) {
+      if (!aktif) return;
+      var x = Math.min(sx, e.clientX), y = Math.min(sy, e.clientY);
+      var w = Math.abs(e.clientX - sx), h = Math.abs(e.clientY - sy);
+      bersih();
+      if (w < 8 || h < 8) { parent.postMessage({ __karsa_shot_err: 'dibatalkan' }, '*'); return; }
+      setTimeout(function () {
+        ambilShot({ x: x + window.scrollX, y: y + window.scrollY, width: w, height: h });
+      }, 60);
+    });
+  }
+
+  // REPL & perintah screenshot dari panel KARSA
   window.addEventListener('message', function (e) {
     var data = e.data;
-    if (!data || typeof data.__karsa_eval !== 'string') return;
+    if (!data) return;
+    if (data.__karsa_shot === 'full') { ambilShot(); return; }
+    if (data.__karsa_shot === 'region') { pilihAreaShot(); return; }
+    if (typeof data.__karsa_eval !== 'string') return;
     try {
       var hasil = (0, eval)(data.__karsa_eval);
       kirim('result', [hasil === undefined ? 'undefined' : format(hasil)]);
@@ -181,5 +253,55 @@ const Preview = (() => {
     if (frame.contentWindow) frame.contentWindow.postMessage({ __karsa_eval: code }, '*');
   }
 
-  return { refresh, refreshDebounced, openInNewTab, setDevice, buildBundle, runInPreview };
+  // --- Screenshot preview ---
+  function screenshot(mode) {
+    const frame = $('#preview-frame');
+    if (!frame.contentWindow) return;
+    if (mode === 'region') showToast('Seret untuk memilih area di preview (Esc untuk batal).', 'info');
+    frame.contentWindow.postMessage({ __karsa_shot: mode }, '*');
+  }
+
+  function showShotResult(dataUrl) {
+    const project = State.getCurrentProject();
+    const slug = project
+      ? project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      : 'karsa';
+    const filename = slug + '-screenshot-' + new Date().toISOString().slice(11, 19).replace(/:/g, '') + '.png';
+    const img = el('img', { src: dataUrl, class: 'shot-preview-img', alt: 'Hasil screenshot' });
+    showModal({
+      title: '📸 Screenshot Preview',
+      wide: true,
+      body: el('div', {}, [img]),
+      actions: [
+        { label: 'Tutup' },
+        {
+          label: '✨ Lampirkan ke AI',
+          onClick: () => {
+            AI.attachImageDataUrl(dataUrl, filename);
+            AI.switchTab('ai');
+          },
+        },
+        {
+          label: '⬇ Unduh PNG', primary: true,
+          onClick: () => {
+            fetch(dataUrl).then((r) => r.blob()).then((blob) => {
+              downloadBlob(blob, filename);
+              showToast('Screenshot diunduh! 📸', 'ok');
+            });
+          },
+        },
+      ],
+    });
+  }
+
+  window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (!data) return;
+    if (typeof data.__karsa_shot_done === 'string') showShotResult(data.__karsa_shot_done);
+    else if (data.__karsa_shot_err && data.__karsa_shot_err !== 'dibatalkan') {
+      showToast('Screenshot gagal: ' + data.__karsa_shot_err, 'error');
+    }
+  });
+
+  return { refresh, refreshDebounced, openInNewTab, setDevice, buildBundle, runInPreview, screenshot };
 })();

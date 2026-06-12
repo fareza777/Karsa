@@ -116,6 +116,72 @@ const Dashboard = (() => {
     reader.readAsText(file);
   }
 
+  // --- Impor: pilih sumber (folder atau JSON) ---
+  function importDialog() {
+    showModal({
+      title: '📂 Impor Proyek',
+      body: el('div', {}, [
+        el('p', { class: 'modal-desc', text: 'Pilih sumber proyek yang mau diimpor:' }),
+        el('button', {
+          class: 'btn btn-ghost', style: 'width:100%;margin-bottom:10px;justify-content:flex-start',
+          html: '📁 &nbsp;<b>Folder di komputer</b> — semua file HTML/CSS/JS di dalamnya',
+          onclick: () => { closeModal(); $('#import-folder-input').click(); },
+        }),
+        el('button', {
+          class: 'btn btn-ghost', style: 'width:100%;justify-content:flex-start',
+          html: '🧾 &nbsp;<b>File JSON KARSA</b> — hasil ekspor dari KARSA',
+          onclick: () => { closeModal(); $('#import-input').click(); },
+        }),
+      ]),
+      actions: [{ label: 'Batal' }],
+    });
+  }
+
+  // --- Impor folder: baca semua file teks, pertahankan struktur subfolder ---
+  const FOLDER_TEXT_EXTS = ['html', 'htm', 'css', 'js', 'mjs', 'json', 'md', 'txt', 'svg', 'xml', 'csv'];
+  const FOLDER_MAX_FILES = 150;
+  const FOLDER_MAX_SIZE = 400 * 1024;
+
+  function importProjectFolder(fileList) {
+    const files = Array.from(fileList);
+    if (!files.length) return;
+    const rootName = (files[0].webkitRelativePath || files[0].name).split('/')[0] || 'Proyek Folder';
+
+    let skipped = 0;
+    const chosen = files.filter((file) => {
+      const rel = (file.webkitRelativePath || file.name).split('/').slice(1).join('/');
+      const ext = rel.split('.').pop().toLowerCase();
+      const tersembunyi = rel.split('/').some((seg) => seg.startsWith('.') || seg === 'node_modules');
+      const ok = rel && !tersembunyi && FOLDER_TEXT_EXTS.includes(ext) &&
+        file.size <= FOLDER_MAX_SIZE && isValidPath(rel);
+      if (!ok) skipped++;
+      return ok;
+    }).slice(0, FOLDER_MAX_FILES);
+
+    if (!chosen.length) {
+      showToast('Tidak ada file teks (HTML/CSS/JS dll.) yang bisa diimpor dari folder itu.', 'warn');
+      return;
+    }
+
+    Promise.all(chosen.map((file) =>
+      file.text().then((content) => [
+        (file.webkitRelativePath || file.name).split('/').slice(1).join('/'),
+        content,
+      ])
+    )).then((entries) => {
+      const filesMap = {};
+      entries.forEach(([path, content]) => { filesMap[path] = content; });
+      const project = State.createProject(rootName, filesMap);
+      render();
+      showToast(
+        'Folder "' + rootName + '" diimpor: ' + entries.length + ' file' +
+        (skipped ? ' (' + skipped + ' file non-teks/besar dilewati)' : '') + '. 🎉',
+        'ok'
+      );
+      App.openProject(project.id);
+    }).catch(() => showToast('Gagal membaca beberapa file dari folder.', 'error'));
+  }
+
   function renderTemplates() {
     const strip = $('#template-strip');
     strip.innerHTML = '';
@@ -189,5 +255,5 @@ const Dashboard = (() => {
     });
   }
 
-  return { render, newProjectDialog, importProjectJson };
+  return { render, newProjectDialog, importProjectJson, importDialog, importProjectFolder };
 })();

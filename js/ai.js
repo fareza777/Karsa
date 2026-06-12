@@ -86,6 +86,83 @@ const AI = (() => {
     }
   }
 
+  // --- Lampiran (gambar & file teks) ---
+  let attachments = []; // {kind:'image', name, dataUrl} | {kind:'text', name, content}
+  const MAX_IMAGE_DIM = 1000;
+  const MAX_TEXT_FILE = 256 * 1024;
+  const MAX_ATTACHMENTS = 4;
+
+  function renderAttachments() {
+    const bar = $('#ai-attachments');
+    bar.innerHTML = '';
+    bar.classList.toggle('hidden', attachments.length === 0);
+    attachments.forEach((att, index) => {
+      const chip = el('div', { class: 'ai-attach-chip' }, [
+        att.kind === 'image'
+          ? el('img', { src: att.dataUrl, alt: att.name })
+          : el('span', { class: 'ai-attach-icon', text: '📄' }),
+        el('span', { class: 'ai-attach-name', text: att.name }),
+        el('button', {
+          class: 'ai-attach-remove', text: '✕', title: 'Hapus lampiran',
+          onclick: () => { attachments = attachments.filter((_, i) => i !== index); renderAttachments(); },
+        }),
+      ]);
+      bar.appendChild(chip);
+    });
+  }
+
+  function downscaleImage(srcUrl, callback) {
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, MAX_IMAGE_DIM / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width * ratio));
+      canvas.height = Math.max(1, Math.round(img.height * ratio));
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      callback(canvas.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => showToast('Gagal membaca gambar.', 'error');
+    img.src = srcUrl;
+  }
+
+  function pushAttachment(att) {
+    if (attachments.length >= MAX_ATTACHMENTS) {
+      showToast('Maksimal ' + MAX_ATTACHMENTS + ' lampiran per pesan.', 'warn');
+      return false;
+    }
+    attachments = [...attachments, att];
+    renderAttachments();
+    return true;
+  }
+
+  function addImageFile(file, namaDefault) {
+    const reader = new FileReader();
+    reader.onload = () => downscaleImage(reader.result, (dataUrl) => {
+      if (pushAttachment({ kind: 'image', name: file.name || namaDefault || 'gambar.png', dataUrl })) {
+        showToast('Gambar dilampirkan — akan dianalisis mode 🧠 Cermat.', 'ok');
+      }
+    });
+    reader.readAsDataURL(file);
+  }
+
+  function addTextFile(file) {
+    if (file.size > MAX_TEXT_FILE) {
+      showToast('File "' + file.name + '" terlalu besar (maks 256 KB).', 'warn');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => pushAttachment({ kind: 'text', name: file.name, content: String(reader.result) });
+    reader.readAsText(file);
+  }
+
+  function attachImageDataUrl(dataUrl, name) {
+    downscaleImage(dataUrl, (kecil) => {
+      if (pushAttachment({ kind: 'image', name: name || 'screenshot.png', dataUrl: kecil })) {
+        showToast('Screenshot dilampirkan ke chat AI. 📎', 'ok');
+      }
+    });
+  }
+
   // --- Konteks proyek untuk AI ---
   function buildProjectContext() {
     const project = State.getCurrentProject();
@@ -160,8 +237,12 @@ const AI = (() => {
     });
   }
 
-  function appendUserBubble(text) {
-    chatEl().appendChild(el('div', { class: 'ai-msg ai-msg-user', text }));
+  function appendUserBubble(text, images) {
+    const bubble = el('div', { class: 'ai-msg ai-msg-user', text });
+    (images || []).forEach((att) => {
+      bubble.appendChild(el('img', { src: att.dataUrl, class: 'ai-user-thumb', alt: att.name }));
+    });
+    chatEl().appendChild(bubble);
     scrollChat();
   }
 
@@ -324,16 +405,48 @@ const AI = (() => {
     const welcome = $('.ai-welcome', chatEl());
     if (welcome) welcome.remove();
 
+    // Pisahkan lampiran: gambar → konten vision, teks → disisipkan ke prompt
+    const imageAtts = attachments.filter((a) => a.kind === 'image');
+    const textAtts = attachments.filter((a) => a.kind === 'text');
+    const sentAttachments = attachments;
+
+    let textPayload = prompt;
+    textAtts.forEach((a) => {
+      textPayload += '\n\nLAMPIRAN "' + a.name + '":\n```\n' + a.content + '\n```';
+    });
+    const displayText = prompt + (attachments.length
+      ? '\n📎 ' + attachments.map((a) => a.name).join(', ')
+      : '');
+
     input.value = '';
-    appendUserBubble(prompt);
+    appendUserBubble(displayText, imageAtts);
+    attachments = [];
+    renderAttachments();
+
     const history = getHistory();
-    history.push({ role: 'user', content: prompt });
+    history.push({ role: 'user', content: displayText });
+
+    // Gambar hanya dipahami MiniMax-M3 → paksa model itu utk permintaan ini
+    const modelUsed = imageAtts.length ? MODEL_SMART : settings.model;
+    if (imageAtts.length && !settings.model.includes('M3')) {
+      showToast('Ada gambar → permintaan ini otomatis memakai 🧠 Cermat (M3) yang bisa melihat gambar.', 'info');
+    }
 
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: buildProjectContext() },
       ...history.slice(-MAX_HISTORY),
     ];
+    // Pesan terakhir diganti versi lengkap untuk API (isi file lampiran + gambar)
+    messages[messages.length - 1] = {
+      role: 'user',
+      content: imageAtts.length
+        ? [
+            { type: 'text', text: textPayload },
+            ...imageAtts.map((a) => ({ type: 'image_url', image_url: { url: a.dataUrl } })),
+          ]
+        : textPayload,
+    };
 
     const bubble = el('div', { class: 'ai-msg ai-msg-assistant' }, [
       el('span', { class: 'ai-thinking', text: 'menghubungi KARSA AI…' }),
@@ -360,12 +473,12 @@ const AI = (() => {
     const headers = { 'Content-Type': 'application/json' };
     if (useDirect) headers.Authorization = 'Bearer ' + settings.apiKey;
     const directPayload = {
-      model: settings.model, messages, stream: true, max_tokens: 16384, temperature: 0.7,
-      ...(settings.model.includes('M3') ? { reasoning_effort: 'low' } : {}),
+      model: modelUsed, messages, stream: true, max_tokens: 16384, temperature: 0.7,
+      ...(modelUsed.includes('M3') ? { reasoning_effort: 'low' } : {}),
     };
     const body = useDirect
       ? JSON.stringify(directPayload)
-      : JSON.stringify({ model: settings.model, messages });
+      : JSON.stringify({ model: modelUsed, messages });
 
     let rawText = '';
     let lastRenderAt = 0;
@@ -445,7 +558,7 @@ const AI = (() => {
       const elapsed = Math.round((Date.now() - startedAt) / 1000);
       bubble.appendChild(el('div', {
         class: 'ai-meta',
-        text: '⚡ ' + elapsed + ' dtk · ' + settings.model.replace('MiniMax-', ''),
+        text: '⚡ ' + elapsed + ' dtk · ' + modelUsed.replace('MiniMax-', '') + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : ''),
       }));
       history.push({ role: 'assistant', content: visible });
       saveHistory();
@@ -466,6 +579,8 @@ const AI = (() => {
       }
       history.pop(); // buang pesan user dari riwayat…
       input.value = prompt; // …tapi kembalikan ke kotak input agar tinggal klik Kirim / Coba lagi
+      attachments = sentAttachments; // lampiran juga dikembalikan
+      renderAttachments();
     } finally {
       clearInterval(ticker);
       setBusy(false, '');
@@ -566,9 +681,29 @@ const AI = (() => {
         send();
       }
     });
+
+    // Lampiran: tombol 📎 dan tempel (Ctrl+V) gambar langsung ke chat
+    $('#ai-attach-btn').addEventListener('click', () => $('#ai-file-input').click());
+    $('#ai-file-input').addEventListener('change', (e) => {
+      Array.from(e.target.files).forEach((file) => {
+        if (file.type.startsWith('image/')) addImageFile(file);
+        else addTextFile(file);
+      });
+      e.target.value = '';
+    });
+    $('#ai-input').addEventListener('paste', (e) => {
+      const items = Array.from((e.clipboardData && e.clipboardData.items) || []);
+      const gambar = items.filter((it) => it.kind === 'file' && it.type.startsWith('image/'));
+      if (!gambar.length) return;
+      e.preventDefault();
+      gambar.forEach((it) => {
+        const file = it.getAsFile();
+        if (file) addImageFile(file, 'tempelan.png');
+      });
+    });
   }
 
-  return { init, switchTab };
+  return { init, switchTab, attachImageDataUrl };
 })();
 
 document.addEventListener('DOMContentLoaded', AI.init);

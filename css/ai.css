@@ -103,6 +103,70 @@
   font-family: var(--font-code);
 }
 
+/* --- Lampiran chat --- */
+.ai-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+.ai-attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 4px 7px;
+  max-width: 100%;
+}
+.ai-attach-chip img {
+  width: 30px; height: 30px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+.ai-attach-icon { font-size: 15px; }
+.ai-attach-name {
+  font-size: 11px;
+  font-family: var(--font-code);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-attach-remove {
+  width: 17px; height: 17px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.ai-attach-remove:hover { background: var(--danger); color: #fff; }
+
+/* Thumbnail gambar di gelembung pesan user */
+.ai-user-thumb {
+  display: block;
+  max-width: 150px;
+  max-height: 110px;
+  border-radius: 8px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, .35);
+}
+
+/* Pratinjau hasil screenshot di modal */
+.shot-preview-img {
+  display: block;
+  max-width: 100%;
+  max-height: 55vh;
+  margin: 0 auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
 /* Tombol coba lagi pada error */
 .ai-retry-btn {
   margin-top: 8px;

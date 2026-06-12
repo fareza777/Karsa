@@ -221,10 +221,14 @@ const App = (() => {
   function bindEvents() {
     // Dashboard
     $('#btn-new-project').addEventListener('click', () => Dashboard.newProjectDialog());
-    $('#btn-import-project').addEventListener('click', () => $('#import-input').click());
+    $('#btn-import-project').addEventListener('click', () => Dashboard.importDialog());
     $('#import-input').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) Dashboard.importProjectJson(file);
+      e.target.value = '';
+    });
+    $('#import-folder-input').addEventListener('change', (e) => {
+      if (e.target.files.length) Dashboard.importProjectFolder(e.target.files);
       e.target.value = '';
     });
     $('#dash-theme-toggle').addEventListener('click', toggleTheme);
@@ -234,6 +238,8 @@ const App = (() => {
     $('#ide-theme-toggle').addEventListener('click', toggleTheme);
     $('#btn-run').addEventListener('click', () => Preview.refresh());
     $('#btn-refresh-preview').addEventListener('click', () => Preview.refresh());
+    $('#btn-shot-full').addEventListener('click', () => Preview.screenshot('full'));
+    $('#btn-shot-region').addEventListener('click', () => Preview.screenshot('region'));
     $('#btn-open-tab').addEventListener('click', () => Preview.openInNewTab());
     $('#btn-share').addEventListener('click', shareProject);
     $('#btn-export').addEventListener('click', exportDialog);

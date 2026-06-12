@@ -11,7 +11,10 @@ live preview.
 
 | Fitur | Keterangan |
 |---|---|
-| ✨ **KARSA AI (vibecoding)** | Jelaskan idemu dalam bahasa natural — AI (MiniMax-M3) menulis file HTML/CSS/JS lengkap, klik **Terapkan** dan preview langsung jalan |
+| ✨ **KARSA AI (vibecoding)** | Jelaskan idemu dalam bahasa natural — AI menulis file HTML/CSS/JS lengkap, klik **Terapkan** dan preview langsung jalan. Mode ⚡ Cepat / 🧠 Cermat |
+| 🖼 **AI bisa melihat gambar** | Tempel (Ctrl+V) screenshot atau lampirkan gambar & file lewat 📎 — dianalisis MiniMax-M3 (vision) |
+| 📸 **Screenshot preview** | Tangkap satu layar penuh atau seret untuk area tertentu — unduh PNG atau langsung lampirkan ke chat AI |
+| 📁 **Impor folder** | Impor seluruh folder proyek dari komputer (struktur subfolder dipertahankan), selain impor JSON KARSA |
 | 🗂️ **Multi-proyek** | Kelola banyak proyek sekaligus — buat, duplikat, ganti nama, hapus |
 | 🧩 **8 Template siap pakai** | Landing page, Todo, Kalkulator, Game Ular, Kuis, Portofolio, Dashboard Statistik, atau kosong |
 | 📝 **Editor kode profesional** | CodeMirror: syntax highlighting, autocomplete (`Ctrl+Space`), cari dalam file (`Ctrl+F`), toggle komentar (`Ctrl+/`), auto-close bracket & tag, ukuran font bisa diatur |
