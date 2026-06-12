@@ -142,7 +142,7 @@ const Dashboard = (() => {
   }
 
   // --- Impor folder: baca semua file teks, pertahankan struktur subfolder ---
-  const FOLDER_TEXT_EXTS = ['html', 'htm', 'css', 'js', 'mjs', 'json', 'md', 'txt', 'svg', 'xml', 'csv'];
+  const FOLDER_TEXT_EXTS = ['html', 'htm', 'css', 'js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx', 'json', 'md', 'txt', 'svg', 'xml', 'csv'];
   const FOLDER_MAX_FILES = 150;
   const FOLDER_MAX_SIZE = 400 * 1024;
 
