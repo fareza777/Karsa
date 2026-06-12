@@ -1,6 +1,20 @@
 /* ===== KARSA — live preview: bundling file proyek ke iframe ===== */
 
 const Preview = (() => {
+  let publishHostCache = null;
+
+  async function ensurePublishHost() {
+    if (publishHostCache) return publishHostCache;
+    try {
+      const res = await fetch('/api/config');
+      const cfg = await res.json();
+      publishHostCache = cfg.publishHost || location.hostname.replace(/^www\./, '') || 'karsa.work';
+    } catch (e) {
+      publishHostCache = location.hostname.replace(/^www\./, '') || 'karsa.work';
+    }
+    return publishHostCache;
+  }
+
   // Skrip yang disuntikkan ke preview untuk meneruskan console & error ke panel KARSA
   const CONSOLE_BRIDGE = `<script>(function () {
   // Sandbox memblokir localStorage; sediakan shim in-memory agar kode pengguna tetap jalan
@@ -336,7 +350,7 @@ const Preview = (() => {
       urlLabel.textContent = (project.publish.subdomainUrl || project.publish.customUrl || project.publish.url)
         .replace(/^https?:\/\//, '');
     }
-    else urlLabel.textContent = slug + '.karsa.app';
+    else ensurePublishHost().then((host) => { urlLabel.textContent = slug + '.' + host; });
   }
 
   const refreshDebounced = debounce(() => {
