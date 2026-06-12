@@ -69,28 +69,28 @@ const Dashboard = (() => {
 
   function projectMenu(e, project) {
     const menu = [
-      { label: 'Buka', icon: '📂', onClick: () => App.openProject(project.id) },
-      { label: 'Ganti nama', icon: '✏️', onClick: () => renamePrompt(project) },
-      { label: 'Duplikat', icon: '📋', onClick: () => {
+      { label: 'Buka', icon: 'folder-open', onClick: () => App.openProject(project.id) },
+      { label: 'Ganti nama', icon: 'pencil', onClick: () => renamePrompt(project) },
+      { label: 'Duplikat', icon: 'copy', onClick: () => {
         State.duplicateProject(project.id);
         render();
         showToast('Proyek diduplikat.', 'ok');
       } },
-      { label: 'Ekspor (.json)', icon: '⬇️', onClick: () => exportProjectJson(project) },
+      { label: 'Ekspor (.json)', icon: 'download', onClick: () => exportProjectJson(project) },
     ];
     if (PlayStore.shouldShowButton(project)) {
       menu.push({
-        label: 'Checklist Play Store', icon: '🏪',
+        label: 'Checklist Play Store', icon: 'store',
         onClick: () => { App.openProject(project.id); PlayStore.openChecklist(); },
       });
     }
     if (project.publish && project.publish.url) {
       menu.splice(1, 0, {
-        label: 'Buka situs live', icon: '🌐',
+        label: 'Buka situs live', icon: 'globe',
         onClick: () => window.open(project.publish.url, '_blank'),
       });
     }
-    menu.push('sep', { label: 'Hapus', icon: '🗑️', danger: true, onClick: () => deletePrompt(project) });
+    menu.push('sep', { label: 'Hapus', icon: 'trash', danger: true, onClick: () => deletePrompt(project) });
     showContextMenu(e.clientX, e.clientY, menu);
   }
 

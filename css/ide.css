@@ -56,7 +56,7 @@
   font-weight: 700;
   padding: 6px 12px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, #22c55e, #14b8a6);
+  background: var(--grad-success);
   color: #fff;
   border: none;
   cursor: pointer;
@@ -69,7 +69,7 @@
   font-weight: 700;
   padding: 6px 12px;
   border-radius: var(--radius-sm);
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: var(--grad-success);
   color: #fff;
   border: none;
   cursor: pointer;
@@ -265,7 +265,14 @@
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.preview-title { font-size: 12px; font-weight: 700; }
+.preview-title {
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.preview-title .icon { color: var(--accent-2); }
 .preview-url {
   flex: 1;
   background: var(--bg-3);
@@ -341,7 +348,34 @@
   transition: transform .25s ease, border-radius .25s ease;
   display: flex;
   width: 100%;
+  position: relative;
 }
+
+/* --- Anti-kedip: overlay loading preview sinkron tema --- */
+.preview-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+.preview-frame-wrap.loading .preview-loading { opacity: 1; }
+#preview-frame { transition: opacity .2s ease; }
+.preview-frame-wrap.loading #preview-frame { opacity: 0; }
+.preview-spinner {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: previewSpin .7s linear infinite;
+}
+@keyframes previewSpin { to { transform: rotate(360deg); } }
 /* Ukuran viewport device nyata; diskalakan otomatis agar pas panel (JS fitDevice) */
 .preview-stage.device-mode { overflow: hidden; }
 .preview-frame-wrap.device-tablet {
@@ -417,7 +451,14 @@
   cursor: pointer;
   user-select: none;
 }
-.console-title { font-size: 12px; font-weight: 700; color: var(--muted); }
+.console-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
 .console-badge {
   background: var(--danger);
   color: #fff;

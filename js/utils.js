@@ -115,6 +115,25 @@ function decodeBase64Url(encoded) {
   return new TextDecoder().decode(bytes);
 }
 
+// Ikon SVG dari sprite #i-* di index.html. Nama valid → node svg; selain itu null.
+const ICON_NAMES = new Set([
+  'spark', 'sun', 'moon', 'play', 'monitor', 'tablet', 'phone', 'external',
+  'history', 'link', 'rocket', 'store', 'download', 'folder', 'folder-open',
+  'folder-plus', 'file-plus', 'trash', 'settings', 'sparkles', 'zap', 'bulb',
+  'paperclip', 'stop', 'wand', 'keyboard', 'terminal', 'globe', 'camera',
+  'scissors', 'maximize', 'refresh', 'pencil', 'copy', 'plus', 'send',
+]);
+
+function iconSvg(name) {
+  if (!ICON_NAMES.has(name)) return null;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'icon');
+  const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  use.setAttribute('href', '#i-' + name);
+  svg.appendChild(use);
+  return svg;
+}
+
 function colorForId(id) {
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;

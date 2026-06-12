@@ -80,19 +80,19 @@ const FileTree = (() => {
 
   function fileContextMenu(e, path) {
     showContextMenu(e.clientX, e.clientY, [
-      { label: 'Ganti nama', icon: '✏️', onClick: () => renameFilePrompt(path) },
-      { label: 'Duplikat', icon: '📋', onClick: () => duplicateFile(path) },
-      { label: 'Unduh file', icon: '⬇️', onClick: () => downloadFile(path) },
+      { label: 'Ganti nama', icon: 'pencil', onClick: () => renameFilePrompt(path) },
+      { label: 'Duplikat', icon: 'copy', onClick: () => duplicateFile(path) },
+      { label: 'Unduh file', icon: 'download', onClick: () => downloadFile(path) },
       'sep',
-      { label: 'Hapus', icon: '🗑️', danger: true, onClick: () => deleteFilePrompt(path) },
+      { label: 'Hapus', icon: 'trash', danger: true, onClick: () => deleteFilePrompt(path) },
     ]);
   }
 
   function folderContextMenu(e, folderPath) {
     showContextMenu(e.clientX, e.clientY, [
-      { label: 'File baru di sini', icon: '＋', onClick: () => newFilePrompt(folderPath + '/') },
+      { label: 'File baru di sini', icon: 'file-plus', onClick: () => newFilePrompt(folderPath + '/') },
       'sep',
-      { label: 'Hapus folder', icon: '🗑️', danger: true, onClick: () => deleteFolderPrompt(folderPath) },
+      { label: 'Hapus folder', icon: 'trash', danger: true, onClick: () => deleteFolderPrompt(folderPath) },
     ]);
   }
 

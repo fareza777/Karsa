@@ -31,11 +31,12 @@
 .btn-lg { padding: 13px 26px; font-size: 15px; border-radius: var(--radius); }
 
 .btn-run {
-  background: var(--ok);
-  color: #06281c;
+  background: var(--grad-success);
+  color: #fff;
   font-weight: 700;
   padding: 7px 16px;
   border-radius: var(--radius-sm);
+  box-shadow: 0 3px 12px rgba(16, 185, 129, .3);
 }
 .btn-run:hover { filter: brightness(1.08); }
 

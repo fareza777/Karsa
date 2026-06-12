@@ -120,11 +120,13 @@ function showContextMenu(x, y, items) {
       menu.appendChild(el('div', { class: 'context-menu-sep' }));
       return;
     }
+    // item.icon: nama ikon sprite (mis. 'pencil') → SVG; selain itu dirender sebagai teks/emoji
+    const iconNode = iconSvg(item.icon) || el('span', { text: item.icon || '' });
     menu.appendChild(el('button', {
       class: 'context-menu-item' + (item.danger ? ' danger' : ''),
       onclick: () => { hideContextMenu(); item.onClick(); },
     }, [
-      el('span', { text: item.icon || '' }),
+      iconNode,
       el('span', { text: item.label }),
     ]));
   });

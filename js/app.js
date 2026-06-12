@@ -41,9 +41,9 @@ const App = (() => {
   // --- Tema ---
   function applyTheme(theme) {
     document.body.dataset.theme = theme;
-    const icon = theme === 'dark' ? '🌙' : '☀️';
-    $('#dash-theme-toggle').textContent = icon;
-    $('#ide-theme-toggle').textContent = icon;
+    const iconHtml = '<svg class="icon"><use href="#i-' + (theme === 'dark' ? 'moon' : 'sun') + '"/></svg>';
+    $('#dash-theme-toggle').innerHTML = iconHtml;
+    $('#ide-theme-toggle').innerHTML = iconHtml;
     Editor.setTheme(theme);
   }
 

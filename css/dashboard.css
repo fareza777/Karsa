@@ -428,7 +428,8 @@
   color: var(--muted);
 }
 .feature-card strong { color: var(--text); font-size: 13px; }
-.feature-icon { font-size: 22px; margin-bottom: 4px; }
+.feature-icon { font-size: 22px; margin-bottom: 4px; color: var(--accent); }
+.feature-card:hover .feature-icon { color: var(--accent-2); }
 @media (max-width: 720px) {
   .feature-strip { grid-template-columns: repeat(2, 1fr); }
 }

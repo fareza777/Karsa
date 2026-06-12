@@ -292,6 +292,15 @@ const Preview = (() => {
     ]));
   }
 
+  // Anti-kedip: tampilkan overlay bertema selama iframe memuat ulang
+  let loadingFailsafe = null;
+  function setPreviewLoading(active) {
+    const wrap = $('#preview-frame-wrap');
+    wrap.classList.toggle('loading', active);
+    clearTimeout(loadingFailsafe);
+    if (active) loadingFailsafe = setTimeout(() => wrap.classList.remove('loading'), 4000);
+  }
+
   function refresh() {
     const project = State.getCurrentProject();
     if (!project) return;
@@ -299,6 +308,7 @@ const Preview = (() => {
     const frame = $('#preview-frame');
     const snackMode = usesSnackEngine(project);
     updateEngineTabs();
+    setPreviewLoading(true);
 
     if (snackMode) {
       frame.removeAttribute('src');
@@ -453,6 +463,10 @@ const Preview = (() => {
       ],
     });
   }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    $('#preview-frame').addEventListener('load', () => setPreviewLoading(false));
+  });
 
   // Simpan thumbnail proyek (diperkecil ke 360px JPEG agar hemat penyimpanan)
   function saveThumb(dataUrl) {
