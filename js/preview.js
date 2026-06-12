@@ -322,7 +322,10 @@ const Preview = (() => {
     const urlLabel = $('#preview-url');
     const slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preview';
     if (snackMode) urlLabel.textContent = 'snack.expo.dev · ' + slug;
-    else if (project.publish && project.publish.url) urlLabel.textContent = project.publish.url.replace(/^https?:\/\//, '');
+    else if (project.publish && (project.publish.subdomainUrl || project.publish.customUrl || project.publish.url)) {
+      urlLabel.textContent = (project.publish.subdomainUrl || project.publish.customUrl || project.publish.url)
+        .replace(/^https?:\/\//, '');
+    }
     else urlLabel.textContent = slug + '.karsa.app';
   }
 

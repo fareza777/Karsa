@@ -1,6 +1,9 @@
 /* ===== KARSA — publish situs web ke /p/:slug (Vercel KV) ===== */
 
-import { kvConfigured, kvGet, kvSet } from '../lib/kv.js';
+import { kvConfigured, kvGet, kvSet, kvDel } from '../lib/kv.js';
+import {
+  cnameTarget, normalizeDomain, subdomainUrl, validateCustomDomain,
+} from '../lib/domains.js';
 
 const MAX_HTML = 1.5 * 1024 * 1024;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
@@ -67,7 +70,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { slug: rawSlug, html, name } = req.body || {};
+  const { slug: rawSlug, html, name, customDomain: rawDomain, previousDomain: rawPrev } = req.body || {};
   const slug = normalizeSlug(rawSlug);
   const slugErr = validateSlug(slug);
   if (slugErr) {
@@ -84,26 +87,66 @@ export default async function handler(req, res) {
   }
 
   const finalHtml = watermark(html);
-  const meta = JSON.stringify({
-    name: typeof name === 'string' ? name.slice(0, 120) : slug,
-    publishedAt: Date.now(),
-  });
 
   const htmlRes = await kvSet('karsa:pub:' + slug + ':html', finalHtml);
   if (htmlRes.error) {
     res.status(502).json({ error: htmlRes.error });
     return;
   }
-  const metaRes = await kvSet('karsa:pub:' + slug + ':meta', meta);
+  let customDomain = null;
+  let dns = null;
+  const domain = normalizeDomain(rawDomain);
+  if (domain) {
+    const dErr = validateCustomDomain(domain);
+    if (dErr) {
+      res.status(400).json({ error: dErr });
+      return;
+    }
+    const taken = await kvGet('karsa:domain:' + domain);
+    if (taken.error) {
+      res.status(502).json({ error: taken.error });
+      return;
+    }
+    if (taken.value && taken.value !== slug) {
+      res.status(409).json({ error: 'Domain "' + domain + '" sudah dipakai proyek lain.' });
+      return;
+    }
+    const mapRes = await kvSet('karsa:domain:' + domain, slug);
+    if (mapRes.error) {
+      res.status(502).json({ error: mapRes.error });
+      return;
+    }
+    customDomain = domain;
+    dns = { type: 'CNAME', name: domain, value: cnameTarget() };
+  }
+
+  const prev = normalizeDomain(rawPrev);
+  if (prev && prev !== domain) {
+    await kvDel('karsa:domain:' + prev);
+  }
+
+  const metaObj = {
+    name: typeof name === 'string' ? name.slice(0, 120) : slug,
+    publishedAt: Date.now(),
+    customDomain,
+  };
+  const metaRes = await kvSet('karsa:pub:' + slug + ':meta', JSON.stringify(metaObj));
   if (metaRes.error) {
     res.status(502).json({ error: metaRes.error });
     return;
   }
 
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  const subUrl = subdomainUrl(slug, proto);
+
   res.status(200).json({
     ok: true,
     slug,
     url: baseUrl(req) + '/p/' + slug,
-    publishedAt: JSON.parse(meta).publishedAt,
+    subdomainUrl: subUrl,
+    customDomain,
+    customUrl: customDomain ? proto + '://' + customDomain : null,
+    dns,
+    publishedAt: metaObj.publishedAt,
   });
 }

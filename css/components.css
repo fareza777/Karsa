@@ -258,6 +258,15 @@
 .playstore-check-hint { font-size: 11px; color: var(--muted); display: block; }
 .playstore-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
+.publish-slug-suffix {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 10px 12px 10px 0;
+  font-family: var(--font-code);
+  white-space: nowrap;
+}
+.publish-url-block { margin-bottom: 10px; }
+.publish-url-label { font-size: 11px; font-weight: 700; color: var(--muted); display: block; margin-bottom: 4px; }
 .publish-live-url {
   width: 100%;
   padding: 10px 12px;
@@ -265,8 +274,19 @@
   border-radius: var(--radius-sm);
   font-family: var(--font-code);
   font-size: 13px;
-  margin-top: 8px;
+  margin-top: 0;
 }
+.publish-dns-box {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-size: 12px;
+}
+.publish-dns-box strong { display: block; margin-bottom: 6px; }
+.publish-dns-box code { font-family: var(--font-code); font-size: 11px; }
+.modal-hint.warn { color: #f59e0b; }
 
 /* --- Toast --- */
 .toast-root {
