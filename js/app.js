@@ -115,6 +115,7 @@ const App = (() => {
     const data = JSON.stringify({
       karsa: 1, name: project.name, projectType: project.projectType || 'web',
       files: project.files, folders: project.folders || [],
+      publish: project.publish || null,
     }, null, 2);
     downloadBlob(new Blob([data], { type: 'application/json' }), slugify(project.name) + '.karsa.json');
     showToast('JSON berhasil diunduh!', 'ok');
@@ -319,6 +320,7 @@ const App = (() => {
     $('#btn-shot-region').addEventListener('click', () => Preview.screenshot('region'));
     $('#btn-open-tab').addEventListener('click', () => Preview.openInNewTab());
     $('#btn-share').addEventListener('click', shareProject);
+    $('#btn-publish').addEventListener('click', () => Publish.openDialog());
     $('#btn-export').addEventListener('click', exportDialog);
     $('#btn-history').addEventListener('click', historyDialog);
     $('#btn-format').addEventListener('click', () => Editor.formatCurrentFile());

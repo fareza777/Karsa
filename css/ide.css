@@ -51,6 +51,20 @@
 .device-btn:hover { opacity: 1; }
 .device-btn.active { background: var(--bg-hover); opacity: 1; }
 
+.btn-publish {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #22c55e, #14b8a6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter var(--transition), transform var(--transition);
+}
+.btn-publish:hover { filter: brightness(1.08); transform: translateY(-1px); }
+
 /* --- Layout utama --- */
 .ide-body {
   flex: 1;

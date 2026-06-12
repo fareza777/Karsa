@@ -31,6 +31,9 @@ const Dashboard = (() => {
             el('h3', { text: project.name }),
             el('div', { class: 'project-meta' }, [
               el('span', { text: fileCount + ' file' }),
+              project.publish && project.publish.url
+                ? el('span', { class: 'project-tag live', text: '🟢 Live' })
+                : null,
               (() => {
                 const a = analyzeProjectFiles(project.files);
                 if (a.expoLike) return el('span', { class: 'project-tag', text: 'Expo' });
@@ -62,7 +65,7 @@ const Dashboard = (() => {
   }
 
   function projectMenu(e, project) {
-    showContextMenu(e.clientX, e.clientY, [
+    const menu = [
       { label: 'Buka', icon: '📂', onClick: () => App.openProject(project.id) },
       { label: 'Ganti nama', icon: '✏️', onClick: () => renamePrompt(project) },
       { label: 'Duplikat', icon: '📋', onClick: () => {
@@ -71,9 +74,15 @@ const Dashboard = (() => {
         showToast('Proyek diduplikat.', 'ok');
       } },
       { label: 'Ekspor (.json)', icon: '⬇️', onClick: () => exportProjectJson(project) },
-      'sep',
-      { label: 'Hapus', icon: '🗑️', danger: true, onClick: () => deletePrompt(project) },
-    ]);
+    ];
+    if (project.publish && project.publish.url) {
+      menu.splice(1, 0, {
+        label: 'Buka situs live', icon: '🌐',
+        onClick: () => window.open(project.publish.url, '_blank'),
+      });
+    }
+    menu.push('sep', { label: 'Hapus', icon: '🗑️', danger: true, onClick: () => deletePrompt(project) });
+    showContextMenu(e.clientX, e.clientY, menu);
   }
 
   function renamePrompt(project) {
@@ -105,6 +114,7 @@ const Dashboard = (() => {
     const data = JSON.stringify({
       karsa: 1, name: project.name, projectType: project.projectType || 'web',
       files: project.files, folders: project.folders || [],
+      publish: project.publish || null,
     }, null, 2);
     const slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'proyek';
     downloadBlob(new Blob([data], { type: 'application/json' }), slug + '.karsa.json');
@@ -124,6 +134,7 @@ const Dashboard = (() => {
           projectType: data.projectType || 'web',
         });
         if (Array.isArray(data.folders)) State.updateProject(project.id, { folders: data.folders });
+        if (data.publish) State.updateProject(project.id, { publish: data.publish });
         render();
         showToast('Proyek "' + project.name + '" berhasil diimpor!', 'ok');
       } catch (err) {

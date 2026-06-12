@@ -2,8 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/p/:slug", "destination": "/api/site/:slug" }
+  ],
   "functions": {
-    "api/chat.js": { "maxDuration": 300 }
+    "api/chat.js": { "maxDuration": 300 },
+    "api/publish.js": { "maxDuration": 60 },
+    "api/site/[slug].js": { "maxDuration": 30 }
   },
   "headers": [
     {
