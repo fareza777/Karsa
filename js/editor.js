@@ -149,8 +149,63 @@ const Editor = (() => {
 
   function getCurrentPath() { return currentPath; }
 
+  // --- Rapikan kode dengan Prettier (dimuat dari CDN saat pertama dipakai) ---
+  const PRETTIER_PARSERS = {
+    html: 'html', htm: 'html',
+    css: 'css',
+    js: 'babel', mjs: 'babel', json: 'json',
+  };
+  let prettierQueue = null;
+
+  function loadPrettier(callback) {
+    if (window.prettier && window.prettierPlugins) return callback(true);
+    if (prettierQueue) { prettierQueue.push(callback); return; }
+    prettierQueue = [callback];
+    const base = 'https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/';
+    const sources = ['standalone.min.js', 'parser-html.min.js', 'parser-postcss.min.js', 'parser-babel.min.js'];
+    let remaining = sources.length;
+    let failed = false;
+    const finish = () => {
+      const callbacks = prettierQueue;
+      prettierQueue = null;
+      callbacks.forEach((cb) => cb(!failed));
+    };
+    sources.forEach((src) => {
+      const script = document.createElement('script');
+      script.src = base + src;
+      script.onload = () => { if (--remaining === 0) finish(); };
+      script.onerror = () => { failed = true; if (--remaining === 0) finish(); };
+      document.head.appendChild(script);
+    });
+  }
+
+  function formatCurrentFile() {
+    if (!currentPath) { showToast('Buka file dulu untuk dirapikan.', 'warn'); return; }
+    const parser = PRETTIER_PARSERS[fileExt(currentPath)];
+    if (!parser) { showToast('Format hanya untuk HTML, CSS, JS, dan JSON.', 'warn'); return; }
+    $('#status-save').textContent = 'Memuat formatter…';
+    loadPrettier((ok) => {
+      if (!ok) { showToast('Gagal memuat Prettier (periksa internet).', 'error'); return; }
+      try {
+        const source = cm ? cm.getValue() : (fallback ? fallback.value : '');
+        const formatted = window.prettier.format(source, {
+          parser, plugins: window.prettierPlugins, tabWidth: 2, printWidth: 100,
+        });
+        if (formatted !== source) {
+          if (cm) { const pos = cm.getCursor(); cm.setValue(formatted); cm.setCursor(pos); }
+          else if (fallback) { fallback.value = formatted; onContentChanged(formatted); }
+          showToast('Kode dirapikan ✨', 'ok');
+        } else {
+          showToast('Kode sudah rapi 👌', 'ok');
+        }
+      } catch (err) {
+        showToast('Prettier: ' + String(err.message || err).split('\n')[0], 'error');
+      }
+    });
+  }
+
   return {
     init, openFile, closeFile, handleRename, resetForProject,
-    setTheme, changeFontSize, getCurrentPath,
+    setTheme, changeFontSize, getCurrentPath, formatCurrentFile,
   };
 })();

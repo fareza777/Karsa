@@ -36,6 +36,7 @@ const AI = (() => {
   let renderedProjectId = null;
   let busy = false;
   let abortCtrl = null;
+  let autoApplyOnce = false; // utk alur prompt-to-app dari dashboard
 
   function loadSettings() {
     try {
@@ -376,12 +377,14 @@ const AI = (() => {
   }
 
   function applyFiles(files) {
+    State.addCheckpoint('Sebelum Terapkan AI (' + files.length + ' file)');
     files.forEach((f) => State.setFile(f.path, f.code));
     FileTree.render();
     const entry = files.find((f) => f.path === 'index.html') || files[0];
     Tabs.open(entry.path);
     Preview.refresh();
-    showToast(files.length + ' file diterapkan. Lihat hasilnya di preview! ⚡', 'ok');
+    confettiBurst();
+    showToast(files.length + ' file diterapkan — checkpoint tersimpan 🕰', 'ok');
   }
 
   // --- Streaming chat ---
@@ -562,10 +565,11 @@ const AI = (() => {
       }));
       history.push({ role: 'assistant', content: visible });
       saveHistory();
-      if (settings.autoApply) {
+      if (settings.autoApply || autoApplyOnce) {
         const applyBtn = $('.btn-apply', bubble);
         if (applyBtn) applyBtn.click();
       }
+      autoApplyOnce = false;
     } catch (err) {
       bubble.remove();
       if (err.name === 'AbortError') {
@@ -581,6 +585,7 @@ const AI = (() => {
       input.value = prompt; // …tapi kembalikan ke kotak input agar tinggal klik Kirim / Coba lagi
       attachments = sentAttachments; // lampiran juga dikembalikan
       renderAttachments();
+      autoApplyOnce = false;
     } finally {
       clearInterval(ticker);
       setBusy(false, '');
@@ -703,7 +708,14 @@ const AI = (() => {
     });
   }
 
-  return { init, switchTab, attachImageDataUrl };
+  // Kirim prompt secara terprogram (dipakai alur prompt-to-app dashboard)
+  function sendPrompt(text, options) {
+    $('#ai-input').value = text;
+    if (options && options.autoApplyOnce) autoApplyOnce = true;
+    send();
+  }
+
+  return { init, switchTab, attachImageDataUrl, sendPrompt };
 })();
 
 document.addEventListener('DOMContentLoaded', AI.init);

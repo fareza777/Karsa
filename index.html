@@ -38,6 +38,14 @@
         <div class="hero-blob hero-blob-3"></div>
         <h1 class="hero-title">Mau bikin apa hari ini?</h1>
         <p class="hero-sub">Tulis kode, lihat hasilnya langsung. Semua di browser — tanpa instalasi apa pun.</p>
+        <div class="hero-prompt">
+          <textarea id="hero-prompt-input" rows="2"
+            placeholder="Ceritakan aplikasi impianmu… mis. &quot;aplikasi kasir warung dengan keranjang dan struk&quot;"></textarea>
+          <div class="hero-prompt-foot">
+            <span class="hero-prompt-hint">⚡ KARSA AI langsung membangunnya untukmu</span>
+            <button id="hero-prompt-send" class="btn btn-primary">Buat dengan AI ✨</button>
+          </div>
+        </div>
         <div class="hero-actions">
           <button id="btn-new-project" class="btn btn-primary btn-lg">＋ Proyek Baru</button>
           <button id="btn-import-project" class="btn btn-ghost btn-lg">📂 Impor Proyek</button>
@@ -93,6 +101,7 @@
           <button class="device-btn" data-device="phone" title="Ponsel (412×915, Android modern)">📲</button>
         </div>
         <button id="btn-open-tab" class="icon-btn" title="Buka preview di tab baru">↗</button>
+        <button id="btn-history" class="icon-btn" title="Riwayat versi (checkpoint)">🕰</button>
         <button id="btn-share" class="icon-btn" title="Bagikan tautan proyek">🔗</button>
         <button id="btn-export" class="icon-btn" title="Ekspor proyek">⬇</button>
         <button id="ide-theme-toggle" class="icon-btn" title="Ganti tema">🌙</button>
@@ -165,6 +174,7 @@
           <span id="status-file">—</span>
           <span id="status-cursor"></span>
           <span class="statusbar-spacer"></span>
+          <button id="btn-format" class="icon-btn-sm" title="Rapikan kode dengan Prettier">🧹</button>
           <button id="btn-font-minus" class="icon-btn-sm" title="Perkecil font editor">A−</button>
           <button id="btn-font-plus" class="icon-btn-sm" title="Perbesar font editor">A＋</button>
           <button id="btn-shortcuts" class="icon-btn-sm" title="Bantuan shortcut">⌨</button>

@@ -104,9 +104,29 @@ const State = (() => {
     updateProject(project.id, { folders });
   }
 
+  // --- Checkpoint: snapshot file proyek (maks 5 per proyek) ---
+  function addCheckpoint(label) {
+    const project = getCurrentProject();
+    if (!project) return;
+    const checkpoint = { id: uid(), label, at: Date.now(), files: { ...project.files } };
+    const list = [...(project.checkpoints || []), checkpoint].slice(-5);
+    updateProject(project.id, { checkpoints: list });
+  }
+
+  function restoreCheckpoint(checkpointId) {
+    const project = getCurrentProject();
+    if (!project) return false;
+    const checkpoint = (project.checkpoints || []).find((c) => c.id === checkpointId);
+    if (!checkpoint) return false;
+    addCheckpoint('Sebelum pemulihan');
+    updateProject(project.id, { files: { ...checkpoint.files } });
+    return true;
+  }
+
   return {
     getProjects, getSettings, getCurrentProject, setCurrentProject,
     updateSettings, createProject, updateProject, deleteProject, duplicateProject,
     setFile, deleteFile, renameFile, deleteFolder, addFolder,
+    addCheckpoint, restoreCheckpoint,
   };
 })();

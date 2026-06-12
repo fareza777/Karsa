@@ -15,16 +15,25 @@ const Dashboard = (() => {
 
     projects.forEach((project) => {
       const fileCount = Object.keys(project.files).length;
+      const cover = project.thumb
+        ? el('div', { class: 'project-cover' }, [el('img', { src: project.thumb, alt: project.name, loading: 'lazy' })])
+        : el('div', { class: 'project-cover', style: 'background:' + colorForId(project.id) }, [
+            el('span', { class: 'project-cover-initial', text: project.name.trim().charAt(0).toUpperCase() || '✦' }),
+          ]);
+
       const card = el('div', {
         class: 'project-card',
         onclick: () => App.openProject(project.id),
       }, [
-        el('div', { class: 'project-card-top' }, [
-          el('div', {
-            class: 'project-icon',
-            text: project.name.trim().charAt(0).toUpperCase() || '✦',
-            style: 'background:' + colorForId(project.id),
-          }),
+        cover,
+        el('div', { class: 'project-card-bottom' }, [
+          el('div', { class: 'project-card-info' }, [
+            el('h3', { text: project.name }),
+            el('div', { class: 'project-meta' }, [
+              el('span', { text: fileCount + ' file' }),
+              el('span', { text: formatRelativeTime(project.updatedAt) }),
+            ]),
+          ]),
           el('button', {
             class: 'icon-btn-sm project-menu-btn',
             text: '⋯',
@@ -34,11 +43,6 @@ const Dashboard = (() => {
               projectMenu(e, project);
             },
           }),
-        ]),
-        el('h3', { text: project.name }),
-        el('div', { class: 'project-meta' }, [
-          el('span', { text: fileCount + ' file' }),
-          el('span', { text: formatRelativeTime(project.updatedAt) }),
         ]),
       ]);
       card.addEventListener('contextmenu', (e) => {

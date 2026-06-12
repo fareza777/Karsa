@@ -59,10 +59,10 @@ const Preview = (() => {
     s.onerror = function () { d2iAntrian = null; parent.postMessage({ __karsa_shot_err: 'Gagal memuat pustaka screenshot (periksa internet).' }, '*'); };
     document.head.appendChild(s);
   }
-  function ambilShot(area) {
+  function ambilShot(area, tag) {
     muatD2I(function () {
       window.domtoimage.toPng(document.body, { bgcolor: '#ffffff' }).then(function (dataUrl) {
-        if (!area) { parent.postMessage({ __karsa_shot_done: dataUrl }, '*'); return; }
+        if (!area) { parent.postMessage({ __karsa_shot_done: dataUrl, tag: tag }, '*'); return; }
         var img = new Image();
         img.onload = function () {
           var skala = img.width / Math.max(1, document.body.scrollWidth);
@@ -79,7 +79,7 @@ const Preview = (() => {
         img.onerror = function () { parent.postMessage({ __karsa_shot_err: 'Gagal memotong area.' }, '*'); };
         img.src = dataUrl;
       }).catch(function (err) {
-        parent.postMessage({ __karsa_shot_err: String(err) }, '*');
+        parent.postMessage({ __karsa_shot_err: String(err), tag: tag }, '*');
       });
     });
   }
@@ -120,6 +120,7 @@ const Preview = (() => {
     var data = e.data;
     if (!data) return;
     if (data.__karsa_shot === 'full') { ambilShot(); return; }
+    if (data.__karsa_shot === 'thumb') { ambilShot(null, 'thumb'); return; }
     if (data.__karsa_shot === 'region') { pilihAreaShot(); return; }
     if (typeof data.__karsa_eval !== 'string') return;
     try {
@@ -189,12 +190,22 @@ const Preview = (() => {
     return html;
   }
 
+  let thumbTimer = null;
+
   function refresh() {
     const project = State.getCurrentProject();
     if (!project) return;
     ConsolePanel.clear();
     const frame = $('#preview-frame');
     frame.srcdoc = buildBundle(project);
+    // Jadwalkan tangkapan thumbnail proyek setelah preview tenang
+    clearTimeout(thumbTimer);
+    thumbTimer = setTimeout(() => {
+      const current = State.getCurrentProject();
+      if (current && frame.contentWindow) {
+        frame.contentWindow.postMessage({ __karsa_shot: 'thumb' }, '*');
+      }
+    }, 2500);
     const urlLabel = $('#preview-url');
     const slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preview';
     urlLabel.textContent = slug + '.karsa.app';
@@ -294,11 +305,29 @@ const Preview = (() => {
     });
   }
 
+  // Simpan thumbnail proyek (diperkecil ke 360px JPEG agar hemat penyimpanan)
+  function saveThumb(dataUrl) {
+    const project = State.getCurrentProject();
+    if (!project) return;
+    const img = new Image();
+    img.onload = () => {
+      const ratio = Math.min(1, 360 / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(img.width * ratio));
+      canvas.height = Math.max(1, Math.round(img.height * ratio));
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      State.updateProject(project.id, { thumb: canvas.toDataURL('image/jpeg', 0.72) });
+    };
+    img.src = dataUrl;
+  }
+
   window.addEventListener('message', (event) => {
     const data = event.data;
     if (!data) return;
-    if (typeof data.__karsa_shot_done === 'string') showShotResult(data.__karsa_shot_done);
-    else if (data.__karsa_shot_err && data.__karsa_shot_err !== 'dibatalkan') {
+    if (typeof data.__karsa_shot_done === 'string') {
+      if (data.tag === 'thumb') saveThumb(data.__karsa_shot_done);
+      else showShotResult(data.__karsa_shot_done);
+    } else if (data.__karsa_shot_err && data.__karsa_shot_err !== 'dibatalkan' && data.tag !== 'thumb') {
       showToast('Screenshot gagal: ' + data.__karsa_shot_err, 'error');
     }
   });

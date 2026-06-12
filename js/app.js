@@ -160,6 +160,64 @@ const App = (() => {
     }
   }
 
+  // --- Riwayat versi (checkpoint) ---
+  function historyDialog() {
+    const project = State.getCurrentProject();
+    if (!project) return;
+    const checkpoints = (project.checkpoints || []).slice().reverse();
+    const body = el('div', {});
+    if (!checkpoints.length) {
+      body.appendChild(el('p', {
+        class: 'modal-desc',
+        text: 'Belum ada checkpoint. KARSA otomatis menyimpan snapshot setiap kali kamu menerapkan file dari AI — jadi selalu bisa kembali bila hasilnya tak sesuai.',
+      }));
+    } else {
+      body.appendChild(el('p', { class: 'modal-desc', text: 'Pulihkan proyek ke kondisi sebelumnya (5 checkpoint terakhir disimpan):' }));
+      checkpoints.forEach((cp) => {
+        body.appendChild(el('div', { class: 'history-item' }, [
+          el('div', { class: 'history-item-info' }, [
+            el('strong', { text: cp.label }),
+            el('span', {
+              class: 'history-item-meta',
+              text: formatRelativeTime(cp.at) + ' · ' + Object.keys(cp.files).length + ' file',
+            }),
+          ]),
+          el('button', {
+            class: 'btn btn-ghost btn-sm',
+            text: '↩ Pulihkan',
+            onclick: () => {
+              if (State.restoreCheckpoint(cp.id)) {
+                closeModal();
+                openProject(project.id);
+                showToast('Proyek dipulihkan ke: ' + cp.label, 'ok');
+              }
+            },
+          }),
+        ]));
+      });
+    }
+    showModal({ title: '🕰 Riwayat Versi', body, actions: [{ label: 'Tutup' }] });
+  }
+
+  // --- Prompt-to-app: dari ide di dashboard langsung jadi proyek + AI bekerja ---
+  function promptToApp() {
+    const input = $('#hero-prompt-input');
+    const idea = input.value.trim();
+    if (!idea) {
+      showToast('Tulis dulu ide aplikasimu ✍', 'warn');
+      input.focus();
+      return;
+    }
+    const words = idea.replace(/["'`]/g, '').split(/\s+/).slice(0, 5).join(' ');
+    const name = words.charAt(0).toUpperCase() + words.slice(1);
+    const project = State.createProject(name, getTemplate('blank').files);
+    input.value = '';
+    openProject(project.id);
+    AI.switchTab('ai');
+    AI.sendPrompt(idea, { autoApplyOnce: true });
+    showToast('Proyek dibuat — KARSA AI mulai membangun! 🚀', 'ok');
+  }
+
   // --- Modal bantuan shortcut ---
   function shortcutsDialog() {
     const rows = [
@@ -232,6 +290,13 @@ const App = (() => {
       e.target.value = '';
     });
     $('#dash-theme-toggle').addEventListener('click', toggleTheme);
+    $('#hero-prompt-send').addEventListener('click', promptToApp);
+    $('#hero-prompt-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        promptToApp();
+      }
+    });
 
     // IDE topbar
     $('#btn-home').addEventListener('click', showDashboard);
@@ -243,6 +308,8 @@ const App = (() => {
     $('#btn-open-tab').addEventListener('click', () => Preview.openInNewTab());
     $('#btn-share').addEventListener('click', shareProject);
     $('#btn-export').addEventListener('click', exportDialog);
+    $('#btn-history').addEventListener('click', historyDialog);
+    $('#btn-format').addEventListener('click', () => Editor.formatCurrentFile());
     $('#btn-fullscreen-preview').addEventListener('click', (e) => {
       e.stopPropagation();
       $('.ide-body').classList.toggle('preview-full');

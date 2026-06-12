@@ -14,6 +14,24 @@ function showToast(message, type) {
   }, 2800);
 }
 
+// Ledakan confetti kecil untuk momen sukses (mis. file AI diterapkan)
+function confettiBurst() {
+  const colors = ['#7c5cff', '#22d3ee', '#f43f5e', '#f59e0b', '#34d399'];
+  const root = el('div', { class: 'confetti-root' });
+  for (let i = 0; i < 28; i++) {
+    const piece = el('span', { class: 'confetti-piece' });
+    piece.style.background = colors[i % colors.length];
+    piece.style.left = (44 + Math.random() * 12) + '%';
+    piece.style.setProperty('--dx', ((Math.random() * 2 - 1) * 260).toFixed(0) + 'px');
+    piece.style.setProperty('--dy', (-(120 + Math.random() * 300)).toFixed(0) + 'px');
+    piece.style.setProperty('--rot', (Math.random() * 720 - 360).toFixed(0) + 'deg');
+    piece.style.animationDelay = (Math.random() * 0.12).toFixed(2) + 's';
+    root.appendChild(piece);
+  }
+  document.body.appendChild(root);
+  setTimeout(() => root.remove(), 1500);
+}
+
 function closeModal() {
   const overlay = $('.modal-overlay');
   if (overlay) overlay.remove();
