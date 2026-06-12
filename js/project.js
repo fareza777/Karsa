@@ -13,10 +13,9 @@ const PROJECT_TYPES = [
     id: 'mobile',
     icon: '📱',
     name: 'Mobile App',
-    desc: 'Aplikasi HP dengan Expo & React Native. Preview Snack — segera hadir.',
+    desc: 'Expo + React Native. Preview Snack di browser & export ke HP.',
     color: 'linear-gradient(135deg,#0ea5e9,#06b6d4)',
-    available: false,
-    badge: 'Segera',
+    available: true,
   },
   {
     id: 'playstore',
@@ -82,7 +81,8 @@ function previewHintForProject(project) {
     return {
       kind: 'expo',
       title: 'Proyek Expo / React Native',
-      body: 'Preview KARSA hanya menjalankan file web (index.html). Buat versi web untuk preview di sini, atau ekspor ZIP lalu jalankan dengan npx expo start di komputer.',
+      body: 'Aktifkan tab 📱 Mobile di atas preview untuk Expo Snack, atau buat versi web cepat lewat AI.',
+      showSnack: true,
     };
   }
   if (a.preview === 'mixed') {
@@ -104,6 +104,18 @@ function previewHintForProject(project) {
     body: 'Buat file index.html atau minta KARSA AI membuatkan preview web dari proyekmu.',
   };
 }
+
+const MOBILE_AI_PROMPT = [
+  'Kamu adalah KARSA AI untuk proyek MOBILE (Expo + React Native + TypeScript).',
+  'ATURAN FILE:',
+  '1. Tulis file UTUH dalam blok ```tsx file=App.tsx (atribut file= wajib). Path contoh: App.tsx, app.json, package.json, screens/Home.tsx.',
+  '2. Entry point: App.tsx. Gunakan komponen react-native (View, Text, StyleSheet, Pressable, ScrollView).',
+  '3. Jangan pakai HTML/CSS web. Jangan pakai div/span.',
+  '4. OPSIONAL tapi disarankan: buat juga preview/index.html + css + js sebagai prototipe web cepat (dual output).',
+  '5. package.json harus menyertakan expo, react, react-native. app.json valid untuk Expo SDK 52.',
+  '6. Jawab bahasa Indonesia. Hangat & kolaboratif. Tutup dengan 2-3 ide iterasi.',
+  '7. Mobile-first, aman di layar 360–412px lebar.',
+].join('\n');
 
 const WEB_PREVIEW_PROMPT =
   'Buatkan preview web untuk proyek ini: file index.html + css/style.css + js/app.js (mobile-first, muat frame HP). ' +

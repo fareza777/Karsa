@@ -191,10 +191,52 @@ const Preview = (() => {
   }
 
   let thumbTimer = null;
+  let previewEngine = 'auto';
+
+  function usesSnackEngine(project) {
+    const a = analyzeProjectFiles(project.files);
+    if (previewEngine === 'web') return false;
+    if (previewEngine === 'snack') return Snack.canPreview(project);
+    if (project.projectType === 'mobile' && a.expoLike) return Snack.canPreview(project);
+    if (a.expoLike && !a.hasHtml) return Snack.canPreview(project);
+    return false;
+  }
+
+  function setEngine(mode) {
+    previewEngine = mode;
+    updateEngineTabs();
+    const snackBtn = $('#btn-snack-tab');
+    const project = State.getCurrentProject();
+    if (snackBtn && project) {
+      snackBtn.classList.toggle('hidden', !analyzeProjectFiles(project.files).expoLike);
+    }
+  }
+
+  function updateEngineTabs() {
+    $$('.preview-engine-btn').forEach((btn) => {
+      const mode = btn.dataset.engine;
+      let active = false;
+      if (mode === previewEngine) active = true;
+      else if (previewEngine === 'auto') {
+        const project = State.getCurrentProject();
+        active = project && (mode === 'snack' ? usesSnackEngine(project) : !usesSnackEngine(project));
+      }
+      btn.classList.toggle('active', active);
+    });
+    const project = State.getCurrentProject();
+    const show = project && analyzeProjectFiles(project.files).expoLike;
+    const bar = $('#preview-engine-bar');
+    if (bar) bar.classList.toggle('hidden', !show);
+  }
 
   function updatePreviewHint(project) {
     const hint = $('#preview-hint');
     if (!hint) return;
+    if (usesSnackEngine(project)) {
+      hint.className = 'preview-hint hidden';
+      hint.innerHTML = '';
+      return;
+    }
     const data = previewHintForProject(project);
     if (!data) {
       hint.className = 'preview-hint hidden';
@@ -211,11 +253,25 @@ const Preview = (() => {
         onclick: () => { AI.switchTab('ai'); AI.requestWebPreview(); },
       }));
     }
+    if (data.showSnack || data.kind === 'expo' || data.kind === 'mixed') {
+      if (Snack.canPreview(project)) {
+        actions.appendChild(el('button', {
+          class: 'btn btn-primary btn-sm',
+          text: '📱 Preview Mobile',
+          onclick: () => { setEngine('snack'); refresh(); },
+        }));
+      }
+    }
     if (data.kind === 'expo' || data.kind === 'mixed') {
       actions.appendChild(el('button', {
         class: 'btn btn-ghost btn-sm',
         text: '⬇ Ekspor ZIP',
         onclick: () => App.exportZipCurrent(),
+      }));
+      actions.appendChild(el('button', {
+        class: 'btn btn-ghost btn-sm',
+        text: 'Expo Go ↗',
+        onclick: () => Snack.openExternal(project, 'mydevice'),
       }));
     }
     if (data.dismissKey) {
@@ -241,19 +297,33 @@ const Preview = (() => {
     if (!project) return;
     ConsolePanel.clear();
     const frame = $('#preview-frame');
-    frame.srcdoc = buildBundle(project);
+    const snackMode = usesSnackEngine(project);
+    updateEngineTabs();
+
+    if (snackMode) {
+      frame.removeAttribute('src');
+      frame.srcdoc = Snack.buildEmbedPage(project);
+    } else {
+      frame.removeAttribute('src');
+      frame.srcdoc = buildBundle(project);
+    }
     updatePreviewHint(project);
-    // Jadwalkan tangkapan thumbnail proyek setelah preview tenang
+    updatePhoneModelSelect();
+
     clearTimeout(thumbTimer);
-    thumbTimer = setTimeout(() => {
-      const current = State.getCurrentProject();
-      if (current && frame.contentWindow) {
-        frame.contentWindow.postMessage({ __karsa_shot: 'thumb' }, '*');
-      }
-    }, 2500);
+    if (!snackMode) {
+      thumbTimer = setTimeout(() => {
+        const current = State.getCurrentProject();
+        if (current && frame.contentWindow) {
+          frame.contentWindow.postMessage({ __karsa_shot: 'thumb' }, '*');
+        }
+      }, 2500);
+    }
     const urlLabel = $('#preview-url');
     const slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preview';
-    urlLabel.textContent = slug + '.karsa.app';
+    if (snackMode) urlLabel.textContent = 'snack.expo.dev · ' + slug;
+    else if (project.publish && project.publish.url) urlLabel.textContent = project.publish.url.replace(/^https?:\/\//, '');
+    else urlLabel.textContent = slug + '.karsa.app';
   }
 
   const refreshDebounced = debounce(() => {
@@ -270,17 +340,41 @@ const Preview = (() => {
   }
 
   // Dimensi viewport device (CSS px) + lebar bingkai ponsel
-  const DEVICE_DIMS = { phone: [412, 915, 12], tablet: [768, 1024, 0] };
+  const DEVICE_DIMS = {
+    phone: [412, 915, 12],
+    'phone-samsung': [360, 800, 10],
+    'phone-oppo': [393, 873, 10],
+    'phone-xiaomi': [393, 851, 10],
+    tablet: [768, 1024, 0],
+  };
   let currentDevice = 'desktop';
+
+  function isPhoneDevice(d) {
+    return d === 'phone' || (d && d.startsWith('phone-'));
+  }
 
   function setDevice(device) {
     currentDevice = device;
     const wrap = $('#preview-frame-wrap');
-    wrap.className = 'preview-frame-wrap device-' + device;
-    $$('.device-btn').forEach((btn) =>
-      btn.classList.toggle('active', btn.dataset.device === device)
-    );
+    const cls = DEVICE_DIMS[device] ? 'device-' + device : 'device-desktop';
+    wrap.className = 'preview-frame-wrap ' + cls;
+    $$('.device-btn').forEach((btn) => {
+      const d = btn.dataset.device;
+      btn.classList.toggle('active', d === 'phone' ? isPhoneDevice(device) : d === device);
+    });
+    const sel = $('#phone-model-select');
+    if (sel && isPhoneDevice(device)) {
+      sel.value = DEVICE_DIMS[device] ? device : 'phone';
+    }
     fitDevice();
+    updatePhoneModelSelect();
+  }
+
+  function updatePhoneModelSelect() {
+    const sel = $('#phone-model-select');
+    if (!sel) return;
+    const phoneActive = isPhoneDevice(currentDevice);
+    sel.classList.toggle('hidden', !phoneActive);
   }
 
   // Skalakan frame device agar selalu utuh terlihat di panel (ala DevTools)
@@ -289,7 +383,14 @@ const Preview = (() => {
     const stage = $('#preview-stage');
     const dims = DEVICE_DIMS[currentDevice];
     stage.classList.toggle('device-mode', !!dims);
-    if (!dims) { wrap.style.transform = ''; return; }
+    if (!dims) {
+      wrap.style.transform = '';
+      wrap.style.width = '';
+      wrap.style.height = '';
+      return;
+    }
+    wrap.style.width = dims[0] + 'px';
+    wrap.style.height = dims[1] + 'px';
     const rect = stage.getBoundingClientRect();
     const scale = Math.min(
       1,
@@ -377,5 +478,13 @@ const Preview = (() => {
     }
   });
 
-  return { refresh, refreshDebounced, openInNewTab, setDevice, buildBundle, runInPreview, screenshot, updatePreviewHint };
+  function openSnackTab() {
+    const project = State.getCurrentProject();
+    if (project) Snack.openExternal(project, 'mydevice');
+  }
+
+  return {
+    refresh, refreshDebounced, openInNewTab, setDevice, setEngine, buildBundle,
+    runInPreview, screenshot, updatePreviewHint, openSnackTab,
+  };
 })();

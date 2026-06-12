@@ -247,7 +247,8 @@
 .preview-head {
   display: flex;
   align-items: center;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
   padding: 7px 12px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
@@ -341,9 +342,10 @@
   overflow: hidden;
   flex: none;
 }
-.preview-frame-wrap.device-phone {
-  width: 412px;
-  height: 915px;
+.preview-frame-wrap.device-phone,
+.preview-frame-wrap.device-phone-samsung,
+.preview-frame-wrap.device-phone-oppo,
+.preview-frame-wrap.device-phone-xiaomi {
   margin: 10px auto auto;
   transform-origin: top center;
   border-radius: 26px;
@@ -351,6 +353,33 @@
   box-shadow: var(--shadow);
   overflow: hidden;
   flex: none;
+}
+.preview-engine-bar {
+  display: flex;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+}
+.preview-engine-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: .6;
+  transition: background var(--transition), opacity var(--transition);
+}
+.preview-engine-btn:hover { opacity: 1; }
+.preview-engine-btn.active { background: var(--bg-hover); opacity: 1; }
+.phone-model-select {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-3);
+  color: var(--text);
+  max-width: 110px;
 }
 #preview-frame {
   width: 100%;

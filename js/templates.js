@@ -974,8 +974,164 @@ LAYANAN.forEach((l) => {
 `,
     },
   },
+
+  {
+    id: 'expo-blank',
+    stack: 'mobile',
+    name: 'Expo Kosong',
+    desc: 'App.tsx minimal — mulai app HP dari nol.',
+    icon: '📱',
+    color: 'linear-gradient(135deg,#0ea5e9,#6366f1)',
+    files: {
+      'package.json': JSON.stringify({
+        name: 'karsa-mobile-app',
+        version: '1.0.0',
+        main: 'expo/AppEntry.js',
+        scripts: { start: 'expo start', android: 'expo start --android', ios: 'expo start --ios', web: 'expo start --web' },
+        dependencies: {
+          expo: '~52.0.0',
+          react: '18.3.1',
+          'react-native': '0.76.3',
+        },
+      }, null, 2),
+      'app.json': JSON.stringify({
+        expo: {
+          name: 'Aplikasi Mobile',
+          slug: 'karsa-mobile-app',
+          version: '1.0.0',
+          orientation: 'portrait',
+          userInterfaceStyle: 'light',
+          splash: { backgroundColor: '#6366f1' },
+          ios: { supportsTablet: true },
+          android: { adaptiveIcon: { backgroundColor: '#6366f1' } },
+        },
+      }, null, 2),
+      'App.tsx': `import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View } from 'react-native';
+
+export default function App() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Halo, Mobile! 👋</Text>
+      <Text style={styles.sub}>Edit App.tsx lalu lihat preview Snack.</Text>
+      <StatusBar style="auto" />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  title: { fontSize: 24, fontWeight: '800', color: '#0f172a', marginBottom: 8 },
+  sub: { fontSize: 15, color: '#64748b', textAlign: 'center' },
+});
+`,
+      'tsconfig.json': JSON.stringify({
+        extends: 'expo/tsconfig.base',
+        compilerOptions: { strict: true },
+      }, null, 2),
+    },
+  },
+
+  {
+    id: 'expo-todo',
+    stack: 'mobile',
+    name: 'Todo Mobile',
+    desc: 'Daftar tugas sederhana — Expo + React Native.',
+    icon: '✅',
+    color: 'linear-gradient(135deg,#22c55e,#0ea5e9)',
+    files: {
+      'package.json': JSON.stringify({
+        name: 'karsa-todo-mobile',
+        version: '1.0.0',
+        main: 'expo/AppEntry.js',
+        scripts: { start: 'expo start' },
+        dependencies: {
+          expo: '~52.0.0',
+          react: '18.3.1',
+          'react-native': '0.76.3',
+        },
+      }, null, 2),
+      'app.json': JSON.stringify({
+        expo: { name: 'Todo Mobile', slug: 'karsa-todo', version: '1.0.0', orientation: 'portrait' },
+      }, null, 2),
+      'App.tsx': `import { useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+
+type Item = { id: string; text: string; done: boolean };
+
+export default function App() {
+  const [items, setItems] = useState<Item[]>([
+    { id: '1', text: 'Belajar React Native', done: false },
+    { id: '2', text: 'Bikin app di KARSA', done: true },
+  ]);
+  const [input, setInput] = useState('');
+
+  const add = () => {
+    const t = input.trim();
+    if (!t) return;
+    setItems((prev) => [{ id: String(Date.now()), text: t, done: false }, ...prev]);
+    setInput('');
+  };
+
+  return (
+    <View style={styles.root}>
+      <Text style={styles.h1}>✅ Todo</Text>
+      <View style={styles.row}>
+        <TextInput
+          style={styles.input}
+          placeholder="Tugas baru…"
+          value={input}
+          onChangeText={setInput}
+          onSubmitEditing={add}
+        />
+        <Pressable style={styles.btn} onPress={add}><Text style={styles.btnText}>＋</Text></Pressable>
+      </View>
+      <FlatList
+        data={items}
+        keyExtractor={(it) => it.id}
+        renderItem={({ item }) => (
+          <Pressable
+            style={styles.item}
+            onPress={() => setItems((prev) => prev.map((x) => x.id === item.id ? { ...x, done: !x.done } : x))}
+          >
+            <Text style={[styles.itemText, item.done && styles.done]}>{item.done ? '☑' : '☐'} {item.text}</Text>
+          </Pressable>
+        )}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#f0fdf4', paddingTop: 56, paddingHorizontal: 16 },
+  h1: { fontSize: 22, fontWeight: '800', marginBottom: 12, color: '#14532d' },
+  row: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+  input: { flex: 1, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15 },
+  btn: { backgroundColor: '#22c55e', borderRadius: 12, width: 44, alignItems: 'center', justifyContent: 'center' },
+  btnText: { color: '#fff', fontSize: 22, fontWeight: '700' },
+  item: { backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 8 },
+  itemText: { fontSize: 15, color: '#166534' },
+  done: { textDecorationLine: 'line-through', opacity: 0.55 },
+});
+`,
+    },
+  },
 ];
 
 function getTemplate(id) {
   return TEMPLATES.find((t) => t.id === id) || TEMPLATES[0];
+}
+
+function getTemplatesForType(projectType) {
+  if (projectType === 'mobile') {
+    const mobile = TEMPLATES.filter((t) => t.stack === 'mobile');
+    return mobile.length ? mobile : TEMPLATES.filter((t) => t.id === 'expo-blank');
+  }
+  return TEMPLATES.filter((t) => t.stack !== 'mobile');
 }

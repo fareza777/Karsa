@@ -28,7 +28,13 @@ const App = (() => {
       ? 'index.html'
       : Object.keys(project.files)[0];
     if (entry) Tabs.open(entry);
+    const a = analyzeProjectFiles(project.files);
+    Preview.setEngine(
+      project.projectType === 'mobile' && a.expoLike ? 'snack' : 'auto'
+    );
     Preview.refresh();
+    const snackBtn = $('#btn-snack-tab');
+    if (snackBtn) snackBtn.classList.toggle('hidden', !a.expoLike);
   }
 
   // --- Tema ---
@@ -346,8 +352,22 @@ const App = (() => {
     });
 
     $$('.device-btn').forEach((btn) =>
-      btn.addEventListener('click', () => Preview.setDevice(btn.dataset.device))
+      btn.addEventListener('click', () => {
+        const d = btn.dataset.device;
+        Preview.setDevice(d === 'phone' ? 'phone' : d);
+      })
     );
+    const phoneSel = $('#phone-model-select');
+    if (phoneSel) {
+      phoneSel.addEventListener('change', () => Preview.setDevice(phoneSel.value));
+    }
+    $$('.preview-engine-btn').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        Preview.setEngine(btn.dataset.engine);
+        Preview.refresh();
+      })
+    );
+    $('#btn-snack-tab').addEventListener('click', () => Preview.openSnackTab());
 
     // Sidebar
     $('#btn-new-file').addEventListener('click', () => FileTree.newFilePrompt());

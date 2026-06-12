@@ -31,6 +31,12 @@ const AI = (() => {
     '12. Jika kamu model yang berpikir (reasoning), batasi penalaran internal seketat mungkin — beberapa kalimat saja — lalu langsung tulis jawaban dan file. Jangan menganalisis berlebihan.',
   ].join('\n');
 
+  function getSystemPrompt() {
+    const project = State.getCurrentProject();
+    if (project && project.projectType === 'mobile') return MOBILE_AI_PROMPT;
+    return SYSTEM_PROMPT;
+  }
+
   let settings = loadSettings();
   let historyByProject = loadHistory();
   let renderedProjectId = null;
@@ -449,7 +455,7 @@ const AI = (() => {
     }
 
     const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'system', content: getSystemPrompt() },
       { role: 'user', content: buildProjectContext() },
       ...compactHistoryForApi(history.slice(-MAX_HISTORY)),
     ];
@@ -732,7 +738,13 @@ const AI = (() => {
     sendPrompt(WEB_PREVIEW_PROMPT, { autoApplyOnce: true });
   }
 
-  return { init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview };
+  function requestSnackRefresh() {
+    Preview.setEngine('snack');
+    Preview.refresh();
+    showToast('Preview Mobile (Expo Snack) dimuat…', 'info');
+  }
+
+  return { init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh };
 })();
 
 document.addEventListener('DOMContentLoaded', AI.init);

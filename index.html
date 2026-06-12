@@ -188,10 +188,21 @@
       <section class="preview-pane">
         <div class="preview-head">
           <span class="preview-title">⚡ Live Preview</span>
+          <div id="preview-engine-bar" class="preview-engine-bar hidden" role="group" aria-label="Mesin preview">
+            <button type="button" class="preview-engine-btn" data-engine="web" title="Preview web HTML">🌐 Web</button>
+            <button type="button" class="preview-engine-btn" data-engine="snack" title="Preview Expo Snack">📱 Mobile</button>
+          </div>
+          <select id="phone-model-select" class="phone-model-select hidden" title="Model HP">
+            <option value="phone">HP umum</option>
+            <option value="phone-samsung">Samsung</option>
+            <option value="phone-oppo">OPPO</option>
+            <option value="phone-xiaomi">Xiaomi</option>
+          </select>
           <span id="preview-url" class="preview-url">karsa.app/preview</span>
           <button id="btn-shot-full" class="icon-btn-sm" title="Screenshot satu layar preview">📸</button>
           <button id="btn-shot-region" class="icon-btn-sm" title="Screenshot area tertentu (seret untuk memilih)">✂️</button>
           <button id="btn-fullscreen-preview" class="icon-btn-sm" title="Preview layar penuh">⛶</button>
+          <button id="btn-snack-tab" class="icon-btn-sm hidden" title="Buka di Expo Snack / Expo Go">📲</button>
           <button id="btn-refresh-preview" class="icon-btn-sm" title="Muat ulang preview">⟳</button>
         </div>
         <div class="preview-stage" id="preview-stage">
@@ -256,6 +267,7 @@
   <script src="js/state.js"></script>
   <script src="js/components.js"></script>
   <script src="js/console.js"></script>
+  <script src="js/snack.js"></script>
   <script src="js/preview.js"></script>
   <script src="js/editor.js"></script>
   <script src="js/tabs.js"></script>

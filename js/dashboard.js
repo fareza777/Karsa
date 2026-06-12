@@ -250,9 +250,11 @@ const Dashboard = (() => {
               return;
             }
             selectedType = pt.id;
+            if (selectedType === 'mobile') selectedId = 'expo-blank';
+            else if (selectedId.startsWith('expo-')) selectedId = 'blank';
             renderTypeChoices();
             renderTemplateChoices();
-            templateField.classList.toggle('hidden', selectedType !== 'web');
+            templateField.classList.remove('hidden');
           },
         }, [
           el('div', { class: 'project-type-icon', text: pt.icon, style: 'background:' + pt.color }),
@@ -266,7 +268,7 @@ const Dashboard = (() => {
 
     const renderTemplateChoices = () => {
       grid.innerHTML = '';
-      TEMPLATES.forEach((tpl) => {
+      getTemplatesForType(selectedType).forEach((tpl) => {
         grid.appendChild(el('button', {
           type: 'button',
           class: 'template-card' + (tpl.id === selectedId ? ' selected' : ''),
@@ -281,7 +283,6 @@ const Dashboard = (() => {
 
     renderTypeChoices();
     renderTemplateChoices();
-    templateField.classList.toggle('hidden', selectedType !== 'web');
     templateField.appendChild(el('label', { text: 'Pilih template' }));
     templateField.appendChild(grid);
 
@@ -296,10 +297,16 @@ const Dashboard = (() => {
         showToast(pt.name + ' — segera hadir!', 'info');
         return true;
       }
-      const tpl = getTemplate(selectedId);
+      const tplId = selectedType === 'mobile' && selectedId === 'blank' ? 'expo-blank' : selectedId;
+      const tpl = getTemplate(tplId);
       const project = State.createProject(name, tpl.files, { projectType: selectedType });
       App.openProject(project.id);
-      showToast('Proyek "' + name + '" siap! Selamat berkarya 🎉', 'ok');
+      if (selectedType === 'mobile') {
+        AI.switchTab('ai');
+        showToast('Proyek mobile siap — coba tab 📱 Mobile di preview! 🎉', 'ok');
+      } else {
+        showToast('Proyek "' + name + '" siap! Selamat berkarya 🎉', 'ok');
+      }
     };
 
     nameInput.addEventListener('keydown', (e) => {
