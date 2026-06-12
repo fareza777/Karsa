@@ -409,6 +409,8 @@ const App = (() => {
       const proBtn = $('#dash-pro-btn');
       if (proBtn) proBtn.classList.toggle('active', Plan.isPro());
     });
+    Auth.bindTriggers();
+    Auth.init();
 
     ConsolePanel.init();
     Editor.init();

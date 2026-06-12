@@ -8,6 +8,9 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'GET saja.' });
     return;
   }
+  const supabaseUrl = process.env.SUPABASE_URL || null;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || null;
+
   res.status(200).json({
     publishHost: publishHost() || null,
     cnameTarget: cnameTarget(),
@@ -15,5 +18,8 @@ export default async function handler(req, res) {
     subdomainExample: publishHost() ? 'namabisnis.' + publishHost() : null,
     freeAiDaily: Number(process.env.KARSA_FREE_AI_DAILY) || 30,
     proAvailable: !!process.env.KARSA_PRO_TOKEN,
+    supabaseUrl,
+    supabaseAnonKey,
+    authEnabled: !!(supabaseUrl && supabaseAnonKey),
   });
 }
