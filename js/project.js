@@ -21,10 +21,9 @@ const PROJECT_TYPES = [
     id: 'playstore',
     icon: '🏪',
     name: 'Play Store',
-    desc: 'Siap listing Google Play. Checklist & build AAB — segera hadir.',
+    desc: 'Expo + checklist siap listing Google Play & build AAB.',
     color: 'linear-gradient(135deg,#22c55e,#14b8a6)',
-    available: false,
-    badge: 'Segera',
+    available: true,
   },
 ];
 

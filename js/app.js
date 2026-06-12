@@ -29,12 +29,13 @@ const App = (() => {
       : Object.keys(project.files)[0];
     if (entry) Tabs.open(entry);
     const a = analyzeProjectFiles(project.files);
-    Preview.setEngine(
-      project.projectType === 'mobile' && a.expoLike ? 'snack' : 'auto'
-    );
+    const isMobileLike = project.projectType === 'mobile' || project.projectType === 'playstore';
+    Preview.setEngine(isMobileLike && a.expoLike ? 'snack' : 'auto');
     Preview.refresh();
     const snackBtn = $('#btn-snack-tab');
     if (snackBtn) snackBtn.classList.toggle('hidden', !a.expoLike);
+    const playBtn = $('#btn-playstore');
+    if (playBtn) playBtn.classList.toggle('hidden', !PlayStore.shouldShowButton(project));
   }
 
   // --- Tema ---
@@ -97,6 +98,10 @@ const App = (() => {
     }
     if (a.expoLike && !project.files['CARA-JALANKAN-EXPO.md']) {
       zip.file('CARA-JALANKAN-EXPO.md', CARA_EXPO_MD);
+    }
+    if (a.expoLike && (project.projectType === 'playstore' || project.files['eas.json']) &&
+        !project.files['CARA-PLAY-STORE.md']) {
+      zip.file('CARA-PLAY-STORE.md', CARA_PLAY_STORE_MD);
     }
     zip.generateAsync({ type: 'blob' })
       .then((blob) => {
@@ -327,6 +332,7 @@ const App = (() => {
     $('#btn-open-tab').addEventListener('click', () => Preview.openInNewTab());
     $('#btn-share').addEventListener('click', shareProject);
     $('#btn-publish').addEventListener('click', () => Publish.openDialog());
+    $('#btn-playstore').addEventListener('click', () => PlayStore.openChecklist());
     $('#btn-export').addEventListener('click', exportDialog);
     $('#btn-history').addEventListener('click', historyDialog);
     $('#btn-format').addEventListener('click', () => Editor.formatCurrentFile());

@@ -34,6 +34,9 @@ const Dashboard = (() => {
               project.publish && project.publish.url
                 ? el('span', { class: 'project-tag live', text: '🟢 Live' })
                 : null,
+              project.projectType === 'playstore'
+                ? el('span', { class: 'project-tag playstore', text: '🏪 Play' })
+                : null,
               (() => {
                 const a = analyzeProjectFiles(project.files);
                 if (a.expoLike) return el('span', { class: 'project-tag', text: 'Expo' });
@@ -75,6 +78,12 @@ const Dashboard = (() => {
       } },
       { label: 'Ekspor (.json)', icon: '⬇️', onClick: () => exportProjectJson(project) },
     ];
+    if (PlayStore.shouldShowButton(project)) {
+      menu.push({
+        label: 'Checklist Play Store', icon: '🏪',
+        onClick: () => { App.openProject(project.id); PlayStore.openChecklist(); },
+      });
+    }
     if (project.publish && project.publish.url) {
       menu.splice(1, 0, {
         label: 'Buka situs live', icon: '🌐',
@@ -251,6 +260,7 @@ const Dashboard = (() => {
             }
             selectedType = pt.id;
             if (selectedType === 'mobile') selectedId = 'expo-blank';
+            else if (selectedType === 'playstore') selectedId = 'expo-playstore';
             else if (selectedId.startsWith('expo-')) selectedId = 'blank';
             renderTypeChoices();
             renderTemplateChoices();
@@ -297,13 +307,17 @@ const Dashboard = (() => {
         showToast(pt.name + ' — segera hadir!', 'info');
         return true;
       }
-      const tplId = selectedType === 'mobile' && selectedId === 'blank' ? 'expo-blank' : selectedId;
+      let tplId = selectedId;
+      if (selectedType === 'mobile' && selectedId === 'blank') tplId = 'expo-blank';
+      if (selectedType === 'playstore' && (selectedId === 'blank' || !selectedId.startsWith('expo'))) tplId = 'expo-playstore';
       const tpl = getTemplate(tplId);
       const project = State.createProject(name, tpl.files, { projectType: selectedType });
       App.openProject(project.id);
       if (selectedType === 'mobile') {
         AI.switchTab('ai');
         showToast('Proyek mobile siap — coba tab 📱 Mobile di preview! 🎉', 'ok');
+      } else if (selectedType === 'playstore') {
+        showToast('Proyek Play Store siap — cek checklist 🏪 di kanan atas.', 'ok');
       } else {
         showToast('Proyek "' + name + '" siap! Selamat berkarya 🎉', 'ok');
       }

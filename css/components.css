@@ -204,6 +204,60 @@
   margin-top: 6px;
   word-break: break-all;
 }
+.playstore-score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.playstore-score { font-size: 18px; font-weight: 800; color: var(--accent); }
+.playstore-progress {
+  height: 8px;
+  background: var(--bg-3);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.playstore-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #14b8a6);
+  border-radius: 999px;
+  transition: width .35s ease;
+}
+.playstore-checklist {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.playstore-check-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+}
+.playstore-check-item.ok { border-color: rgba(34, 197, 94, .35); }
+.playstore-check-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  background: var(--bg-2);
+  flex-shrink: 0;
+}
+.playstore-check-item.ok .playstore-check-mark { background: rgba(34, 197, 94, .2); color: #22c55e; }
+.playstore-check-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
+.playstore-check-hint { font-size: 11px; color: var(--muted); display: block; }
+.playstore-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
 .publish-live-url {
   width: 100%;
   padding: 10px 12px;

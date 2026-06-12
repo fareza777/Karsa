@@ -1039,6 +1039,68 @@ const styles = StyleSheet.create({
   },
 
   {
+    id: 'expo-playstore',
+    stack: 'playstore',
+    name: 'Play Store Ready',
+    desc: 'Expo + eas.json + app.json siap listing Android.',
+    icon: '🏪',
+    color: 'linear-gradient(135deg,#22c55e,#6366f1)',
+    files: {
+      'package.json': JSON.stringify({
+        name: 'karsa-playstore-app',
+        version: '1.0.0',
+        main: 'expo/AppEntry.js',
+        scripts: { start: 'expo start', android: 'expo run:android' },
+        dependencies: { expo: '~52.0.0', react: '18.3.1', 'react-native': '0.76.3' },
+      }, null, 2),
+      'app.json': JSON.stringify({
+        expo: {
+          name: 'Aplikasi Play Store',
+          slug: 'karsa-playstore-app',
+          version: '1.0.0',
+          orientation: 'portrait',
+          icon: './assets/icon.png',
+          userInterfaceStyle: 'light',
+          splash: { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#6366f1' },
+          android: {
+            package: 'com.karsa.playstoreapp',
+            versionCode: 1,
+            adaptiveIcon: { foregroundImage: './assets/adaptive-icon.png', backgroundColor: '#6366f1' },
+          },
+        },
+      }, null, 2),
+      'eas.json': JSON.stringify({
+        cli: { version: '>= 12.0.0' },
+        build: { production: { android: { buildType: 'app-bundle' } } },
+        submit: { production: {} },
+      }, null, 2),
+      'App.tsx': `import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View } from 'react-native';
+
+export default function App() {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.emoji}>🏪</Text>
+      <Text style={styles.title}>Siap Play Store</Text>
+      <Text style={styles.sub}>Edit app ini, lalu buka checklist 🏪 di KARSA.</Text>
+      <StatusBar style="auto" />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: '#ecfdf5', alignItems: 'center', justifyContent: 'center', padding: 24 },
+  emoji: { fontSize: 48, marginBottom: 12 },
+  title: { fontSize: 22, fontWeight: '800', color: '#14532d' },
+  sub: { fontSize: 14, color: '#64748b', textAlign: 'center', marginTop: 8 },
+});
+`,
+      'assets/README-assets.txt': 'Tambahkan icon.png, adaptive-icon.png, splash.png sebelum upload ke Play Store.',
+      'CARA-PLAY-STORE.md': '# Lihat panduan lengkap — diekspor otomatis dari KARSA saat checklist Play Store.',
+    },
+  },
+
+  {
     id: 'expo-todo',
     stack: 'mobile',
     name: 'Todo Mobile',
@@ -1129,9 +1191,12 @@ function getTemplate(id) {
 }
 
 function getTemplatesForType(projectType) {
+  if (projectType === 'playstore') {
+    return TEMPLATES.filter((t) => t.stack === 'playstore' || t.id === 'expo-playstore');
+  }
   if (projectType === 'mobile') {
     const mobile = TEMPLATES.filter((t) => t.stack === 'mobile');
     return mobile.length ? mobile : TEMPLATES.filter((t) => t.id === 'expo-blank');
   }
-  return TEMPLATES.filter((t) => t.stack !== 'mobile');
+  return TEMPLATES.filter((t) => t.stack !== 'mobile' && t.stack !== 'playstore');
 }

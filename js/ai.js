@@ -33,6 +33,9 @@ const AI = (() => {
 
   function getSystemPrompt() {
     const project = State.getCurrentProject();
+    if (project && project.projectType === 'playstore') {
+      return MOBILE_AI_PROMPT + '\n\nFOKUS PLAY STORE: pastikan app.json punya android.package unik, version, versionCode, icon, splash, adaptiveIcon. Sertakan eas.json.';
+    }
     if (project && project.projectType === 'mobile') return MOBILE_AI_PROMPT;
     return SYSTEM_PROMPT;
   }

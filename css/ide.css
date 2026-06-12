@@ -64,6 +64,18 @@
   transition: filter var(--transition), transform var(--transition);
 }
 .btn-publish:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-playstore {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-playstore:hover { filter: brightness(1.08); }
 
 /* --- Layout utama --- */
 .ide-body {
