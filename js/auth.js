@@ -57,6 +57,11 @@ const Auth = (() => {
     });
     const { data } = await client.auth.getSession();
     user = data.session?.user || null;
+    if (user && typeof CloudSync !== 'undefined') {
+      CloudSync.pullAndMerge().then((merged) => {
+        if (merged && typeof Dashboard !== 'undefined') Dashboard.render();
+      });
+    }
     client.auth.onAuthStateChange(async (event, session) => {
       user = session?.user || null;
       updateUI();
