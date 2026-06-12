@@ -165,12 +165,25 @@ const AI = (() => {
   }
 
   // --- Konteks proyek untuk AI ---
+  // Ringkas riwayat agar tidak melewati batas 200k karakter di server
+  function compactHistoryForApi(history) {
+    return history.map((msg) => {
+      if (msg.role !== 'assistant' || typeof msg.content !== 'string') return msg;
+      let text = msg.content;
+      if (text.length > 2500) {
+        text = text.replace(/```[\w]*\s+file=[^\n]+\n[\s\S]*?```/g, '[…blok file di ringkas…]');
+      }
+      if (text.length > 4000) text = text.slice(0, 4000) + '\n[…pesan dipotong…]';
+      return { role: msg.role, content: text };
+    });
+  }
+
   function buildProjectContext() {
     const project = State.getCurrentProject();
     if (!project) return 'Belum ada proyek terbuka.';
     let context = 'FILE PROYEK "' + project.name + '" SAAT INI:\n';
     let total = 0;
-    Object.keys(project.files).sort().forEach((path) => {
+    sortedProjectPaths(project.files).forEach((path) => {
       let content = project.files[path];
       if (content.length > MAX_FILE_CHARS) {
         content = content.slice(0, MAX_FILE_CHARS) + '\n/* …dipotong, file terlalu panjang… */';
@@ -438,7 +451,7 @@ const AI = (() => {
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: buildProjectContext() },
-      ...history.slice(-MAX_HISTORY),
+      ...compactHistoryForApi(history.slice(-MAX_HISTORY)),
     ];
     // Pesan terakhir diganti versi lengkap untuk API (isi file lampiran + gambar)
     messages[messages.length - 1] = {
@@ -715,7 +728,11 @@ const AI = (() => {
     send();
   }
 
-  return { init, switchTab, attachImageDataUrl, sendPrompt };
+  function requestWebPreview() {
+    sendPrompt(WEB_PREVIEW_PROMPT, { autoApplyOnce: true });
+  }
+
+  return { init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview };
 })();
 
 document.addEventListener('DOMContentLoaded', AI.init);

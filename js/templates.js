@@ -791,6 +791,189 @@ console.log('Dashboard dimuat dengan', METRIK.length, 'metrik');
 `,
     },
   },
+
+  {
+    id: 'umkm-katalog',
+    name: 'Katalog UMKM',
+    desc: 'Daftar produk warung/toko online — mobile-first.',
+    icon: '🛒',
+    color: 'linear-gradient(135deg,#f59e0b,#ef4444)',
+    files: {
+      'index.html': `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Katalog Toko</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>🛒 Warung Makmur</h1>
+    <p>Katalog produk — pesan via WhatsApp</p>
+  </header>
+  <div class="search-wrap">
+    <input type="search" id="search" placeholder="Cari produk…" aria-label="Cari produk">
+  </div>
+  <main id="grid" class="grid"></main>
+  <a id="wa" class="fab" href="#" target="_blank" rel="noopener">💬 Pesan</a>
+  <script src="js/app.js"></script>
+</body>
+</html>
+`,
+      'css/style.css': `* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: system-ui, sans-serif;
+  background: #fafafa; color: #1a1a1a;
+  min-height: 100dvh; padding-bottom: 72px;
+}
+.top { background: linear-gradient(135deg,#f59e0b,#ef4444); color: #fff; padding: 20px 16px; }
+.top h1 { font-size: 20px; }
+.top p { font-size: 13px; opacity: .9; margin-top: 4px; }
+.search-wrap { padding: 12px 16px; }
+.search-wrap input {
+  width: 100%; padding: 12px 14px; border: 1px solid #e5e5e5;
+  border-radius: 12px; font-size: 15px;
+}
+.grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+  padding: 0 16px 16px;
+}
+.card {
+  background: #fff; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.card .img {
+  height: 100px; display: grid; place-content: center;
+  font-size: 36px; background: #fff7ed;
+}
+.card .info { padding: 10px 12px; }
+.card h3 { font-size: 14px; margin-bottom: 4px; }
+.card .price { font-weight: 800; color: #ea580c; font-size: 14px; }
+.fab {
+  position: fixed; bottom: 16px; right: 16px;
+  background: #22c55e; color: #fff; text-decoration: none;
+  padding: 14px 20px; border-radius: 999px; font-weight: 700;
+  box-shadow: 0 4px 16px rgba(34,197,94,.4);
+}
+`,
+      'js/app.js': `const PRODUK = [
+  { nama: 'Beras 5kg', harga: 'Rp 68.000', emoji: '🍚' },
+  { nama: 'Minyak 1L', harga: 'Rp 18.500', emoji: '🫒' },
+  { nama: 'Gula 1kg', harga: 'Rp 15.000', emoji: '🧂' },
+  { nama: 'Telur 1kg', harga: 'Rp 28.000', emoji: '🥚' },
+  { nama: 'Indomie goreng', harga: 'Rp 3.500', emoji: '🍜' },
+  { nama: 'Kopi sachet', harga: 'Rp 2.000', emoji: '☕' },
+];
+const grid = document.getElementById('grid');
+const search = document.getElementById('search');
+document.getElementById('wa').href = 'https://wa.me/6281234567890?text=' + encodeURIComponent('Halo, mau pesan dari katalog');
+
+function render(list) {
+  grid.innerHTML = '';
+  list.forEach((p) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="img">' + p.emoji + '</div>' +
+      '<div class="info"><h3>' + p.nama + '</h3><div class="price">' + p.harga + '</div></div>';
+    card.onclick = () => console.log('Klik:', p.nama);
+    grid.appendChild(card);
+  });
+}
+search.addEventListener('input', () => {
+  const q = search.value.toLowerCase();
+  render(PRODUK.filter((p) => p.nama.toLowerCase().includes(q)));
+});
+render(PRODUK);
+`,
+    },
+  },
+
+  {
+    id: 'umkm-landing',
+    name: 'Landing UMKM',
+    desc: 'Halaman promosi bisnis kecil — layanan & kontak.',
+    icon: '🏪',
+    color: 'linear-gradient(135deg,#8b5cf6,#ec4899)',
+    files: {
+      'index.html': `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bisnis Kita</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <section class="hero">
+    <span class="badge">UMKM Lokal</span>
+    <h1>Jahit & Alter<br><em>Presisi & Cepat</em></h1>
+    <p>Layanan jahit baju, celana, dan alter — selesai 1–3 hari.</p>
+    <a class="cta" href="#kontak">Hubungi Kami</a>
+  </section>
+  <section class="layanan">
+    <h2>Layanan</h2>
+    <div class="cards" id="cards"></div>
+  </section>
+  <section class="kontak" id="kontak">
+    <h2>Kontak</h2>
+    <p>📍 Jl. Merdeka No. 12, Jakarta</p>
+    <p>📱 <a href="tel:+6281234567890">0812-3456-7890</a></p>
+    <a class="cta wa" href="https://wa.me/6281234567890">WhatsApp</a>
+  </section>
+  <script src="js/app.js"></script>
+</body>
+</html>
+`,
+      'css/style.css': `* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; color: #1e1b4b; background: #faf5ff; }
+.hero {
+  min-height: 55dvh; padding: 48px 24px;
+  background: linear-gradient(160deg,#ede9fe,#fce7f3);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 999px; background: #fff;
+  margin-bottom: 12px; width: fit-content;
+}
+.hero h1 { font-size: clamp(28px, 8vw, 40px); line-height: 1.15; }
+.hero h1 em { font-style: normal; color: #7c3aed; }
+.hero p { margin: 12px 0 20px; color: #6b7280; max-width: 320px; }
+.cta {
+  display: inline-block; background: #7c3aed; color: #fff;
+  text-decoration: none; padding: 14px 24px; border-radius: 12px;
+  font-weight: 700; width: fit-content;
+}
+.layanan, .kontak { padding: 32px 24px; }
+h2 { font-size: 18px; margin-bottom: 16px; }
+.cards { display: flex; flex-direction: column; gap: 12px; }
+.svc {
+  background: #fff; padding: 16px; border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+}
+.svc strong { display: block; margin-bottom: 4px; }
+.svc span { font-size: 13px; color: #6b7280; }
+.kontak p { margin-bottom: 8px; }
+.kontak a { color: #7c3aed; }
+.wa { margin-top: 12px; background: #22c55e; }
+`,
+      'js/app.js': `const LAYANAN = [
+  { judul: 'Jahit Baju Baru', desc: 'Dari pola custom — mulai Rp 150rb' },
+  { judul: 'Alter Celana', desc: 'Pendek/panjang — mulai Rp 25rb' },
+  { judul: 'Permak Kemeja', desc: 'Lengan & badan — mulai Rp 40rb' },
+];
+const cards = document.getElementById('cards');
+LAYANAN.forEach((l) => {
+  const el = document.createElement('div');
+  el.className = 'svc';
+  el.innerHTML = '<strong>' + l.judul + '</strong><span>' + l.desc + '</span>';
+  cards.appendChild(el);
+});
+`,
+    },
+  },
 ];
 
 function getTemplate(id) {

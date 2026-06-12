@@ -22,10 +22,12 @@ const State = (() => {
     return settings;
   }
 
-  function createProject(name, files) {
+  function createProject(name, files, opts) {
+    opts = opts || {};
     const project = {
       id: uid(),
       name: name || 'Proyek Tanpa Nama',
+      projectType: opts.projectType || 'web',
       files: { ...files },
       folders: [],
       createdAt: Date.now(),
@@ -52,7 +54,8 @@ const State = (() => {
   function duplicateProject(id) {
     const source = projects.find((p) => p.id === id);
     if (!source) return null;
-    return createProject(source.name + ' (salinan)', source.files);
+    const copy = createProject(source.name + ' (salinan)', source.files, { projectType: source.projectType || 'web' });
+    return copy;
   }
 
   // --- Operasi file dalam proyek aktif ---

@@ -31,6 +31,14 @@ const Dashboard = (() => {
             el('h3', { text: project.name }),
             el('div', { class: 'project-meta' }, [
               el('span', { text: fileCount + ' file' }),
+              (() => {
+                const a = analyzeProjectFiles(project.files);
+                if (a.expoLike) return el('span', { class: 'project-tag', text: 'Expo' });
+                if ((project.projectType || 'web') !== 'web') {
+                  return el('span', { class: 'project-tag', text: getProjectType(project.projectType).name });
+                }
+                return null;
+              })(),
               el('span', { text: formatRelativeTime(project.updatedAt) }),
             ]),
           ]),
@@ -94,7 +102,10 @@ const Dashboard = (() => {
   }
 
   function exportProjectJson(project) {
-    const data = JSON.stringify({ karsa: 1, name: project.name, files: project.files, folders: project.folders || [] }, null, 2);
+    const data = JSON.stringify({
+      karsa: 1, name: project.name, projectType: project.projectType || 'web',
+      files: project.files, folders: project.folders || [],
+    }, null, 2);
     const slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'proyek';
     downloadBlob(new Blob([data], { type: 'application/json' }), slug + '.karsa.json');
     showToast('Proyek diekspor sebagai JSON.', 'ok');
@@ -109,7 +120,9 @@ const Dashboard = (() => {
           showToast('File bukan ekspor proyek KARSA yang valid.', 'error');
           return;
         }
-        const project = State.createProject(data.name || 'Proyek Impor', data.files);
+        const project = State.createProject(data.name || 'Proyek Impor', data.files, {
+          projectType: data.projectType || 'web',
+        });
         if (Array.isArray(data.folders)) State.updateProject(project.id, { folders: data.folders });
         render();
         showToast('Proyek "' + project.name + '" berhasil diimpor!', 'ok');
@@ -175,13 +188,15 @@ const Dashboard = (() => {
     )).then((entries) => {
       const filesMap = {};
       entries.forEach(([path, content]) => { filesMap[path] = content; });
-      const project = State.createProject(rootName, filesMap);
+      const detected = analyzeProjectFiles(filesMap);
+      const project = State.createProject(rootName, filesMap, { projectType: 'web' });
       render();
-      showToast(
-        'Folder "' + rootName + '" diimpor: ' + entries.length + ' file' +
-        (skipped ? ' (' + skipped + ' file non-teks/besar dilewati)' : '') + '. 🎉',
-        'ok'
-      );
+      let msg = 'Folder "' + rootName + '" diimpor: ' + entries.length + ' file';
+      if (skipped) msg += ' (' + skipped + ' dilewati)';
+      if (detected.expoLike && !detected.hasHtml) {
+        msg += '. Proyek Expo — buat preview web lewat AI atau ekspor ZIP untuk npx expo start.';
+      }
+      showToast(msg + ' 🎉', 'ok');
       App.openProject(project.id);
     }).catch(() => showToast('Gagal membaca beberapa file dari folder.', 'error'));
   }
@@ -201,20 +216,50 @@ const Dashboard = (() => {
     });
   }
 
-  // Dialog proyek baru: pilih nama + template
-  function newProjectDialog(preselectedId) {
+  // Dialog proyek baru: jenis proyek → nama + template
+  function newProjectDialog(preselectedId, preselectedType) {
+    let selectedType = preselectedType || 'web';
     let selectedId = preselectedId || 'blank';
 
     const nameInput = el('input', { type: 'text', placeholder: 'contoh: Aplikasi Impianku' });
     const errorMsg = el('div', { class: 'field-error' });
+    const typeGrid = el('div', { class: 'project-type-grid' });
+    const templateField = el('div', { class: 'field' });
     const grid = el('div', { class: 'template-grid' });
 
-    const renderChoices = () => {
+    const renderTypeChoices = () => {
+      typeGrid.innerHTML = '';
+      PROJECT_TYPES.forEach((pt) => {
+        typeGrid.appendChild(el('button', {
+          type: 'button',
+          class: 'project-type-card' + (pt.id === selectedType ? ' selected' : '') + (pt.available ? '' : ' disabled'),
+          onclick: () => {
+            if (!pt.available) {
+              showToast(pt.name + ' — segera hadir di update berikutnya! 🚀', 'info');
+              return;
+            }
+            selectedType = pt.id;
+            renderTypeChoices();
+            renderTemplateChoices();
+            templateField.classList.toggle('hidden', selectedType !== 'web');
+          },
+        }, [
+          el('div', { class: 'project-type-icon', text: pt.icon, style: 'background:' + pt.color }),
+          el('div', { class: 'project-type-text' }, [
+            el('h3', { html: pt.name + (pt.badge ? ' <span class="project-type-badge">' + pt.badge + '</span>' : '') }),
+            el('p', { text: pt.desc }),
+          ]),
+        ]));
+      });
+    };
+
+    const renderTemplateChoices = () => {
       grid.innerHTML = '';
       TEMPLATES.forEach((tpl) => {
         grid.appendChild(el('button', {
+          type: 'button',
           class: 'template-card' + (tpl.id === selectedId ? ' selected' : ''),
-          onclick: () => { selectedId = tpl.id; renderChoices(); },
+          onclick: () => { selectedId = tpl.id; renderTemplateChoices(); },
         }, [
           el('div', { class: 'template-icon', text: tpl.icon, style: 'background:' + tpl.color }),
           el('h3', { text: tpl.name }),
@@ -222,7 +267,12 @@ const Dashboard = (() => {
         ]));
       });
     };
-    renderChoices();
+
+    renderTypeChoices();
+    renderTemplateChoices();
+    templateField.classList.toggle('hidden', selectedType !== 'web');
+    templateField.appendChild(el('label', { text: 'Pilih template' }));
+    templateField.appendChild(grid);
 
     const create = () => {
       const name = nameInput.value.trim();
@@ -230,8 +280,13 @@ const Dashboard = (() => {
         errorMsg.textContent = 'Beri nama proyekmu dulu, ya.';
         return true;
       }
+      const pt = getProjectType(selectedType);
+      if (!pt.available) {
+        showToast(pt.name + ' — segera hadir!', 'info');
+        return true;
+      }
       const tpl = getTemplate(selectedId);
-      const project = State.createProject(name, tpl.files);
+      const project = State.createProject(name, tpl.files, { projectType: selectedType });
       App.openProject(project.id);
       showToast('Proyek "' + name + '" siap! Selamat berkarya 🎉', 'ok');
     };
@@ -245,12 +300,15 @@ const Dashboard = (() => {
       wide: true,
       body: el('div', {}, [
         el('div', { class: 'field' }, [
+          el('label', { text: 'Jenis proyek' }),
+          typeGrid,
+        ]),
+        el('div', { class: 'field' }, [
           el('label', { text: 'Nama proyek' }),
           nameInput,
           errorMsg,
         ]),
-        el('label', { class: 'field', text: '' }),
-        el('div', { class: 'field' }, [el('label', { text: 'Pilih template' }), grid]),
+        templateField,
       ]),
       actions: [
         { label: 'Batal' },

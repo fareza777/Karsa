@@ -85,6 +85,13 @@ const App = (() => {
     }
     const zip = new JSZip();
     Object.keys(project.files).forEach((path) => zip.file(path, project.files[path]));
+    const a = analyzeProjectFiles(project.files);
+    if (a.hasHtml && !project.files['CARA-HOSTING.md']) {
+      zip.file('CARA-HOSTING.md', CARA_HOSTING_MD);
+    }
+    if (a.expoLike && !project.files['CARA-JALANKAN-EXPO.md']) {
+      zip.file('CARA-JALANKAN-EXPO.md', CARA_EXPO_MD);
+    }
     zip.generateAsync({ type: 'blob' })
       .then((blob) => {
         downloadBlob(blob, slugify(project.name) + '.zip');
@@ -99,11 +106,16 @@ const App = (() => {
     showToast('HTML mandiri berhasil diunduh!', 'ok');
   }
 
+  function exportZipCurrent() {
+    const project = State.getCurrentProject();
+    if (project) exportZip(project);
+  }
+
   function exportJson(project) {
-    const data = JSON.stringify(
-      { karsa: 1, name: project.name, files: project.files, folders: project.folders || [] },
-      null, 2
-    );
+    const data = JSON.stringify({
+      karsa: 1, name: project.name, projectType: project.projectType || 'web',
+      files: project.files, folders: project.folders || [],
+    }, null, 2);
     downloadBlob(new Blob([data], { type: 'application/json' }), slugify(project.name) + '.karsa.json');
     showToast('JSON berhasil diunduh!', 'ok');
   }
@@ -210,7 +222,7 @@ const App = (() => {
     }
     const words = idea.replace(/["'`]/g, '').split(/\s+/).slice(0, 5).join(' ');
     const name = words.charAt(0).toUpperCase() + words.slice(1);
-    const project = State.createProject(name, getTemplate('blank').files);
+    const project = State.createProject(name, getTemplate('blank').files, { projectType: 'web' });
     input.value = '';
     openProject(project.id);
     AI.switchTab('ai');
@@ -371,7 +383,7 @@ const App = (() => {
     importFromHash();
   }
 
-  return { init, openProject, showDashboard };
+  return { init, openProject, showDashboard, exportZipCurrent };
 })();
 
 document.addEventListener('DOMContentLoaded', App.init);

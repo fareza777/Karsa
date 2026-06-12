@@ -192,12 +192,57 @@ const Preview = (() => {
 
   let thumbTimer = null;
 
+  function updatePreviewHint(project) {
+    const hint = $('#preview-hint');
+    if (!hint) return;
+    const data = previewHintForProject(project);
+    if (!data) {
+      hint.className = 'preview-hint hidden';
+      hint.innerHTML = '';
+      return;
+    }
+    hint.className = 'preview-hint' + (data.compact ? ' preview-hint-compact' : '');
+    const actions = el('div', { class: 'preview-hint-actions' });
+    const showWebBtn = data.kind === 'expo' || data.kind === 'none' || data.kind === 'mixed';
+    if (showWebBtn) {
+      actions.appendChild(el('button', {
+        class: 'btn btn-primary btn-sm',
+        text: '✨ Buat preview web',
+        onclick: () => { AI.switchTab('ai'); AI.requestWebPreview(); },
+      }));
+    }
+    if (data.kind === 'expo' || data.kind === 'mixed') {
+      actions.appendChild(el('button', {
+        class: 'btn btn-ghost btn-sm',
+        text: '⬇ Ekspor ZIP',
+        onclick: () => App.exportZipCurrent(),
+      }));
+    }
+    if (data.dismissKey) {
+      actions.appendChild(el('button', {
+        class: 'btn btn-ghost btn-sm',
+        text: '✕ Tutup',
+        onclick: () => {
+          try { sessionStorage.setItem(data.dismissKey, '1'); } catch (e) { /* abaikan */ }
+          updatePreviewHint(project);
+        },
+      }));
+    }
+    hint.innerHTML = '';
+    hint.appendChild(el('div', { class: 'preview-hint-inner' }, [
+      el('strong', { text: data.title }),
+      el('p', { text: data.body }),
+      actions,
+    ]));
+  }
+
   function refresh() {
     const project = State.getCurrentProject();
     if (!project) return;
     ConsolePanel.clear();
     const frame = $('#preview-frame');
     frame.srcdoc = buildBundle(project);
+    updatePreviewHint(project);
     // Jadwalkan tangkapan thumbnail proyek setelah preview tenang
     clearTimeout(thumbTimer);
     thumbTimer = setTimeout(() => {
@@ -332,5 +377,5 @@ const Preview = (() => {
     }
   });
 
-  return { refresh, refreshDebounced, openInNewTab, setDevice, buildBundle, runInPreview, screenshot };
+  return { refresh, refreshDebounced, openInNewTab, setDevice, buildBundle, runInPreview, screenshot, updatePreviewHint };
 })();
