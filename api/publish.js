@@ -35,7 +35,7 @@ function baseUrl(req) {
 function watermark(html) {
   const foot =
     '<footer style="text-align:center;padding:14px;font:12px/1.4 system-ui,sans-serif;color:#94a3b8;background:#f8fafc;border-top:1px solid #e2e8f0">' +
-    'Dibuat dengan <a href="https://github.com/fareza777/Karsa" style="color:#7c5cff;text-decoration:none;font-weight:600">KARSA</a>' +
+    'Dibuat dengan <a href="https://karsa.work" style="color:#7c5cff;text-decoration:none;font-weight:600">KARSA</a>' +
     ' · Dari ide, jadi aplikasi</footer>';
   if (/<\/body>/i.test(html)) return html.replace(/<\/body>/i, foot + '\n</body>');
   return html + foot;

@@ -10,9 +10,11 @@ export default async function handler(req, res) {
   }
   const supabaseUrl = process.env.SUPABASE_URL || null;
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || null;
+  const ph = publishHost();
 
   res.status(200).json({
-    publishHost: publishHost() || null,
+    appUrl: ph ? 'https://' + ph : null,
+    publishHost: ph || null,
     cnameTarget: cnameTarget(),
     publishEnabled: kvConfigured(),
     subdomainExample: publishHost() ? 'namabisnis.' + publishHost() : null,

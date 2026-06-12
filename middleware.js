@@ -33,7 +33,7 @@ export default async function middleware(request) {
     return new Response(
       '<!DOCTYPE html><html lang="id"><body style="font-family:system-ui;text-align:center;padding:48px;color:#64748b">' +
       '<p>✦</p><h1>Situs tidak ditemukan</h1><p>Domain belum terhubung ke KARSA atau belum dipublish.</p>' +
-      '<p><a href="https://github.com/fareza777/Karsa">KARSA</a></p></body></html>',
+      '<p><a href="https://karsa.work" style="color:#7c5cff">Kembali ke KARSA</a></p></body></html>',
       { status: 404, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
     );
   }

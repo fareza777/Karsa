@@ -57,9 +57,12 @@ const Auth = (() => {
     });
     const { data } = await client.auth.getSession();
     user = data.session?.user || null;
-    client.auth.onAuthStateChange((_event, session) => {
+    client.auth.onAuthStateChange(async (event, session) => {
       user = session?.user || null;
       updateUI();
+      if (event === 'SIGNED_IN' && typeof CloudSync !== 'undefined') {
+        await CloudSync.onLogin();
+      }
     });
     updateUI();
   }
@@ -125,6 +128,13 @@ const Auth = (() => {
     const y = e.clientY || 48;
     const menu = [
       { label: displayName(user), icon: '👤', onClick: () => openProfileDialog() },
+      { label: 'Sinkronkan cloud', icon: '☁️', onClick: async () => {
+        if (typeof CloudSync === 'undefined') return;
+        await CloudSync.pushAll();
+        const merged = await CloudSync.pullAndMerge();
+        if (merged && typeof Dashboard !== 'undefined') Dashboard.render();
+        showToast('Sinkronisasi cloud selesai ☁', 'ok');
+      } },
     ];
     if (user.email) menu.push({ label: user.email, icon: '✉️', onClick: () => {} });
     menu.push('sep', {
@@ -151,7 +161,7 @@ const Auth = (() => {
           el('strong', { text: displayName(user) }),
           el('span', { class: 'muted', text: user.email || '' }),
         ]),
-        el('p', { class: 'modal-hint muted', text: 'Proyek kamu masih tersimpan di browser perangkat ini. Sinkron cloud akan hadir di update berikutnya.' }),
+        el('p', { class: 'modal-hint muted', text: 'Proyek kamu otomatis disinkronkan ke cloud saat login. Bisa diakses dari perangkat lain dengan akun yang sama.' }),
       ]),
       actions: [{ label: 'Tutup' }],
     });
@@ -287,8 +297,10 @@ const Auth = (() => {
     });
   }
 
+  function getClient() { return client; }
+
   return {
-    init, bindTriggers, getUser, isLoggedIn, isEnabled,
+    init, bindTriggers, getUser, getClient, isLoggedIn, isEnabled,
     openAuthDialog, openUserMenu, signOut,
   };
 })();

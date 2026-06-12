@@ -5,7 +5,10 @@ const State = (() => {
   let settings = Storage.loadSettings();
   let currentProjectId = null;
 
-  const persist = debounce(() => Storage.saveProjects(projects), 400);
+  const persist = debounce(() => {
+    Storage.saveProjects(projects);
+    if (typeof CloudSync !== 'undefined') CloudSync.onLocalChange();
+  }, 400);
 
   function getProjects() { return projects; }
   function getSettings() { return settings; }
@@ -35,6 +38,7 @@ const State = (() => {
     };
     projects = [project, ...projects];
     Storage.saveProjects(projects);
+    if (typeof CloudSync !== 'undefined') CloudSync.onLocalChange();
     return project;
   }
 
@@ -48,6 +52,12 @@ const State = (() => {
 
   function deleteProject(id) {
     projects = projects.filter((p) => p.id !== id);
+    Storage.saveProjects(projects);
+    if (typeof CloudSync !== 'undefined') CloudSync.onLocalChange();
+  }
+
+  function replaceProjects(next) {
+    projects = Array.isArray(next) ? next : [];
     Storage.saveProjects(projects);
   }
 
@@ -130,6 +140,6 @@ const State = (() => {
     getProjects, getSettings, getCurrentProject, setCurrentProject,
     updateSettings, createProject, updateProject, deleteProject, duplicateProject,
     setFile, deleteFile, renameFile, deleteFolder, addFolder,
-    addCheckpoint, restoreCheckpoint,
+    addCheckpoint, restoreCheckpoint, replaceProjects,
   };
 })();
