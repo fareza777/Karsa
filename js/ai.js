@@ -20,7 +20,8 @@ const AI = (() => {
     '3. Rujuk CSS via <link href="css/style.css"> dan JS via <script src="js/app.js"> — KARSA otomatis menyatukannya di live preview.',
     '4. Library eksternal boleh lewat CDN https penuh.',
     '5. Jangan pakai fitur server (API backend sendiri, database). localStorage boleh.',
-    '6. Jawab dalam bahasa Indonesia. Jangan ulangi file yang tidak berubah.',
+    '6. Jawab dalam bahasa Indonesia. Jangan ulangi file yang tidak berubah — tapi jika user bilang belum berubah / minta ulang, tulis ulang file yang perlu diperbarui secara UTUH.',
+    '6b. DILARANG menulis placeholder seperti "[blok file di ringkas]" atau ringkasan kode. Setiap perubahan kode HARUS pakai blok ``` dengan file=path dan isi file lengkap.',
     'GAYA PERCAKAPAN:',
     '7. Hangat dan kolaboratif seperti rekan satu tim. Buka dengan 1-2 kalimat tentang apa yang akan kamu buat beserta pilihan desain utamanya, baru blok file.',
     '8. Setelah blok file, SELALU tutup dengan pertanyaan iterasi singkat berisi 2-3 ide konkret (contoh: "Mau kutambahkan efek suara, mode gelap, atau papan peringkat?").',
@@ -174,15 +175,21 @@ const AI = (() => {
   }
 
   // --- Konteks proyek untuk AI ---
-  // Ringkas riwayat agar tidak melewati batas 200k karakter di server
+  // Ringkas riwayat lama agar tidak melewati batas 200k karakter di server.
+  // Respons asisten TERAKHIR tetap utuh — kalau dipotong, model meniru placeholder & tidak keluarkan file.
   function compactHistoryForApi(history) {
-    return history.map((msg) => {
+    const OMIT = '(kode file dihilangkan dari riwayat lama — lihat bagian FILE PROYEK SAAT INI)';
+    let lastAssistantIdx = -1;
+    for (let i = history.length - 1; i >= 0; i--) {
+      if (history[i].role === 'assistant') { lastAssistantIdx = i; break; }
+    }
+    return history.map((msg, i) => {
       if (msg.role !== 'assistant' || typeof msg.content !== 'string') return msg;
+      if (i === lastAssistantIdx) return msg;
       let text = msg.content;
-      if (text.length > 2500) {
-        text = text.replace(/```[\w]*\s+file=[^\n]+\n[\s\S]*?```/g, '[…blok file di ringkas…]');
-      }
-      if (text.length > 4000) text = text.slice(0, 4000) + '\n[…pesan dipotong…]';
+      text = text.replace(/```[\w-]*[ \t]+file=[^\n`]+\n[\s\S]*?```/g, OMIT);
+      text = text.replace(/```[\w-]*\nfile=[^\n`]+\n[\s\S]*?```/g, OMIT);
+      if (text.length > 3500) text = text.slice(0, 3500) + '\n[…]';
       return { role: msg.role, content: text };
     });
   }
@@ -284,11 +291,19 @@ const AI = (() => {
     scrollChat();
   }
 
-  // Hilangkan blok <think>…</think> (penalaran internal model)
+  // Hilangkan blok penalaran internal model (MiniMax reasoning)
   function stripThink(text) {
-    const cleaned = text.replace(/<think>[\s\S]*?<\/think>/g, '');
-    const openIdx = cleaned.indexOf('<think>');
-    if (openIdx !== -1) return { visible: cleaned.slice(0, openIdx), thinking: true };
+    const tOpen = '<' + 'think' + '>';
+    const tClose = '</' + 'think' + '>';
+    let cleaned = text
+      .replace(/<think>[\s\S]*?<\/redacted_thinking>/gi, '')
+      .replace(new RegExp(tOpen + '[\\s\\S]*?' + tClose, 'gi'), '');
+    if (/<think>/i.test(cleaned) || cleaned.includes(tOpen)) {
+      const idxA = cleaned.indexOf('<think>');
+      const idxB = cleaned.indexOf(tOpen);
+      const openIdx = idxA === -1 ? idxB : (idxB === -1 ? idxA : Math.min(idxA, idxB));
+      if (openIdx !== -1) return { visible: cleaned.slice(0, openIdx), thinking: true };
+    }
     return { visible: cleaned, thinking: false };
   }
 
@@ -358,16 +373,30 @@ const AI = (() => {
   // --- Parsing & penerapan file dari jawaban AI ---
   function parseFileBlocks(text) {
     const files = [];
-    const regex = /```[\w-]*[ \t]+file=([^\s`]+)[ \t]*\n([\s\S]*?)```/g;
-    let match;
-    while ((match = regex.exec(text)) !== null) {
-      const path = match[1].trim().replace(/^\.\//, '');
-      if (isValidPath(path)) files.push({ path, code: match[2].replace(/\n$/, '') });
-    }
-    // Jika path sama muncul dua kali, pakai versi terakhir
+    const patterns = [
+      /```[\w-]*[ \t]+file=([^\s`]+)[ \t]*\n([\s\S]*?)```/g,
+      /```[\w-]*\nfile=([^\s`]+)[ \t]*\n([\s\S]*?)```/g,
+    ];
+    patterns.forEach((regex) => {
+      let match;
+      const re = new RegExp(regex.source, regex.flags);
+      while ((match = re.exec(text)) !== null) {
+        const path = match[1].trim().replace(/^\.\//, '');
+        const code = match[2].replace(/\n$/, '');
+        if (isValidPath(path) && code.trim()) files.push({ path, code });
+      }
+    });
     const unique = {};
     files.forEach((f) => { unique[f.path] = f.code; });
     return Object.keys(unique).map((path) => ({ path, code: unique[path] }));
+  }
+
+  function looksLikeCodeChangeRequest(text) {
+    return /ubah|perbaiki|percantik|tambah|buat|fix|update|desain|warna|style|css|html|mana|belum|ulang/i.test(text || '');
+  }
+
+  function responseHasFilePlaceholder(text) {
+    return /blok file di ringkas|isi file tidak disertakan|\[…pesan dipotong/i.test(text || '');
   }
 
   function attachApplyBox(bubble, visibleText, autoFocus) {
@@ -388,9 +417,10 @@ const AI = (() => {
       class: 'btn-apply',
       text: '⚡ Terapkan ke Proyek (' + files.length + ' file)',
       onclick: () => {
-        applyFiles(files);
-        applyBtn.disabled = true;
-        applyBtn.textContent = '✓ Sudah diterapkan';
+        if (applyFiles(files)) {
+          applyBtn.disabled = true;
+          applyBtn.textContent = '✓ Sudah diterapkan';
+        }
       },
     });
 
@@ -399,14 +429,20 @@ const AI = (() => {
   }
 
   function applyFiles(files) {
-    State.addCheckpoint('Sebelum Terapkan AI (' + files.length + ' file)');
-    files.forEach((f) => State.setFile(f.path, f.code));
+    const valid = files.filter((f) => f.code && f.code.trim());
+    if (!valid.length) {
+      showToast('Tidak ada kode file yang valid untuk diterapkan.', 'warn');
+      return false;
+    }
+    State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
+    valid.forEach((f) => State.setFile(f.path, f.code));
     FileTree.render();
-    const entry = files.find((f) => f.path === 'index.html') || files[0];
+    const entry = valid.find((f) => f.path === 'index.html') || valid[0];
     Tabs.open(entry.path);
     Preview.refresh();
     confettiBurst();
-    showToast(files.length + ' file diterapkan — checkpoint tersimpan 🕰', 'ok');
+    showToast(valid.length + ' file diterapkan — checkpoint tersimpan 🕰', 'ok');
+    return true;
   }
 
   // --- Streaming chat ---
@@ -586,6 +622,19 @@ const AI = (() => {
       }
       renderAssistantHtml(bubble, visible);
       attachApplyBox(bubble, visible, true);
+      const parsedFiles = parseFileBlocks(visible);
+      if (!parsedFiles.length && (looksLikeCodeChangeRequest(prompt) || responseHasFilePlaceholder(visible))) {
+        bubble.appendChild(el('button', {
+          class: 'ai-retry-btn',
+          text: '🔄 Minta file lengkap',
+          onclick: () => {
+            $('#ai-input').value =
+              'Tulis ulang perubahan dengan blok ``` file=path dan isi file UTUH (jangan ringkas). ' + prompt;
+            send();
+          },
+        }));
+        showToast('AI tidak mengeluarkan file kode. Klik "Minta file lengkap" atau kirim ulang.', 'warn');
+      }
       const elapsed = Math.round((Date.now() - startedAt) / 1000);
       bubble.appendChild(el('div', {
         class: 'ai-meta',
