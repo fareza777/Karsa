@@ -165,6 +165,8 @@ const Plan = (() => {
     }
     const proBtn = $('#dash-pro-btn');
     if (proBtn) proBtn.classList.toggle('active', isPro() || isSuperuser());
+    const adminBtn = $('#dash-admin-btn');
+    if (adminBtn) adminBtn.classList.toggle('hidden', !isSuperuser());
   }
 
   async function verifyProCode(code) {

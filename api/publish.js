@@ -5,6 +5,7 @@ import {
   cnameTarget, normalizeDomain, subdomainUrl, validateCustomDomain,
 } from '../lib/domains.js';
 import { isSuperuserEmail } from '../lib/superuser.js';
+import { trackPublish } from '../lib/analytics.js';
 
 const MAX_HTML = 1.5 * 1024 * 1024;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
@@ -142,6 +143,8 @@ export default async function handler(req, res) {
 
   const proto = req.headers['x-forwarded-proto'] || 'https';
   const subUrl = subdomainUrl(slug, proto);
+
+  trackPublish().catch(() => {});
 
   res.status(200).json({
     ok: true,

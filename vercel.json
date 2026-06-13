@@ -4,7 +4,8 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/p/:slug", "destination": "/api/site/:slug" },
-    { "source": "/app", "destination": "/app.html" }
+    { "source": "/app", "destination": "/app.html" },
+    { "source": "/admin", "destination": "/admin.html" }
   ],
   "functions": {
     "api/chat.js": { "maxDuration": 300 },
@@ -16,7 +17,9 @@
     "api/setup-auth.js": { "maxDuration": 30 },
     "api/lemon-webhook.js": { "maxDuration": 30 },
     "api/verify-license.js": { "maxDuration": 15 },
-    "api/superuser-sync.js": { "maxDuration": 15 }
+    "api/superuser-sync.js": { "maxDuration": 15 },
+    "api/analytics-event.js": { "maxDuration": 10 },
+    "api/admin-analytics.js": { "maxDuration": 30 }
   },
   "headers": [
     {

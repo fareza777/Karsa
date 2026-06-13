@@ -1,5 +1,7 @@
 /* ===== KARSA AI — proxy serverless ke MiniMax (API key aman di server) ===== */
 
+import { trackAiUsage } from '../lib/analytics.js';
+
 // Wajib: tanpa ini Vercel mem-buffer seluruh respons sebelum dikirim ke browser,
 // sehingga streaming tidak pernah tampil dan permintaan panjang mati kena timeout.
 export const config = {
@@ -78,6 +80,11 @@ export default async function handler(req, res) {
   }
 
   const chosenModel = ALLOWED_MODELS.includes(model) ? model : 'MiniMax-M2.7-highspeed';
+  let inputChars = 0;
+  for (const msg of messages) {
+    const s = contentSize(msg.content);
+    if (s) inputChars += s.total;
+  }
 
   let upstream;
   try {
@@ -118,16 +125,44 @@ export default async function handler(req, res) {
   if (typeof res.flushHeaders === 'function') res.flushHeaders();
 
   const reader = upstream.body.getReader();
+  const decoder = new TextDecoder();
+  let sseBuffer = '';
+  let outputChars = 0;
+  let usage = { prompt_tokens: 0, completion_tokens: 0 };
   try {
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
       res.write(Buffer.from(value));
       if (typeof res.flush === 'function') res.flush();
+      sseBuffer += decoder.decode(value, { stream: true });
+      let nl;
+      while ((nl = sseBuffer.indexOf('\n')) !== -1) {
+        const line = sseBuffer.slice(0, nl).trim();
+        sseBuffer = sseBuffer.slice(nl + 1);
+        if (!line.startsWith('data:')) continue;
+        const payload = line.slice(5).trim();
+        if (payload === '[DONE]') continue;
+        try {
+          const json = JSON.parse(payload);
+          if (json.usage) {
+            usage.prompt_tokens = json.usage.prompt_tokens || usage.prompt_tokens;
+            usage.completion_tokens = json.usage.completion_tokens || usage.completion_tokens;
+          }
+          const delta = json.choices?.[0]?.delta?.content;
+          if (typeof delta === 'string') outputChars += delta.length;
+        } catch (_) { /* chunk parsial */ }
+      }
     }
   } catch (err) {
     res.write('data: ' + JSON.stringify({ error: 'Stream terputus: ' + err.message }) + '\n\n');
   } finally {
+    trackAiUsage({
+      promptTokens: usage.prompt_tokens,
+      completionTokens: usage.completion_tokens,
+      promptChars: inputChars,
+      completionChars: outputChars,
+    }).catch(() => {});
     res.end();
   }
 }
