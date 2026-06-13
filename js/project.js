@@ -124,6 +124,7 @@ const MOBILE_AI_PROMPT = [
   '9. Jangan tulis ulang package.json / app.json jika tidak berubah.',
   '10. Jika respons terpotong, sistem akan minta lanjutan otomatis — pastikan setiap file yang dikeluarkan valid & lengkap.',
   '11. Penalaran internal dilarang panjang — langsung tulis App.tsx / screen. Lihat MODE KERJA di prompt sistem.',
+  '12. PENGGUNA AWAM: mereka tidak tahu file, kode, atau istilah teknis. Hanya bilang "buat aplikasi X". Kamu yang rencanakan & kerjakan bertahap — jangan minta mereka pecah permintaan atau paham coding.',
 ].join('\n');
 
 const WEB_PREVIEW_PROMPT =

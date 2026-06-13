@@ -454,6 +454,14 @@ body.is-superuser #btn-ai-settings {
 }
 .ai-welcome h3 { color: var(--text); font-size: 14px; margin-bottom: 4px; }
 .ai-welcome p { font-size: 12px; margin-bottom: 12px; }
+.ai-phase-note {
+  font-size: 11px;
+  color: var(--accent);
+  margin: 10px 0 4px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(124, 92, 255, .1);
+}
 .ai-examples { display: flex; flex-direction: column; gap: 6px; }
 .ai-example {
   text-align: left;
