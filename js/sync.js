@@ -1,8 +1,42 @@
 /* ===== KARSA — sinkron proyek ke Supabase (cloud backup) ===== */
 
 const CloudSync = (() => {
+  const DELETED_KEY = 'karsa.deleted_projects.v1';
+  const TOMBSTONE_MS = 30 * 24 * 60 * 60 * 1000;
   let pushing = false;
   let status = 'hidden'; // hidden | syncing | saved | error
+
+  function loadDeletedMap() {
+    try {
+      const raw = localStorage.getItem(DELETED_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return typeof parsed === 'object' && parsed !== null ? parsed : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveDeletedMap(map) {
+    try {
+      const cutoff = Date.now() - TOMBSTONE_MS;
+      const pruned = {};
+      Object.entries(map).forEach(([id, at]) => {
+        if (typeof at === 'number' && at >= cutoff) pruned[id] = at;
+      });
+      localStorage.setItem(DELETED_KEY, JSON.stringify(pruned));
+    } catch (e) { /* abaikan */ }
+  }
+
+  function markDeleted(id) {
+    if (!id) return;
+    const map = loadDeletedMap();
+    map[id] = Date.now();
+    saveDeletedMap(map);
+  }
+
+  function isDeleted(id) {
+    return !!loadDeletedMap()[id];
+  }
 
   function canSync() {
     return typeof Auth !== 'undefined' && Auth.isLoggedIn() && Auth.getClient();
@@ -40,6 +74,46 @@ const CloudSync = (() => {
     if (pushing) setStatus('syncing');
   }
 
+  async function deleteProjectRemote(id) {
+    if (!canSync() || !id) return false;
+    const client = Auth.getClient();
+    const user = Auth.getUser();
+    if (!client || !user) return false;
+    try {
+      const { error } = await client
+        .from('user_projects')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('id', id);
+      if (error) throw error;
+      setStatus('saved');
+      return true;
+    } catch (err) {
+      console.warn('KARSA cloud sync delete:', err);
+      setStatus('error');
+      return false;
+    }
+  }
+
+  async function pruneOrphanCloudProjects(localIds) {
+    const client = Auth.getClient();
+    const user = Auth.getUser();
+    if (!client || !user) return;
+    const { data, error } = await client
+      .from('user_projects')
+      .select('id')
+      .eq('user_id', user.id);
+    if (error) throw error;
+    const orphanIds = (data || []).map((row) => row.id).filter((cid) => !localIds.has(cid));
+    if (!orphanIds.length) return;
+    const { error: delErr } = await client
+      .from('user_projects')
+      .delete()
+      .eq('user_id', user.id)
+      .in('id', orphanIds);
+    if (delErr) throw delErr;
+  }
+
   async function pushAll() {
     if (!canSync() || pushing) return;
     const client = Auth.getClient();
@@ -49,20 +123,22 @@ const CloudSync = (() => {
     setStatus('syncing');
     try {
       const projects = State.getProjects();
-      if (!projects.length) {
-        setStatus('saved');
-        return;
+      const localIds = new Set(projects.map((p) => p.id));
+
+      if (projects.length) {
+        const rows = projects.map((p) => ({
+          user_id: user.id,
+          id: p.id,
+          name: p.name || 'Proyek',
+          project_type: p.projectType || 'web',
+          data: p,
+          updated_at: new Date(p.updatedAt || Date.now()).toISOString(),
+        }));
+        const { error } = await client.from('user_projects').upsert(rows, { onConflict: 'user_id,id' });
+        if (error) throw error;
       }
-      const rows = projects.map((p) => ({
-        user_id: user.id,
-        id: p.id,
-        name: p.name || 'Proyek',
-        project_type: p.projectType || 'web',
-        data: p,
-        updated_at: new Date(p.updatedAt || Date.now()).toISOString(),
-      }));
-      const { error } = await client.from('user_projects').upsert(rows, { onConflict: 'user_id,id' });
-      if (error) throw error;
+
+      await pruneOrphanCloudProjects(localIds);
       setStatus('saved');
     } catch (err) {
       console.warn('KARSA cloud sync push:', err);
@@ -95,9 +171,14 @@ const CloudSync = (() => {
 
       const map = new Map(State.getProjects().map((p) => [p.id, p]));
       let changed = false;
+      const staleOnCloud = [];
       data.forEach((row) => {
         const cloud = row.data;
         if (!cloud || !cloud.id || !cloud.files) return;
+        if (isDeleted(cloud.id)) {
+          staleOnCloud.push(cloud.id);
+          return;
+        }
         const local = map.get(cloud.id);
         const cloudTs = new Date(row.updated_at).getTime() || cloud.updatedAt || 0;
         const localTs = local?.updatedAt || 0;
@@ -106,6 +187,9 @@ const CloudSync = (() => {
           changed = true;
         }
       });
+      if (staleOnCloud.length) {
+        await Promise.all(staleOnCloud.map((id) => deleteProjectRemote(id)));
+      }
       if (!changed) {
         setStatus('saved');
         return false;
@@ -141,5 +225,8 @@ const CloudSync = (() => {
     else if (status === 'hidden') setStatus('saved');
   }
 
-  return { pushAll, pullAndMerge, onLogin, onLocalChange, updateBadge, onAuthChange };
+  return {
+    pushAll, pullAndMerge, onLogin, onLocalChange, updateBadge, onAuthChange,
+    markDeleted, deleteProjectRemote,
+  };
 })();

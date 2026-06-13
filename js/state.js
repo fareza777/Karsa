@@ -51,9 +51,14 @@ const State = (() => {
   }
 
   function deleteProject(id) {
+    if (typeof CloudSync !== 'undefined') CloudSync.markDeleted(id);
     projects = projects.filter((p) => p.id !== id);
+    if (currentProjectId === id) currentProjectId = null;
     Storage.saveProjects(projects);
-    if (typeof CloudSync !== 'undefined') CloudSync.onLocalChange();
+    if (typeof CloudSync !== 'undefined') {
+      CloudSync.deleteProjectRemote(id);
+      CloudSync.onLocalChange();
+    }
   }
 
   function replaceProjects(next) {
