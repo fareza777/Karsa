@@ -79,6 +79,9 @@ function baseName(path) {
 // Validasi nama file/folder: huruf, angka, titik, strip, underscore, spasi; segmen dipisah '/'
 function isValidPath(path) {
   if (!path || path.startsWith('/') || path.endsWith('/')) return false;
+  const base = path.split('/').pop() || '';
+  if (/^(tsx?|jsx?|json|html|css|md|txt)$/i.test(base)) return false;
+  if (!base.includes('.')) return false;
   return path.split('/').every((seg) => /^[\w.\- ]+$/.test(seg) && seg !== '.' && seg !== '..');
 }
 

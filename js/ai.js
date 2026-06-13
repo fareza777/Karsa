@@ -210,6 +210,12 @@ const AI = (() => {
 
   function buildUserInstruction(prompt, hasImages) {
     const parts = [];
+    const project = State.getCurrentProject();
+    if (project && (project.projectType === 'mobile' || project.projectType === 'playstore')) {
+      if (/lengkap|semua fitur|full|editor|aplikasi/i.test(prompt || '')) {
+        parts.push('[MOBILE: Buat bertahap — respons ini maks 1 file (App.tsx atau satu screen). Jangan banyak file sekaligus.]');
+      }
+    }
     if (hasImages) {
       parts.push(
         '[SCREENSHOT = tampilan proyek SEKARANG, bukan desain baru. Ikuti permintaan TEKS di bawah secara harfiah.]',
@@ -447,6 +453,8 @@ const AI = (() => {
       if (/\[\.\.\.\]|BUKAN kode asli|penanda dipotong|← ini/i.test(c)) return false;
       if (!braceBalance(c)) return false;
       if (/const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
+      if (/[{(,=]\s*$/.test(c)) return false;
+      if ((ext === 'tsx' || ext === 'jsx' || ext === 'ts') && !/export\s+default\b/.test(c)) return false;
       if ((ext === 'tsx' || ext === 'jsx') && /export\s+default\s+function/.test(c) && !/\}\s*;?\s*$/.test(c.trim())) return false;
     }
     if (ext === 'json') {
@@ -464,10 +472,10 @@ const AI = (() => {
     if (hasUnclosedCodeFence(visible)) return true;
     const files = parseFileBlocks(visible);
     if (!files.length) return false;
-    return !files.some((f) => isFileComplete(f.code, f.path));
+    return files.some((f) => !isFileComplete(f.code, f.path));
   }
 
-  const MAX_AUTO_CONTINUE = 6;
+  const MAX_AUTO_CONTINUE = 10;
 
   function extractProse(text) {
     const idx = text.indexOf('```');
@@ -626,12 +634,14 @@ const AI = (() => {
 
     const pending = files.filter((f) => !projectFileMatches(f.path, f.code));
 
+    const blocked = truncated || incomplete.length > 0;
+
     if (truncated || incomplete.length) {
       bubble.appendChild(el('div', {
         class: 'ai-truncated-warn',
         text: incomplete.length
-          ? '⚠ Sebagian file belum lengkap — yang siap tetap bisa diterapkan.'
-          : '⚠ Respons mungkin terpotong — periksa file sebelum terapkan.',
+          ? '⚠ File belum lengkap — tunggu lanjutan otomatis atau klik Lanjutkan tulis.'
+          : '⚠ Respons terpotong — tunggu lanjutan otomatis atau klik Lanjutkan tulis.',
       }));
     }
 
@@ -653,8 +663,12 @@ const AI = (() => {
           : (files.length === allFiles.length
             ? '⚡ Terapkan ke Proyek (' + pending.length + ' file)'
             : '⚡ Terapkan (' + pending.length + '/' + allFiles.length + ' file siap)')),
-      disabled: !files.length,
+      disabled: !files.length || blocked,
       onclick: () => {
+        if (blocked) {
+          showToast('File belum lengkap — tunggu lanjutan otomatis atau klik Lanjutkan tulis.', 'warn');
+          return;
+        }
         const toApply = pending.length ? pending : files;
         if (!toApply.length) return;
         if (applyFiles(toApply)) {
@@ -686,24 +700,20 @@ const AI = (() => {
   }
 
   function tryAutoApply(bubble, visible, truncated) {
-    if (!shouldAutoApply()) return;
+    if (!shouldAutoApply() || truncated) return;
     const allFiles = collectFileBlocks(bubble, visible);
     const parsedFiles = allFiles.filter((f) => isFileComplete(f.code, f.path));
+    if (parsedFiles.length < allFiles.length) {
+      showToast('Auto-terapkan ditunda — file belum lengkap.', 'warn');
+      return;
+    }
     const pending = parsedFiles.filter((f) => !projectFileMatches(f.path, f.code));
     if (!pending.length) return;
-    if (truncated && pending.length < allFiles.length) {
-      showToast('Auto-terapkan ditunda — ada file yang belum lengkap.', 'warn');
-      return;
-    }
-    if (parsedFiles.length < allFiles.length) {
-      showToast('Auto-terapkan ditunda — ada file yang belum lengkap.', 'warn');
-      return;
-    }
     if (applyFiles(pending)) markApplyButtonDone(bubble);
   }
 
   function applyFiles(files) {
-    const valid = files.filter((f) => f.code && f.code.trim());
+    const valid = files.filter((f) => f.code && f.code.trim() && isFileComplete(f.code, f.path));
     if (!valid.length) {
       showToast('Tidak ada kode file yang valid untuk diterapkan.', 'warn');
       return false;
@@ -851,6 +861,7 @@ const AI = (() => {
 
     // Gambar hanya dipahami MiniMax-M3 → paksa model itu utk permintaan ini
     const modelUsed = resolveModel(imageAtts.length > 0);
+    let fastRetry = false;
     if (imageAtts.length) {
       showToast('Ada gambar → AI memakai mode vision (M3).', 'info');
     }
@@ -898,13 +909,15 @@ const AI = (() => {
     let accumulatedVisible = '';
     let finishReason = null;
 
+    let activeModel = modelUsed;
+
     try {
       const onPhase = (p) => { phase = p; };
 
       for (;;) {
         const result = await runAiStream({
           messages: apiMessages,
-          modelUsed,
+          modelUsed: activeModel,
           useDirect,
           signal: abortCtrl.signal,
           bubble,
@@ -913,12 +926,24 @@ const AI = (() => {
         finishReason = result.finishReason;
 
         if (!result.visible.trim()) {
+          if (!fastRetry && result.rawText.length > 1500 && activeModel.includes('M3')) {
+            fastRetry = true;
+            activeModel = MODEL_FAST;
+            phase = 'menghubungi';
+            bubble.innerHTML = '';
+            bubble.appendChild(el('span', {
+              class: 'ai-thinking',
+              text: 'Model berpikir terlalu lama — mencoba lagi dengan mode cepat…',
+            }));
+            showToast('AI hanya berpikir tanpa menulis — beralih ke M2.7 cepat.', 'warn');
+            continue;
+          }
           if (finishReason === 'length') {
-            throw new Error('Jatah token habis sebelum jawaban selesai. Coba pecah permintaan (mis. satu screen dulu).');
+            throw new Error('Jatah token habis sebelum jawaban selesai. Pecah permintaan: satu file/screen dulu.');
           }
           throw new Error(result.rawText.length === 0
             ? 'Tidak ada respons dari server AI. Periksa koneksi internetmu lalu coba lagi.'
-            : 'AI selesai tanpa jawaban yang bisa ditampilkan. Klik Kirim untuk mencoba lagi.');
+            : 'AI selesai tanpa jawaban. Coba pecah permintaan (mis. "buat App.tsx dulu saja").');
         }
 
         accumulatedVisible = continueRound === 0
@@ -966,7 +991,7 @@ const AI = (() => {
       const elapsed = Math.round((Date.now() - startedAt) / 1000);
       bubble.appendChild(el('div', {
         class: 'ai-meta',
-        text: '⚡ ' + elapsed + ' dtk · ' + modelUsed.replace('MiniMax-', '') + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : ''),
+        text: '⚡ ' + elapsed + ' dtk · ' + activeModel.replace('MiniMax-', '') + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (continueRound ? ' · ↻ ' + continueRound + 'x lanjut' : ''),
       }));
       history.push({ role: 'assistant', content: visible });
       saveHistory();
@@ -1046,9 +1071,6 @@ const AI = (() => {
   // --- Mode AI: cepat default, vision otomatis saat ada gambar ---
   function resolveModel(hasImages) {
     if (hasImages) return MODEL_SMART;
-    if (typeof Plan !== 'undefined' && Plan.isSuperuser() && settings.model) {
-      return settings.model;
-    }
     return MODEL_FAST;
   }
 
