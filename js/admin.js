@@ -2,6 +2,9 @@
 
 (function () {
   const fmt = (n) => (Number(n) || 0).toLocaleString('id-ID');
+  let previewTimer = null;
+  let previewIndex = 0;
+  let previewItems = [];
 
   const METRICS = [
     ['Login', 'logins', 'admin-card--login', '↪', false],
@@ -20,20 +23,70 @@
     ['Proyek cloud', 'totalProjects', 'admin-card--db', '▣', false],
   ];
 
+  const ACTIVITY_META = {
+    login: { icon: '↪', label: 'Login', cls: 'login' },
+    signup: { icon: '＋', label: 'Pendaftaran baru', cls: 'signup' },
+    ai: { icon: '✦', label: 'Permintaan AI', cls: 'ai' },
+    publish: { icon: '⬡', label: 'Publish situs', cls: 'publish' },
+  };
+
+  const DEMO_ACTIVITY = [
+    { type: 'login', t: Date.now(), uid: 'demo' },
+    { type: 'ai', t: Date.now() - 60000, n: 1200 },
+    { type: 'publish', t: Date.now() - 120000 },
+    { type: 'signup', t: Date.now() - 180000, uid: 'demo2' },
+  ];
+
   function fmtDate(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+  }
+
+  function fmtDateFull(iso) {
     if (!iso) return '—';
     const [y, m, d] = iso.split('-').map(Number);
     const dt = new Date(y, m - 1, d);
     return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
   }
 
+  function fmtTime(ts) {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    const now = new Date();
+    const diff = (now - d) / 1000;
+    if (diff < 60) return 'baru saja';
+    if (diff < 3600) return Math.floor(diff / 60) + ' mnt lalu';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' jam lalu';
+    return d.toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function animateValue(node, end) {
+    if (!node) return;
+    const target = Number(end) || 0;
+    const start = 0;
+    const dur = 700;
+    const t0 = performance.now();
+    function tick(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmt(Math.round(start + (target - start) * eased));
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
   function card(label, value, mod, icon, accent) {
+    const valNode = el('div', { class: 'admin-card-value' + (accent ? ' accent' : '') });
+    valNode.textContent = '0';
+    requestAnimationFrame(() => animateValue(valNode, value));
     return el('div', { class: 'admin-card ' + mod }, [
       el('div', { class: 'admin-card-top' }, [
         el('span', { class: 'admin-card-label', text: label }),
         el('span', { class: 'admin-card-icon', text: icon, 'aria-hidden': 'true' }),
       ]),
-      el('div', { class: 'admin-card-value' + (accent ? ' accent' : ''), text: fmt(value) }),
+      valNode,
     ]);
   }
 
@@ -55,10 +108,190 @@
       ['AI requests', today?.ai_requests],
     ];
     items.forEach(([label, val]) => {
+      const valEl = el('div', { class: 'admin-hero-kpi-value', text: '0' });
       box.appendChild(el('div', { class: 'admin-hero-kpi' }, [
         el('div', { class: 'admin-hero-kpi-label', text: label }),
-        el('div', { class: 'admin-hero-kpi-value', text: fmt(val) }),
+        valEl,
       ]));
+      animateValue(valEl, val);
+    });
+  }
+
+  function renderChart(container, title, days, key, mod) {
+    const max = Math.max(1, ...days.map((d) => d[key] || 0));
+    const block = el('div', { class: 'admin-chart-block admin-chart ' + mod });
+    block.appendChild(el('h3', { text: title }));
+    const bars = el('div', { class: 'admin-chart-bars' });
+    days.forEach((d) => {
+      const v = d[key] || 0;
+      const pct = Math.max(4, (v / max) * 100);
+      const wrap = el('div', { class: 'admin-chart-bar-wrap' });
+      wrap.appendChild(el('div', { class: 'admin-chart-val', text: v > 0 ? fmt(v) : '·' }));
+      wrap.appendChild(el('div', {
+        class: 'admin-chart-bar',
+        style: 'height:' + pct + '%',
+        title: fmtDate(d.date) + ': ' + fmt(v),
+      }));
+      wrap.appendChild(el('div', { class: 'admin-chart-label', text: fmtDate(d.date) }));
+      bars.appendChild(wrap);
+    });
+    block.appendChild(bars);
+    container.appendChild(block);
+  }
+
+  function renderCharts(days) {
+    const box = $('#admin-charts');
+    if (!box) return;
+    box.innerHTML = '';
+    const last7 = (days || []).slice(-7);
+    if (!last7.length) {
+      box.appendChild(el('p', { class: 'admin-muted', text: 'Belum ada data tren.' }));
+      return;
+    }
+    renderChart(box, 'Login', last7, 'logins', 'admin-chart--login');
+    renderChart(box, 'Permintaan AI', last7, 'ai_requests', 'admin-chart--ai');
+    renderChart(box, 'Token keluar', last7, 'tokens_out', 'admin-chart--token');
+  }
+
+  function sceneLogin(item) {
+    const uid = item?.uid || 'user';
+    return el('div', { class: 'admin-scene' }, [
+      el('div', { class: 'admin-scene-header' }, [
+        el('div', { class: 'admin-scene-logo', text: '✦' }),
+        el('span', { class: 'admin-scene-title', text: 'KARSA — Dashboard' }),
+      ]),
+      el('div', { class: 'admin-scene-body' }, [
+        el('div', { style: 'display:flex;align-items:center;gap:10px;margin-bottom:8px' }, [
+          el('div', { class: 'admin-mock-avatar', text: (uid[0] || 'U').toUpperCase() }),
+          el('div', {}, [
+            el('div', { class: 'admin-mock-row w40', style: 'height:8px;margin-bottom:6px' }),
+            el('div', { class: 'admin-mock-row w60', style: 'height:6px' }),
+          ]),
+        ]),
+        el('div', { class: 'admin-mock-card' }, [
+          el('div', { style: 'font-size:.72rem;color:var(--accent-2)', text: '✓ Login berhasil' }),
+          el('div', { class: 'admin-mock-row w80', style: 'height:6px;margin-top:8px' }),
+        ]),
+        el('div', { class: 'admin-mock-row w80' }),
+        el('div', { class: 'admin-mock-row w60' }),
+      ]),
+    ]);
+  }
+
+  function sceneSignup() {
+    return el('div', { class: 'admin-scene' }, [
+      el('div', { class: 'admin-scene-header' }, [
+        el('div', { class: 'admin-scene-logo', text: '✦' }),
+        el('span', { class: 'admin-scene-title', text: 'Daftar akun baru' }),
+      ]),
+      el('div', { class: 'admin-scene-body' }, [
+        el('div', { class: 'admin-mock-card green' }, [
+          el('div', { style: 'font-size:.75rem;font-weight:600', text: 'Selamat datang di KARSA!' }),
+          el('div', { style: 'font-size:.68rem;color:var(--muted);margin-top:4px', text: 'Akun siap — mulai buat proyek pertama.' }),
+        ]),
+        el('div', { class: 'admin-mock-row w80' }),
+        el('div', { class: 'admin-mock-row w60' }),
+      ]),
+    ]);
+  }
+
+  function sceneAi(item) {
+    const tokens = item?.n ? ' ~' + fmt(item.n) + ' token' : '';
+    return el('div', { class: 'admin-scene' }, [
+      el('div', { class: 'admin-scene-header' }, [
+        el('div', { class: 'admin-scene-logo', text: '✦' }),
+        el('span', { class: 'admin-scene-title', text: 'AI Vibecoding' }),
+      ]),
+      el('div', { class: 'admin-scene-body admin-mock-chat' }, [
+        el('div', { class: 'admin-mock-bubble user', text: 'Buatkan landing page warung kopi…' }),
+        el('div', { class: 'admin-mock-bubble ai', text: 'Oke! Saya buatkan index.html + CSS…' }),
+        el('div', { class: 'admin-mock-typing' }, [
+          el('span'), el('span'), el('span'),
+        ]),
+        el('div', { style: 'font-size:.65rem;color:var(--muted);text-align:center', text: tokens || 'Menghasilkan kode…' }),
+      ]),
+    ]);
+  }
+
+  function scenePublish() {
+    return el('div', { class: 'admin-scene' }, [
+      el('div', { class: 'admin-scene-header' }, [
+        el('div', { class: 'admin-scene-logo', text: '✦' }),
+        el('span', { class: 'admin-scene-title', text: 'Publish ke web' }),
+      ]),
+      el('div', { class: 'admin-scene-body' }, [
+        el('div', { class: 'admin-mock-card green' }, [
+          el('div', { style: 'font-size:.75rem;font-weight:600', text: '🚀 Situs live!' }),
+          el('div', { class: 'admin-mock-publish-url', text: 'namabisnis.karsa.work' }),
+        ]),
+        el('div', { class: 'admin-mock-row w80' }),
+        el('div', { class: 'admin-mock-row w40' }),
+      ]),
+    ]);
+  }
+
+  function buildScene(item) {
+    switch (item.type) {
+      case 'login': return sceneLogin(item);
+      case 'signup': return sceneSignup(item);
+      case 'ai': return sceneAi(item);
+      case 'publish': return scenePublish(item);
+      default: return sceneLogin(item);
+    }
+  }
+
+  function activityCaption(item) {
+    const meta = ACTIVITY_META[item.type] || { label: item.type };
+    let detail = meta.label;
+    if (item.uid && item.uid !== 'demo' && item.uid !== 'demo2') detail += ' · ' + item.uid;
+    if (item.type === 'ai' && item.n) detail += ' · ' + fmt(item.n) + ' token';
+    return detail;
+  }
+
+  function showPreviewScene(index) {
+    const stage = $('#admin-preview-stage');
+    const caption = $('#admin-preview-caption');
+    if (!stage || !previewItems.length) return;
+    previewIndex = index % previewItems.length;
+    const item = previewItems[previewIndex];
+    stage.innerHTML = '';
+    const scene = buildScene(item);
+    scene.classList.add('active');
+    stage.appendChild(scene);
+    if (caption) {
+      caption.innerHTML = '<strong>' + (ACTIVITY_META[item.type]?.label || 'Aktivitas') + '</strong> — ' + fmtTime(item.t);
+    }
+  }
+
+  function startPreviewReplay(activity) {
+    if (previewTimer) clearInterval(previewTimer);
+    previewItems = (activity && activity.length) ? activity.slice(0, 20) : DEMO_ACTIVITY;
+    showPreviewScene(0);
+    previewTimer = setInterval(() => {
+      showPreviewScene(previewIndex + 1);
+    }, 4200);
+  }
+
+  function renderActivityFeed(activity) {
+    const box = $('#admin-activity-feed');
+    if (!box) return;
+    box.innerHTML = '';
+    const list = activity && activity.length ? activity : [];
+    if (!list.length) {
+      box.appendChild(el('div', { class: 'admin-feed-empty', text: 'Belum ada aktivitas tercatat. Feed akan terisi saat ada login, AI, atau publish.' }));
+      return;
+    }
+    list.slice(0, 15).forEach((item, i) => {
+      const meta = ACTIVITY_META[item.type] || { icon: '·', label: item.type, cls: 'login' };
+      let text = meta.label;
+      if (item.uid) text += ' · ' + item.uid;
+      if (item.type === 'ai' && item.n) text += ' (' + fmt(item.n) + ' tok)';
+      const row = el('div', { class: 'admin-feed-item', style: 'animation-delay:' + (i * 0.04) + 's' }, [
+        el('span', { class: 'admin-feed-icon admin-feed-icon--' + meta.cls, text: meta.icon }),
+        el('span', { class: 'admin-feed-text', html: '<strong>' + text + '</strong>' }),
+        el('span', { class: 'admin-feed-time', text: fmtTime(item.t) }),
+      ]);
+      box.appendChild(row);
     });
   }
 
@@ -99,7 +332,7 @@
     (days || []).slice().reverse().forEach((d) => {
       const tr = el('tr', { class: d.date === todayKey ? 'row-today' : '' });
       const vals = [
-        fmtDate(d.date),
+        fmtDateFull(d.date),
         d.logins,
         d.signups,
         d.unique_users,
@@ -136,6 +369,9 @@
   function renderDashboard(data) {
     renderWarnings(data);
     renderHeroKpis(data.today);
+    renderCharts(data.days);
+    startPreviewReplay(data.activity);
+    renderActivityFeed(data.activity);
     renderCards($('#admin-today-cards'), data.today || {}, METRICS);
     renderCards($('#admin-week-cards'), data.last7 || {}, METRICS);
     renderSupabase(data.supabase);
@@ -175,6 +411,7 @@
   }
 
   async function refresh() {
+    if (previewTimer) clearInterval(previewTimer);
     show('admin-loading');
     try {
       const data = await loadStats();

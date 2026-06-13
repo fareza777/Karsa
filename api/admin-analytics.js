@@ -1,7 +1,7 @@
 /* ===== KARSA — dashboard analitik (superuser only) ===== */
 
 import { isSuperuserEmail } from '../lib/superuser.js';
-import { analyticsEnabled, getStatsRange } from '../lib/analytics.js';
+import { analyticsEnabled, getStatsRange, getRecentActivity } from '../lib/analytics.js';
 import { getAdminOverview, adminConfigured } from '../lib/supabase-admin.js';
 
 export default async function handler(req, res) {
@@ -21,6 +21,7 @@ export default async function handler(req, res) {
   const sum = (key) => last7.reduce((a, d) => a + (d[key] || 0), 0);
 
   const supabase = adminConfigured() ? await getAdminOverview() : null;
+  const activity = analyticsEnabled() ? await getRecentActivity(40) : [];
 
   res.status(200).json({
     analyticsEnabled: analyticsEnabled(),
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
       unique_users: sum('unique_users'),
     },
     days,
+    activity,
     supabase,
     generatedAt: new Date().toISOString(),
   });
