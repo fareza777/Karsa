@@ -5,7 +5,7 @@ const AI = (() => {
   const HISTORY_KEY = 'karsa.ai.history.v1';
   const MODEL_FAST = 'MiniMax-M2.7-highspeed';
   const MODEL_SMART = 'MiniMax-M3';
-  const DEFAULT_SETTINGS = { v: 2, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: false };
+  const DEFAULT_SETTINGS = { v: 2, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: true };
   const DIRECT_URL = 'https://api.minimax.io/v1/chat/completions';
   const MAX_OUTPUT_TOKENS = 65536;
   const MAX_FILE_CHARS = 18000;
@@ -60,6 +60,7 @@ const AI = (() => {
         merged.v = 2;
         merged.model = MODEL_FAST;
       }
+      if (saved.autoApply === undefined) merged.autoApply = true;
       return merged;
     } catch (err) {
       return { ...DEFAULT_SETTINGS };
@@ -517,6 +518,25 @@ const AI = (() => {
     if (autoFocus) scrollChat();
   }
 
+  function shouldAutoApply() {
+    return settings.autoApply || autoApplyOnce || State.getSettings().autoRun;
+  }
+
+  function markApplyButtonDone(bubble) {
+    const applyBtn = $('.btn-apply', bubble);
+    if (applyBtn) {
+      applyBtn.disabled = true;
+      applyBtn.textContent = '✓ Sudah diterapkan';
+    }
+  }
+
+  function tryAutoApply(bubble, visible, truncated) {
+    if (truncated || !shouldAutoApply()) return;
+    const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
+    if (!parsedFiles.length) return;
+    if (applyFiles(parsedFiles)) markApplyButtonDone(bubble);
+  }
+
   function applyFiles(files) {
     const valid = files.filter((f) => f.code && f.code.trim());
     if (!valid.length) {
@@ -739,10 +759,7 @@ const AI = (() => {
       history.push({ role: 'assistant', content: visible });
       saveHistory();
       Plan.recordAiUse();
-      if ((settings.autoApply || autoApplyOnce) && !truncated) {
-        const applyBtn = $('.btn-apply', bubble);
-        if (applyBtn && parsedFiles.length && !applyBtn.disabled) applyBtn.click();
-      }
+      tryAutoApply(bubble, visible, truncated);
       autoApplyOnce = false;
     } catch (err) {
       bubble.remove();
