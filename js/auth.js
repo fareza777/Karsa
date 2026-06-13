@@ -91,6 +91,11 @@ const Auth = (() => {
     return data;
   }
 
+function authRedirectUrl() {
+    const base = location.origin.replace(/\/$/, '');
+    return base + '/app';
+  }
+
   async function signUp(email, password, fullName) {
     if (!client) throw new Error('Daftar belum dikonfigurasi di server.');
     const { data, error } = await client.auth.signUp({
@@ -98,7 +103,7 @@ const Auth = (() => {
       password,
       options: {
         data: fullName ? { full_name: fullName } : {},
-        emailRedirectTo: location.origin,
+        emailRedirectTo: authRedirectUrl(),
       },
     });
     if (error) throw error;
@@ -109,7 +114,7 @@ const Auth = (() => {
     if (!client) throw new Error('Login Google belum dikonfigurasi.');
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: location.origin },
+      options: { redirectTo: authRedirectUrl() },
     });
     if (error) throw error;
   }
@@ -117,7 +122,7 @@ const Auth = (() => {
   async function resetPassword(email) {
     if (!client) throw new Error('Reset password belum dikonfigurasi.');
     const { error } = await client.auth.resetPasswordForEmail(email, {
-      redirectTo: location.origin,
+      redirectTo: authRedirectUrl(),
     });
     if (error) throw error;
   }
