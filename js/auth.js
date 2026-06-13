@@ -25,6 +25,18 @@ const Auth = (() => {
     }).catch(() => {});
   }
 
+  /** Satu hitungan login per user per hari (termasuk buka app dengan session tersimpan). */
+  function trackLoginOnce(userId) {
+    if (!userId) return;
+    const day = new Date().toISOString().slice(0, 10);
+    const key = 'karsa.analytics.login.' + day + '.' + userId;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch (e) { /* private mode */ }
+    trackAuthEvent('login', userId);
+  }
+
   function updateUI() {
     $$('.auth-trigger').forEach((btn) => {
       btn.classList.remove('hidden');
