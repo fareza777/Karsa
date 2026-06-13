@@ -32,6 +32,11 @@ const AI = (() => {
     '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
     '12. Jika kamu model yang berpikir (reasoning), batasi penalaran internal seketat mungkin — beberapa kalimat saja — lalu langsung tulis jawaban dan file. Jangan menganalisis berlebihan.',
     '13. File besar (>80 baris): pisah ke index.html + css/style.css + js/app.js. Jangan gabung HTML+CSS+JS inline ke satu file kecuali user minta — file terpotong = app rusak.',
+    'PERUBAHAN KECIL & SCREENSHOT:',
+    '14. Jika user minta ubah SATU hal (warna tulisan, ukuran font, teks tombol, satu elemen), ubah HANYA itu. Jangan ganti palet tema, glow, border, background, layout, atau seluruh desain kecuali user minta eksplisit ("redesign", "ganti tema", "percanti", "ubah semua").',
+    '15. Screenshot/lampiran gambar = tampilan proyek SAAT INI sebagai referensi. Instruksi sungguhan ada di TEKS user — ikuti secara harfiah. Jangan anggap screenshot sebagai mockup desain baru.',
+    '16. "Ganti warna tulisan/ teks jadi hijau" = ubah properti color teks (soal, opsi, heading, label) saja — BUKAN mengganti glow, border kartu, gradient background, atau variabel tema global.',
+    '17. Untuk permintaan kecil, keluarkan HANYA file yang benar-benar berubah (sering cukup css/style.css). Jangan tulis ulang index.html/js/app.js jika tidak perlu.',
   ].join('\n');
 
   function getSystemPrompt() {
@@ -195,6 +200,28 @@ const AI = (() => {
       if (text.length > 3500) text = text.slice(0, 3500) + '\n[…]';
       return { role: msg.role, content: text };
     });
+  }
+
+  function isNarrowChangeRequest(text) {
+    return /warna|warni|tulisan|teks|font|ukuran|besar|kecil|bold|italic|margin|padding|spasi|rata|align|opacity|transparan/i.test(text || '')
+      && !/redesign|ganti tema|percanti|ubah semua|rombak|overhaul|total/i.test(text || '');
+  }
+
+  function buildUserInstruction(prompt, hasImages) {
+    const parts = [];
+    if (hasImages) {
+      parts.push(
+        '[SCREENSHOT = tampilan proyek SEKARANG, bukan desain baru. Ikuti permintaan TEKS di bawah secara harfiah.]',
+        '[Ubah HANYA yang diminta user. Jangan redesign tema/glow/border/background jika tidak diminta.]',
+      );
+    }
+    if (isNarrowChangeRequest(prompt)) {
+      parts.push(
+        '[PERUBAHAN SPESIFIK: sentuh hanya elemen/properti yang disebut. Sisanya biarkan sama persis.]',
+      );
+    }
+    parts.push(prompt);
+    return parts.join('\n');
   }
 
   function buildProjectContext() {
@@ -641,7 +668,7 @@ const AI = (() => {
     const textAtts = attachments.filter((a) => a.kind === 'text');
     const sentAttachments = attachments;
 
-    let textPayload = prompt;
+    let textPayload = buildUserInstruction(prompt, imageAtts.length > 0);
     textAtts.forEach((a) => {
       textPayload += '\n\nLAMPIRAN "' + a.name + '":\n```\n' + a.content + '\n```';
     });
