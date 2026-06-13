@@ -1,0 +1,15 @@
+---
+description: Setelah selesai mengubah kode, commit dan push ke origin/main
+alwaysApply: true
+---
+
+# Auto push ke GitHub
+
+Setelah menyelesaikan perubahan kode (fitur, fix, polish):
+
+1. **Commit** dengan pesan singkat yang menjelaskan *why*
+2. **Push** ke `origin main` tanpa menunggu diminta lagi
+3. **Jangan commit**: `.env*`, file berisi secret/token, artefak lokal sementara
+4. Jika commit gagus (hook), perbaiki lalu commit baru — jangan `--amend` kecuali aturan git mengizinkan
+
+User mengharapkan deploy Vercel mengikuti push GitHub.

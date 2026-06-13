@@ -86,10 +86,11 @@ const Auth = (() => {
     if (user && typeof Plan !== 'undefined') {
       await Plan.syncProFromCloud();
     }
+    if (user) trackLoginOnce(user.id);
     client.auth.onAuthStateChange(async (event, session) => {
       user = session?.user || null;
       updateUI();
-      if (event === 'SIGNED_IN' && user) trackAuthEvent('login', user.id);
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && user) trackLoginOnce(user.id);
       if (event === 'SIGNED_IN' && typeof CloudSync !== 'undefined') {
         await CloudSync.onLogin();
       }
