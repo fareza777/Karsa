@@ -326,6 +326,15 @@ const Preview = (() => {
 
     if (snackMode) {
       frame.removeAttribute('src');
+      const diag = Snack.diagnoseProject(project);
+      if (!diag.ok) {
+        diag.errors.forEach((msg) => ConsolePanel.append('error', 'Preview mobile: ' + msg));
+        diag.warnings.forEach((msg) => ConsolePanel.append('warn', 'Preview mobile: ' + msg));
+        ConsolePanel.show();
+        showToast('Preview kosong — lihat Console di bawah.', 'error');
+      } else if (diag.warnings.length) {
+        diag.warnings.forEach((msg) => ConsolePanel.append('warn', 'Preview mobile: ' + msg));
+      }
       frame.srcdoc = Snack.buildEmbedPage(project);
     } else {
       frame.removeAttribute('src');

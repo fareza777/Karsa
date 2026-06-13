@@ -40,6 +40,12 @@ const ConsolePanel = (() => {
     $('#btn-toggle-console').textContent = panel.classList.contains('collapsed') ? '▴' : '▾';
   }
 
+  function show() {
+    const panel = $('#console-panel');
+    panel.classList.remove('collapsed');
+    $('#btn-toggle-console').textContent = '▾';
+  }
+
   function init() {
     window.addEventListener('message', (event) => {
       const data = event.data;
@@ -76,5 +82,5 @@ const ConsolePanel = (() => {
     clear();
   }
 
-  return { init, append, clear };
+  return { init, append, clear, show };
 })();
