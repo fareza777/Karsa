@@ -348,8 +348,10 @@ const App = (() => {
     $('#btn-shortcuts').addEventListener('click', shortcutsDialog);
 
     $('#auto-run-toggle').addEventListener('change', (e) => {
-      State.updateSettings({ autoRun: e.target.checked });
-      if (e.target.checked) Preview.refresh();
+      const on = e.target.checked;
+      State.updateSettings({ autoRun: on });
+      if (on && typeof AI !== 'undefined') AI.setAutoApply(true);
+      if (on) Preview.refresh();
     });
 
     $('#project-name-input').addEventListener('change', (e) => {

@@ -42,6 +42,7 @@
     <symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M15 2v5h5"/><path d="M12 18v-6M9 15h6"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></symbol>
     <symbol id="i-settings" viewBox="0 0 24 24"><path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></symbol>
     <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94a2 2 0 0 0 1.44-1.44l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/><path d="M19 3v4M21 5h-4"/></symbol>
     <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
     <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/></symbol>
@@ -174,6 +175,7 @@
         <button id="btn-history" class="icon-btn" title="Riwayat versi (checkpoint)"><svg class="icon"><use href="#i-history"/></svg></button>
         <button id="btn-share" class="icon-btn" title="Bagikan tautan proyek"><svg class="icon"><use href="#i-link"/></svg></button>
         <button id="btn-publish" class="btn btn-publish" title="Publish ke internet"><svg class="icon"><use href="#i-rocket"/></svg> Publish</button>
+        <button id="btn-ai-settings" class="icon-btn hidden" type="button" title="Pengaturan AI (superuser)"><svg class="icon"><use href="#i-gear"/></svg></button>
         <button id="btn-playstore" class="btn btn-playstore hidden" title="Checklist Google Play Store"><svg class="icon"><use href="#i-store"/></svg> Play</button>
         <button id="btn-export" class="icon-btn" title="Ekspor proyek"><svg class="icon"><use href="#i-download"/></svg></button>
         <span id="ide-sync-badge" class="dash-sync-badge hidden" title="Sinkron cloud"></span>
@@ -205,7 +207,7 @@
             <span class="sidebar-title">KARSA AI</span>
             <span id="ai-plan-badge" class="ai-plan-badge" title="Sisa kuota AI harian"></span>
             <div class="sidebar-actions">
-              <button id="ai-settings-btn" class="icon-btn-sm hidden" title="Pengaturan AI (superuser)"><svg class="icon"><use href="#i-settings"/></svg></button>
+              <button id="ai-settings-btn" class="icon-btn-sm hidden" title="Pengaturan AI (superuser)"><svg class="icon"><use href="#i-gear"/></svg></button>
               <button id="ai-clear-btn" class="icon-btn-sm" title="Bersihkan percakapan"><svg class="icon"><use href="#i-trash"/></svg></button>
             </div>
           </div>

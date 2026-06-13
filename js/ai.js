@@ -402,7 +402,7 @@ const AI = (() => {
 
   function isFileComplete(code, path) {
     const c = (code || '').trim();
-    if (!c) return false;
+    if (c.length < 4) return false;
     const ext = fileExt(path);
     if (ext === 'html') {
       if (c.length > 250) {
@@ -413,10 +413,11 @@ const AI = (() => {
       const scriptClose = (c.match(/<\/script>/gi) || []).length;
       if (scripts > scriptClose) return false;
     }
-    if (ext === 'css' || ext === 'js') {
+    if (ext === 'css') return true;
+    if (ext === 'js') {
       if (!braceBalance(c)) return false;
+      if (/const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
     }
-    if (ext === 'js' && /const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
     return true;
   }
 
@@ -428,7 +429,8 @@ const AI = (() => {
     if (finishReason === 'length') return true;
     if (hasUnclosedCodeFence(visible)) return true;
     const files = parseFileBlocks(visible);
-    return files.length > 0 && files.some((f) => !isFileComplete(f.code, f.path));
+    if (!files.length) return false;
+    return !files.some((f) => isFileComplete(f.code, f.path));
   }
 
   function appendContinueButton(bubble, visible) {
@@ -448,6 +450,7 @@ const AI = (() => {
   function parseFileBlocks(text) {
     const files = [];
     const patterns = [
+      /```[\w-]*[ \t]+file[=:]\s*["']?([^\s"'`]+)["']?[^\n]*\n([\s\S]*?)```/gi,
       /```[\w-]*[ \t]+file=([^\s`]+)[ \t]*\n([\s\S]*?)```/g,
       /```[\w-]*\nfile=([^\s`]+)[ \t]*\n([\s\S]*?)```/g,
     ];
@@ -473,8 +476,33 @@ const AI = (() => {
     return /blok file di ringkas|isi file tidak disertakan|\[…pesan dipotong/i.test(text || '');
   }
 
+  function parseFileBlocksFromDom(bubble) {
+    const files = [];
+    bubble.querySelectorAll('.ai-code-card:not(.writing)').forEach((card) => {
+      const path = card.querySelector('.ai-code-name')?.textContent?.trim();
+      const code = card.querySelector('.ai-code-body code')?.textContent;
+      if (!path || !code || !isValidPath(path)) return;
+      files.push({ path: path.replace(/^\.\//, ''), code: code.replace(/\n$/, '') });
+    });
+    const unique = {};
+    files.forEach((f) => { unique[f.path] = f.code; });
+    return Object.keys(unique).map((path) => ({ path, code: unique[path] }));
+  }
+
+  function collectFileBlocks(bubble, visibleText) {
+    const fromText = parseFileBlocks(visibleText);
+    if (fromText.length) return fromText;
+    return parseFileBlocksFromDom(bubble);
+  }
+
+  function projectFileMatches(path, code) {
+    const project = State.getCurrentProject();
+    if (!project || project.files[path] === undefined) return false;
+    return project.files[path] === code;
+  }
+
   function attachApplyBox(bubble, visibleText, autoFocus, opts) {
-    const allFiles = parseFileBlocks(visibleText);
+    const allFiles = collectFileBlocks(bubble, visibleText);
     if (allFiles.length === 0) return;
     const truncated = opts && opts.truncated;
     const files = allFiles.filter((f) => isFileComplete(f.code, f.path));
@@ -482,10 +510,14 @@ const AI = (() => {
     const project = State.getCurrentProject();
     if (!project) return;
 
+    const pending = files.filter((f) => !projectFileMatches(f.path, f.code));
+
     if (truncated || incomplete.length) {
       bubble.appendChild(el('div', {
         class: 'ai-truncated-warn',
-        text: '⚠ File terpotong atau tidak lengkap — jangan diterapkan dulu. Klik "Lanjutkan tulis" atau minta pisah ke css/js.',
+        text: incomplete.length
+          ? '⚠ Sebagian file belum lengkap — yang siap tetap bisa diterapkan.'
+          : '⚠ Respons mungkin terpotong — periksa file sebelum terapkan.',
       }));
     }
 
@@ -502,21 +534,25 @@ const AI = (() => {
       class: 'btn-apply',
       text: !files.length
         ? '⚡ File belum lengkap'
-        : (files.length === allFiles.length
-          ? '⚡ Terapkan ke Proyek (' + files.length + ' file)'
-          : '⚡ Terapkan (' + files.length + '/' + allFiles.length + ' file siap)'),
-      disabled: !files.length,
+        : (!pending.length
+          ? '✓ Sudah diterapkan'
+          : (files.length === allFiles.length
+            ? '⚡ Terapkan ke Proyek (' + pending.length + ' file)'
+            : '⚡ Terapkan (' + pending.length + '/' + allFiles.length + ' file siap)')),
+      disabled: !pending.length,
       onclick: () => {
-        if (!files.length) {
-          showToast('File belum lengkap — lanjutkan tulis dulu.', 'warn');
+        if (!pending.length) {
+          showToast('File ini sudah ada di proyek — preview sudah memakai versi terbaru.', 'info');
+          Preview.refresh();
           return;
         }
-        if (applyFiles(files)) {
-          const allDone = files.length === allFiles.length;
+        if (applyFiles(pending)) {
+          const left = pending.length;
+          const allDone = left === allFiles.length && !incomplete.length;
           applyBtn.disabled = allDone;
           applyBtn.textContent = allDone
             ? '✓ Sudah diterapkan'
-            : '✓ ' + files.length + ' file diterapkan (ada yang belum lengkap)';
+            : '✓ ' + left + ' file diterapkan';
         }
       },
     });
@@ -538,15 +574,20 @@ const AI = (() => {
   }
 
   function tryAutoApply(bubble, visible, truncated) {
-    if (truncated || !shouldAutoApply()) return;
-    const allFiles = parseFileBlocks(visible);
+    if (!shouldAutoApply()) return;
+    const allFiles = collectFileBlocks(bubble, visible);
     const parsedFiles = allFiles.filter((f) => isFileComplete(f.code, f.path));
-    if (!parsedFiles.length) return;
-    if (parsedFiles.length < allFiles.length) {
-      showToast('Auto-terapkan ditunda — ada file yang belum lengkap. Klik Terapkan atau Lanjutkan tulis.', 'warn');
+    const pending = parsedFiles.filter((f) => !projectFileMatches(f.path, f.code));
+    if (!pending.length) return;
+    if (truncated && pending.length < allFiles.length) {
+      showToast('Auto-terapkan ditunda — ada file yang belum lengkap.', 'warn');
       return;
     }
-    if (applyFiles(parsedFiles)) markApplyButtonDone(bubble);
+    if (parsedFiles.length < allFiles.length) {
+      showToast('Auto-terapkan ditunda — ada file yang belum lengkap.', 'warn');
+      return;
+    }
+    if (applyFiles(pending)) markApplyButtonDone(bubble);
   }
 
   function applyFiles(files) {
@@ -562,7 +603,7 @@ const AI = (() => {
     Tabs.open(entry.path);
     Preview.refresh();
     confettiBurst();
-    showToast(valid.length + ' file diterapkan — checkpoint tersimpan 🕰', 'ok');
+    showToast(valid.length + ' file diterapkan — preview diperbarui', 'ok');
     return true;
   }
 
@@ -875,6 +916,8 @@ const AI = (() => {
     $('#ai-send').addEventListener('click', send);
     $('#ai-stop').addEventListener('click', () => { if (abortCtrl) abortCtrl.abort(); });
     $('#ai-settings-btn').addEventListener('click', settingsDialog);
+    const topSettings = $('#btn-ai-settings');
+    if (topSettings) topSettings.addEventListener('click', settingsDialog);
     $('#ai-clear-btn').addEventListener('click', clearChat);
     $('#ai-mode-fast').addEventListener('click', () => setMode(true));
     $('#ai-mode-smart').addEventListener('click', () => setMode(false));
@@ -935,7 +978,16 @@ const AI = (() => {
     showToast('Preview Mobile (Expo Snack) dimuat…', 'info');
   }
 
-  return { init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh };
+  function setAutoApply(enabled) {
+    saveSettings({ autoApply: !!enabled });
+    const toggle = $('#ai-auto-apply');
+    if (toggle) toggle.checked = !!enabled;
+  }
+
+  return {
+    init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh,
+    setAutoApply, openSettings: settingsDialog,
+  };
 })();
 
 document.addEventListener('DOMContentLoaded', AI.init);

@@ -7,6 +7,17 @@ const Plan = (() => {
   const FREE_AI_DAILY = 30;
 
   let config = { freeAiDaily: FREE_AI_DAILY, billingEnabled: false, lemonCheckoutBase: null, superuserConfigured: false };
+  let superuserActive = false;
+
+  function readSuperuserStorage() {
+    try {
+      return localStorage.getItem(SUPER_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  superuserActive = readSuperuserStorage();
 
   async function loadConfig() {
     try {
@@ -89,14 +100,11 @@ const Plan = (() => {
   }
 
   function isSuperuser() {
-    try {
-      return localStorage.getItem(SUPER_KEY) === '1';
-    } catch (e) {
-      return false;
-    }
+    return superuserActive || readSuperuserStorage();
   }
 
   function setSuperuser(active) {
+    superuserActive = !!active;
     try {
       if (active) localStorage.setItem(SUPER_KEY, '1');
       else localStorage.removeItem(SUPER_KEY);
@@ -181,8 +189,9 @@ const Plan = (() => {
     if (proBtn) proBtn.classList.toggle('active', isPro() || isSuperuser());
     const adminBtn = $('#dash-admin-btn');
     if (adminBtn) adminBtn.classList.toggle('hidden', !isSuperuser());
-    const settingsBtn = $('#ai-settings-btn');
-    if (settingsBtn) settingsBtn.classList.toggle('hidden', !isSuperuser());
+    const settingsBtns = $$('#ai-settings-btn, #btn-ai-settings');
+    settingsBtns.forEach((btn) => btn.classList.toggle('hidden', !isSuperuser()));
+    document.body.classList.toggle('is-superuser', isSuperuser());
   }
 
   async function verifyProCode(code) {

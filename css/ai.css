@@ -56,8 +56,13 @@
   flex-shrink: 0;
   margin-left: auto;
 }
-#ai-settings-btn:not(.hidden) {
-  display: inline-grid;
+#btn-ai-settings:not(.hidden) {
+  color: var(--accent-2);
+}
+
+body.is-superuser #btn-ai-settings,
+body.is-superuser #ai-settings-btn {
+  opacity: 1;
 }
 .ai-plan-badge {
   font-size: 10px;
