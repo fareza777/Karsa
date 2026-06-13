@@ -17,6 +17,40 @@ const PlayStore = (() => {
     return Object.keys(files).some((p) => p.endsWith('/' + path) || p === path);
   }
 
+  function resolveAssetPath(files, ref) {
+    if (!ref || typeof ref !== 'string') return null;
+    const p = ref.replace(/^\.\//, '');
+    if (files[p]) return p;
+    return Object.keys(files).find((k) => k === p || k.endsWith('/' + p)) || null;
+  }
+
+  // Cek file gambar beneran ada — bukan cuma path di app.json atau README placeholder
+  function hasRealImageAsset(files, ref) {
+    const path = resolveAssetPath(files, ref);
+    if (!path || !/\.(png|jpg|jpeg|webp)$/i.test(path)) return false;
+    const content = files[path];
+    if (!content || content.length < 180) return false;
+    const head = content.trim().slice(0, 120);
+    return !/^(#|Tambahkan|Ganti|placeholder|README)/i.test(head);
+  }
+
+  function isTemplateApp(files) {
+    const entry = expoEntryPath(files);
+    if (!entry) return true;
+    const code = files[entry] || '';
+    return /Siap Play Store|Edit app ini, lalu buka checklist/i.test(code) || code.length < 350;
+  }
+
+  function isGenericPackage(pkg) {
+    return !pkg || /^com\.karsa\.(playstoreapp|todo|app)$/i.test(pkg);
+  }
+
+  function isGenericExpoName(expo) {
+    if (!expo || !expo.name || !expo.slug) return true;
+    return /^(aplikasi play store|karsa playstore app)$/i.test(expo.name.trim()) ||
+      /^(karsa-playstore-app|karsa-playstore)$/i.test(expo.slug);
+  }
+
   function evaluate(project) {
     const files = project.files;
     const a = analyzeProjectFiles(files);
@@ -25,64 +59,66 @@ const PlayStore = (() => {
     const items = [];
 
     items.push({
-      id: 'expo',
-      label: 'Proyek Expo (App.tsx + package.json)',
-      ok: a.expoLike && !!expoEntryPath(files),
-      hint: a.expoLike ? 'Tambahkan App.tsx' : 'Buat proyek tipe Mobile atau Play Store',
-    });
-
-    items.push({
-      id: 'androidPackage',
-      label: 'ID paket Android (com.namabisnis.app)',
-      ok: !!(expo && expo.android && expo.android.package),
-      hint: 'Isi expo.android.package di app.json — huruf kecil, unik secara global',
+      id: 'app',
+      label: 'Aplikasi sudah dibuat (bukan template kosong)',
+      ok: a.expoLike && !!expoEntryPath(files) && !isTemplateApp(files),
+      hint: 'Minta KARSA AI buat aplikasi Anda dulu — preview mobile harus tampil isinya',
     });
 
     items.push({
       id: 'name',
-      label: 'Nama aplikasi & slug',
-      ok: !!(expo && expo.name && expo.slug),
-      hint: 'Isi expo.name dan expo.slug di app.json',
+      label: 'Nama aplikasi untuk Play Store',
+      ok: !!(expo && expo.name && expo.slug) && !isGenericExpoName(expo),
+      hint: 'Ubah nama & slug di app.json sesuai aplikasi Anda (bukan "Aplikasi Play Store")',
+    });
+
+    items.push({
+      id: 'androidPackage',
+      label: 'ID aplikasi Android (unik, contoh com.tokoanda.app)',
+      ok: !!(expo && expo.android && expo.android.package) && !isGenericPackage(expo.android.package),
+      hint: 'Isi expo.android.package di app.json — huruf kecil, unik, sesuai bisnis Anda',
     });
 
     items.push({
       id: 'version',
-      label: 'Versi (version + android.versionCode)',
+      label: 'Nomor versi rilis',
       ok: !!(expo && expo.version && expo.android && expo.android.versionCode),
       hint: 'Contoh: version "1.0.0" dan android.versionCode 1',
     });
 
     items.push({
       id: 'icon',
-      label: 'Icon aplikasi (1024×1024 PNG)',
-      ok: !!(expo && expo.icon && hasAsset(files, expo.icon.replace(/^\.\//, ''))),
-      hint: 'Tambahkan assets/icon.png dan rujuk di app.json',
+      label: 'Icon aplikasi (file PNG 1024×1024)',
+      ok: !!(expo && expo.icon && hasRealImageAsset(files, expo.icon)),
+      hint: 'Upload assets/icon.png — gambar asli, bukan cuma path di app.json',
     });
 
     items.push({
       id: 'splash',
-      label: 'Splash screen',
-      ok: !!(expo && expo.splash),
-      hint: 'Tambahkan expo.splash (image atau backgroundColor) di app.json',
+      label: 'Gambar layar pembuka (splash)',
+      ok: !!(expo && expo.splash && expo.splash.image && hasRealImageAsset(files, expo.splash.image)),
+      hint: 'Tambahkan file assets/splash.png (gambar asli)',
     });
 
     items.push({
       id: 'adaptive',
-      label: 'Adaptive icon Android',
-      ok: !!(expo && expo.android && expo.android.adaptiveIcon),
-      hint: 'Tambahkan expo.android.adaptiveIcon di app.json',
+      label: 'Icon adaptif Android (PNG)',
+      ok: !!(expo && expo.android && expo.android.adaptiveIcon &&
+        expo.android.adaptiveIcon.foregroundImage &&
+        hasRealImageAsset(files, expo.android.adaptiveIcon.foregroundImage)),
+      hint: 'Tambahkan file assets/adaptive-icon.png (gambar asli)',
     });
 
     items.push({
       id: 'eas',
-      label: 'eas.json untuk build AAB',
+      label: 'Konfigurasi build (eas.json)',
       ok: !!files['eas.json'],
-      hint: 'Klik "Buat eas.json" di bawah',
+      hint: 'Klik "Setup otomatis" di bawah',
     });
 
     const done = items.filter((i) => i.ok).length;
     const score = Math.round((done / items.length) * 100);
-    return { items, score, ready: score >= 85 && items.find((i) => i.id === 'androidPackage').ok };
+    return { items, score, done, total: items.length, ready: done === items.length };
   }
 
   function defaultAndroidPackage(project) {
@@ -170,7 +206,7 @@ const PlayStore = (() => {
     const body = el('div', {}, [
       el('p', { class: 'modal-desc', text: 'Persiapan upload ke Google Play Store untuk "' + project.name + '".' }),
       el('div', { class: 'playstore-score-row' }, [
-        el('span', { class: 'playstore-score', text: ev.score + '% siap' }),
+        el('span', { class: 'playstore-score', text: ev.done + ' dari ' + ev.total + ' selesai (' + ev.score + '%)' }),
         ev.ready ? el('span', { class: 'project-tag live', text: '🏪 Siap build' }) : null,
       ]),
       bar,
