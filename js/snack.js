@@ -132,11 +132,11 @@ const Snack = (() => {
   function buildEmbedPage(project) {
     const diag = diagnoseProject(project);
     if (!diag.ok) {
-      return buildErrorPage(diag.errors, diag.warnings);
+      return buildWaitingPage();
     }
     const snackFiles = buildSnackFiles(project);
     if (!snackFiles) {
-      return buildErrorPage(['Tidak ada App.tsx / App.js untuk preview mobile.']);
+      return buildWaitingPage();
     }
     const filesAttr = encodeURIComponent(JSON.stringify(snackFiles));
     return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">' +
@@ -149,23 +149,17 @@ const Snack = (() => {
       '<script async src="https://snack.expo.dev/embed.js"><\/script></body></html>';
   }
 
-  function buildErrorPage(errors, warnings) {
-    const errs = Array.isArray(errors) ? errors : [errors];
-    const warns = warnings || [];
-    const list = errs.map((t) => '<li>' + escapeHtml(t) + '</li>').join('');
-    const wlist = warns.length
-      ? '<ul style="margin:12px 0 0;padding-left:20px;color:#94a3b8;font-size:13px">' +
-        warns.map((t) => '<li>' + escapeHtml(t) + '</li>').join('') + '</ul>'
-      : '';
+  function buildWaitingPage() {
     return '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
-      '<style>body{font-family:system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0f1117;color:#e2e8f0;padding:24px;box-sizing:border-box}' +
-      '.box{max-width:420px;text-align:left;background:#1a1d27;border:1px solid #334155;border-radius:12px;padding:24px}' +
-      'h2{margin:0 0 8px;font-size:16px;color:#f87171}ul{margin:8px 0 0;padding-left:20px;line-height:1.5;font-size:14px;color:#fca5a5}' +
-      'p.hint{margin:16px 0 0;font-size:12px;color:#94a3b8}</style></head><body><div class="box">' +
-      '<h2>📱 Preview mobile gagal</h2>' +
-      '<ul>' + list + '</ul>' + wlist +
-      '<p class="hint">Detail juga muncul di panel <b>Console</b> di bawah preview.</p>' +
-      '</div></body></html>';
+      '<style>' +
+      'body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#f8fafc,#e2e8f0);font-family:system-ui,sans-serif;color:#64748b}' +
+      '.c{text-align:center;padding:24px}.ico{font-size:48px;opacity:.5;margin-bottom:8px}' +
+      'p{margin:0;font-size:13px}</style></head><body><div class="c">' +
+      '<div class="ico">📱</div><p>Menunggu aplikasi siap…</p></div></body></html>';
+  }
+
+  function buildErrorPage(errors, warnings) {
+    return buildWaitingPage();
   }
 
   function canPreview(project) {

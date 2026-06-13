@@ -207,6 +207,113 @@ const Preview = (() => {
   let thumbTimer = null;
   let previewEngine = 'auto';
 
+  const PREVIEW_FIX_PROMPT =
+    'Preview mobile belum bisa tampil. Tulis ulang App.tsx secara UTUH sampai valid: export default, return JSX lengkap, StyleSheet.create ditutup. Satu file saja.';
+  const MAX_AUTO_FIX = 2;
+  const fixAttemptsByProject = {};
+
+  function resetAutoFix(projectId) {
+    if (projectId) fixAttemptsByProject[projectId] = 0;
+  }
+
+  function isAiBusy() {
+    const btn = $('#ai-send');
+    return btn ? btn.disabled : false;
+  }
+
+  function hidePreviewStatus() {
+    const el = $('#preview-status');
+    if (el) {
+      el.classList.add('hidden');
+      el.innerHTML = '';
+    }
+  }
+
+  function showPreviewStatus(opts) {
+    const root = $('#preview-status');
+    if (!root) return;
+    const parts = [];
+    if (opts.spinning !== false) {
+      parts.push(el('span', { class: 'preview-status-spinner' }));
+    }
+    parts.push(el('strong', { text: opts.title || '⏳ Tunggu sebentar…' }));
+    parts.push(el('p', { text: opts.body || '' }));
+    if (opts.action) {
+      parts.push(el('button', {
+        class: 'btn btn-primary btn-sm',
+        text: opts.action.label,
+        onclick: opts.action.onclick,
+      }));
+    }
+    root.innerHTML = '';
+    root.appendChild(el('div', { class: 'preview-status-inner' }, parts));
+    root.classList.remove('hidden');
+  }
+
+  function friendlyPreviewMessage(diag) {
+    const errs = (diag.errors || []).join(' ');
+    if (/Belum ada App/.test(errs)) {
+      return {
+        title: '✨ Mulai dari sini',
+        body: 'Ceritakan aplikasi yang kamu mau di chat KARSA AI (kiri). Preview akan muncul otomatis setelah AI selesai.',
+      };
+    }
+    if (/return|terpotong|pendek|seimbang/.test(errs)) {
+      return {
+        title: '⏳ Hampir selesai…',
+        body: 'KARSA sedang menyelesaikan tampilan aplikasi. Preview muncul sendiri — tunggu sebentar ya.',
+      };
+    }
+    return {
+      title: '⏳ Aplikasi sedang disusun…',
+      body: 'Tidak perlu lakukan apa pun. Kalau sudah lama, klik tombol di bawah.',
+    };
+  }
+
+  function maybeAutoFixPreview(project, diag) {
+    if (diag.ok) {
+      hidePreviewStatus();
+      resetAutoFix(project.id);
+      return;
+    }
+    const msg = friendlyPreviewMessage(diag);
+    const aiBusy = isAiBusy();
+    const attempts = fixAttemptsByProject[project.id] || 0;
+
+    showPreviewStatus({
+      title: msg.title,
+      body: aiBusy
+        ? 'KARSA AI sedang menulis kode. Preview akan muncul otomatis setelah selesai.'
+        : msg.body,
+      spinning: true,
+      action: (!aiBusy && attempts >= MAX_AUTO_FIX) ? {
+        label: '✨ Selesaikan aplikasi',
+        onclick: () => {
+          fixAttemptsByProject[project.id] = attempts + 1;
+          AI.switchTab('ai');
+          AI.sendPrompt(PREVIEW_FIX_PROMPT, { autoApplyOnce: true });
+        },
+      } : null,
+    });
+
+    if (aiBusy || attempts >= MAX_AUTO_FIX) return;
+
+    fixAttemptsByProject[project.id] = attempts + 1;
+    const projectId = project.id;
+    setTimeout(() => {
+      const current = State.getCurrentProject();
+      if (!current || current.id !== projectId) return;
+      if (isAiBusy()) return;
+      const d2 = Snack.diagnoseProject(current);
+      if (d2.ok) {
+        hidePreviewStatus();
+        return;
+      }
+      AI.switchTab('ai');
+      AI.sendPrompt(PREVIEW_FIX_PROMPT, { autoApplyOnce: true });
+    }, 2500);
+  }
+
   function usesSnackEngine(project) {
     const a = analyzeProjectFiles(project.files);
     if (previewEngine === 'web') return false;
@@ -327,16 +434,10 @@ const Preview = (() => {
     if (snackMode) {
       frame.removeAttribute('src');
       const diag = Snack.diagnoseProject(project);
-      if (!diag.ok) {
-        diag.errors.forEach((msg) => ConsolePanel.append('error', 'Preview mobile: ' + msg));
-        diag.warnings.forEach((msg) => ConsolePanel.append('warn', 'Preview mobile: ' + msg));
-        ConsolePanel.show();
-        showToast('Preview kosong — lihat Console di bawah.', 'error');
-      } else if (diag.warnings.length) {
-        diag.warnings.forEach((msg) => ConsolePanel.append('warn', 'Preview mobile: ' + msg));
-      }
       frame.srcdoc = Snack.buildEmbedPage(project);
+      maybeAutoFixPreview(project, diag);
     } else {
+      hidePreviewStatus();
       frame.removeAttribute('src');
       frame.srcdoc = buildBundle(project);
     }
@@ -504,6 +605,6 @@ const Preview = (() => {
 
   return {
     refresh, refreshDebounced, openInNewTab, setDevice, setEngine, buildBundle,
-    runInPreview, screenshot, updatePreviewHint, openSnackTab,
+    runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix,
   };
 })();

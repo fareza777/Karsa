@@ -430,7 +430,7 @@ const AI = (() => {
     const box = el('div', { class: 'ai-welcome' }, [
       el('div', { class: 'ai-welcome-icon', text: '✨' }),
       el('h3', { text: 'Vibecoding dengan KARSA AI' }),
-      el('p', { text: 'Cukup bilang apa yang kamu mau — misalnya "buatkan aplikasi catatan keuangan". KARSA yang urus sisanya.' }),
+      el('p', { text: 'Cukup bilang apa yang kamu mau — misalnya "buatkan aplikasi catatan keuangan". KARSA yang urus sisanya; preview di kanan muncul otomatis saat siap.' }),
       el('div', { class: 'ai-examples' }, examples.map((ex) =>
         el('button', {
           class: 'ai-example',
@@ -990,6 +990,8 @@ const AI = (() => {
       return;
     }
 
+    if (typeof Preview !== 'undefined') Preview.resetAutoFix(project.id);
+
     // Hapus sapaan bila masih ada
     const welcome = $('.ai-welcome', chatEl());
     if (welcome) welcome.remove();
@@ -1199,7 +1201,9 @@ const AI = (() => {
       } else if (totalContinueRounds > 0) {
         showToast('Selesai ✓', 'ok');
       } else if (awamPhases.length > 1 && parsedFiles.length) {
-        showToast('Aplikasi dasar siap — preview sudah diperbarui ✨', 'ok');
+        showToast('Aplikasi siap — cek preview di kanan ✨', 'ok');
+      } else if (parsedFiles.length && !truncated) {
+        showToast('Selesai — preview diperbarui ✨', 'ok');
       } else if (!parsedFiles.length && (looksLikeCodeChangeRequest(prompt) || responseHasFilePlaceholder(visible))) {
         bubble.appendChild(el('button', {
           class: 'ai-retry-btn',
