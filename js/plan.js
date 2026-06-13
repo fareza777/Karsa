@@ -189,8 +189,8 @@ const Plan = (() => {
     if (proBtn) proBtn.classList.toggle('active', isPro() || isSuperuser());
     const adminBtn = $('#dash-admin-btn');
     if (adminBtn) adminBtn.classList.toggle('hidden', !isSuperuser());
-    const settingsBtns = $$('#ai-settings-btn, #btn-ai-settings');
-    settingsBtns.forEach((btn) => btn.classList.toggle('hidden', !isSuperuser()));
+    const settingsBtn = $('#btn-ai-settings');
+    if (settingsBtn) settingsBtn.classList.toggle('hidden', !isSuperuser());
     document.body.classList.toggle('is-superuser', isSuperuser());
   }
 

@@ -332,7 +332,6 @@ const Preview = (() => {
       frame.srcdoc = buildBundle(project);
     }
     updatePreviewHint(project);
-    updatePhoneModelSelect();
 
     clearTimeout(thumbTimer);
     if (!snackMode) {
@@ -369,16 +368,9 @@ const Preview = (() => {
   // Dimensi viewport device (CSS px) + lebar bingkai ponsel
   const DEVICE_DIMS = {
     phone: [412, 915, 12],
-    'phone-samsung': [360, 800, 10],
-    'phone-oppo': [393, 873, 10],
-    'phone-xiaomi': [393, 851, 10],
     tablet: [768, 1024, 0],
   };
   let currentDevice = 'desktop';
-
-  function isPhoneDevice(d) {
-    return d === 'phone' || (d && d.startsWith('phone-'));
-  }
 
   function setDevice(device) {
     currentDevice = device;
@@ -386,22 +378,9 @@ const Preview = (() => {
     const cls = DEVICE_DIMS[device] ? 'device-' + device : 'device-desktop';
     wrap.className = 'preview-frame-wrap ' + cls;
     $$('.device-btn').forEach((btn) => {
-      const d = btn.dataset.device;
-      btn.classList.toggle('active', d === 'phone' ? isPhoneDevice(device) : d === device);
+      btn.classList.toggle('active', btn.dataset.device === device);
     });
-    const sel = $('#phone-model-select');
-    if (sel && isPhoneDevice(device)) {
-      sel.value = DEVICE_DIMS[device] ? device : 'phone';
-    }
     fitDevice();
-    updatePhoneModelSelect();
-  }
-
-  function updatePhoneModelSelect() {
-    const sel = $('#phone-model-select');
-    if (!sel) return;
-    const phoneActive = isPhoneDevice(currentDevice);
-    sel.classList.toggle('hidden', !phoneActive);
   }
 
   // Skalakan frame device agar selalu utuh terlihat di panel (ala DevTools)

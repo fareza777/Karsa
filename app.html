@@ -13,11 +13,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="css/base.css?v=20260614b">
-  <link rel="stylesheet" href="css/components.css?v=20260614b">
-  <link rel="stylesheet" href="css/dashboard.css?v=20260614b">
-  <link rel="stylesheet" href="css/ide.css?v=20260614b">
-  <link rel="stylesheet" href="css/ai.css?v=20260614b">
+  <link rel="stylesheet" href="css/base.css?v=20260614c">
+  <link rel="stylesheet" href="css/components.css?v=20260614c">
+  <link rel="stylesheet" href="css/dashboard.css?v=20260614c">
+  <link rel="stylesheet" href="css/ide.css?v=20260614c">
+  <link rel="stylesheet" href="css/ai.css?v=20260614c">
 </head>
 <body data-theme="dark">
 
@@ -28,8 +28,8 @@
     <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z"/></symbol>
     <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
-    <symbol id="i-tablet" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></symbol>
-    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></symbol>
+    <symbol id="i-tablet" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M11 5h2" stroke-width="2.5"/><path d="M12 18h.01"/></symbol>
     <symbol id="i-external" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
     <symbol id="i-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
@@ -168,8 +168,8 @@
       <div class="topbar-right">
         <div class="device-group" role="group" aria-label="Mode tampilan">
           <button class="device-btn active" data-device="desktop" title="Desktop"><svg class="icon"><use href="#i-monitor"/></svg></button>
-          <button class="device-btn" data-device="tablet" title="Tablet (768px)"><svg class="icon"><use href="#i-tablet"/></svg></button>
-          <button class="device-btn" data-device="phone" title="Ponsel (412×915, Android modern)"><svg class="icon"><use href="#i-phone"/></svg></button>
+          <button class="device-btn" data-device="tablet" title="Tablet (768×1024)"><svg class="icon"><use href="#i-tablet"/></svg></button>
+          <button class="device-btn" data-device="phone" title="Ponsel (412×915)"><svg class="icon"><use href="#i-phone"/></svg></button>
         </div>
         <button id="btn-open-tab" class="icon-btn" title="Buka preview di tab baru"><svg class="icon"><use href="#i-external"/></svg></button>
         <button id="btn-history" class="icon-btn" title="Riwayat versi (checkpoint)"><svg class="icon"><use href="#i-history"/></svg></button>
@@ -207,7 +207,6 @@
             <span class="sidebar-title">KARSA AI</span>
             <span id="ai-plan-badge" class="ai-plan-badge" title="Sisa kuota AI harian"></span>
             <div class="sidebar-actions">
-              <button id="ai-settings-btn" class="icon-btn-sm hidden" title="Pengaturan AI (superuser)"><svg class="icon"><use href="#i-gear"/></svg></button>
               <button id="ai-clear-btn" class="icon-btn-sm" title="Bersihkan percakapan"><svg class="icon"><use href="#i-trash"/></svg></button>
             </div>
           </div>
@@ -268,12 +267,6 @@
             <button type="button" class="preview-engine-btn" data-engine="web" title="Preview web HTML"><svg class="icon"><use href="#i-globe"/></svg> Web</button>
             <button type="button" class="preview-engine-btn" data-engine="snack" title="Preview Expo Snack"><svg class="icon"><use href="#i-phone"/></svg> Mobile</button>
           </div>
-          <select id="phone-model-select" class="phone-model-select hidden" title="Model HP">
-            <option value="phone">HP umum</option>
-            <option value="phone-samsung">Samsung</option>
-            <option value="phone-oppo">OPPO</option>
-            <option value="phone-xiaomi">Xiaomi</option>
-          </select>
           <span id="preview-url" class="preview-url">karsa.work/preview</span>
           <button id="btn-shot-full" class="icon-btn-sm" title="Screenshot satu layar preview"><svg class="icon"><use href="#i-camera"/></svg></button>
           <button id="btn-shot-region" class="icon-btn-sm" title="Screenshot area tertentu (seret untuk memilih)"><svg class="icon"><use href="#i-scissors"/></svg></button>
@@ -338,25 +331,25 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ============ APP ============ -->
-  <script src="js/utils.js?v=20260614b"></script>
-  <script src="js/storage.js?v=20260614b"></script>
-  <script src="js/templates.js?v=20260614b"></script>
-  <script src="js/project.js?v=20260614b"></script>
-  <script src="js/state.js?v=20260614b"></script>
-  <script src="js/components.js?v=20260614b"></script>
-  <script src="js/console.js?v=20260614b"></script>
-  <script src="js/snack.js?v=20260614b"></script>
-  <script src="js/preview.js?v=20260614b"></script>
-  <script src="js/editor.js?v=20260614b"></script>
-  <script src="js/tabs.js?v=20260614b"></script>
-  <script src="js/filetree.js?v=20260614b"></script>
-  <script src="js/dashboard.js?v=20260614b"></script>
-  <script src="js/plan.js?v=20260614b"></script>
-  <script src="js/auth.js?v=20260614b"></script>
-  <script src="js/sync.js?v=20260614b"></script>
-  <script src="js/publish.js?v=20260614b"></script>
-  <script src="js/playstore.js?v=20260614b"></script>
-  <script src="js/app.js?v=20260614b"></script>
-  <script src="js/ai.js?v=20260614b"></script>
+  <script src="js/utils.js?v=20260614c"></script>
+  <script src="js/storage.js?v=20260614c"></script>
+  <script src="js/templates.js?v=20260614c"></script>
+  <script src="js/project.js?v=20260614c"></script>
+  <script src="js/state.js?v=20260614c"></script>
+  <script src="js/components.js?v=20260614c"></script>
+  <script src="js/console.js?v=20260614c"></script>
+  <script src="js/snack.js?v=20260614c"></script>
+  <script src="js/preview.js?v=20260614c"></script>
+  <script src="js/editor.js?v=20260614c"></script>
+  <script src="js/tabs.js?v=20260614c"></script>
+  <script src="js/filetree.js?v=20260614c"></script>
+  <script src="js/dashboard.js?v=20260614c"></script>
+  <script src="js/plan.js?v=20260614c"></script>
+  <script src="js/auth.js?v=20260614c"></script>
+  <script src="js/sync.js?v=20260614c"></script>
+  <script src="js/publish.js?v=20260614c"></script>
+  <script src="js/playstore.js?v=20260614c"></script>
+  <script src="js/app.js?v=20260614c"></script>
+  <script src="js/ai.js?v=20260614c"></script>
 </body>
 </html>

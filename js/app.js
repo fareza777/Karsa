@@ -364,15 +364,8 @@ const App = (() => {
     });
 
     $$('.device-btn').forEach((btn) =>
-      btn.addEventListener('click', () => {
-        const d = btn.dataset.device;
-        Preview.setDevice(d === 'phone' ? 'phone' : d);
-      })
+      btn.addEventListener('click', () => Preview.setDevice(btn.dataset.device))
     );
-    const phoneSel = $('#phone-model-select');
-    if (phoneSel) {
-      phoneSel.addEventListener('change', () => Preview.setDevice(phoneSel.value));
-    }
     $$('.preview-engine-btn').forEach((btn) =>
       btn.addEventListener('click', () => {
         Preview.setEngine(btn.dataset.engine);

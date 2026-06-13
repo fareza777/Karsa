@@ -918,7 +918,6 @@ const AI = (() => {
     $('#side-tab-ai').addEventListener('click', () => switchTab('ai'));
     $('#ai-send').addEventListener('click', send);
     $('#ai-stop').addEventListener('click', () => { if (abortCtrl) abortCtrl.abort(); });
-    $('#ai-settings-btn').addEventListener('click', settingsDialog);
     const topSettings = $('#btn-ai-settings');
     if (topSettings) topSettings.addEventListener('click', settingsDialog);
     $('#ai-clear-btn').addEventListener('click', clearChat);

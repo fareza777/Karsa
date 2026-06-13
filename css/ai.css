@@ -60,8 +60,7 @@
   color: var(--accent-2);
 }
 
-body.is-superuser #btn-ai-settings,
-body.is-superuser #ai-settings-btn {
+body.is-superuser #btn-ai-settings {
   opacity: 1;
 }
 .ai-plan-badge {
