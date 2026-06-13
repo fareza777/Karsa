@@ -2,7 +2,7 @@
 
 const CloudSync = (() => {
   const DELETED_KEY = 'karsa.deleted_projects.v1';
-  const TOMBSTONE_MS = 30 * 24 * 60 * 60 * 1000;
+  const TOMBSTONE_MS = 90 * 24 * 60 * 60 * 1000;
   let pushing = false;
   let status = 'hidden'; // hidden | syncing | saved | error
 
@@ -35,11 +35,26 @@ const CloudSync = (() => {
   }
 
   function isDeleted(id) {
+    if (!id) return false;
     return !!loadDeletedMap()[id];
+  }
+
+  function filterDeletedProjects(list) {
+    return (list || []).filter((p) => p && p.id && !isDeleted(p.id));
   }
 
   function canSync() {
     return typeof Auth !== 'undefined' && Auth.isLoggedIn() && Auth.getClient();
+  }
+
+  async function getAccessToken() {
+    if (typeof Auth === 'undefined' || !Auth.getClient()) return null;
+    try {
+      const { data } = await Auth.getClient().auth.getSession();
+      return data.session?.access_token || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   function setStatus(next) {
@@ -75,43 +90,70 @@ const CloudSync = (() => {
   }
 
   async function deleteProjectRemote(id) {
-    if (!canSync() || !id) return false;
-    const client = Auth.getClient();
-    const user = Auth.getUser();
-    if (!client || !user) return false;
-    try {
-      const { error } = await client
-        .from('user_projects')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('id', id);
-      if (error) throw error;
-      setStatus('saved');
-      return true;
-    } catch (err) {
-      console.warn('KARSA cloud sync delete:', err);
-      setStatus('error');
-      return false;
+    if (!id) return false;
+
+    if (canSync()) {
+      const token = await getAccessToken();
+      if (token) {
+        try {
+          const res = await fetch('/api/project-delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectId: id, accessToken: token }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok) {
+            setStatus('saved');
+            return true;
+          }
+          console.warn('KARSA cloud delete API:', data.error || res.status);
+        } catch (err) {
+          console.warn('KARSA cloud delete API:', err);
+        }
+      }
+
+      const client = Auth.getClient();
+      const user = Auth.getUser();
+      if (client && user) {
+        try {
+          const { error } = await client
+            .from('user_projects')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('id', id);
+          if (!error) {
+            setStatus('saved');
+            return true;
+          }
+          console.warn('KARSA cloud sync delete:', error);
+        } catch (err) {
+          console.warn('KARSA cloud sync delete:', err);
+        }
+      }
     }
+
+    return false;
   }
 
   async function pruneOrphanCloudProjects(localIds) {
+    if (!canSync()) return;
     const client = Auth.getClient();
     const user = Auth.getUser();
     if (!client || !user) return;
+
     const { data, error } = await client
       .from('user_projects')
       .select('id')
       .eq('user_id', user.id);
     if (error) throw error;
-    const orphanIds = (data || []).map((row) => row.id).filter((cid) => !localIds.has(cid));
+
+    const orphanIds = (data || [])
+      .map((row) => row.id)
+      .filter((cid) => cid && !localIds.has(cid));
+
     if (!orphanIds.length) return;
-    const { error: delErr } = await client
-      .from('user_projects')
-      .delete()
-      .eq('user_id', user.id)
-      .in('id', orphanIds);
-    if (delErr) throw delErr;
+
+    await Promise.all(orphanIds.map((cid) => deleteProjectRemote(cid)));
   }
 
   async function pushAll() {
@@ -122,7 +164,7 @@ const CloudSync = (() => {
     pushing = true;
     setStatus('syncing');
     try {
-      const projects = State.getProjects();
+      const projects = filterDeletedProjects(State.getProjects());
       const localIds = new Set(projects.map((p) => p.id));
 
       if (projects.length) {
@@ -164,21 +206,21 @@ const CloudSync = (() => {
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
       if (error) throw error;
-      if (!data || !data.length) {
-        setStatus('saved');
-        return false;
-      }
 
-      const map = new Map(State.getProjects().map((p) => [p.id, p]));
-      let changed = false;
+      const map = new Map(filterDeletedProjects(State.getProjects()).map((p) => [p.id, p]));
+      let changed = map.size !== State.getProjects().length;
       const staleOnCloud = [];
-      data.forEach((row) => {
+
+      (data || []).forEach((row) => {
         const cloud = row.data;
-        if (!cloud || !cloud.id || !cloud.files) return;
-        if (isDeleted(cloud.id)) {
-          staleOnCloud.push(cloud.id);
+        const pid = row.id || cloud?.id;
+        if (!pid) return;
+        if (isDeleted(pid) || (cloud?.id && isDeleted(cloud.id))) {
+          staleOnCloud.push(pid);
           return;
         }
+        if (!cloud || !cloud.id || !cloud.files) return;
+
         const local = map.get(cloud.id);
         const cloudTs = new Date(row.updated_at).getTime() || cloud.updatedAt || 0;
         const localTs = local?.updatedAt || 0;
@@ -187,14 +229,20 @@ const CloudSync = (() => {
           changed = true;
         }
       });
+
       if (staleOnCloud.length) {
         await Promise.all(staleOnCloud.map((id) => deleteProjectRemote(id)));
       }
-      if (!changed) {
+
+      const merged = filterDeletedProjects(
+        Array.from(map.values()).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+      );
+
+      if (!changed && merged.length === State.getProjects().length) {
         setStatus('saved');
         return false;
       }
-      const merged = Array.from(map.values()).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
       State.replaceProjects(merged);
       setStatus('saved');
       return true;
@@ -207,7 +255,17 @@ const CloudSync = (() => {
     }
   }
 
+  async function purgeLocalTombstones() {
+    const cleaned = filterDeletedProjects(State.getProjects());
+    if (cleaned.length !== State.getProjects().length) {
+      State.replaceProjects(cleaned);
+      return true;
+    }
+    return false;
+  }
+
   async function onLogin() {
+    await purgeLocalTombstones();
     const merged = await pullAndMerge();
     if (merged) {
       if (typeof Dashboard !== 'undefined') Dashboard.render();
@@ -227,6 +285,6 @@ const CloudSync = (() => {
 
   return {
     pushAll, pullAndMerge, onLogin, onLocalChange, updateBadge, onAuthChange,
-    markDeleted, deleteProjectRemote,
+    markDeleted, deleteProjectRemote, isDeleted, filterDeletedProjects, purgeLocalTombstones,
   };
 })();

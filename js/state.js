@@ -56,9 +56,18 @@ const State = (() => {
     if (currentProjectId === id) currentProjectId = null;
     Storage.saveProjects(projects);
     if (typeof CloudSync !== 'undefined') {
-      CloudSync.deleteProjectRemote(id);
-      CloudSync.onLocalChange();
+      return CloudSync.deleteProjectRemote(id).then(() => CloudSync.pushAll());
     }
+    return Promise.resolve();
+  }
+
+  function purgeDeletedProjects() {
+    if (typeof CloudSync === 'undefined') return false;
+    const next = CloudSync.filterDeletedProjects(projects);
+    if (next.length === projects.length) return false;
+    projects = next;
+    Storage.saveProjects(projects);
+    return true;
   }
 
   function replaceProjects(next) {
@@ -145,6 +154,6 @@ const State = (() => {
     getProjects, getSettings, getCurrentProject, setCurrentProject,
     updateSettings, createProject, updateProject, deleteProject, duplicateProject,
     setFile, deleteFile, renameFile, deleteFolder, addFolder,
-    addCheckpoint, restoreCheckpoint, replaceProjects,
+    addCheckpoint, restoreCheckpoint, replaceProjects, purgeDeletedProjects,
   };
 })();

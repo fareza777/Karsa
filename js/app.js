@@ -409,6 +409,7 @@ const App = (() => {
     $('#auto-run-toggle').checked = settings.autoRun;
     Auth.bindTriggers();
     await Auth.init();
+    if (typeof CloudSync !== 'undefined') await CloudSync.purgeLocalTombstones();
     await Plan.loadConfig();
     await Plan.syncProFromCloud();
     Plan.updateAiBadge();

@@ -79,6 +79,9 @@ const Auth = (() => {
     const { data } = await client.auth.getSession();
     user = data.session?.user || null;
     if (user && typeof CloudSync !== 'undefined') {
+      CloudSync.purgeLocalTombstones().then((purged) => {
+        if (purged && typeof Dashboard !== 'undefined') Dashboard.render();
+      });
       CloudSync.pullAndMerge().then((merged) => {
         if (merged && typeof Dashboard !== 'undefined') Dashboard.render();
       });

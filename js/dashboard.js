@@ -112,9 +112,13 @@ const Dashboard = (() => {
       'Hapus Proyek',
       'Yakin mau menghapus "' + project.name + '"? Semua file di dalamnya akan hilang permanen.',
       () => {
-        State.deleteProject(project.id);
-        render();
-        showToast('Proyek dihapus.', 'ok');
+        State.deleteProject(project.id).then(() => {
+          render();
+          showToast('Proyek dihapus.', 'ok');
+        }).catch(() => {
+          render();
+          showToast('Proyek dihapus lokal; cloud mungkin belum sinkron.', 'warn');
+        });
       }
     );
   }
