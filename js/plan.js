@@ -56,6 +56,7 @@ const Plan = (() => {
         return true;
       }
       setSuperuser(false);
+      updateAiBadge();
     } catch (e) {
       console.warn('KARSA superuser sync:', e);
     }
@@ -180,6 +181,8 @@ const Plan = (() => {
     if (proBtn) proBtn.classList.toggle('active', isPro() || isSuperuser());
     const adminBtn = $('#dash-admin-btn');
     if (adminBtn) adminBtn.classList.toggle('hidden', !isSuperuser());
+    const settingsBtn = $('#ai-settings-btn');
+    if (settingsBtn) settingsBtn.classList.toggle('hidden', !isSuperuser());
   }
 
   async function verifyProCode(code) {

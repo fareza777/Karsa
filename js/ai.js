@@ -768,8 +768,9 @@ const AI = (() => {
     }
   }
 
-  // --- Pengaturan ---
+  // --- Pengaturan (superuser only) ---
   function settingsDialog() {
+    if (!Plan.isSuperuser()) return;
     const endpointInput = el('input', { type: 'text', value: settings.endpoint });
     const modelInput = el('input', { type: 'text', value: settings.model });
     const keyInput = el('input', { type: 'text', value: settings.apiKey, placeholder: 'kosongkan untuk pakai server' });
