@@ -5,12 +5,6 @@ const Snack = (() => {
   const MAX_FILE = 14000;
   const SKIP = /package-lock|node_modules|\.md$/i;
 
-  function expoEntryPath(files) {
-    if (files['App.tsx']) return 'App.tsx';
-    if (files['App.js']) return 'App.js';
-    return Object.keys(files).find((p) => /(^|\/)App\.tsx?$/i.test(p)) || null;
-  }
-
   function buildSnackFiles(project) {
     const files = project.files;
     const entry = expoEntryPath(files);

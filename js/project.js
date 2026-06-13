@@ -72,6 +72,12 @@ function analyzeProjectFiles(files) {
   return { hasHtml, isExpo, isRn, expoLike, preview };
 }
 
+function expoEntryPath(files) {
+  if (files['App.tsx']) return 'App.tsx';
+  if (files['App.js']) return 'App.js';
+  return Object.keys(files).find((p) => /(^|\/)App\.tsx?$/i.test(p)) || null;
+}
+
 function previewHintForProject(project) {
   if (!project) return null;
   const a = analyzeProjectFiles(project.files);
