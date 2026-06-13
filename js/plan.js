@@ -5,15 +5,52 @@ const Plan = (() => {
   const PRO_KEY = 'karsa.pro.v1';
   const FREE_AI_DAILY = 30;
 
-  let config = { freeAiDaily: FREE_AI_DAILY };
+  let config = { freeAiDaily: FREE_AI_DAILY, billingEnabled: false, lemonCheckoutBase: null };
 
   async function loadConfig() {
     try {
       const res = await fetch('/api/config');
       const data = await res.json();
       if (data.freeAiDaily) config.freeAiDaily = data.freeAiDaily;
+      config.billingEnabled = !!data.billingEnabled;
+      config.lemonCheckoutBase = data.lemonCheckoutBase || null;
     } catch (e) { /* pakai default */ }
     return config;
+  }
+
+  function buildCheckoutUrl() {
+    if (!config.lemonCheckoutBase) return null;
+    const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+    const url = new URL(config.lemonCheckoutBase);
+    if (user?.email) url.searchParams.set('checkout[email]', user.email);
+    if (user?.id) url.searchParams.set('checkout[custom][user_id]', user.id);
+    const name = user?.user_metadata?.full_name || user?.user_metadata?.name;
+    if (name) url.searchParams.set('checkout[name]', name);
+    url.searchParams.set('checkout[custom][product]', 'karsa-pro');
+    return url.toString();
+  }
+
+  async function syncProFromCloud() {
+    if (typeof Auth === 'undefined' || !Auth.isLoggedIn() || !Auth.getClient()) return false;
+    const client = Auth.getClient();
+    const user = Auth.getUser();
+    if (!client || !user) return false;
+    try {
+      const { data, error } = await client
+        .from('profiles')
+        .select('is_pro')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) {
+        setPro(!!data.is_pro);
+        updateAiBadge();
+        return !!data.is_pro;
+      }
+    } catch (e) {
+      console.warn('KARSA sync pro:', e);
+    }
+    return false;
   }
 
   function isPro() {
@@ -98,30 +135,95 @@ const Plan = (() => {
     return data;
   }
 
+  async function verifyLicenseKey(licenseKey) {
+    const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+    if (!user) throw new Error('Login dulu sebelum aktivasi license.');
+    const res = await fetch('/api/verify-license', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ licenseKey: String(licenseKey || '').trim(), userId: user.id }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'License tidak valid');
+    setPro(true);
+    updateAiBadge();
+    return data;
+  }
+
   function openProDialog() {
-    const codeInput = el('input', { type: 'text', placeholder: 'Masukkan kode Pro' });
+    const checkoutUrl = config.billingEnabled ? buildCheckoutUrl() : null;
+    const licenseInput = el('input', { type: 'text', placeholder: 'KARS-XXXX-XXXX-XXXX' });
+    const codeInput = el('input', { type: 'text', placeholder: 'Kode aktivasi (opsional)' });
+    const bodyKids = [
+      el('p', { class: 'modal-desc', text: 'Pro = AI tanpa limit harian + publish tanpa watermark KARSA.' }),
+      el('ul', { class: 'pro-benefits' }, [
+        el('li', { text: '✓ AI vibecoding tanpa limit harian' }),
+        el('li', { text: '✓ Publish tanpa footer KARSA' }),
+        el('li', { text: '✓ Sinkron ke semua perangkat (akun login)' }),
+      ]),
+    ];
+
+    if (checkoutUrl) {
+      bodyKids.push(el('button', {
+        type: 'button',
+        class: 'btn btn-primary pro-checkout-btn',
+        text: '💳 Berlangganan KARSA Pro',
+        onclick: () => {
+          if (typeof Auth !== 'undefined' && !Auth.isLoggedIn()) {
+            showToast('Masuk dulu dengan email yang sama saat bayar.', 'warn');
+            Auth.openAuthDialog('login');
+            return;
+          }
+          window.open(checkoutUrl, '_blank', 'noopener');
+        },
+      }));
+      bodyKids.push(el('p', { class: 'modal-hint muted', text: 'Setelah bayar, Pro aktif otomatis (±1 menit). Pastikan email checkout = email akun KARSA.' }));
+    }
+
+    bodyKids.push(
+      el('div', { class: 'field' }, [el('label', { text: 'License key (dari email Lemon)' }), licenseInput]),
+    );
+    if (!checkoutUrl) {
+      bodyKids.push(el('div', { class: 'field' }, [el('label', { text: 'Kode aktivasi' }), codeInput]));
+    }
+
     showModal({
       title: '✦ KARSA Pro',
-      body: el('div', {}, [
-        el('p', { class: 'modal-desc', text: 'Aktifkan Pro untuk limit AI tanpa batas dan publish tanpa watermark.' }),
-        el('ul', { class: 'pro-benefits' }, [
-          el('li', { text: '✓ AI vibecoding tanpa limit harian' }),
-          el('li', { text: '✓ Publish tanpa footer KARSA' }),
-          el('li', { text: '✓ Prioritas fitur baru' }),
-        ]),
-        el('div', { class: 'field' }, [el('label', { text: 'Kode aktivasi' }), codeInput]),
-        el('p', { class: 'modal-hint muted', text: 'Belum punya kode? Hubungi pengembang atau nantikan langganan resmi.' }),
-      ]),
+      body: el('div', { class: 'pro-dialog' }, bodyKids),
       actions: [
         { label: 'Tutup' },
-        isPro() ? { label: 'Nonaktifkan Pro', onClick: () => { setPro(false); updateAiBadge(); showToast('Kembali ke paket gratis.', 'ok'); closeModal(); } } : null,
-        {
-          label: 'Aktifkan',
+        isPro() ? { label: 'Refresh status', onClick: async () => {
+          await syncProFromCloud();
+          showToast(isPro() ? 'Pro aktif ✦' : 'Masih paket gratis.', isPro() ? 'ok' : 'info');
+          return true;
+        } } : null,
+        isPro() ? { label: 'Nonaktifkan lokal', onClick: () => { setPro(false); updateAiBadge(); showToast('Status lokal direset. Pro cloud tetap jika masih berlangganan.', 'info'); closeModal(); } } : null,
+        checkoutUrl ? null : {
+          label: 'Aktifkan kode',
           primary: true,
           onClick: async () => {
             try {
               await verifyProCode(codeInput.value);
               showToast('KARSA Pro aktif! ✦', 'ok');
+              closeModal();
+            } catch (err) {
+              showToast(String(err.message || err), 'error');
+              return true;
+            }
+          },
+        },
+        {
+          label: 'Aktifkan license',
+          primary: !!checkoutUrl,
+          onClick: async () => {
+            if (!licenseInput.value.trim()) {
+              showToast('Isi license key dulu.', 'warn');
+              return true;
+            }
+            try {
+              await verifyLicenseKey(licenseInput.value);
+              showToast('KARSA Pro aktif! ✦', 'ok');
+              closeModal();
             } catch (err) {
               showToast(String(err.message || err), 'error');
               return true;
@@ -160,6 +262,6 @@ const Plan = (() => {
 
   return {
     loadConfig, isPro, canUseAi, recordAiUse, aiRemaining, updateAiBadge,
-    openProDialog, openAboutDialog,
+    syncProFromCloud, openProDialog, openAboutDialog,
   };
 })();

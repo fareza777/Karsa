@@ -406,6 +406,7 @@ const App = (() => {
     $('#auto-run-toggle').checked = settings.autoRun;
     Plan.loadConfig().then(() => {
       Plan.updateAiBadge();
+      Plan.syncProFromCloud();
       const proBtn = $('#dash-pro-btn');
       if (proBtn) proBtn.classList.toggle('active', Plan.isPro());
     });

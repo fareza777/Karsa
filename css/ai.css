@@ -69,6 +69,12 @@
   color: var(--muted);
   line-height: 1.7;
 }
+.pro-dialog .pro-checkout-btn {
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+.pro-dialog .field { margin-top: 14px; }
 .about-stats {
   display: grid;
   grid-template-columns: 1fr 1fr;

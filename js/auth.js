@@ -62,11 +62,17 @@ const Auth = (() => {
         if (merged && typeof Dashboard !== 'undefined') Dashboard.render();
       });
     }
+    if (user && typeof Plan !== 'undefined') {
+      Plan.syncProFromCloud();
+    }
     client.auth.onAuthStateChange(async (event, session) => {
       user = session?.user || null;
       updateUI();
       if (event === 'SIGNED_IN' && typeof CloudSync !== 'undefined') {
         await CloudSync.onLogin();
+      }
+      if (user && typeof Plan !== 'undefined') {
+        await Plan.syncProFromCloud();
       }
     });
     updateUI();
