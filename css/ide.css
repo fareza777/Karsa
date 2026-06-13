@@ -10,7 +10,14 @@
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
-.topbar-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 0;
+  max-width: min(480px, 38vw);
+}
 .topbar-left .icon-btn {
   background: var(--gradient);
   color: #fff;
@@ -24,8 +31,17 @@
   font-size: 14px;
   font-weight: 600;
   outline: none;
-  width: 200px;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  text-overflow: ellipsis;
   transition: border-color var(--transition), background var(--transition);
+}
+.project-name-input:hover,
+.project-name-input:focus {
+  text-overflow: clip;
+  overflow-x: auto;
 }
 .project-name-input:hover { background: var(--bg-3); }
 .project-name-input:focus { border-color: var(--accent); background: var(--bg-3); }

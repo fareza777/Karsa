@@ -13,11 +13,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="css/base.css?v=20260614c">
-  <link rel="stylesheet" href="css/components.css?v=20260614c">
-  <link rel="stylesheet" href="css/dashboard.css?v=20260614c">
-  <link rel="stylesheet" href="css/ide.css?v=20260614c">
-  <link rel="stylesheet" href="css/ai.css?v=20260614c">
+  <link rel="stylesheet" href="css/base.css?v=20260614d">
+  <link rel="stylesheet" href="css/components.css?v=20260614d">
+  <link rel="stylesheet" href="css/dashboard.css?v=20260614d">
+  <link rel="stylesheet" href="css/ide.css?v=20260614d">
+  <link rel="stylesheet" href="css/ai.css?v=20260614d">
 </head>
 <body data-theme="dark">
 
@@ -211,13 +211,10 @@
             </div>
           </div>
           <div class="ai-mode-row">
-            <div class="ai-mode-toggle" role="group" aria-label="Mode AI">
-              <button id="ai-mode-fast" class="ai-mode-btn" title="Jawaban langsung tanpa berpikir panjang"><svg class="icon"><use href="#i-zap"/></svg> Cepat</button>
-              <button id="ai-mode-smart" class="ai-mode-btn" title="Hasil lebih matang, butuh 1–2 menit"><svg class="icon"><use href="#i-bulb"/></svg> Cermat</button>
-            </div>
-            <label class="ai-auto-apply" title="Langsung terapkan file ke proyek begitu AI selesai (preview ikut update jika Auto aktif)">
+            <label class="ai-auto-apply" title="Langsung terapkan file ke proyek begitu AI selesai">
               <input type="checkbox" id="ai-auto-apply" checked> Auto&#8209;terapkan
             </label>
+            <span class="ai-mode-hint" title="Teks pakai model cepat. Lampirkan gambar → otomatis mode vision (M3).">🖼 Gambar → vision</span>
           </div>
           <div id="ai-chat" class="ai-chat"></div>
           <div class="ai-input-box">
@@ -331,25 +328,25 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ============ APP ============ -->
-  <script src="js/utils.js?v=20260614c"></script>
-  <script src="js/storage.js?v=20260614c"></script>
-  <script src="js/templates.js?v=20260614c"></script>
-  <script src="js/project.js?v=20260614c"></script>
-  <script src="js/state.js?v=20260614c"></script>
-  <script src="js/components.js?v=20260614c"></script>
-  <script src="js/console.js?v=20260614c"></script>
-  <script src="js/snack.js?v=20260614c"></script>
-  <script src="js/preview.js?v=20260614c"></script>
-  <script src="js/editor.js?v=20260614c"></script>
-  <script src="js/tabs.js?v=20260614c"></script>
-  <script src="js/filetree.js?v=20260614c"></script>
-  <script src="js/dashboard.js?v=20260614c"></script>
-  <script src="js/plan.js?v=20260614c"></script>
-  <script src="js/auth.js?v=20260614c"></script>
-  <script src="js/sync.js?v=20260614c"></script>
-  <script src="js/publish.js?v=20260614c"></script>
-  <script src="js/playstore.js?v=20260614c"></script>
-  <script src="js/app.js?v=20260614c"></script>
-  <script src="js/ai.js?v=20260614c"></script>
+  <script src="js/utils.js?v=20260614d"></script>
+  <script src="js/storage.js?v=20260614d"></script>
+  <script src="js/templates.js?v=20260614d"></script>
+  <script src="js/project.js?v=20260614d"></script>
+  <script src="js/state.js?v=20260614d"></script>
+  <script src="js/components.js?v=20260614d"></script>
+  <script src="js/console.js?v=20260614d"></script>
+  <script src="js/snack.js?v=20260614d"></script>
+  <script src="js/preview.js?v=20260614d"></script>
+  <script src="js/editor.js?v=20260614d"></script>
+  <script src="js/tabs.js?v=20260614d"></script>
+  <script src="js/filetree.js?v=20260614d"></script>
+  <script src="js/dashboard.js?v=20260614d"></script>
+  <script src="js/plan.js?v=20260614d"></script>
+  <script src="js/auth.js?v=20260614d"></script>
+  <script src="js/sync.js?v=20260614d"></script>
+  <script src="js/publish.js?v=20260614d"></script>
+  <script src="js/playstore.js?v=20260614d"></script>
+  <script src="js/app.js?v=20260614d"></script>
+  <script src="js/ai.js?v=20260614d"></script>
 </body>
 </html>

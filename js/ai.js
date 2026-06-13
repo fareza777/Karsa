@@ -153,7 +153,7 @@ const AI = (() => {
     const reader = new FileReader();
     reader.onload = () => downscaleImage(reader.result, (dataUrl) => {
       if (pushAttachment({ kind: 'image', name: file.name || namaDefault || 'gambar.png', dataUrl })) {
-        showToast('Gambar dilampirkan — akan dianalisis mode 🧠 Cermat.', 'ok');
+        showToast('Gambar dilampirkan — akan dianalisis mode vision (M3).', 'ok');
       }
     });
     reader.readAsDataURL(file);
@@ -658,9 +658,9 @@ const AI = (() => {
     history.push({ role: 'user', content: displayText });
 
     // Gambar hanya dipahami MiniMax-M3 → paksa model itu utk permintaan ini
-    const modelUsed = imageAtts.length ? MODEL_SMART : settings.model;
-    if (imageAtts.length && !settings.model.includes('M3')) {
-      showToast('Ada gambar → permintaan ini otomatis memakai 🧠 Cermat (M3) yang bisa melihat gambar.', 'info');
+    const modelUsed = resolveModel(imageAtts.length > 0);
+    if (imageAtts.length) {
+      showToast('Ada gambar → AI memakai mode vision (M3).', 'info');
     }
 
     const messages = [
@@ -850,7 +850,7 @@ const AI = (() => {
     showModal({
       title: '⚙ Pengaturan KARSA AI',
       body: el('div', {}, [
-        el('p', { class: 'modal-desc', text: 'Bawaan: permintaan dikirim lewat server KARSA (API key aman di server). Isi API key MiniMax hanya jika menjalankan KARSA secara lokal.' }),
+        el('p', { class: 'modal-desc', text: 'Bawaan: permintaan dikirim lewat server KARSA. Model di bawah hanya dipakai superuser untuk teks; gambar selalu otomatis M3.' }),
         el('div', { class: 'field' }, [el('label', { text: 'Endpoint server' }), endpointInput]),
         el('div', { class: 'field' }, [el('label', { text: 'Model' }), modelInput]),
         el('div', { class: 'field' }, [el('label', { text: 'API Key MiniMax (mode langsung, opsional)' }), keyInput]),
@@ -865,7 +865,6 @@ const AI = (() => {
               model: modelInput.value.trim() || DEFAULT_SETTINGS.model,
               apiKey: keyInput.value.trim(),
             });
-            updateModeButtons();
             showToast('Pengaturan AI disimpan.', 'ok');
           },
         },
@@ -888,19 +887,13 @@ const AI = (() => {
     }
   }
 
-  // --- Mode Cepat / Cermat ---
-  function updateModeButtons() {
-    const isFast = settings.model.includes('highspeed');
-    $('#ai-mode-fast').classList.toggle('active', isFast);
-    $('#ai-mode-smart').classList.toggle('active', !isFast);
-  }
-
-  function setMode(fast) {
-    saveSettings({ model: fast ? MODEL_FAST : MODEL_SMART });
-    updateModeButtons();
-    showToast(fast
-      ? 'Mode ⚡ Cepat: jawaban langsung tanpa berpikir panjang.'
-      : 'Mode 🧠 Cermat: hasil lebih matang, butuh 1-2 menit.', 'ok');
+  // --- Mode AI: cepat default, vision otomatis saat ada gambar ---
+  function resolveModel(hasImages) {
+    if (hasImages) return MODEL_SMART;
+    if (typeof Plan !== 'undefined' && Plan.isSuperuser() && settings.model) {
+      return settings.model;
+    }
+    return MODEL_FAST;
   }
 
   function clearChat() {
@@ -921,15 +914,12 @@ const AI = (() => {
     const topSettings = $('#btn-ai-settings');
     if (topSettings) topSettings.addEventListener('click', settingsDialog);
     $('#ai-clear-btn').addEventListener('click', clearChat);
-    $('#ai-mode-fast').addEventListener('click', () => setMode(true));
-    $('#ai-mode-smart').addEventListener('click', () => setMode(false));
     const autoApplyToggle = $('#ai-auto-apply');
     autoApplyToggle.checked = !!settings.autoApply;
     autoApplyToggle.addEventListener('change', () => {
       saveSettings({ autoApply: autoApplyToggle.checked });
       if (autoApplyToggle.checked) showToast('File dari AI akan langsung diterapkan otomatis. ⚡', 'ok');
     });
-    updateModeButtons();
     (async () => {
       await Plan.loadConfig();
       await Plan.syncProFromCloud();
