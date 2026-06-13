@@ -37,6 +37,7 @@ const App = (() => {
     const playBtn = $('#btn-playstore');
     if (playBtn) playBtn.classList.toggle('hidden', !PlayStore.shouldShowButton(project));
     if (typeof Plan !== 'undefined') Plan.updateAiBadge();
+    if (typeof AI !== 'undefined' && AI.refreshApplyBoxes) AI.refreshApplyBoxes();
   }
 
   // --- Tema ---

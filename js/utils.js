@@ -11,7 +11,9 @@ function el(tag, attrs, children) {
       else if (key === 'text') node.textContent = attrs[key];
       else if (key === 'html') node.innerHTML = attrs[key];
       else if (key.startsWith('on')) node.addEventListener(key.slice(2), attrs[key]);
-      else node.setAttribute(key, attrs[key]);
+      else if (key === 'disabled' || key === 'checked' || key === 'selected' || key === 'readonly') {
+        node[key] = !!attrs[key];
+      } else node.setAttribute(key, attrs[key]);
     });
   }
   (children || []).forEach((child) => { if (child) node.appendChild(child); });

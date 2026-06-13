@@ -367,6 +367,7 @@ const AI = (() => {
     const bubble = el('div', { class: 'ai-msg ai-msg-assistant' });
     chatEl().appendChild(bubble);
     const { visible } = stripThink(fullText);
+    bubble.dataset.aiVisible = visible;
     renderAssistantHtml(bubble, visible);
     attachApplyBox(bubble, visible, !fromHistory);
     scrollChat();
@@ -502,6 +503,9 @@ const AI = (() => {
   }
 
   function attachApplyBox(bubble, visibleText, autoFocus, opts) {
+    if (visibleText) bubble.dataset.aiVisible = visibleText;
+    const existing = $('.ai-apply-box', bubble);
+    if (existing) existing.remove();
     const allFiles = collectFileBlocks(bubble, visibleText);
     if (allFiles.length === 0) return;
     const truncated = opts && opts.truncated;
@@ -554,15 +558,21 @@ const AI = (() => {
   }
 
   function shouldAutoApply() {
-    return settings.autoApply || autoApplyOnce || State.getSettings().autoRun;
+    return settings.autoApply || autoApplyOnce;
+  }
+
+  function refreshApplyBox(bubble) {
+    const visible = bubble.dataset.aiVisible;
+    if (!visible) return;
+    attachApplyBox(bubble, visible, false);
+  }
+
+  function refreshApplyBoxes() {
+    $$('.ai-msg-assistant').forEach((bubble) => refreshApplyBox(bubble));
   }
 
   function markApplyButtonDone(bubble) {
-    const applyBtn = $('.btn-apply', bubble);
-    if (applyBtn) {
-      applyBtn.disabled = true;
-      applyBtn.textContent = '✓ Sudah diterapkan';
-    }
+    refreshApplyBox(bubble);
   }
 
   function tryAutoApply(bubble, visible, truncated) {
@@ -778,6 +788,7 @@ const AI = (() => {
             : 'AI selesai tanpa jawaban yang bisa ditampilkan. Klik Kirim untuk mencoba lagi.'));
       }
       renderAssistantHtml(bubble, visible);
+      bubble.dataset.aiVisible = visible;
       const truncated = isResponseTruncated(visible, finishReason);
       attachApplyBox(bubble, visible, true, { truncated });
       const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
@@ -978,7 +989,7 @@ const AI = (() => {
 
   return {
     init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh,
-    setAutoApply, openSettings: settingsDialog,
+    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes,
   };
 })();
 
