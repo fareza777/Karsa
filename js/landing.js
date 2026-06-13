@@ -180,6 +180,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const yearEl = document.getElementById('lp-footer-year');
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
     const nav = document.querySelector('.lp-nav');
     const menuBtn = document.querySelector('.lp-menu-btn');
     const onScroll = () => nav?.classList.toggle('is-scrolled', window.scrollY > 12);
