@@ -11,6 +11,7 @@ const AI = (() => {
   const MAX_FILE_CHARS = 18000;
   const MAX_CONTEXT_CHARS = 100000;
   const MAX_HISTORY = 12;
+  const API_TEXT_BUDGET = 180000; // di bawah batas server 200k karakter
 
   const ANTI_REASONING_PROMPT = [
     'MODE KERJA (otomatis — user awam tidak perlu mengetik ini, tapi kamu WAJIB patuh):',
@@ -213,6 +214,63 @@ const AI = (() => {
     });
   }
 
+  function contentTextLen(content) {
+    if (typeof content === 'string') return content.length;
+    if (!Array.isArray(content)) return 0;
+    return content.reduce((n, part) => {
+      if (part && part.type === 'text' && typeof part.text === 'string') return n + part.text.length;
+      return n;
+    }, 0);
+  }
+
+  function messagesTextTotal(msgs) {
+    return msgs.reduce((n, m) => n + contentTextLen(m.content), 0);
+  }
+
+  // Ringkas respons asisten untuk lanjutan otomatis — jangan kirim ulang ribuan baris kode
+  function compactAssistantForApi(visible) {
+    const files = parseFileBlocks(visible);
+    if (!files.length) {
+      const t = (visible || '').trim();
+      return t.length > 4000 ? t.slice(0, 4000) + '\n[…]' : t;
+    }
+    const lines = files.map((f) => {
+      if (isFileComplete(f.code, f.path)) {
+        return '✓ ' + f.path + ' (' + f.code.split('\n').length + ' baris, lengkap)';
+      }
+      return '⏳ ' + f.path + ' (belum lengkap, lanjut dari:\n' + f.code.slice(-600) + ')';
+    });
+    const prose = extractProse(visible);
+    return (prose ? prose.slice(0, 600) + '\n\n' : '') + lines.join('\n');
+  }
+
+  function trimMessagesForApi(msgs, budget) {
+    const cap = budget || API_TEXT_BUDGET;
+    if (messagesTextTotal(msgs) <= cap) return msgs;
+    const system = msgs[0];
+    const projectCtx = msgs[1];
+    const last = msgs[msgs.length - 1];
+    let middle = msgs.slice(2, -1).map((msg) => {
+      if (msg.role === 'assistant' && typeof msg.content === 'string') {
+        return { role: 'assistant', content: compactAssistantForApi(msg.content) };
+      }
+      if (typeof msg.content === 'string' && msg.content.length > 2500) {
+        return { role: msg.role, content: msg.content.slice(0, 2500) + '\n[…]' };
+      }
+      return msg;
+    });
+    let result = [system, projectCtx, ...middle, last];
+    if (messagesTextTotal(result) > cap) {
+      middle = middle.slice(-2);
+      result = [system, projectCtx, ...middle, last];
+    }
+    if (messagesTextTotal(result) > cap && typeof projectCtx.content === 'string') {
+      const room = Math.max(8000, Math.floor(cap * 0.35));
+      result[1] = { role: projectCtx.role, content: projectCtx.content.slice(0, room) + '\n[… konteks file dipotong — lihat editor]' };
+    }
+    return result;
+  }
+
   function isNarrowChangeRequest(text) {
     return /warna|warni|tulisan|teks|font|ukuran|besar|kecil|bold|italic|margin|padding|spasi|rata|align|opacity|transparan/i.test(text || '')
       && !/redesign|ganti tema|percanti|ubah semua|rombak|overhaul|total/i.test(text || '');
@@ -224,8 +282,13 @@ const AI = (() => {
     ];
     const project = State.getCurrentProject();
     if (project && (project.projectType === 'mobile' || project.projectType === 'playstore')) {
-      if (/lengkap|semua fitur|full|editor|aplikasi/i.test(prompt || '')) {
-        parts.push('[MOBILE: Buat bertahap — respons ini maks 1 file (App.tsx atau satu screen). Jangan banyak file sekaligus.]');
+      if (/lengkap|semua fitur|full|editor|video|foto|komplet|mewah/i.test(prompt || '')) {
+        parts.push(
+          '[MOBILE — WAJIB PATUH: Respons INI hanya 1 file: App.tsx (shell UI utama, desain mewah, placeholder fitur).',
+          'Jangan buat screens/, jangan banyak file, maks ~220 baris. Fitur detail = iterasi berikutnya.]',
+        );
+      } else {
+        parts.push('[MOBILE: maks 1–2 file per respons. File besar = satu file saja.]');
       }
     }
     if (hasImages) {
@@ -880,11 +943,17 @@ const AI = (() => {
     } else if (modelUsed === MODEL_SMART) {
       showToast('Proyek mobile — AI pakai M3 (langsung tulis kode, tanpa berpikir panjang).', 'info');
     }
+    if (project && (project.projectType === 'mobile' || project.projectType === 'playstore') &&
+        /lengkap|semua fitur|editor|video|foto|komplet/i.test(prompt)) {
+      showToast('Proyek besar → AI mulai dari App.tsx saja. Tambah fitur lewat chat berikutnya.', 'info');
+    }
 
     const messages = [
       { role: 'system', content: getSystemPrompt() },
       { role: 'user', content: buildProjectContext() },
-      ...compactHistoryForApi(history.slice(-MAX_HISTORY)),
+      ...compactHistoryForApi(history.slice(-(
+        project.projectType === 'mobile' || project.projectType === 'playstore' ? 6 : MAX_HISTORY
+      ))),
     ];
     // Pesan terakhir diganti versi lengkap untuk API (isi file lampiran + gambar)
     messages[messages.length - 1] = {
@@ -919,7 +988,10 @@ const AI = (() => {
     }, 1000);
 
     const useDirect = !!settings.apiKey;
-    let apiMessages = messages.slice();
+    const baseMessages = trimMessagesForApi(messages);
+    if (messagesTextTotal(messages) > API_TEXT_BUDGET) {
+      showToast('Riwayat chat panjang — konteks dirapikan otomatis agar tidak melewati batas 200k.', 'info');
+    }
     let continueRound = 0;
     let accumulatedVisible = '';
     let finishReason = null;
@@ -930,6 +1002,14 @@ const AI = (() => {
       const onPhase = (p) => { phase = p; };
 
       for (;;) {
+        let apiMessages = baseMessages;
+        if (continueRound > 0) {
+          apiMessages = trimMessagesForApi(baseMessages.concat([
+            { role: 'assistant', content: compactAssistantForApi(accumulatedVisible) },
+            { role: 'user', content: buildContinueMessage(accumulatedVisible) },
+          ]));
+        }
+
         const result = await runAiStream({
           messages: apiMessages,
           modelUsed: activeModel,
@@ -941,7 +1021,7 @@ const AI = (() => {
         finishReason = result.finishReason;
 
         if (!result.visible.trim()) {
-          if (!fastRetry && result.rawText.length > 1500 && activeModel.includes('M3')) {
+          if (!fastRetry && result.rawText.length > 6000 && activeModel.includes('M3')) {
             fastRetry = true;
             activeModel = MODEL_FAST;
             phase = 'menghubungi';
@@ -975,11 +1055,6 @@ const AI = (() => {
         phase = 'melanjutkan';
         setBusy(true, 'Melanjutkan otomatis… bagian ' + (continueRound + 1));
         showToast('Respons terpotong — melanjutkan otomatis (' + continueRound + '/' + MAX_AUTO_CONTINUE + ')…', 'info');
-
-        apiMessages = apiMessages.concat([
-          { role: 'assistant', content: accumulatedVisible },
-          { role: 'user', content: buildContinueMessage(accumulatedVisible) },
-        ]);
       }
 
       const visible = accumulatedVisible;
@@ -1014,20 +1089,36 @@ const AI = (() => {
       tryAutoApply(bubble, visible, truncated);
       autoApplyOnce = false;
     } catch (err) {
-      bubble.remove();
-      if (err.name === 'AbortError') {
-        appendErrorBubble('Dihentikan. Jawaban parsial dibuang.');
+      if (err.name === 'AbortError' && accumulatedVisible.trim()) {
+        renderAssistantHtml(bubble, accumulatedVisible);
+        storeMergedFiles(bubble, accumulatedVisible);
+        attachApplyBox(bubble, accumulatedVisible, true, { truncated: true });
+        appendContinueButton(bubble, accumulatedVisible);
+        bubble.appendChild(el('div', {
+          class: 'ai-meta',
+          text: '⏹ Dihentikan — kode parsial tetap ada. Klik Terapkan atau Lanjutkan tulis.',
+        }));
+        history.push({ role: 'assistant', content: accumulatedVisible });
+        saveHistory();
       } else {
-        let hint = err.message;
-        if (!useDirect && (hint.includes('Failed to fetch') || hint.includes('404'))) {
-          hint += ' — Endpoint /api/chat butuh server Vercel. Untuk penggunaan lokal, isi API key di pengaturan (⚙).';
+        bubble.remove();
+        if (err.name === 'AbortError') {
+          appendErrorBubble('Dihentikan sebelum ada kode. Coba pecah permintaan: "buat App.tsx dulu saja".');
+        } else {
+          let hint = err.message;
+          if (/200000|terlalu besar/i.test(hint)) {
+            hint = 'Percakapan terlalu panjang (batas 200.000 karakter). Klik 🗑 bersihkan chat, lalu minta satu file dulu — mis. "buat App.tsx shell UI editor video".';
+          }
+          if (!useDirect && (hint.includes('Failed to fetch') || hint.includes('404'))) {
+            hint += ' — Endpoint /api/chat butuh server Vercel. Untuk penggunaan lokal, isi API key di pengaturan (⚙).';
+          }
+          appendErrorBubble(hint, () => send());
         }
-        appendErrorBubble(hint, () => send());
+        history.pop();
+        input.value = prompt;
+        attachments = sentAttachments;
+        renderAttachments();
       }
-      history.pop(); // buang pesan user dari riwayat…
-      input.value = prompt; // …tapi kembalikan ke kotak input agar tinggal klik Kirim / Coba lagi
-      attachments = sentAttachments; // lampiran juga dikembalikan
-      renderAttachments();
       autoApplyOnce = false;
     } finally {
       clearInterval(ticker);

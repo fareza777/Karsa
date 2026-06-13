@@ -60,6 +60,45 @@ function validateMessages(messages) {
   return null;
 }
 
+function trimMessagesToFit(messages, maxText) {
+  if (!Array.isArray(messages)) return messages;
+  let total = 0;
+  for (const msg of messages) {
+    const size = contentSize(msg.content);
+    if (size) total += size.text;
+  }
+  if (total <= maxText) return messages;
+
+  const system = messages[0];
+  const projectCtx = messages[1];
+  const last = messages[messages.length - 1];
+  let middle = messages.slice(2, -1).map((msg) => {
+    if (msg.role === 'assistant' && typeof msg.content === 'string') {
+      let t = msg.content;
+      t = t.replace(/```[\w-]*[ \t]+file=[^\n`]+\n[\s\S]*?```/g, '(file di ringkas)');
+      if (t.length > 3000) t = t.slice(0, 3000) + '\n[…]';
+      return { role: 'assistant', content: t };
+    }
+    if (typeof msg.content === 'string' && msg.content.length > 2500) {
+      return { role: msg.role, content: msg.content.slice(0, 2500) + '\n[…]' };
+    }
+    return msg;
+  });
+  let trimmed = [system, projectCtx, ...middle.slice(-2), last];
+  total = 0;
+  for (const msg of trimmed) {
+    const size = contentSize(msg.content);
+    if (size) total += size.text;
+  }
+  if (total > maxText && projectCtx && typeof projectCtx.content === 'string') {
+    trimmed[1] = {
+      role: projectCtx.role,
+      content: projectCtx.content.slice(0, Math.max(8000, Math.floor(maxText * 0.35))) + '\n[… konteks dipotong]',
+    };
+  }
+  return trimmed;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Gunakan metode POST.' });
@@ -72,7 +111,8 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { messages, model } = req.body || {};
+  const { messages: rawMessages, model } = req.body || {};
+  const messages = trimMessagesToFit(rawMessages, MAX_TEXT_CHARS - 5000);
   const invalid = validateMessages(messages);
   if (invalid) {
     res.status(400).json({ error: invalid });
