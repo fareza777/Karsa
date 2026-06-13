@@ -610,7 +610,7 @@ const AI = (() => {
       if (/const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
       if (/[{(,=]\s*$/.test(c)) return false;
       if ((ext === 'tsx' || ext === 'jsx' || ext === 'ts') && !/export\s+default\b/.test(c)) return false;
-      if ((ext === 'tsx' || ext === 'jsx') && /export\s+default\s+function/.test(c) && !/\}\s*;?\s*$/.test(c.trim())) return false;
+      // StyleSheet.create / komponen RN biasanya diakhiri `});` — jangan anggap terpotong
     }
     if (ext === 'json') {
       try { JSON.parse(c); } catch (e) { return false; }
@@ -623,14 +623,16 @@ const AI = (() => {
   }
 
   function isResponseTruncated(visible, finishReason) {
-    if (finishReason === 'length') return true;
     if (hasUnclosedCodeFence(visible)) return true;
     const files = parseFileBlocks(visible);
-    if (!files.length) return false;
+    if (!files.length) return finishReason === 'length';
+    const allComplete = files.every((f) => isFileComplete(f.code, f.path));
+    if (allComplete) return false;
+    if (finishReason === 'length') return true;
     return files.some((f) => !isFileComplete(f.code, f.path));
   }
 
-  const MAX_AUTO_CONTINUE = 10;
+  const MAX_AUTO_CONTINUE = 3;
 
   function extractProse(text) {
     const idx = text.indexOf('```');
@@ -676,24 +678,22 @@ const AI = (() => {
   function buildContinueMessage(accumulatedVisible) {
     const files = parseFileBlocks(accumulatedVisible);
     const incomplete = files.filter((f) => !isFileComplete(f.code, f.path));
-    const complete = files.filter((f) => isFileComplete(f.code, f.path)).map((f) => f.path);
-    if (incomplete.length) {
-      const f = incomplete[incomplete.length - 1];
-      const lang = fileExt(f.path) || 'txt';
-      return [
-        '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
-        '[Langsung tulis sisa kode — jangan berpikir panjang.]',
-        'File "' + f.path + '" belum lengkap. Lanjutkan HANYA sisa kode dari titik putus.',
-        'Keluarkan satu blok ```' + lang + ' file=' + f.path + ' berisi sisa file sampai valid.',
-        'Jangan ulang dari awal. Baris terakhir yang sudah ada:',
-        f.code.slice(-700),
-      ].join('\n');
-    }
+    if (!incomplete.length) return null;
+    const f = incomplete[incomplete.length - 1];
+    const lang = fileExt(f.path) || 'txt';
     return [
       '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
-      'File lengkap (jangan tulis ulang): ' + (complete.join(', ') || 'belum ada'),
-      'Tulis file berikutnya yang belum sempat. Maks 1–2 file, masing-masing UTUH dalam blok ``` file=path.',
+      '[Langsung tulis sisa kode — jangan berpikir panjang. Jangan ulang file dari awal.]',
+      'File "' + f.path + '" belum lengkap. Lanjutkan HANYA sisa kode dari titik putus.',
+      'Keluarkan satu blok ```' + lang + ' file=' + f.path + ' berisi sisa file sampai valid.',
+      'Baris terakhir yang sudah ada:',
+      f.code.slice(-700),
     ].join('\n');
+  }
+
+  function mergeFingerprint(text) {
+    const files = parseFileBlocks(text);
+    return files.map((f) => f.path + ':' + f.code.length + ':' + (f.code.trim().slice(-40) || '')).join('|');
   }
 
   function appendContinueButton(bubble, visible) {
@@ -1090,15 +1090,18 @@ const AI = (() => {
 
         let continueRound = 0;
         let fastRetry = false;
+        let lastMergeFp = '';
         accumulatedVisible = '';
         activeModel = modelUsed;
 
         for (;;) {
           let apiMessages = baseMessages;
           if (continueRound > 0) {
+            const contMsg = buildContinueMessage(accumulatedVisible);
+            if (!contMsg) break;
             apiMessages = trimMessagesForApi(baseMessages.concat([
               { role: 'assistant', content: compactAssistantForApi(accumulatedVisible) },
-              { role: 'user', content: buildContinueMessage(accumulatedVisible) },
+              { role: 'user', content: contMsg },
             ]));
           }
 
@@ -1134,9 +1137,16 @@ const AI = (() => {
               : 'AI belum selesai menulis. Coba kirim ulang permintaan yang sama.');
           }
 
+          const beforeMerge = accumulatedVisible;
           accumulatedVisible = continueRound === 0
             ? result.visible
             : mergeContinuedOutput(accumulatedVisible, result.visible);
+
+          const mergeFp = mergeFingerprint(accumulatedVisible);
+          if (continueRound > 0 && (mergeFp === lastMergeFp || accumulatedVisible === beforeMerge)) {
+            break;
+          }
+          lastMergeFp = mergeFp;
 
           const displayVisible = grandVisible && phaseIdx > 0
             ? mergeContinuedOutput(grandVisible, accumulatedVisible)
@@ -1163,6 +1173,15 @@ const AI = (() => {
         if (phaseFiles.length && shouldAutoApply() && !phaseTruncated) {
           const pending = phaseFiles.filter((f) => !projectFileMatches(f.path, f.code));
           if (pending.length) applyFiles(pending);
+        }
+
+        // Tahap 2 (perkaya) dilewati jika tahap 1 sudah menghasilkan App lengkap
+        if (phaseIdx === 0 && awamPhases.length > 1 && !phaseTruncated) {
+          const appFile = phaseFiles.find((f) => /(^|\/)App\.tsx?$/i.test(f.path));
+          if (appFile && appFile.code.length > 400) {
+            grandVisible = accumulatedVisible;
+            break;
+          }
         }
 
         if (phaseTruncated) break;
