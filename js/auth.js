@@ -32,6 +32,7 @@ const Auth = (() => {
         btn.classList.remove('auth-logged-in');
       }
     });
+    if (typeof CloudSync !== 'undefined') CloudSync.onAuthChange();
   }
 
   async function init() {

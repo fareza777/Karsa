@@ -15,4 +15,34 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!open) item?.classList.add('is-open');
     });
   });
+
+  fetch('/api/config')
+    .then((r) => r.json())
+    .then((cfg) => {
+      const priceEl = document.getElementById('lp-pro-price');
+      const ctaEl = document.getElementById('lp-pro-cta');
+      if (!priceEl || !ctaEl) return;
+
+      const freeDaily = cfg.freeAiDaily || 30;
+      document.querySelectorAll('.lp-hero-meta strong').forEach((el, i) => {
+        if (i === 0) el.textContent = String(freeDaily);
+      });
+      const gratisList = document.querySelector('.lp-price-card:not(.featured) .lp-price-list');
+      if (gratisList && gratisList.children[0]) {
+        gratisList.children[0].textContent = freeDaily + ' prompt AI per hari';
+      }
+
+      if (cfg.billingEnabled && cfg.lemonCheckoutBase) {
+        priceEl.innerHTML = 'Pro <span>/ bulan</span>';
+        ctaEl.textContent = 'Berlangganan Pro';
+        ctaEl.href = cfg.lemonCheckoutBase;
+        ctaEl.target = '_blank';
+        ctaEl.rel = 'noopener';
+      } else if (cfg.proAvailable) {
+        priceEl.innerHTML = 'Aktif <span>/ kode</span>';
+        ctaEl.textContent = 'Aktifkan di app';
+        ctaEl.href = '/app';
+      }
+    })
+    .catch(() => { /* pakai default statis */ });
 });

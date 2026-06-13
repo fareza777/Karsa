@@ -4,7 +4,7 @@ import { isMainAppHost, slugFromSubdomain, normalizeDomain } from './lib/domains
 
 export const config = {
   matcher: [
-    '/((?!api/|css/|js/|_next/|favicon|.*\\.(?:css|js|html|ico|png|svg|woff2?|json|map)$).*)',
+    '/((?!api/|css/|js/|_next/|favicon|og\\.svg|.*\\.(?:css|js|html|ico|png|svg|woff2?|json|map)$).*)',
   ],
 };
 
