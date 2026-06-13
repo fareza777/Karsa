@@ -47,6 +47,12 @@ const Plan = (() => {
         setSuperuser(true);
         setPro(true);
         updateAiBadge();
+        if (!sessionStorage.getItem('karsa.super.toast')) {
+          sessionStorage.setItem('karsa.super.toast', '1');
+          if (typeof showToast === 'function') {
+            showToast('Superuser aktif ✦ — AI tanpa limit, publish tanpa watermark.', 'ok');
+          }
+        }
         return true;
       }
       setSuperuser(false);
@@ -94,6 +100,13 @@ const Plan = (() => {
       if (active) localStorage.setItem(SUPER_KEY, '1');
       else localStorage.removeItem(SUPER_KEY);
     } catch (e) { /* abaikan */ }
+  }
+
+  function setSuperuserLocal(active) {
+    setSuperuser(active);
+    if (!active) {
+      try { localStorage.removeItem(PRO_KEY); } catch (e) { /* abaikan */ }
+    }
   }
 
   function isPro() {
@@ -310,6 +323,6 @@ const Plan = (() => {
 
   return {
     loadConfig, isPro, isSuperuser, canUseAi, recordAiUse, aiRemaining, updateAiBadge,
-    syncProFromCloud, syncSuperuser, openProDialog, openAboutDialog,
+    syncProFromCloud, syncSuperuser, setSuperuserLocal, openProDialog, openAboutDialog,
   };
 })();

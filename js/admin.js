@@ -122,6 +122,21 @@
     return data;
   }
 
+  function showDenied(reason, email) {
+    show('admin-denied');
+    const msg = $('#admin-denied-msg');
+    const em = $('#admin-denied-email');
+    if (msg && reason) msg.textContent = reason;
+    if (em) {
+      if (email) {
+        em.textContent = 'Login saat ini: ' + email;
+        em.classList.remove('hidden');
+      } else {
+        em.classList.add('hidden');
+      }
+    }
+  }
+
   async function refresh() {
     show('admin-loading');
     try {
@@ -129,28 +144,35 @@
       renderDashboard(data);
       show('admin-dashboard');
     } catch (e) {
-      if (e.message === 'not_logged_in') {
-        show('admin-denied');
+      const user = Auth.getUser();
+      if (e.message === 'not_logged_in' || !user) {
+        showDenied('Login dulu di KARSA, lalu buka halaman ini lagi.', null);
         return;
       }
-      show('admin-denied');
-      const denied = $('#admin-denied');
-      if (denied) {
-        denied.querySelector('p').textContent = e.message || 'Gagal memuat data.';
+      if (!Plan.isSuperuser()) {
+        showDenied(
+          'Email ini bukan superuser. Superuser saat ini: fajar.mreza@gmail.com — login dengan akun itu lalu refresh.',
+          user.email
+        );
+        return;
       }
+      showDenied(e.message || 'Gagal memuat data.', user?.email);
     }
   }
 
   async function init() {
     await Auth.init();
     if (!Auth.isLoggedIn()) {
-      show('admin-denied');
+      showDenied('Login dulu di KARSA, lalu buka halaman ini lagi.', null);
       return;
     }
     await Plan.loadConfig();
     await Plan.syncProFromCloud();
     if (!Plan.isSuperuser()) {
-      show('admin-denied');
+      showDenied(
+        'Email ini bukan superuser. Superuser saat ini: fajar.mreza@gmail.com — login dengan akun itu lalu refresh.',
+        Auth.getUser()?.email
+      );
       return;
     }
     $('#admin-refresh')?.addEventListener('click', refresh);

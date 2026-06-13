@@ -72,7 +72,7 @@ const Auth = (() => {
       });
     }
     if (user && typeof Plan !== 'undefined') {
-      Plan.syncProFromCloud();
+      await Plan.syncProFromCloud();
     }
     client.auth.onAuthStateChange(async (event, session) => {
       user = session?.user || null;
@@ -83,6 +83,9 @@ const Auth = (() => {
       }
       if (user && typeof Plan !== 'undefined') {
         await Plan.syncProFromCloud();
+      } else if (typeof Plan !== 'undefined') {
+        Plan.setSuperuserLocal(false);
+        Plan.updateAiBadge();
       }
     });
     updateUI();

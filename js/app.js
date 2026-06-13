@@ -400,18 +400,15 @@ const App = (() => {
     });
   }
 
-  function init() {
+  async function init() {
     const settings = State.getSettings();
     applyTheme(settings.theme);
     $('#auto-run-toggle').checked = settings.autoRun;
-    Plan.loadConfig().then(() => {
-      Plan.updateAiBadge();
-      Plan.syncProFromCloud();
-      const proBtn = $('#dash-pro-btn');
-      if (proBtn) proBtn.classList.toggle('active', Plan.isPro());
-    });
     Auth.bindTriggers();
-    Auth.init();
+    await Auth.init();
+    await Plan.loadConfig();
+    await Plan.syncProFromCloud();
+    Plan.updateAiBadge();
 
     ConsolePanel.init();
     Editor.init();
