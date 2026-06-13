@@ -7,8 +7,9 @@ const AI = (() => {
   const MODEL_SMART = 'MiniMax-M3';
   const DEFAULT_SETTINGS = { v: 2, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: false };
   const DIRECT_URL = 'https://api.minimax.io/v1/chat/completions';
-  const MAX_FILE_CHARS = 6000;
-  const MAX_CONTEXT_CHARS = 30000;
+  const MAX_OUTPUT_TOKENS = 65536;
+  const MAX_FILE_CHARS = 18000;
+  const MAX_CONTEXT_CHARS = 100000;
   const MAX_HISTORY = 12;
 
   const SYSTEM_PROMPT = [
@@ -30,6 +31,7 @@ const AI = (() => {
     '10. Mobile-first dan muat satu layar: untuk game serta aplikasi interaktif, seluruh UI harus pas dalam viewport tanpa scroll vertikal (gunakan height:100dvh, flexbox, ukuran ringkas) dan tetap nyaman di layar ponsel Android modern (lebar 360-412px).',
     '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
     '12. Jika kamu model yang berpikir (reasoning), batasi penalaran internal seketat mungkin — beberapa kalimat saja — lalu langsung tulis jawaban dan file. Jangan menganalisis berlebihan.',
+    '13. File besar (>80 baris): pisah ke index.html + css/style.css + js/app.js. Jangan gabung HTML+CSS+JS inline ke satu file kecuali user minta — file terpotong = app rusak.',
   ].join('\n');
 
   function getSystemPrompt() {
@@ -370,6 +372,75 @@ const AI = (() => {
     return bubble;
   }
 
+  function braceBalance(code) {
+    let b = 0; let p = 0; let br = 0; let q = null;
+    for (let i = 0; i < code.length; i++) {
+      const ch = code[i];
+      if (q) {
+        if (ch === '\\') { i++; continue; }
+        if (ch === q) q = null;
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === '`') { q = ch; continue; }
+      if (ch === '/' && code[i + 1] === '/') { while (i < code.length && code[i] !== '\n') i++; continue; }
+      if (ch === '/' && code[i + 1] === '*') {
+        i += 2;
+        while (i < code.length - 1 && !(code[i] === '*' && code[i + 1] === '/')) i++;
+        i++;
+        continue;
+      }
+      if (ch === '{') b++;
+      else if (ch === '}') b--;
+      else if (ch === '(') p++;
+      else if (ch === ')') p--;
+      else if (ch === '[') br++;
+      else if (ch === ']') br--;
+    }
+    return b === 0 && p === 0 && br === 0;
+  }
+
+  function isFileComplete(code, path) {
+    const c = (code || '').trim();
+    if (!c) return false;
+    const ext = fileExt(path);
+    if (ext === 'html') {
+      if (c.length > 400 && !/<\/html>\s*$/i.test(c)) return false;
+      const scripts = (c.match(/<script\b/gi) || []).length;
+      const scriptClose = (c.match(/<\/script>/gi) || []).length;
+      if (scripts > scriptClose) return false;
+    }
+    if (ext === 'css' || ext === 'js') {
+      if (!braceBalance(c)) return false;
+      if (/[=([{,]\s*$/.test(c)) return false;
+    }
+    if (ext === 'js' && /const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
+    return true;
+  }
+
+  function hasUnclosedCodeFence(text) {
+    return ((text.match(/```/g) || []).length % 2) !== 0;
+  }
+
+  function isResponseTruncated(visible, finishReason) {
+    if (finishReason === 'length') return true;
+    if (hasUnclosedCodeFence(visible)) return true;
+    const files = parseFileBlocks(visible);
+    return files.length > 0 && files.some((f) => !isFileComplete(f.code, f.path));
+  }
+
+  function appendContinueButton(bubble, visible) {
+    const tail = visible.slice(-1400);
+    bubble.appendChild(el('button', {
+      class: 'ai-retry-btn',
+      text: '▶ Lanjutkan tulis (terpotong)',
+      onclick: () => {
+        $('#ai-input').value =
+          'Respons terpotong. Lanjutkan menulis dari titik putus — keluarkan blok ``` file=path dengan SISA kode yang belum ada (jangan ulang dari awal):\n\n' + tail;
+        send();
+      },
+    }));
+  }
+
   // --- Parsing & penerapan file dari jawaban AI ---
   function parseFileBlocks(text) {
     const files = [];
@@ -399,24 +470,42 @@ const AI = (() => {
     return /blok file di ringkas|isi file tidak disertakan|\[…pesan dipotong/i.test(text || '');
   }
 
-  function attachApplyBox(bubble, visibleText, autoFocus) {
-    const files = parseFileBlocks(visibleText);
-    if (files.length === 0) return;
+  function attachApplyBox(bubble, visibleText, autoFocus, opts) {
+    const allFiles = parseFileBlocks(visibleText);
+    if (allFiles.length === 0) return;
+    const truncated = opts && opts.truncated;
+    const files = allFiles.filter((f) => isFileComplete(f.code, f.path));
+    const incomplete = allFiles.filter((f) => !isFileComplete(f.code, f.path));
     const project = State.getCurrentProject();
     if (!project) return;
 
-    const chips = el('div', { class: 'ai-file-chips' }, files.map((f) => {
+    if (truncated || incomplete.length) {
+      bubble.appendChild(el('div', {
+        class: 'ai-truncated-warn',
+        text: '⚠ File terpotong atau tidak lengkap — jangan diterapkan dulu. Klik "Lanjutkan tulis" atau minta pisah ke css/js.',
+      }));
+    }
+
+    const chips = el('div', { class: 'ai-file-chips' }, allFiles.map((f) => {
+      const ok = isFileComplete(f.code, f.path);
       const isNew = project.files[f.path] === undefined;
-      return el('span', { class: 'ai-file-chip' }, [
-        el('span', { class: isNew ? 'chip-new' : 'chip-edit', text: isNew ? '＋' : '✎' }),
-        el('span', { text: f.path }),
+      return el('span', { class: 'ai-file-chip' + (ok ? '' : ' incomplete') }, [
+        el('span', { class: isNew ? 'chip-new' : 'chip-edit', text: ok ? (isNew ? '＋' : '✎') : '⚠' }),
+        el('span', { text: f.path + (ok ? '' : ' (potong)') }),
       ]);
     }));
 
     const applyBtn = el('button', {
       class: 'btn-apply',
-      text: '⚡ Terapkan ke Proyek (' + files.length + ' file)',
+      text: files.length
+        ? '⚡ Terapkan ke Proyek (' + files.length + ' file)'
+        : '⚡ File belum lengkap',
+      disabled: !files.length,
       onclick: () => {
+        if (!files.length) {
+          showToast('File belum lengkap — lanjutkan tulis dulu.', 'warn');
+          return;
+        }
         if (applyFiles(files)) {
           applyBtn.disabled = true;
           applyBtn.textContent = '✓ Sudah diterapkan';
@@ -540,7 +629,10 @@ const AI = (() => {
     const headers = { 'Content-Type': 'application/json' };
     if (useDirect) headers.Authorization = 'Bearer ' + settings.apiKey;
     const directPayload = {
-      model: modelUsed, messages, stream: true, max_tokens: 16384, temperature: 0.7,
+      model: modelUsed, messages, stream: true,
+      max_completion_tokens: MAX_OUTPUT_TOKENS,
+      max_tokens: MAX_OUTPUT_TOKENS,
+      temperature: 0.7,
       ...(modelUsed.includes('M3') ? { reasoning_effort: 'low' } : {}),
     };
     const body = useDirect
@@ -621,9 +713,13 @@ const AI = (() => {
             : 'AI selesai tanpa jawaban yang bisa ditampilkan. Klik Kirim untuk mencoba lagi.'));
       }
       renderAssistantHtml(bubble, visible);
-      attachApplyBox(bubble, visible, true);
-      const parsedFiles = parseFileBlocks(visible);
-      if (!parsedFiles.length && (looksLikeCodeChangeRequest(prompt) || responseHasFilePlaceholder(visible))) {
+      const truncated = isResponseTruncated(visible, finishReason);
+      attachApplyBox(bubble, visible, true, { truncated });
+      const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
+      if (truncated) {
+        appendContinueButton(bubble, visible);
+        showToast('Respons AI terpotong — klik "Lanjutkan tulis" atau pisah file ke css/js.', 'warn');
+      } else if (!parsedFiles.length && (looksLikeCodeChangeRequest(prompt) || responseHasFilePlaceholder(visible))) {
         bubble.appendChild(el('button', {
           class: 'ai-retry-btn',
           text: '🔄 Minta file lengkap',
@@ -643,9 +739,9 @@ const AI = (() => {
       history.push({ role: 'assistant', content: visible });
       saveHistory();
       Plan.recordAiUse();
-      if (settings.autoApply || autoApplyOnce) {
+      if ((settings.autoApply || autoApplyOnce) && !truncated) {
         const applyBtn = $('.btn-apply', bubble);
-        if (applyBtn) applyBtn.click();
+        if (applyBtn && parsedFiles.length && !applyBtn.disabled) applyBtn.click();
       }
       autoApplyOnce = false;
     } catch (err) {

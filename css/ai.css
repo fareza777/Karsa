@@ -415,6 +415,17 @@
 }
 .ai-file-chip .chip-new { color: var(--ok); font-weight: 700; }
 .ai-file-chip .chip-edit { color: var(--warn); font-weight: 700; }
+.ai-file-chip.incomplete { border-color: rgba(245, 158, 11, .45); opacity: .85; }
+.ai-truncated-warn {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #fcd34d;
+  background: rgba(245, 158, 11, .1);
+  border: 1px solid rgba(245, 158, 11, .25);
+}
 .btn-apply {
   background: var(--gradient);
   color: #fff;

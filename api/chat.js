@@ -18,6 +18,7 @@ const ALLOWED_MODELS = [
 const MAX_MESSAGES = 40;
 const MAX_TEXT_CHARS = 200000;
 const MAX_TOTAL_CHARS = 3500000; // termasuk gambar data-URL (batas body Vercel ±4,5 MB)
+const MAX_OUTPUT_TOKENS = Number(process.env.KARSA_AI_MAX_TOKENS) || 65536;
 
 // Konten boleh string, atau array bagian {type:'text'}|{type:'image_url'} (vision)
 function contentSize(content) {
@@ -90,7 +91,8 @@ export default async function handler(req, res) {
         model: chosenModel,
         messages,
         stream: true,
-        max_tokens: 16384,
+        max_completion_tokens: MAX_OUTPUT_TOKENS,
+        max_tokens: MAX_OUTPUT_TOKENS,
         temperature: 0.7,
         // Model reasoning (M3): pangkas penalaran agar respons lebih cepat
         ...(chosenModel.includes('M3') ? { reasoning_effort: 'low' } : {}),
