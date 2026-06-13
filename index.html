@@ -56,6 +56,7 @@
       </a>
       <nav class="lp-nav-links" aria-label="Utama">
         <a href="#fitur">Fitur</a>
+        <a href="#demo">Demo</a>
         <a href="#cara-kerja">Cara kerja</a>
         <a href="#harga">Harga</a>
         <a href="#panduan">Panduan</a>
@@ -71,12 +72,18 @@
 
   <main>
     <section class="lp-wrap lp-hero">
+      <div class="lp-hero-bg" aria-hidden="true">
+        <span class="lp-orb lp-orb-1"></span>
+        <span class="lp-orb lp-orb-2"></span>
+        <span class="lp-orb lp-orb-3"></span>
+      </div>
       <div class="lp-hero-copy">
+        <span class="lp-hero-badge">✦ Vibecoding bahasa Indonesia</span>
         <h1>Dari ide, <em>jadi aplikasi</em></h1>
-        <p class="lp-hero-lead">Platform vibecoding bahasa Indonesia. Ceritakan warung, katalog, atau tools bisnismu — AI bangun kodenya, kamu lihat hasilnya langsung di browser.</p>
+        <p class="lp-hero-lead">Ceritakan warung, katalog, atau tools bisnismu — AI bangun kodenya, kamu lihat hasilnya langsung di browser. Tanpa install, tanpa ribet.</p>
         <div class="lp-hero-actions">
           <a href="/app" class="lp-btn lp-btn-accent">Mulai gratis</a>
-          <a href="#cara-kerja" class="lp-btn lp-btn-ghost">Lihat cara kerja</a>
+          <a href="#demo" class="lp-btn lp-btn-ghost lp-btn-play"><span class="lp-play-icon" aria-hidden="true">▶</span> Lihat demo</a>
         </div>
         <div class="lp-hero-meta">
           <div><strong>30</strong> prompt AI/hari</div>
@@ -86,34 +93,61 @@
       </div>
       <div class="lp-showcase" aria-hidden="true">
         <div class="lp-showcase-glow"></div>
-        <div class="lp-frame">
+        <div class="lp-showcase-float lp-float-1">Live preview</div>
+        <div class="lp-showcase-float lp-float-2">AI ✦</div>
+        <div class="lp-frame lp-frame-hero">
           <div class="lp-frame-bar">
             <span class="lp-frame-dot"></span><span class="lp-frame-dot"></span><span class="lp-frame-dot"></span>
             <span class="lp-frame-url">karsa.work/app</span>
+            <span class="lp-frame-live"><span class="lp-live-dot"></span> Demo</span>
           </div>
-          <div class="lp-frame-body">
-            <div class="lp-frame-side">
-              <div class="lp-frame-line accent"></div>
-              <div class="lp-frame-line w80"></div>
-              <div class="lp-frame-line w60"></div>
-              <div class="lp-frame-line w80"></div>
+          <div id="lp-hero-demo" class="lp-demo-stage"></div>
+          <div id="lp-hero-caption" class="lp-demo-caption"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-demo-section" id="demo">
+      <div class="lp-wrap">
+        <div class="lp-demo-section-head">
+          <div>
+            <span class="lp-hero-badge">Sekilas penggunaan</span>
+            <h2>Lihat KARSA <em>beraksi</em></h2>
+            <p>Dari prompt pertama sampai situs live — dalam satu workspace. Pratinjau animasi alur nyata di KARSA.</p>
+          </div>
+          <div id="lp-demo-dots" class="lp-demo-dots" role="tablist" aria-label="Langkah demo"></div>
+        </div>
+        <div class="lp-demo-cinema">
+          <div class="lp-demo-cinema-glow" aria-hidden="true"></div>
+          <div class="lp-frame lp-frame-cinema">
+            <div class="lp-frame-bar">
+              <span class="lp-frame-dot"></span><span class="lp-frame-dot"></span><span class="lp-frame-dot"></span>
+              <span class="lp-frame-url">karsa.work/app</span>
             </div>
-            <div class="lp-frame-editor">
-              <span class="cm">&lt;!-- AI vibecoding --&gt;</span><br>
-              <span class="kw">&lt;section</span> <span class="str">class="hero"</span><span class="kw">&gt;</span><br>
-              &nbsp;&nbsp;<span class="kw">&lt;h1&gt;</span>Kasir Warung<span class="kw">&lt;/h1&gt;</span><br>
-              <span class="kw">&lt;/section&gt;</span>
-            </div>
-            <div class="lp-frame-preview">
-              <div class="lp-preview-card">
-                <h3>Kasir Warung Bu Ani</h3>
-                <p>Preview live — mobile & desktop</p>
-              </div>
-              <div class="lp-preview-card">
-                <h3>Total hari ini</h3>
-                <p>Rp 1.240.000</p>
-              </div>
-            </div>
+            <div id="lp-cinema-demo" class="lp-demo-stage lp-demo-stage-lg"></div>
+            <div id="lp-cinema-caption" class="lp-demo-caption"></div>
+          </div>
+        </div>
+        <div class="lp-demo-steps">
+          <div class="lp-demo-step-card" data-step="0">
+            <span class="lp-demo-step-num">01</span>
+            <h3>Tulis ide</h3>
+            <p>Prompt bahasa Indonesia — warung, katalog, landing page.</p>
+          </div>
+          <div class="lp-demo-step-card" data-step="1">
+            <span class="lp-demo-step-num">02</span>
+            <h3>AI bikin kode</h3>
+            <p>HTML, CSS, JS muncul otomatis di editor.</p>
+          </div>
+          <div class="lp-demo-step-card" data-step="2">
+            <span class="lp-demo-step-num">03</span>
+            <h3>Preview langsung</h3>
+            <p>Lihat hasil di desktop, tablet, atau HP.</p>
+          </div>
+          <div class="lp-demo-step-card" data-step="3">
+            <span class="lp-demo-step-num">04</span>
+            <h3>Publish</h3>
+            <p>Satu klik — situs live di karsa.work.</p>
           </div>
         </div>
       </div>
