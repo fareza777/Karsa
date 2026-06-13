@@ -37,6 +37,7 @@ const AI = (() => {
     '15. Screenshot/lampiran gambar = tampilan proyek SAAT INI sebagai referensi. Instruksi sungguhan ada di TEKS user — ikuti secara harfiah. Jangan anggap screenshot sebagai mockup desain baru.',
     '16. "Ganti warna tulisan/ teks jadi hijau" = ubah properti color teks (soal, opsi, heading, label) saja — BUKAN mengganti glow, border kartu, gradient background, atau variabel tema global.',
     '17. Untuk permintaan kecil, keluarkan HANYA file yang benar-benar berubah (sering cukup css/style.css). Jangan tulis ulang index.html/js/app.js jika tidak perlu.',
+    '18. Proyek besar (Expo/mobile): maks 2 file per respons. Jangan keluarkan banyak file sekaligus — pecah per screen/file.',
   ].join('\n');
 
   function getSystemPrompt() {
@@ -442,9 +443,14 @@ const AI = (() => {
       if (scripts > scriptClose) return false;
     }
     if (ext === 'css') return true;
-    if (ext === 'js') {
+    if (ext === 'js' || ext === 'ts' || ext === 'jsx' || ext === 'tsx') {
+      if (/\[\.\.\.\]|BUKAN kode asli|penanda dipotong|← ini/i.test(c)) return false;
       if (!braceBalance(c)) return false;
       if (/const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
+      if ((ext === 'tsx' || ext === 'jsx') && /export\s+default\s+function/.test(c) && !/\}\s*;?\s*$/.test(c.trim())) return false;
+    }
+    if (ext === 'json') {
+      try { JSON.parse(c); } catch (e) { return false; }
     }
     return true;
   }
@@ -459,6 +465,71 @@ const AI = (() => {
     const files = parseFileBlocks(visible);
     if (!files.length) return false;
     return !files.some((f) => isFileComplete(f.code, f.path));
+  }
+
+  const MAX_AUTO_CONTINUE = 6;
+
+  function extractProse(text) {
+    const idx = text.indexOf('```');
+    return idx === -1 ? text.trim() : text.slice(0, idx).trim();
+  }
+
+  function rebuildWithFiles(originalVisible, files) {
+    const prose = extractProse(originalVisible);
+    const blocks = files.map((f) => {
+      const lang = fileExt(f.path) || 'txt';
+      return '```' + lang + ' file=' + f.path + '\n' + f.code + '\n```';
+    });
+    return (prose ? prose + '\n\n' : '') + blocks.join('\n\n');
+  }
+
+  function mergeContinuedOutput(previous, continuation) {
+    const prevFiles = parseFileBlocks(previous);
+    const newFiles = parseFileBlocks(continuation);
+    if (!newFiles.length) {
+      const tail = continuation.replace(/^[\s\S]*?```[\w-]*\s*\n?/m, '').replace(/```\s*$/m, '').trim();
+      const incomplete = prevFiles.filter((f) => !isFileComplete(f.code, f.path));
+      if (incomplete.length && tail) {
+        const last = incomplete[incomplete.length - 1];
+        last.code = last.code + '\n' + tail;
+        return rebuildWithFiles(previous, prevFiles);
+      }
+      return previous;
+    }
+    const map = Object.fromEntries(prevFiles.map((f) => [f.path, f.code]));
+    newFiles.forEach((f) => {
+      const prior = map[f.path];
+      if (prior && !isFileComplete(prior, f.path)) {
+        const p = prior.trim();
+        const n = f.code.trim();
+        map[f.path] = (n.startsWith(p.slice(0, Math.min(60, p.length))) || n.length >= p.length) ? f.code : prior + '\n' + f.code;
+      } else {
+        map[f.path] = f.code;
+      }
+    });
+    return rebuildWithFiles(previous, Object.keys(map).map((path) => ({ path, code: map[path] })));
+  }
+
+  function buildContinueMessage(accumulatedVisible) {
+    const files = parseFileBlocks(accumulatedVisible);
+    const incomplete = files.filter((f) => !isFileComplete(f.code, f.path));
+    const complete = files.filter((f) => isFileComplete(f.code, f.path)).map((f) => f.path);
+    if (incomplete.length) {
+      const f = incomplete[incomplete.length - 1];
+      const lang = fileExt(f.path) || 'txt';
+      return [
+        '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
+        'File "' + f.path + '" belum lengkap. Lanjutkan HANYA sisa kode dari titik putus.',
+        'Keluarkan satu blok ```' + lang + ' file=' + f.path + ' berisi sisa file sampai valid.',
+        'Jangan ulang dari awal. Baris terakhir yang sudah ada:',
+        f.code.slice(-700),
+      ].join('\n');
+    }
+    return [
+      '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
+      'File lengkap (jangan tulis ulang): ' + (complete.join(', ') || 'belum ada'),
+      'Tulis file berikutnya yang belum sempat. Maks 1–2 file, masing-masing UTUH dalam blok ``` file=path.',
+    ].join('\n');
   }
 
   function appendContinueButton(bubble, visible) {
@@ -518,9 +589,21 @@ const AI = (() => {
   }
 
   function collectFileBlocks(bubble, visibleText) {
+    if (bubble && bubble.dataset.aiFiles) {
+      try {
+        const stored = JSON.parse(bubble.dataset.aiFiles);
+        if (Array.isArray(stored) && stored.length) return stored;
+      } catch (e) { /* abaikan */ }
+    }
     const fromText = parseFileBlocks(visibleText);
     if (fromText.length) return fromText;
     return parseFileBlocksFromDom(bubble);
+  }
+
+  function storeMergedFiles(bubble, visibleText) {
+    const files = parseFileBlocks(visibleText);
+    if (files.length) bubble.dataset.aiFiles = JSON.stringify(files);
+    bubble.dataset.aiVisible = visibleText;
   }
 
   function projectFileMatches(path, code) {
@@ -645,6 +728,88 @@ const AI = (() => {
     $('#side-tab-ai').classList.toggle('busy', value);
   }
 
+  async function runAiStream({ messages, modelUsed, useDirect, signal, bubble, onPhase }) {
+    const url = useDirect ? DIRECT_URL : settings.endpoint;
+    const headers = { 'Content-Type': 'application/json' };
+    if (useDirect) headers.Authorization = 'Bearer ' + settings.apiKey;
+    const directPayload = {
+      model: modelUsed, messages, stream: true,
+      max_completion_tokens: MAX_OUTPUT_TOKENS,
+      max_tokens: MAX_OUTPUT_TOKENS,
+      temperature: 0.7,
+      ...(modelUsed.includes('M3') ? { reasoning_effort: 'low' } : {}),
+    };
+    const body = useDirect
+      ? JSON.stringify(directPayload)
+      : JSON.stringify({ model: modelUsed, messages });
+
+    let rawText = '';
+    let lastRenderAt = 0;
+    let finishReason = null;
+
+    const response = await fetch(url, { method: 'POST', headers, body, signal });
+    if (!response.ok) {
+      let detail = 'HTTP ' + response.status;
+      try {
+        const errJson = await response.json();
+        detail = errJson.error?.message || errJson.error || detail;
+      } catch (e) { /* bukan JSON */ }
+      throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data:')) continue;
+        const payload = trimmed.slice(5).trim();
+        if (payload === '[DONE]') continue;
+        try {
+          const json = JSON.parse(payload);
+          if (json.error) throw new Error(json.error.message || json.error);
+          if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
+          const delta = json.choices?.[0]?.delta?.content;
+          if (delta) {
+            rawText += delta;
+            const { visible, thinking } = stripThink(rawText);
+            const phase = thinking && !visible.trim() ? 'berpikir' : 'menulis';
+            if (onPhase) onPhase(phase, rawText.length);
+            const now = Date.now();
+            if (visible.trim()) {
+              if (now - lastRenderAt > 180) {
+                lastRenderAt = now;
+                renderAssistantHtml(bubble, visible, true);
+                scrollChat();
+              }
+            } else if (thinking && now - lastRenderAt > 400) {
+              lastRenderAt = now;
+              bubble.innerHTML = '';
+              bubble.appendChild(el('span', {
+                class: 'ai-thinking',
+                text: 'AI menyusun rencana… (' + rawText.length + ' karakter penalaran)',
+              }));
+              scrollChat();
+            }
+          }
+        } catch (parseErr) {
+          if (parseErr.message && !payload.startsWith('{')) continue;
+          if (parseErr instanceof SyntaxError) continue;
+          throw parseErr;
+        }
+      }
+    }
+
+    const { visible } = stripThink(rawText);
+    return { visible, finishReason, rawText };
+  }
+
   async function send() {
     if (busy) return;
     const input = $('#ai-input');
@@ -722,106 +887,70 @@ const AI = (() => {
       const secs = Math.round((Date.now() - startedAt) / 1000);
       const label = phase === 'menghubungi' ? 'menghubungi KARSA AI'
         : phase === 'berpikir' ? 'AI sedang berpikir 💭'
+        : phase === 'melanjutkan' ? 'melanjutkan tulis otomatis ✍'
         : 'AI sedang menulis ✍';
       $('#ai-status').textContent = label + '… ' + secs + ' dtk';
     }, 1000);
 
     const useDirect = !!settings.apiKey;
-    const url = useDirect ? DIRECT_URL : settings.endpoint;
-    const headers = { 'Content-Type': 'application/json' };
-    if (useDirect) headers.Authorization = 'Bearer ' + settings.apiKey;
-    const directPayload = {
-      model: modelUsed, messages, stream: true,
-      max_completion_tokens: MAX_OUTPUT_TOKENS,
-      max_tokens: MAX_OUTPUT_TOKENS,
-      temperature: 0.7,
-      ...(modelUsed.includes('M3') ? { reasoning_effort: 'low' } : {}),
-    };
-    const body = useDirect
-      ? JSON.stringify(directPayload)
-      : JSON.stringify({ model: modelUsed, messages });
-
-    let rawText = '';
-    let lastRenderAt = 0;
+    let apiMessages = messages.slice();
+    let continueRound = 0;
+    let accumulatedVisible = '';
     let finishReason = null;
+
     try {
-      const response = await fetch(url, { method: 'POST', headers, body, signal: abortCtrl.signal });
-      if (!response.ok) {
-        let detail = 'HTTP ' + response.status;
-        try {
-          const errJson = await response.json();
-          detail = errJson.error?.message || errJson.error || detail;
-        } catch (e) { /* bukan JSON */ }
-        throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
-      }
+      const onPhase = (p) => { phase = p; };
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
       for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith('data:')) continue;
-          const payload = trimmed.slice(5).trim();
-          if (payload === '[DONE]') continue;
-          try {
-            const json = JSON.parse(payload);
-            if (json.error) throw new Error(json.error.message || json.error);
-            if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
-            const delta = json.choices?.[0]?.delta?.content;
-            if (delta) {
-              rawText += delta;
-              const { visible, thinking } = stripThink(rawText);
-              phase = thinking && !visible.trim() ? 'berpikir' : 'menulis';
-              const now = Date.now();
-              if (visible.trim()) {
-                if (now - lastRenderAt > 180) {
-                  lastRenderAt = now;
-                  renderAssistantHtml(bubble, visible, true);
-                  scrollChat();
-                }
-              } else if (thinking && now - lastRenderAt > 400) {
-                lastRenderAt = now;
-                bubble.innerHTML = '';
-                bubble.appendChild(el('span', {
-                  class: 'ai-thinking',
-                  text: 'AI menyusun rencana… (' + rawText.length + ' karakter penalaran)',
-                }));
-                scrollChat();
-              }
-            }
-          } catch (parseErr) {
-            if (parseErr.message && !payload.startsWith('{')) continue;
-            if (parseErr instanceof SyntaxError) continue;
-            throw parseErr;
+        const result = await runAiStream({
+          messages: apiMessages,
+          modelUsed,
+          useDirect,
+          signal: abortCtrl.signal,
+          bubble,
+          onPhase,
+        });
+        finishReason = result.finishReason;
+
+        if (!result.visible.trim()) {
+          if (finishReason === 'length') {
+            throw new Error('Jatah token habis sebelum jawaban selesai. Coba pecah permintaan (mis. satu screen dulu).');
           }
+          throw new Error(result.rawText.length === 0
+            ? 'Tidak ada respons dari server AI. Periksa koneksi internetmu lalu coba lagi.'
+            : 'AI selesai tanpa jawaban yang bisa ditampilkan. Klik Kirim untuk mencoba lagi.');
         }
+
+        accumulatedVisible = continueRound === 0
+          ? result.visible
+          : mergeContinuedOutput(accumulatedVisible, result.visible);
+
+        renderAssistantHtml(bubble, accumulatedVisible);
+        storeMergedFiles(bubble, accumulatedVisible);
+
+        const stillTruncated = isResponseTruncated(accumulatedVisible, finishReason);
+        if (!stillTruncated || continueRound >= MAX_AUTO_CONTINUE) break;
+
+        continueRound++;
+        phase = 'melanjutkan';
+        setBusy(true, 'Melanjutkan otomatis… bagian ' + (continueRound + 1));
+        showToast('Respons terpotong — melanjutkan otomatis (' + continueRound + '/' + MAX_AUTO_CONTINUE + ')…', 'info');
+
+        apiMessages = apiMessages.concat([
+          { role: 'assistant', content: accumulatedVisible },
+          { role: 'user', content: buildContinueMessage(accumulatedVisible) },
+        ]);
       }
 
-      const { visible, thinking } = stripThink(rawText);
-      if (!visible.trim()) {
-        if (finishReason === 'length') {
-          throw new Error('Jatah token habis terpakai untuk penalaran AI sebelum jawaban sempat ditulis. Coba kirim ulang (klik Kirim), atau ganti model ke MiniMax-M2.7-highspeed di pengaturan ⚙ — model itu langsung menjawab tanpa berpikir panjang.');
-        }
-        throw new Error(thinking
-          ? 'Koneksi terputus saat AI masih berpikir (penalaran terlalu panjang). Coba lagi, atau ganti model ke MiniMax-M2.7-highspeed di pengaturan ⚙ untuk jawaban lebih cepat.'
-          : (rawText.length === 0
-            ? 'Tidak ada respons dari server AI. Periksa koneksi internetmu lalu coba lagi.'
-            : 'AI selesai tanpa jawaban yang bisa ditampilkan. Klik Kirim untuk mencoba lagi.'));
-      }
-      renderAssistantHtml(bubble, visible);
-      bubble.dataset.aiVisible = visible;
+      const visible = accumulatedVisible;
       const truncated = isResponseTruncated(visible, finishReason);
       attachApplyBox(bubble, visible, true, { truncated });
       const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
       if (truncated) {
         appendContinueButton(bubble, visible);
-        showToast('Respons AI terpotong — klik "Lanjutkan tulis" atau pisah file ke css/js.', 'warn');
+        showToast('Masih terpotong setelah ' + MAX_AUTO_CONTINUE + 'x lanjut otomatis — klik "Lanjutkan tulis" atau pecah permintaan.', 'warn');
+      } else if (continueRound > 0) {
+        showToast('Respons lengkap setelah ' + continueRound + 'x lanjut otomatis ✓', 'ok');
       } else if (!parsedFiles.length && (looksLikeCodeChangeRequest(prompt) || responseHasFilePlaceholder(visible))) {
         bubble.appendChild(el('button', {
           class: 'ai-retry-btn',

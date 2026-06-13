@@ -114,6 +114,9 @@ const MOBILE_AI_PROMPT = [
   '5. package.json harus menyertakan expo, react, react-native. app.json valid untuk Expo SDK 52.',
   '6. Jawab bahasa Indonesia. Hangat & kolaboratif. Tutup dengan 2-3 ide iterasi.',
   '7. Mobile-first, aman di layar 360–412px lebar.',
+  '8. Maksimal 2 file per respons. File besar (App.tsx, screen) — satu file per respons. Jangan keluarkan 5+ file sekaligus.',
+  '9. Jangan tulis ulang package.json / app.json jika tidak berubah.',
+  '10. Jika respons terpotong, sistem akan minta lanjutan otomatis — pastikan setiap file yang dikeluarkan valid & lengkap.',
 ].join('\n');
 
 const WEB_PREVIEW_PROMPT =
