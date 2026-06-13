@@ -3,17 +3,62 @@
 (function () {
   const fmt = (n) => (Number(n) || 0).toLocaleString('id-ID');
 
-  function card(label, value, accent) {
-    return el('div', { class: 'admin-card' }, [
-      el('div', { class: 'admin-card-label', text: label }),
+  const METRICS = [
+    ['Login', 'logins', 'admin-card--login', '↪', false],
+    ['Pendaftaran', 'signups', 'admin-card--signup', '＋', false],
+    ['User unik', 'unique_users', 'admin-card--users', '◎', true],
+    ['Permintaan AI', 'ai_requests', 'admin-card--ai', '✦', false],
+    ['Token masuk', 'tokens_in', 'admin-card--token-in', '↓', false],
+    ['Token keluar', 'tokens_out', 'admin-card--token-out', '↑', false],
+    ['Publish', 'publishes', 'admin-card--publish', '⬡', false],
+  ];
+
+  const DB_METRICS = [
+    ['Total user', 'totalUsers', 'admin-card--db', '👤', true],
+    ['Profil', 'totalProfiles', 'admin-card--db', '◉', false],
+    ['Pro', 'proCount', 'admin-card--db', '★', false],
+    ['Proyek cloud', 'totalProjects', 'admin-card--db', '▣', false],
+  ];
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const [y, m, d] = iso.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    return dt.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function card(label, value, mod, icon, accent) {
+    return el('div', { class: 'admin-card ' + mod }, [
+      el('div', { class: 'admin-card-top' }, [
+        el('span', { class: 'admin-card-label', text: label }),
+        el('span', { class: 'admin-card-icon', text: icon, 'aria-hidden': 'true' }),
+      ]),
       el('div', { class: 'admin-card-value' + (accent ? ' accent' : ''), text: fmt(value) }),
     ]);
   }
 
   function renderCards(container, stats, keys) {
+    if (!container) return;
     container.innerHTML = '';
-    keys.forEach(([label, key, accent]) => {
-      container.appendChild(card(label, stats?.[key] ?? 0, accent));
+    keys.forEach(([label, key, mod, icon, accent]) => {
+      container.appendChild(card(label, stats?.[key] ?? 0, mod, icon, accent));
+    });
+  }
+
+  function renderHeroKpis(today) {
+    const box = $('#admin-hero-kpis');
+    if (!box) return;
+    box.innerHTML = '';
+    const items = [
+      ['Login hari ini', today?.logins],
+      ['User unik', today?.unique_users],
+      ['AI requests', today?.ai_requests],
+    ];
+    items.forEach(([label, val]) => {
+      box.appendChild(el('div', { class: 'admin-hero-kpi' }, [
+        el('div', { class: 'admin-hero-kpi-label', text: label }),
+        el('div', { class: 'admin-hero-kpi-value', text: fmt(val) }),
+      ]));
     });
   }
 
@@ -34,6 +79,8 @@
     if (!data.supabaseConfigured) {
       msgs.push('SUPABASE_SERVICE_ROLE_KEY belum diset — ringkasan user/proyek Supabase tidak tersedia.');
     }
+    const note = $('#admin-supabase-note');
+    if (note) note.classList.toggle('hidden', !!data.supabaseConfigured);
     if (!msgs.length) {
       box.classList.add('hidden');
       box.innerHTML = '';
@@ -51,8 +98,8 @@
     const todayKey = new Date().toISOString().slice(0, 10);
     (days || []).slice().reverse().forEach((d) => {
       const tr = el('tr', { class: d.date === todayKey ? 'row-today' : '' });
-      [
-        d.date,
+      const vals = [
+        fmtDate(d.date),
         d.logins,
         d.signups,
         d.unique_users,
@@ -60,8 +107,11 @@
         d.tokens_in,
         d.tokens_out,
         d.publishes,
-      ].forEach((val, i) => {
-        tr.appendChild(el('td', { text: i === 0 ? val : fmt(val) }));
+      ];
+      vals.forEach((val, i) => {
+        const td = el('td', { text: i === 0 ? val : fmt(val) });
+        if (i > 0 && (Number(val) || 0) === 0) td.classList.add('num-zero');
+        tr.appendChild(td);
       });
       tbody.appendChild(tr);
     });
@@ -80,27 +130,14 @@
       return;
     }
     if (section) section.classList.remove('hidden');
-    renderCards(box, sb, [
-      ['Total user', 'totalUsers', true],
-      ['Profil', 'totalProfiles'],
-      ['Pro', 'proCount'],
-      ['Proyek cloud', 'totalProjects'],
-    ]);
+    renderCards(box, sb, DB_METRICS);
   }
 
   function renderDashboard(data) {
     renderWarnings(data);
-    const todayKeys = [
-      ['Login', 'logins'],
-      ['Pendaftaran', 'signups'],
-      ['User unik', 'unique_users', true],
-      ['Permintaan AI', 'ai_requests'],
-      ['Token masuk', 'tokens_in'],
-      ['Token keluar', 'tokens_out'],
-      ['Publish', 'publishes'],
-    ];
-    renderCards($('#admin-today-cards'), data.today || {}, todayKeys);
-    renderCards($('#admin-week-cards'), data.last7 || {}, todayKeys);
+    renderHeroKpis(data.today);
+    renderCards($('#admin-today-cards'), data.today || {}, METRICS);
+    renderCards($('#admin-week-cards'), data.last7 || {}, METRICS);
     renderSupabase(data.supabase);
     renderTable(data.days || []);
     const updated = $('#admin-updated');
