@@ -85,6 +85,7 @@ const Auth = (() => {
     }
     if (user && typeof Plan !== 'undefined') {
       await Plan.syncProFromCloud();
+      Plan.updateAiBadge();
     }
     if (user) trackLoginOnce(user.id);
     client.auth.onAuthStateChange(async (event, session) => {
@@ -96,6 +97,7 @@ const Auth = (() => {
       }
       if (user && typeof Plan !== 'undefined') {
         await Plan.syncProFromCloud();
+        Plan.updateAiBadge();
       } else if (typeof Plan !== 'undefined') {
         Plan.setSuperuserLocal(false);
         Plan.updateAiBadge();

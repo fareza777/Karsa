@@ -40,9 +40,24 @@
 .ai-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 6px;
   padding: 10px 12px 6px;
+  flex-wrap: nowrap;
+}
+.ai-head .sidebar-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-head .ai-plan-badge { flex-shrink: 0; }
+.ai-head .sidebar-actions {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+#ai-settings-btn:not(.hidden) {
+  display: inline-grid;
 }
 .ai-plan-badge {
   font-size: 10px;

@@ -405,14 +405,16 @@ const AI = (() => {
     if (!c) return false;
     const ext = fileExt(path);
     if (ext === 'html') {
-      if (c.length > 400 && !/<\/html>\s*$/i.test(c)) return false;
+      if (c.length > 250) {
+        const tail = c.slice(-120);
+        if (!/<\/(html|body)>/i.test(tail)) return false;
+      }
       const scripts = (c.match(/<script\b/gi) || []).length;
       const scriptClose = (c.match(/<\/script>/gi) || []).length;
       if (scripts > scriptClose) return false;
     }
     if (ext === 'css' || ext === 'js') {
       if (!braceBalance(c)) return false;
-      if (/[=([{,]\s*$/.test(c)) return false;
     }
     if (ext === 'js' && /const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
     return true;
@@ -498,9 +500,11 @@ const AI = (() => {
 
     const applyBtn = el('button', {
       class: 'btn-apply',
-      text: files.length
-        ? '⚡ Terapkan ke Proyek (' + files.length + ' file)'
-        : '⚡ File belum lengkap',
+      text: !files.length
+        ? '⚡ File belum lengkap'
+        : (files.length === allFiles.length
+          ? '⚡ Terapkan ke Proyek (' + files.length + ' file)'
+          : '⚡ Terapkan (' + files.length + '/' + allFiles.length + ' file siap)'),
       disabled: !files.length,
       onclick: () => {
         if (!files.length) {
@@ -508,8 +512,11 @@ const AI = (() => {
           return;
         }
         if (applyFiles(files)) {
-          applyBtn.disabled = true;
-          applyBtn.textContent = '✓ Sudah diterapkan';
+          const allDone = files.length === allFiles.length;
+          applyBtn.disabled = allDone;
+          applyBtn.textContent = allDone
+            ? '✓ Sudah diterapkan'
+            : '✓ ' + files.length + ' file diterapkan (ada yang belum lengkap)';
         }
       },
     });
@@ -532,8 +539,13 @@ const AI = (() => {
 
   function tryAutoApply(bubble, visible, truncated) {
     if (truncated || !shouldAutoApply()) return;
-    const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
+    const allFiles = parseFileBlocks(visible);
+    const parsedFiles = allFiles.filter((f) => isFileComplete(f.code, f.path));
     if (!parsedFiles.length) return;
+    if (parsedFiles.length < allFiles.length) {
+      showToast('Auto-terapkan ditunda — ada file yang belum lengkap. Klik Terapkan atau Lanjutkan tulis.', 'warn');
+      return;
+    }
     if (applyFiles(parsedFiles)) markApplyButtonDone(bubble);
   }
 
@@ -826,6 +838,7 @@ const AI = (() => {
     $('#panel-files').classList.toggle('hidden', isAi);
     $('#sidebar').classList.toggle('ai-active', isAi);
     if (isAi) {
+      if (typeof Plan !== 'undefined') Plan.updateAiBadge();
       renderHistoryForCurrentProject();
       $('#ai-input').focus();
     }
@@ -872,7 +885,11 @@ const AI = (() => {
       if (autoApplyToggle.checked) showToast('File dari AI akan langsung diterapkan otomatis. ⚡', 'ok');
     });
     updateModeButtons();
-    Plan.loadConfig().then(() => Plan.updateAiBadge());
+    (async () => {
+      await Plan.loadConfig();
+      await Plan.syncProFromCloud();
+      Plan.updateAiBadge();
+    })();
     $('#ai-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
