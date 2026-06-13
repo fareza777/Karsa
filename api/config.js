@@ -8,7 +8,7 @@ function lemonCheckoutBase() {
   const direct = process.env.LEMON_SQUEEZY_CHECKOUT_URL;
   if (direct) return direct.replace(/\/$/, '');
   const variant = process.env.LEMON_SQUEEZY_VARIANT_ID;
-  const store = process.env.LEMON_SQUEEZY_STORE_SLUG || 'promptlab';
+  const store = process.env.LEMON_SQUEEZY_STORE_SLUG || 'karsa';
   if (!variant) return null;
   return `https://${store}.lemonsqueezy.com/checkout/buy/${variant}`;
 }

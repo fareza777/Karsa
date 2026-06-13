@@ -2,355 +2,304 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="KARSA — pembuat aplikasi di browser. AI vibecoding, live preview, publish ke karsa.work, mobile Expo, checklist Play Store.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KARSA — Pembuat Aplikasi & Website dengan AI (Bahasa Indonesia)</title>
+  <meta name="description" content="Bikin aplikasi web, landing page UMKM, dan prototype mobile dari browser. AI vibecoding bahasa Indonesia, live preview, publish ke karsa.work. Gratis mulai hari ini.">
   <link rel="canonical" href="https://karsa.work/">
-  <title>KARSA — Dari Ide, Jadi Aplikasi</title>
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://karsa.work/">
+  <meta property="og:title" content="KARSA — Dari Ide, Jadi Aplikasi">
+  <meta property="og:description" content="Pembuat aplikasi di browser untuk Indonesia. AI, preview langsung, publish satu klik.">
+  <meta property="og:locale" content="id_ID">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M32 12l4.8 15.2L52 32l-15.2 4.8L32 52l-4.8-15.2L12 32l15.2-4.8Z' fill='white'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/dashboard.css">
-  <link rel="stylesheet" href="css/ide.css">
-  <link rel="stylesheet" href="css/ai.css">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/landing.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "KARSA",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "url": "https://karsa.work",
+    "description": "Pembuat aplikasi dan website di browser dengan AI vibecoding bahasa Indonesia.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "IDR" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type":"Question","name":"Apa itu KARSA?","acceptedAnswer":{"@type":"Answer","text":"KARSA adalah pembuat aplikasi di browser. Kamu jelaskan ide dalam bahasa Indonesia, AI membantu menulis kode, kamu lihat preview langsung, lalu publish atau export."}},
+      {"@type":"Question","name":"Apakah KARSA gratis?","acceptedAnswer":{"@type":"Answer","text":"Ya. Paket gratis termasuk 30 prompt AI per hari. Pro menawahkan AI tanpa limit dan publish tanpa watermark."}},
+      {"@type":"Question","name":"Perlu install software?","acceptedAnswer":{"@type":"Answer","text":"Tidak. Semua berjalan di browser — cocok untuk laptop atau tablet."}},
+      {"@type":"Question","name":"Bisa publish ke internet?","acceptedAnswer":{"@type":"Answer","text":"Ya. Situs bisa dipublish ke subdomain karsa.work atau domain sendiri."}}
+    ]
+  }
+  </script>
 </head>
-<body data-theme="dark">
+<body class="lp">
 
-  <!-- ============ SPRITE IKON (Lucide-style, stroke 2) ============ -->
-  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l2.1 6.5L21 12l-6.9 2.4L12 21l-2.1-6.6L3 12l6.9-3.5Z"/></symbol>
-    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
-    <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z"/></symbol>
-    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
-    <symbol id="i-tablet" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M12 18h.01"/></symbol>
-    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></symbol>
-    <symbol id="i-external" viewBox="0 0 24 24"><path d="M7 7h10v10M7 17 17 7"/></symbol>
-    <symbol id="i-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
-    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
-    <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
-    <symbol id="i-store" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></symbol>
-    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></symbol>
-    <symbol id="i-folder-open" viewBox="0 0 24 24"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></symbol>
-    <symbol id="i-folder-plus" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/><path d="M12 10v6M9 13h6"/></symbol>
-    <symbol id="i-file-plus" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M15 2v5h5"/><path d="M12 18v-6M9 15h6"/></symbol>
-    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></symbol>
-    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></symbol>
-    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96L8.5 9.94a2 2 0 0 0 1.44-1.44l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/><path d="M19 3v4M21 5h-4"/></symbol>
-    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
-    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/></symbol>
-    <symbol id="i-paperclip" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol>
-    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"/></symbol>
-    <symbol id="i-wand" viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="M14 7l3 3"/><path d="M5 6v4M3 8h4M19 14v4M17 16h4"/></symbol>
-    <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 16h10"/></symbol>
-    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></symbol>
-    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol>
-    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
-    <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></symbol>
-    <symbol id="i-maximize" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
-    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol>
-    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
-    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-    <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></symbol>
-  </svg>
-
-  <!-- ============ DASHBOARD ============ -->
-  <div id="view-dashboard" class="view">
-    <header class="dash-header">
-      <div class="brand">
-        <span class="brand-mark"><svg class="icon icon-fill"><use href="#i-spark"/></svg></span>
-        <span class="brand-name">KARSA</span>
+  <header class="lp-nav">
+    <div class="lp-wrap lp-nav-inner">
+      <a href="/" class="lp-brand">
+        <span class="lp-brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2l3.6 11.4L27 16.8l-11.4 3.6L12 32l-3.6-11.6L-3 16.8l11.4-3.4Z" transform="scale(.7) translate(5 2)"/></svg></span>
+        KARSA
+      </a>
+      <nav class="lp-nav-links" aria-label="Utama">
+        <a href="#fitur">Fitur</a>
+        <a href="#cara-kerja">Cara kerja</a>
+        <a href="#harga">Harga</a>
+        <a href="#panduan">Panduan</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="lp-nav-cta">
+        <a href="/app" class="lp-btn lp-btn-ghost">Masuk</a>
+        <a href="/app" class="lp-btn lp-btn-primary">Mulai gratis</a>
       </div>
-      <div class="dash-header-right">
-        <button id="dash-auth-btn" class="btn btn-ghost btn-sm auth-trigger" type="button">Masuk</button>
-        <button id="dash-about-btn" class="btn btn-ghost btn-sm" title="Tentang KARSA">Tentang</button>
-        <button id="dash-pro-btn" class="btn btn-pro btn-sm" title="KARSA Pro"><svg class="icon icon-fill"><use href="#i-spark"/></svg> Pro</button>
-        <button id="dash-theme-toggle" class="icon-btn" title="Ganti tema"><svg class="icon"><use href="#i-moon"/></svg></button>
-      </div>
-    </header>
-
-    <main class="dash-main">
-      <div class="hero">
-        <div class="hero-blob hero-blob-1"></div>
-        <div class="hero-blob hero-blob-2"></div>
-        <div class="hero-blob hero-blob-3"></div>
-        <h1 class="hero-title">Mau bikin apa hari ini?</h1>
-        <p class="hero-sub">Tulis kode, lihat hasilnya langsung. Semua di browser — tanpa instalasi apa pun.</p>
-        <div class="hero-prompt">
-          <textarea id="hero-prompt-input" rows="2"
-            placeholder="Ceritakan aplikasi impianmu… mis. &quot;aplikasi kasir warung dengan keranjang dan struk&quot;"></textarea>
-          <div class="hero-prompt-foot">
-            <span class="hero-prompt-hint">⚡ KARSA AI langsung membangunnya untukmu</span>
-            <button id="hero-prompt-send" class="btn btn-primary"><svg class="icon"><use href="#i-sparkles"/></svg> Buat dengan AI</button>
-          </div>
-        </div>
-        <div class="hero-actions">
-          <button id="btn-new-project" class="btn btn-primary btn-lg"><svg class="icon"><use href="#i-plus"/></svg> Proyek Baru</button>
-          <button id="btn-import-project" class="btn btn-ghost btn-lg"><svg class="icon"><use href="#i-folder-open"/></svg> Impor Proyek</button>
-          <input type="file" id="import-input" accept=".json" hidden>
-          <input type="file" id="import-folder-input" webkitdirectory hidden>
-        </div>
-      </div>
-
-      <section class="feature-strip" aria-label="Fitur KARSA">
-        <div class="feature-card">
-          <span class="feature-icon"><svg class="icon"><use href="#i-sparkles"/></svg></span>
-          <strong>AI Vibecoding</strong>
-          <span>Tulis ide, AI bangun kodenya</span>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon"><svg class="icon"><use href="#i-phone"/></svg></span>
-          <strong>Mobile Preview</strong>
-          <span>Expo Snack di browser</span>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon"><svg class="icon"><use href="#i-rocket"/></svg></span>
-          <strong>Publish</strong>
-          <span>Situs live + subdomain</span>
-        </div>
-        <div class="feature-card">
-          <span class="feature-icon"><svg class="icon"><use href="#i-store"/></svg></span>
-          <strong>Play Store</strong>
-          <span>Checklist &amp; EAS build</span>
-        </div>
-      </section>
-
-      <section class="dash-section" id="section-projects">
-        <div class="dash-section-head">
-          <h2>Proyek Kamu</h2>
-          <span id="project-count" class="badge"></span>
-        </div>
-        <div id="project-grid" class="project-grid"></div>
-        <div id="empty-projects" class="empty-state hidden">
-          <div class="empty-icon">🌱</div>
-          <p>Belum ada proyek. Mulai dari template di bawah, atau buat dari nol!</p>
-        </div>
-      </section>
-
-      <section class="dash-section">
-        <div class="dash-section-head">
-          <h2>Mulai Cepat dari Template</h2>
-        </div>
-        <div id="template-strip" class="template-grid"></div>
-      </section>
-
-      <footer class="dash-footer">
-        <span class="brand-mark"><svg class="icon icon-fill"><use href="#i-spark"/></svg></span> KARSA — Dari ide, jadi aplikasi. Data tersimpan aman di browser kamu.
-      </footer>
-    </main>
-  </div>
-
-  <!-- ============ IDE ============ -->
-  <div id="view-ide" class="view hidden">
-    <header class="ide-topbar">
-      <div class="topbar-left">
-        <button id="btn-home" class="icon-btn" title="Kembali ke Beranda"><svg class="icon icon-fill"><use href="#i-spark"/></svg></button>
-        <input id="project-name-input" class="project-name-input" spellcheck="false" title="Klik untuk ganti nama proyek">
-      </div>
-      <div class="topbar-center">
-        <button id="btn-run" class="btn btn-run" title="Jalankan (Ctrl+Enter)"><svg class="icon icon-fill"><use href="#i-play"/></svg> Jalankan</button>
-        <label class="switch-label" title="Otomatis jalankan saat kode berubah">
-          <input type="checkbox" id="auto-run-toggle" checked>
-          <span class="switch"></span>
-          <span class="switch-text">Auto</span>
-        </label>
-      </div>
-      <div class="topbar-right">
-        <div class="device-group" role="group" aria-label="Mode tampilan">
-          <button class="device-btn active" data-device="desktop" title="Desktop"><svg class="icon"><use href="#i-monitor"/></svg></button>
-          <button class="device-btn" data-device="tablet" title="Tablet (768px)"><svg class="icon"><use href="#i-tablet"/></svg></button>
-          <button class="device-btn" data-device="phone" title="Ponsel (412×915, Android modern)"><svg class="icon"><use href="#i-phone"/></svg></button>
-        </div>
-        <button id="btn-open-tab" class="icon-btn" title="Buka preview di tab baru"><svg class="icon"><use href="#i-external"/></svg></button>
-        <button id="btn-history" class="icon-btn" title="Riwayat versi (checkpoint)"><svg class="icon"><use href="#i-history"/></svg></button>
-        <button id="btn-share" class="icon-btn" title="Bagikan tautan proyek"><svg class="icon"><use href="#i-link"/></svg></button>
-        <button id="btn-publish" class="btn btn-publish" title="Publish ke internet"><svg class="icon"><use href="#i-rocket"/></svg> Publish</button>
-        <button id="btn-playstore" class="btn btn-playstore hidden" title="Checklist Google Play Store"><svg class="icon"><use href="#i-store"/></svg> Play</button>
-        <button id="btn-export" class="icon-btn" title="Ekspor proyek"><svg class="icon"><use href="#i-download"/></svg></button>
-        <button id="ide-auth-btn" class="btn btn-ghost btn-sm auth-trigger" type="button">Masuk</button>
-        <button id="ide-theme-toggle" class="icon-btn" title="Ganti tema"><svg class="icon"><use href="#i-moon"/></svg></button>
-      </div>
-    </header>
-
-    <div class="ide-body">
-      <aside id="sidebar" class="sidebar">
-        <div class="sidebar-tabs">
-          <button id="side-tab-files" class="side-tab active"><svg class="icon"><use href="#i-folder"/></svg> File</button>
-          <button id="side-tab-ai" class="side-tab"><svg class="icon"><use href="#i-sparkles"/></svg> AI</button>
-        </div>
-
-        <div id="panel-files" class="side-panel">
-          <div class="sidebar-head">
-            <span class="sidebar-title">FILE</span>
-            <div class="sidebar-actions">
-              <button id="btn-new-file" class="icon-btn-sm" title="File baru"><svg class="icon"><use href="#i-file-plus"/></svg></button>
-              <button id="btn-new-folder" class="icon-btn-sm" title="Folder baru"><svg class="icon"><use href="#i-folder-plus"/></svg></button>
-            </div>
-          </div>
-          <div id="file-tree" class="file-tree"></div>
-        </div>
-
-        <div id="panel-ai" class="side-panel hidden">
-          <div class="ai-head">
-            <span class="sidebar-title">KARSA AI · VIBECODING</span>
-            <span id="ai-plan-badge" class="ai-plan-badge" title="Sisa kuota AI harian"></span>
-            <div class="sidebar-actions">
-              <button id="ai-clear-btn" class="icon-btn-sm" title="Bersihkan percakapan"><svg class="icon"><use href="#i-trash"/></svg></button>
-              <button id="ai-settings-btn" class="icon-btn-sm" title="Pengaturan AI"><svg class="icon"><use href="#i-settings"/></svg></button>
-            </div>
-          </div>
-          <div class="ai-mode-row">
-            <div class="ai-mode-toggle" role="group" aria-label="Mode AI">
-              <button id="ai-mode-fast" class="ai-mode-btn" title="MiniMax-M2.7-highspeed — langsung menjawab tanpa berpikir panjang"><svg class="icon"><use href="#i-zap"/></svg> Cepat</button>
-              <button id="ai-mode-smart" class="ai-mode-btn" title="MiniMax-M3 — berpikir dalam, hasil lebih matang (1-2 menit)"><svg class="icon"><use href="#i-bulb"/></svg> Cermat</button>
-            </div>
-            <label class="ai-auto-apply" title="Langsung terapkan file ke proyek begitu AI selesai">
-              <input type="checkbox" id="ai-auto-apply"> Auto&#8209;terapkan
-            </label>
-          </div>
-          <div id="ai-chat" class="ai-chat"></div>
-          <div class="ai-input-box">
-            <div id="ai-attachments" class="ai-attachments hidden"></div>
-            <textarea id="ai-input" rows="3"
-              placeholder="Jelaskan aplikasi atau perubahan yang kamu mau… Tempel (Ctrl+V) screenshot juga bisa!"></textarea>
-            <div class="ai-input-actions">
-              <button id="ai-attach-btn" class="icon-btn-sm" title="Lampirkan gambar atau file"><svg class="icon"><use href="#i-paperclip"/></svg></button>
-              <input type="file" id="ai-file-input" multiple hidden
-                     accept="image/*,.txt,.md,.json,.csv,.html,.css,.js,.svg,.xml">
-              <span id="ai-status" class="ai-status"></span>
-              <button id="ai-stop" class="btn btn-ghost btn-sm hidden"><svg class="icon icon-fill"><use href="#i-stop"/></svg> Stop</button>
-              <button id="ai-send" class="btn btn-primary btn-sm"><svg class="icon"><use href="#i-send"/></svg> Kirim</button>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      <div class="resizer" id="resizer-left"></div>
-
-      <section class="editor-pane">
-        <div id="tabbar" class="tabbar"></div>
-        <div id="editor-host" class="editor-host">
-          <div id="editor-empty" class="editor-empty">
-            <div class="empty-icon">✦</div>
-            <p>Pilih file di panel kiri untuk mulai menulis kode.</p>
-          </div>
-        </div>
-        <div class="statusbar">
-          <span id="status-file">—</span>
-          <span id="status-cursor"></span>
-          <span class="statusbar-spacer"></span>
-          <button id="btn-format" class="icon-btn-sm" title="Rapikan kode dengan Prettier"><svg class="icon"><use href="#i-wand"/></svg></button>
-          <button id="btn-font-minus" class="icon-btn-sm" title="Perkecil font editor">A−</button>
-          <button id="btn-font-plus" class="icon-btn-sm" title="Perbesar font editor">A＋</button>
-          <button id="btn-shortcuts" class="icon-btn-sm" title="Bantuan shortcut"><svg class="icon"><use href="#i-keyboard"/></svg></button>
-          <span id="status-save" class="status-save">Tersimpan ✓</span>
-        </div>
-      </section>
-
-      <div class="resizer" id="resizer-right"></div>
-
-      <section class="preview-pane">
-        <div class="preview-head">
-          <span class="preview-title"><svg class="icon"><use href="#i-zap"/></svg> Live Preview</span>
-          <div id="preview-engine-bar" class="preview-engine-bar hidden" role="group" aria-label="Mesin preview">
-            <button type="button" class="preview-engine-btn" data-engine="web" title="Preview web HTML"><svg class="icon"><use href="#i-globe"/></svg> Web</button>
-            <button type="button" class="preview-engine-btn" data-engine="snack" title="Preview Expo Snack"><svg class="icon"><use href="#i-phone"/></svg> Mobile</button>
-          </div>
-          <select id="phone-model-select" class="phone-model-select hidden" title="Model HP">
-            <option value="phone">HP umum</option>
-            <option value="phone-samsung">Samsung</option>
-            <option value="phone-oppo">OPPO</option>
-            <option value="phone-xiaomi">Xiaomi</option>
-          </select>
-          <span id="preview-url" class="preview-url">karsa.work/preview</span>
-          <button id="btn-shot-full" class="icon-btn-sm" title="Screenshot satu layar preview"><svg class="icon"><use href="#i-camera"/></svg></button>
-          <button id="btn-shot-region" class="icon-btn-sm" title="Screenshot area tertentu (seret untuk memilih)"><svg class="icon"><use href="#i-scissors"/></svg></button>
-          <button id="btn-fullscreen-preview" class="icon-btn-sm" title="Preview layar penuh"><svg class="icon"><use href="#i-maximize"/></svg></button>
-          <button id="btn-snack-tab" class="icon-btn-sm hidden" title="Buka di Expo Snack / Expo Go"><svg class="icon"><use href="#i-external"/></svg></button>
-          <button id="btn-refresh-preview" class="icon-btn-sm" title="Muat ulang preview"><svg class="icon"><use href="#i-refresh"/></svg></button>
-        </div>
-        <div class="preview-stage" id="preview-stage">
-          <div id="preview-hint" class="preview-hint hidden" aria-live="polite"></div>
-          <div id="preview-frame-wrap" class="preview-frame-wrap device-desktop">
-            <div class="preview-loading" aria-hidden="true"><span class="preview-spinner"></span></div>
-            <iframe id="preview-frame" title="Preview aplikasi" sandbox="allow-scripts allow-modals allow-forms allow-popups"></iframe>
-          </div>
-        </div>
-        <div id="console-panel" class="console-panel">
-          <div class="console-head" id="console-head">
-            <span class="console-title"><svg class="icon"><use href="#i-terminal"/></svg> Console</span>
-            <span id="console-badge" class="console-badge hidden">0</span>
-            <span class="statusbar-spacer"></span>
-            <button id="btn-clear-console" class="icon-btn-sm" title="Bersihkan console"><svg class="icon"><use href="#i-trash"/></svg></button>
-            <button id="btn-toggle-console" class="icon-btn-sm" title="Tampilkan/sembunyikan console">▾</button>
-          </div>
-          <div id="console-log" class="console-log"></div>
-          <div class="console-input-row">
-            <span class="console-prompt">»</span>
-            <input id="console-input" class="console-input" type="text"
-                   placeholder="Ketik JavaScript lalu Enter untuk jalankan di preview…"
-                   autocomplete="off" spellcheck="false">
-          </div>
-        </div>
-      </section>
+      <button type="button" class="lp-menu-btn" aria-label="Menu">≡</button>
     </div>
-  </div>
+  </header>
 
-  <!-- ============ OVERLAYS ============ -->
-  <div id="modal-root"></div>
-  <div id="toast-root" class="toast-root"></div>
-  <div id="context-menu" class="context-menu hidden"></div>
+  <main>
+    <section class="lp-wrap lp-hero">
+      <div class="lp-hero-copy">
+        <h1>Dari ide, <em>jadi aplikasi</em></h1>
+        <p class="lp-hero-lead">Platform vibecoding bahasa Indonesia. Ceritakan warung, katalog, atau tools bisnismu — AI bangun kodenya, kamu lihat hasilnya langsung di browser.</p>
+        <div class="lp-hero-actions">
+          <a href="/app" class="lp-btn lp-btn-accent">Mulai gratis</a>
+          <a href="#cara-kerja" class="lp-btn lp-btn-ghost">Lihat cara kerja</a>
+        </div>
+        <div class="lp-hero-meta">
+          <div><strong>30</strong> prompt AI/hari</div>
+          <div><strong>0</strong> instalasi</div>
+          <div><strong>1</strong> klik publish</div>
+        </div>
+      </div>
+      <div class="lp-showcase" aria-hidden="true">
+        <div class="lp-showcase-glow"></div>
+        <div class="lp-frame">
+          <div class="lp-frame-bar">
+            <span class="lp-frame-dot"></span><span class="lp-frame-dot"></span><span class="lp-frame-dot"></span>
+            <span class="lp-frame-url">karsa.work/app</span>
+          </div>
+          <div class="lp-frame-body">
+            <div class="lp-frame-side">
+              <div class="lp-frame-line accent"></div>
+              <div class="lp-frame-line w80"></div>
+              <div class="lp-frame-line w60"></div>
+              <div class="lp-frame-line w80"></div>
+            </div>
+            <div class="lp-frame-editor">
+              <span class="cm">&lt;!-- AI vibecoding --&gt;</span><br>
+              <span class="kw">&lt;section</span> <span class="str">class="hero"</span><span class="kw">&gt;</span><br>
+              &nbsp;&nbsp;<span class="kw">&lt;h1&gt;</span>Kasir Warung<span class="kw">&lt;/h1&gt;</span><br>
+              <span class="kw">&lt;/section&gt;</span>
+            </div>
+            <div class="lp-frame-preview">
+              <div class="lp-preview-card">
+                <h3>Kasir Warung Bu Ani</h3>
+                <p>Preview live — mobile & desktop</p>
+              </div>
+              <div class="lp-preview-card">
+                <h3>Total hari ini</h3>
+                <p>Rp 1.240.000</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <!-- ============ LIBS (CDN) ============ -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/searchcursor.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/search/search.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/xml-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/css-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/javascript-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/anyword-hint.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div class="lp-strip" aria-hidden="true">
+      <div class="lp-marquee">
+        <span>Vibecoding</span><span>Live preview</span><span>Publish karsa.work</span><span>Expo mobile</span><span>Play Store checklist</span><span>Bahasa Indonesia</span>
+        <span>Vibecoding</span><span>Live preview</span><span>Publish karsa.work</span><span>Expo mobile</span><span>Play Store checklist</span><span>Bahasa Indonesia</span>
+      </div>
+    </div>
 
-  <!-- ============ APP ============ -->
-  <script src="js/utils.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/templates.js"></script>
-  <script src="js/project.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/components.js"></script>
-  <script src="js/console.js"></script>
-  <script src="js/snack.js"></script>
-  <script src="js/preview.js"></script>
-  <script src="js/editor.js"></script>
-  <script src="js/tabs.js"></script>
-  <script src="js/filetree.js"></script>
-  <script src="js/dashboard.js"></script>
-  <script src="js/plan.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/sync.js"></script>
-  <script src="js/publish.js"></script>
-  <script src="js/playstore.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/ai.js"></script>
+    <section class="lp-section" id="fitur">
+      <div class="lp-wrap">
+        <div class="lp-section-head">
+          <h2>Satu workspace untuk web sampai mobile</h2>
+          <p>Tidak perlu bolak-balik editor, hosting, dan ChatGPT. KARSA menggabungkan AI, kode, dan preview dalam satu layar.</p>
+        </div>
+        <div class="lp-bento">
+          <article class="lp-bento-cell span-7 tint-violet">
+            <h3>AI yang paham konteks Indonesia</h3>
+            <p>Prompt warung, UMKM, booking, katalog — tanpa harus menulis prompt Inggris panjang. AI mengerti use case lokal.</p>
+            <span class="lp-bento-tag">vibecoding · bahasa Indonesia</span>
+          </article>
+          <article class="lp-bento-cell span-5">
+            <h3>Preview tanpa deploy</h3>
+            <p>Perubahan kode langsung terlihat di panel preview. Uji di tampilan desktop, tablet, atau HP.</p>
+          </article>
+          <article class="lp-bento-cell span-4 tint-cyan">
+            <h3>Publish cepat</h3>
+            <p>Situs live di subdomain karsa.work atau domain sendiri. Cocok untuk landing page dan prototype klien.</p>
+          </article>
+          <article class="lp-bento-cell span-8">
+            <h3>Jalur ke Play Store</h3>
+            <p>Mode Expo + checklist siap upload. Dari web prototype sampai rencana build AAB — dalam satu alur kerja.</p>
+            <span class="lp-bento-tag">mobile · expo · play store</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section" id="cara-kerja" style="padding-top:0">
+      <div class="lp-wrap">
+        <div class="lp-section-head">
+          <h2>Tiga langkah, tanpa ribet</h2>
+        </div>
+        <div class="lp-steps">
+          <div class="lp-step">
+            <div class="lp-step-num">01</div>
+            <h3>Ceritakan ide</h3>
+            <p>Tulis di panel AI: jenis bisnis, fitur utama, gaya visual. Atau mulai dari template UMKM.</p>
+          </div>
+          <div class="lp-step">
+            <div class="lp-step-num">02</div>
+            <h3>Iterasi di preview</h3>
+            <p>AI mengubah kode; kamu koreksi dengan chat atau edit manual. Semua tersimpan di proyek.</p>
+          </div>
+          <div class="lp-step">
+            <div class="lp-step-num">03</div>
+            <h3>Publish atau export</h3>
+            <p>Go live dengan satu slug, unduh ZIP, atau lanjut ke checklist mobile.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section" id="harga">
+      <div class="lp-wrap">
+        <div class="lp-section-head">
+          <h2>Harga transparan</h2>
+          <p>Mulai gratis. Upgrade saat butuh AI tanpa batas atau publish tanpa watermark.</p>
+        </div>
+        <div class="lp-pricing">
+          <div class="lp-price-card">
+            <h3>Gratis</h3>
+            <div class="amount">Rp 0</div>
+            <ul class="lp-price-list">
+              <li>30 prompt AI per hari</li>
+              <li>Proyek unlimited</li>
+              <li>Live preview</li>
+              <li>Publish + watermark KARSA</li>
+              <li>Sinkron cloud (login)</li>
+            </ul>
+            <a href="/app" class="lp-btn lp-btn-ghost" style="width:100%">Mulai gratis</a>
+          </div>
+          <div class="lp-price-card featured">
+            <h3>Pro</h3>
+            <div class="amount">Soon <span>/ bulan</span></div>
+            <ul class="lp-price-list">
+              <li>AI tanpa limit harian</li>
+              <li>Publish tanpa watermark</li>
+              <li>Prioritas fitur baru</li>
+              <li>Pro aktif di semua perangkat</li>
+            </ul>
+            <a href="/app" class="lp-btn lp-btn-accent" style="width:100%">Upgrade di app</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section" id="panduan">
+      <div class="lp-wrap">
+        <div class="lp-section-head">
+          <h2>Panduan untuk mulai</h2>
+          <p>Artikel singkat — membantu SEO dan onboarding. Bukan blog panjang di halaman utama.</p>
+        </div>
+        <div class="lp-articles">
+          <a href="/artikel/pembuat-aplikasi-tanpa-coding" class="lp-article-card">
+            <div class="lp-article-thumb"><time>8 min baca</time></div>
+            <div class="lp-article-body">
+              <h3>Pembuat aplikasi tanpa coding untuk pemula</h3>
+              <p>Siapa cocok pakai vibecoding, batasannya apa, dan kapan perlu developer sungguhan.</p>
+              <span class="lp-article-link">Baca artikel</span>
+            </div>
+          </a>
+          <a href="/artikel/vibecoding-untuk-umkm" class="lp-article-card">
+            <div class="lp-article-thumb"><time>6 min baca</time></div>
+            <div class="lp-article-body">
+              <h3>Vibecoding untuk UMKM Indonesia</h3>
+              <p>Katalog online, form booking, dan landing page — tanpa bayar developer dari nol.</p>
+              <span class="lp-article-link">Baca artikel</span>
+            </div>
+          </a>
+          <a href="/artikel/cara-publish-website-karsa" class="lp-article-card">
+            <div class="lp-article-thumb"><time>5 min baca</time></div>
+            <div class="lp-article-body">
+              <h3>Cara publish website dari KARSA</h3>
+              <p>Subdomain gratis, custom domain, dan tips biar situs cepat diindeks Google.</p>
+              <span class="lp-article-link">Baca artikel</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section" id="faq" style="padding-top:0">
+      <div class="lp-wrap">
+        <div class="lp-section-head" style="text-align:center;margin-inline:auto">
+          <h2 style="max-width:none">Pertanyaan umum</h2>
+        </div>
+        <div class="lp-faq">
+          <div class="lp-faq-item">
+            <button type="button" class="lp-faq-q">Apa itu KARSA?</button>
+            <div class="lp-faq-a">KARSA adalah pembuat aplikasi di browser. Kamu jelaskan ide dalam bahasa Indonesia, AI membantu menulis kode HTML/CSS/JS (atau stack mobile), kamu lihat preview langsung, lalu publish atau export ZIP.</div>
+          </div>
+          <div class="lp-faq-item">
+            <button type="button" class="lp-faq-q">Apakah gratis?</button>
+            <div class="lp-faq-a">Ya. Paket gratis memberi 30 prompt AI per hari — cukup untuk eksplor dan beberapa proyek. Pro menambah AI tanpa limit dan publish tanpa watermark.</div>
+          </div>
+          <div class="lp-faq-item">
+            <button type="button" class="lp-faq-q">Perlu install Node.js atau Git?</button>
+            <div class="lp-faq-a">Tidak untuk web app. Semua di browser. Untuk jalur Expo/Play Store, KARSA membantu generate project yang bisa kamu build di mesin sendiri.</div>
+          </div>
+          <div class="lp-faq-item">
+            <button type="button" class="lp-faq-q">Data proyek aman?</button>
+            <div class="lp-faq-a">Proyek tersimpan di browser. Login dengan akun KARSA mengaktifkan sinkron cloud ke Supabase — akses dari perangkat lain dengan email yang sama.</div>
+          </div>
+          <div class="lp-faq-item">
+            <button type="button" class="lp-faq-q">Bisa pakai domain sendiri?</button>
+            <div class="lp-faq-a">Ya. Publish ke subdomain karsa.work dulu, lalu hubungkan custom domain lewat pengaturan publish di IDE.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-cta-band">
+      <h2>Siap bikin aplikasi pertama?</h2>
+      <p>Gratis, tanpa kartu kredit. Buka workspace dan ketik ide pertamamu.</p>
+      <a href="/app" class="lp-btn lp-btn-primary">Buka KARSA</a>
+    </section>
+  </main>
+
+  <footer class="lp-footer">
+    <div class="lp-wrap lp-footer-inner">
+      <div>
+        <div class="lp-brand" style="margin-bottom:12px">
+          <span class="lp-brand-mark"><svg viewBox="0 0 24 24"><path d="M12 2l3.6 11.4L27 16.8l-11.4 3.6L12 32l-3.6-11.6L-3 16.8l11.4-3.4Z" transform="scale(.7) translate(5 2)" fill="white"/></svg></span>
+          KARSA
+        </div>
+        <small>Dari ide, jadi aplikasi.</small>
+      </div>
+      <nav class="lp-footer-links">
+        <a href="/app">App</a>
+        <a href="#harga">Harga</a>
+        <a href="#panduan">Panduan</a>
+        <a href="mailto:fajar.mreza@gmail.com">Kontak</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="/js/landing.js"></script>
 </body>
 </html>

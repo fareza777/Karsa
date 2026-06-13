@@ -42,5 +42,5 @@ function notFoundPage(msg) {
   return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<title>KARSA — Tidak ditemukan</title></head><body style="font-family:system-ui;display:grid;place-content:center;min-height:100vh;margin:0;color:#64748b;text-align:center;padding:24px">' +
     '<p style="font-size:48px;margin:0 0 12px">✦</p><h1 style="font-size:18px;color:#0f172a">Halaman tidak ditemukan</h1>' +
-    '<p>' + msg + '</p><p><a href="/" style="color:#7c5cff">← Kembali ke KARSA</a></p></body></html>';
+      '<p>' + msg + '</p><p><a href="https://karsa.work/app" style="color:#7c5cff">← Buka KARSA</a></p></body></html>';
 }
