@@ -5,14 +5,14 @@ const AI = (() => {
   const HISTORY_KEY = 'karsa.ai.history.v1';
   const MODEL_FAST = 'MiniMax-M2.7-highspeed';
   const MODEL_SMART = 'MiniMax-M3';
-  const DEFAULT_SETTINGS = { v: 2, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: true };
+  const DEFAULT_SETTINGS = { v: 2, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: false };
   const DIRECT_URL = 'https://api.minimax.io/v1/chat/completions';
   const MAX_OUTPUT_TOKENS = 65536;
   const MAX_FILE_CHARS = 18000;
   const MAX_CONTEXT_CHARS = 100000;
   const MAX_HISTORY = 12;
   const API_TEXT_BUDGET = 180000; // di bawah batas server 200k karakter
-  const MAX_AWAM_PHASES = 2; // tahap otomatis untuk pengguna awam (tanpa prompt teknis)
+  const MAX_AWAM_PHASES = 1; // satu tahap per pesan — tidak ada "percantik" otomatis tanpa diminta
 
   const ANTI_REASONING_PROMPT = [
     'MODE KERJA (otomatis — user awam tidak perlu mengetik ini, tapi kamu WAJIB patuh):',
@@ -333,16 +333,6 @@ const AI = (() => {
             'Buat file App.tsx lengkap & valid: layar utama cantik sesuai permintaan. Semua fitur yang mereka bayangkan ' +
             'tampak di UI (tombol, panel, preview) — boleh pakai data contoh. Satu file App.tsx saja (~250 baris max). Langsung tulis kode.',
         });
-        if (ambitious) {
-          phases.push({
-            label: 'Menambahkan fitur & sentuhan akhir…',
-            apiText:
-              'Permintaan awal pengguna: «' + userAsk + '»\n\n' +
-              'CATATAN SISTEM: Pengguna awam — jangan tanya balik.\n' +
-              'App.tsx sudah ada di proyek. Perkaya tampilan & interaksi agar terasa lebih lengkap sesuai permintaan awal. ' +
-              'Tulis ulang App.tsx UTUH (satu file). Jangan buat banyak file sekaligus.',
-          });
-        }
       } else {
         phases.push({ label: null, apiText: prompt });
       }
@@ -354,13 +344,6 @@ const AI = (() => {
           'CATATAN SISTEM: Pengguna biasa — jangan tanya balik.\n' +
           'Buat index.html + css/style.css + js/app.js — tampilan sesuai permintaan, mobile-first, menarik. Fitur utama terlihat di UI.',
       });
-      if (ambitious) {
-        phases.push({
-          label: 'Mempercantik & melengkapi…',
-          apiText:
-            'Permintaan awal: «' + userAsk + '». Perkaya desain & interaksi di file yang sudah ada. Hanya file yang berubah.',
-        });
-      }
     } else {
       phases.push({ label: null, apiText: prompt });
     }
@@ -838,7 +821,8 @@ const AI = (() => {
   }
 
   function shouldAutoApply() {
-    return settings.autoApply || autoApplyOnce;
+    const toggle = $('#ai-auto-apply');
+    return (toggle ? toggle.checked : !!settings.autoApply) || autoApplyOnce;
   }
 
   function refreshApplyBox(bubble) {
@@ -1015,9 +999,7 @@ const AI = (() => {
 
     const awamPhases = planAwamPhases(prompt, project);
     const modelUsed = resolveModel(imageAtts.length > 0, project);
-    if (awamPhases.length > 1) {
-      showToast('KARSA menyusun aplikasi Anda — tunggu sebentar ya ✨', 'info');
-    } else if (imageAtts.length) {
+    if (imageAtts.length) {
       showToast('Ada gambar — AI menganalisis screenshot.', 'info');
     }
 
@@ -1177,15 +1159,7 @@ const AI = (() => {
           if (pending.length) applyFiles(pending);
         }
 
-        // Tahap 2 (perkaya) dilewati jika tahap 1 sudah menghasilkan App lengkap
-        if (phaseIdx === 0 && awamPhases.length > 1 && !phaseTruncated) {
-          const appFile = phaseFiles.find((f) => /(^|\/)App\.tsx?$/i.test(f.path));
-          if (appFile && appFile.code.length > 400) {
-            grandVisible = accumulatedVisible;
-            break;
-          }
-        }
-
+        // Hanya satu tahap per pesan — tidak ada tahap "percantik" otomatis
         if (phaseTruncated) break;
       }
 
@@ -1200,10 +1174,8 @@ const AI = (() => {
         showToast('Masih ada bagian yang belum selesai — klik "Lanjutkan tulis" atau kirim ulang permintaan yang sama.', 'warn');
       } else if (totalContinueRounds > 0) {
         showToast('Selesai ✓', 'ok');
-      } else if (awamPhases.length > 1 && parsedFiles.length) {
-        showToast('Aplikasi siap — cek preview di kanan ✨', 'ok');
       } else if (parsedFiles.length && !truncated) {
-        showToast('Selesai — preview diperbarui ✨', 'ok');
+        showToast('Selesai — klik Terapkan kalau belum auto.', 'ok');
       } else if (!parsedFiles.length && (looksLikeCodeChangeRequest(prompt) || responseHasFilePlaceholder(visible))) {
         bubble.appendChild(el('button', {
           class: 'ai-retry-btn',
@@ -1213,7 +1185,7 @@ const AI = (() => {
         showToast('Belum ada file — klik Coba lagi atau kirim ulang.', 'warn');
       }
       const elapsed = Math.round((Date.now() - startedAt) / 1000);
-      const phaseNote = awamPhases.length > 1 ? ' · ' + awamPhases.length + ' tahap' : '';
+      const phaseNote = '';
       bubble.appendChild(el('div', {
         class: 'ai-meta',
         text: '⚡ ' + elapsed + ' dtk · ' + activeModel.replace('MiniMax-', '') + phaseNote + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (totalContinueRounds ? ' · ↻ ' + totalContinueRounds + 'x lanjut' : ''),
@@ -1341,6 +1313,7 @@ const AI = (() => {
     autoApplyToggle.addEventListener('change', () => {
       saveSettings({ autoApply: autoApplyToggle.checked });
       if (autoApplyToggle.checked) showToast('File dari AI akan langsung diterapkan otomatis. ⚡', 'ok');
+      else showToast('Auto-terapkan dimatikan — klik Terapkan manual setelah AI selesai.', 'info');
     });
     (async () => {
       await Plan.loadConfig();

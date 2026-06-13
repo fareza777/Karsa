@@ -351,7 +351,6 @@ const App = (() => {
     $('#auto-run-toggle').addEventListener('change', (e) => {
       const on = e.target.checked;
       State.updateSettings({ autoRun: on });
-      if (on && typeof AI !== 'undefined') AI.setAutoApply(true);
       if (on) Preview.refresh();
     });
 

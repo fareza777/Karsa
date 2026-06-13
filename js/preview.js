@@ -291,7 +291,7 @@ const Preview = (() => {
         onclick: () => {
           fixAttemptsByProject[project.id] = attempts + 1;
           AI.switchTab('ai');
-          AI.sendPrompt(PREVIEW_FIX_PROMPT, { autoApplyOnce: true });
+          AI.sendPrompt(PREVIEW_FIX_PROMPT);
         },
       } : null,
     });
@@ -310,7 +310,7 @@ const Preview = (() => {
         return;
       }
       AI.switchTab('ai');
-      AI.sendPrompt(PREVIEW_FIX_PROMPT, { autoApplyOnce: true });
+      AI.sendPrompt(PREVIEW_FIX_PROMPT);
     }, 2500);
   }
 
