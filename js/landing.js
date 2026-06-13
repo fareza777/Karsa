@@ -126,7 +126,7 @@
   }
 
   function buildScenePublish() {
-    const scene = el('div', { class: 'lp-scene' });
+    const scene = el('div', { class: 'lp-scene lp-scene-publish' });
     scene.appendChild(sidePanel());
     scene.appendChild(el('div', { class: 'lp-scene-ai' }, [
       el('div', { class: 'lp-scene-bubble ai', text: '🚀 Publish ke karsa.work…' }),
