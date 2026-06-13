@@ -3,6 +3,7 @@
 import { cnameTarget, publishHost } from '../lib/domains.js';
 import { kvConfigured } from '../lib/kv.js';
 import { billingConfigured } from '../lib/lemon.js';
+import { superuserEmails } from '../lib/superuser.js';
 
 function lemonCheckoutBase() {
   const direct = process.env.LEMON_SQUEEZY_CHECKOUT_URL;
@@ -37,5 +38,6 @@ export default async function handler(req, res) {
     supabaseUrl,
     supabaseAnonKey,
     authEnabled: !!(supabaseUrl && supabaseAnonKey),
+    superuserConfigured: superuserEmails().length > 0,
   });
 }

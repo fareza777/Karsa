@@ -15,7 +15,8 @@
     "api/verify-pro.js": { "maxDuration": 10 },
     "api/setup-auth.js": { "maxDuration": 30 },
     "api/lemon-webhook.js": { "maxDuration": 30 },
-    "api/verify-license.js": { "maxDuration": 15 }
+    "api/verify-license.js": { "maxDuration": 15 },
+    "api/superuser-sync.js": { "maxDuration": 15 }
   },
   "headers": [
     {

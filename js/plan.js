@@ -3,9 +3,10 @@
 const Plan = (() => {
   const USAGE_KEY = 'karsa.usage.v1';
   const PRO_KEY = 'karsa.pro.v1';
+  const SUPER_KEY = 'karsa.superuser.v1';
   const FREE_AI_DAILY = 30;
 
-  let config = { freeAiDaily: FREE_AI_DAILY, billingEnabled: false, lemonCheckoutBase: null };
+  let config = { freeAiDaily: FREE_AI_DAILY, billingEnabled: false, lemonCheckoutBase: null, superuserConfigured: false };
 
   async function loadConfig() {
     try {
@@ -14,6 +15,7 @@ const Plan = (() => {
       if (data.freeAiDaily) config.freeAiDaily = data.freeAiDaily;
       config.billingEnabled = !!data.billingEnabled;
       config.lemonCheckoutBase = data.lemonCheckoutBase || null;
+      config.superuserConfigured = !!data.superuserConfigured;
     } catch (e) { /* pakai default */ }
     return config;
   }
@@ -30,7 +32,33 @@ const Plan = (() => {
     return url.toString();
   }
 
+  async function syncSuperuser() {
+    if (typeof Auth === 'undefined' || !Auth.isLoggedIn()) return false;
+    const user = Auth.getUser();
+    if (!user?.email) return false;
+    try {
+      const res = await fetch('/api/superuser-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email }),
+      });
+      const data = await res.json();
+      if (data.superuser) {
+        setSuperuser(true);
+        setPro(true);
+        updateAiBadge();
+        return true;
+      }
+      setSuperuser(false);
+    } catch (e) {
+      console.warn('KARSA superuser sync:', e);
+    }
+    return false;
+  }
+
   async function syncProFromCloud() {
+    await syncSuperuser();
+    if (isSuperuser()) return true;
     if (typeof Auth === 'undefined' || !Auth.isLoggedIn() || !Auth.getClient()) return false;
     const client = Auth.getClient();
     const user = Auth.getUser();
@@ -53,6 +81,21 @@ const Plan = (() => {
     return false;
   }
 
+  function isSuperuser() {
+    try {
+      return localStorage.getItem(SUPER_KEY) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function setSuperuser(active) {
+    try {
+      if (active) localStorage.setItem(SUPER_KEY, '1');
+      else localStorage.removeItem(SUPER_KEY);
+    } catch (e) { /* abaikan */ }
+  }
+
   function isPro() {
     try {
       const raw = localStorage.getItem(PRO_KEY);
@@ -67,7 +110,7 @@ const Plan = (() => {
   function setPro(active) {
     try {
       localStorage.setItem(PRO_KEY, JSON.stringify({ active: !!active, at: Date.now() }));
-      if (!active) localStorage.removeItem('karsa.pro.code');
+      if (!active && !isSuperuser()) localStorage.removeItem('karsa.pro.code');
     } catch (e) { /* abaikan */ }
   }
 
@@ -87,17 +130,17 @@ const Plan = (() => {
   }
 
   function aiRemaining() {
-    if (isPro()) return null;
+    if (isPro() || isSuperuser()) return null;
     return Math.max(0, config.freeAiDaily - getAiUsage().count);
   }
 
   function canUseAi() {
-    if (isPro()) return true;
+    if (isPro() || isSuperuser()) return true;
     return getAiUsage().count < config.freeAiDaily;
   }
 
   function recordAiUse() {
-    if (isPro()) return;
+    if (isPro() || isSuperuser()) return;
     const u = getAiUsage();
     u.count += 1;
     u.date = todayKey();
@@ -108,7 +151,10 @@ const Plan = (() => {
   function updateAiBadge() {
     const badge = $('#ai-plan-badge');
     if (badge) {
-      if (isPro()) {
+      if (isSuperuser()) {
+        badge.textContent = '✦ Super';
+        badge.className = 'ai-plan-badge pro';
+      } else if (isPro()) {
         badge.textContent = '✦ Pro';
         badge.className = 'ai-plan-badge pro';
       } else {
@@ -118,7 +164,7 @@ const Plan = (() => {
       }
     }
     const proBtn = $('#dash-pro-btn');
-    if (proBtn) proBtn.classList.toggle('active', isPro());
+    if (proBtn) proBtn.classList.toggle('active', isPro() || isSuperuser());
   }
 
   async function verifyProCode(code) {
@@ -242,7 +288,7 @@ const Plan = (() => {
         el('p', { class: 'modal-desc', text: 'KARSA — dari ide, jadi aplikasi. Web, mobile, Play Store, publish — semua di browser.' }),
         el('div', { class: 'about-stats' }, [
           el('div', { class: 'about-stat' }, [
-            el('strong', { text: isPro() ? 'Pro ✦' : 'Gratis' }),
+            el('strong', { text: isSuperuser() ? 'Super ✦' : (isPro() ? 'Pro ✦' : 'Gratis') }),
             el('span', { text: 'Paket kamu' }),
           ]),
           el('div', { class: 'about-stat' }, [
@@ -261,7 +307,7 @@ const Plan = (() => {
   }
 
   return {
-    loadConfig, isPro, canUseAi, recordAiUse, aiRemaining, updateAiBadge,
-    syncProFromCloud, openProDialog, openAboutDialog,
+    loadConfig, isPro, isSuperuser, canUseAi, recordAiUse, aiRemaining, updateAiBadge,
+    syncProFromCloud, syncSuperuser, openProDialog, openAboutDialog,
   };
 })();

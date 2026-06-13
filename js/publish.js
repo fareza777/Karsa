@@ -75,7 +75,9 @@ const Publish = (() => {
     const body = { slug, html, name: project.name };
     if (customDomain) body.customDomain = customDomain;
     if (previousDomain) body.previousDomain = previousDomain;
-    if (Plan.isPro() && publishConfig && publishConfig.proAvailable) {
+    if (Plan.isPro() || Plan.isSuperuser()) {
+      const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+      if (user?.email) body.email = user.email;
       const code = await fetchProCode();
       if (code) body.proCode = code;
     }
