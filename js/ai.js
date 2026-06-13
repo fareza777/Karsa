@@ -535,24 +535,16 @@ const AI = (() => {
       text: !files.length
         ? '⚡ File belum lengkap'
         : (!pending.length
-          ? '✓ Sudah diterapkan'
+          ? '↻ Terapkan ulang (' + files.length + ' file)'
           : (files.length === allFiles.length
             ? '⚡ Terapkan ke Proyek (' + pending.length + ' file)'
             : '⚡ Terapkan (' + pending.length + '/' + allFiles.length + ' file siap)')),
-      disabled: !pending.length,
+      disabled: !files.length,
       onclick: () => {
-        if (!pending.length) {
-          showToast('File ini sudah ada di proyek — preview sudah memakai versi terbaru.', 'info');
-          Preview.refresh();
-          return;
-        }
-        if (applyFiles(pending)) {
-          const left = pending.length;
-          const allDone = left === allFiles.length && !incomplete.length;
-          applyBtn.disabled = allDone;
-          applyBtn.textContent = allDone
-            ? '✓ Sudah diterapkan'
-            : '✓ ' + left + ' file diterapkan';
+        const toApply = pending.length ? pending : files;
+        if (!toApply.length) return;
+        if (applyFiles(toApply)) {
+          applyBtn.textContent = '✓ ' + toApply.length + ' file diterapkan';
         }
       },
     });

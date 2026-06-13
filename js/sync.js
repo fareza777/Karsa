@@ -96,10 +96,10 @@ const CloudSync = (() => {
       const token = await getAccessToken();
       if (token) {
         try {
-          const res = await fetch('/api/project-delete', {
+          const res = await fetch('/api/superuser-sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ projectId: id, accessToken: token }),
+            body: JSON.stringify({ action: 'delete-project', projectId: id, accessToken: token }),
           });
           const data = await res.json().catch(() => ({}));
           if (res.ok && data.ok) {
