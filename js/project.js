@@ -117,6 +117,7 @@ const MOBILE_AI_PROMPT = [
   '8. Maksimal 2 file per respons. File besar (App.tsx, screen) — satu file per respons. Jangan keluarkan 5+ file sekaligus.',
   '9. Jangan tulis ulang package.json / app.json jika tidak berubah.',
   '10. Jika respons terpotong, sistem akan minta lanjutan otomatis — pastikan setiap file yang dikeluarkan valid & lengkap.',
+  '11. Penalaran internal dilarang panjang — langsung tulis App.tsx / screen. Lihat MODE KERJA di prompt sistem.',
 ].join('\n');
 
 const WEB_PREVIEW_PROMPT =

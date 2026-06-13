@@ -12,6 +12,14 @@ const AI = (() => {
   const MAX_CONTEXT_CHARS = 100000;
   const MAX_HISTORY = 12;
 
+  const ANTI_REASONING_PROMPT = [
+    'MODE KERJA (otomatis — user awam tidak perlu mengetik ini, tapi kamu WAJIB patuh):',
+    '• DILARANG penalaran/reasoning panjang (think / redacted_thinking). Maks 2 kalimat internal, lalu LANGSUNG tulis jawaban + file.',
+    '• Jangan habiskan token untuk menganalisis — output terbatas; kalau berpikir lama respons terpotong dan app rusak.',
+    '• Langsung coding: 1-2 kalimat pembuka singkat → segera blok ``` file=path. Tanpa rencana multi-paragraf.',
+    '• Ini setara instruksi "jangan pakai mikir lama, langsung jalan" — terapkan setiap permintaan.',
+  ].join('\n');
+
   const SYSTEM_PROMPT = [
     'Kamu adalah KARSA AI, rekan vibe-coding di dalam KARSA — pembuat aplikasi berbasis browser.',
     'Proyek pengguna hanya berisi file statis HTML/CSS/JavaScript murni (tanpa framework, tanpa npm, tanpa backend).',
@@ -30,7 +38,7 @@ const AI = (() => {
     'DESAIN:',
     '10. Mobile-first dan muat satu layar: untuk game serta aplikasi interaktif, seluruh UI harus pas dalam viewport tanpa scroll vertikal (gunakan height:100dvh, flexbox, ukuran ringkas) dan tetap nyaman di layar ponsel Android modern (lebar 360-412px).',
     '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
-    '12. Jika kamu model yang berpikir (reasoning), batasi penalaran internal seketat mungkin — beberapa kalimat saja — lalu langsung tulis jawaban dan file. Jangan menganalisis berlebihan.',
+    '12. Penalaran internal: lihat aturan MODE KERJA di bawah — singkat, lalu langsung file.',
     '13. File besar (>80 baris): pisah ke index.html + css/style.css + js/app.js. Jangan gabung HTML+CSS+JS inline ke satu file kecuali user minta — file terpotong = app rusak.',
     'PERUBAHAN KECIL & SCREENSHOT:',
     '14. Jika user minta ubah SATU hal (warna tulisan, ukuran font, teks tombol, satu elemen), ubah HANYA itu. Jangan ganti palet tema, glow, border, background, layout, atau seluruh desain kecuali user minta eksplisit ("redesign", "ganti tema", "percanti", "ubah semua").',
@@ -42,11 +50,13 @@ const AI = (() => {
 
   function getSystemPrompt() {
     const project = State.getCurrentProject();
+    let base = SYSTEM_PROMPT;
     if (project && project.projectType === 'playstore') {
-      return MOBILE_AI_PROMPT + '\n\nFOKUS PLAY STORE: pastikan app.json punya android.package unik, version, versionCode, icon, splash, adaptiveIcon. Sertakan eas.json.';
+      base = MOBILE_AI_PROMPT + '\n\nFOKUS PLAY STORE: pastikan app.json punya android.package unik, version, versionCode, icon, splash, adaptiveIcon. Sertakan eas.json.';
+    } else if (project && project.projectType === 'mobile') {
+      base = MOBILE_AI_PROMPT;
     }
-    if (project && project.projectType === 'mobile') return MOBILE_AI_PROMPT;
-    return SYSTEM_PROMPT;
+    return base + '\n\n' + ANTI_REASONING_PROMPT;
   }
 
   let settings = loadSettings();
@@ -209,7 +219,9 @@ const AI = (() => {
   }
 
   function buildUserInstruction(prompt, hasImages) {
-    const parts = [];
+    const parts = [
+      '[Langsung tulis kode — jangan berpikir/reasoning panjang.]',
+    ];
     const project = State.getCurrentProject();
     if (project && (project.projectType === 'mobile' || project.projectType === 'playstore')) {
       if (/lengkap|semua fitur|full|editor|aplikasi/i.test(prompt || '')) {
@@ -527,6 +539,7 @@ const AI = (() => {
       const lang = fileExt(f.path) || 'txt';
       return [
         '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
+        '[Langsung tulis sisa kode — jangan berpikir panjang.]',
         'File "' + f.path + '" belum lengkap. Lanjutkan HANYA sisa kode dari titik putus.',
         'Keluarkan satu blok ```' + lang + ' file=' + f.path + ' berisi sisa file sampai valid.',
         'Jangan ulang dari awal. Baris terakhir yang sudah ada:',
@@ -860,10 +873,12 @@ const AI = (() => {
     history.push({ role: 'user', content: displayText });
 
     // Gambar hanya dipahami MiniMax-M3 → paksa model itu utk permintaan ini
-    const modelUsed = resolveModel(imageAtts.length > 0);
+    const modelUsed = resolveModel(imageAtts.length > 0, project);
     let fastRetry = false;
     if (imageAtts.length) {
-      showToast('Ada gambar → AI memakai mode vision (M3).', 'info');
+      showToast('Ada gambar → AI memakai M3 (vision).', 'info');
+    } else if (modelUsed === MODEL_SMART) {
+      showToast('Proyek mobile — AI pakai M3 (langsung tulis kode, tanpa berpikir panjang).', 'info');
     }
 
     const messages = [
@@ -1068,9 +1083,12 @@ const AI = (() => {
     }
   }
 
-  // --- Mode AI: cepat default, vision otomatis saat ada gambar ---
-  function resolveModel(hasImages) {
+  // --- Pemilihan model: M3 untuk vision & mobile kompleks; M2.7 cepat untuk web ---
+  function resolveModel(hasImages, project) {
     if (hasImages) return MODEL_SMART;
+    if (project && (project.projectType === 'mobile' || project.projectType === 'playstore')) {
+      return MODEL_SMART;
+    }
     return MODEL_FAST;
   }
 

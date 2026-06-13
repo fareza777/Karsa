@@ -101,7 +101,7 @@ export default async function handler(req, res) {
         max_completion_tokens: MAX_OUTPUT_TOKENS,
         max_tokens: MAX_OUTPUT_TOKENS,
         temperature: 0.7,
-        // Model reasoning (M3): pangkas penalaran agar respons lebih cepat
+        // Model reasoning (M3): pangkas penalaran — user tidak perlu prompt manual
         ...(chosenModel.includes('M3') ? { reasoning_effort: 'low' } : {}),
       }),
     });
