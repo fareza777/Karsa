@@ -287,38 +287,47 @@ const App = (() => {
     showModal({ title: '⌨ Shortcut Keyboard', body: table, actions: [{ label: 'Tutup' }] });
   }
 
-  // --- Panel resizable ---
+  // --- Panel resizable (mulus: pointer-capture + rAF, iframe tak menelan event) ---
   function setupResizers() {
     const sidebar = $('#sidebar');
     const previewPane = $('.preview-pane');
 
     const bindResizer = (resizer, onMove) => {
-      resizer.addEventListener('mousedown', (e) => {
+      if (!resizer) return;
+      resizer.addEventListener('pointerdown', (e) => {
         e.preventDefault();
+        // Tangkap pointer → semua gerakan tetap masuk ke resizer, walau kursor
+        // melintas di atas iframe preview (inilah yang dulu bikin "nyangkut").
+        try { resizer.setPointerCapture(e.pointerId); } catch (err) { /* abaikan */ }
         resizer.classList.add('dragging');
+        document.body.classList.add('resizing');
         document.body.style.cursor = 'col-resize';
-        document.body.style.userSelect = 'none';
+
         const move = (ev) => onMove(ev);
         const stop = () => {
           resizer.classList.remove('dragging');
+          document.body.classList.remove('resizing');
           document.body.style.cursor = '';
-          document.body.style.userSelect = '';
-          document.removeEventListener('mousemove', move);
-          document.removeEventListener('mouseup', stop);
+          resizer.removeEventListener('pointermove', move);
+          resizer.removeEventListener('pointerup', stop);
+          resizer.removeEventListener('pointercancel', stop);
+          try { resizer.releasePointerCapture(e.pointerId); } catch (err) { /* abaikan */ }
         };
-        document.addEventListener('mousemove', move);
-        document.addEventListener('mouseup', stop);
+
+        resizer.addEventListener('pointermove', move);
+        resizer.addEventListener('pointerup', stop);
+        resizer.addEventListener('pointercancel', stop);
       });
     };
 
     bindResizer($('#resizer-left'), (e) => {
-      const width = Math.max(150, Math.min(420, e.clientX));
-      sidebar.style.width = width + 'px';
+      sidebar.style.width = Math.max(150, Math.min(420, e.clientX)) + 'px';
     });
 
     bindResizer($('#resizer-right'), (e) => {
-      const width = Math.max(260, Math.min(window.innerWidth * 0.7, window.innerWidth - e.clientX));
-      previewPane.style.width = width + 'px';
+      // Lebar preview = sisa dari kanan; editor (flex:1) otomatis mengecil
+      const w = Math.max(280, Math.min(window.innerWidth - 360, window.innerWidth - e.clientX));
+      previewPane.style.width = w + 'px';
     });
   }
 

@@ -101,13 +101,29 @@
 }
 
 .resizer {
-  width: 5px;
+  width: 6px;
   cursor: col-resize;
   flex-shrink: 0;
   position: relative;
-  transition: background var(--transition);
+  background: transparent;
+  transition: background .12s ease;
+  touch-action: none;
+  z-index: 6;
 }
+/* Area cengkeram lebih lebar dari garis visual, biar gampang ditarik */
+.resizer::before {
+  content: '';
+  position: absolute;
+  inset: 0 -4px;
+}
+/* Garis tipis di tengah saat hover/drag */
 .resizer:hover, .resizer.dragging { background: var(--accent); }
+.resizer.dragging { background: var(--accent); }
+
+/* Saat menyeret: iframe & area lain tak menelan event pointer → mulus */
+body.resizing iframe { pointer-events: none !important; }
+body.resizing { cursor: col-resize; }
+body.resizing * { user-select: none !important; }
 
 /* --- Sidebar / file tree --- */
 .sidebar {
