@@ -812,6 +812,75 @@ const AI = (() => {
     return project.files[path] === code;
   }
 
+  // --- #12 Diff: muat jsdiff dari CDN saat dibutuhkan ---
+  let jsdiffQueue = null;
+  function loadJsDiff(cb) {
+    if (window.Diff) return cb(true);
+    if (jsdiffQueue) { jsdiffQueue.push(cb); return; }
+    jsdiffQueue = [cb];
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js';
+    s.onload = () => { const q = jsdiffQueue; jsdiffQueue = null; q.forEach((f) => f(true)); };
+    s.onerror = () => { jsdiffQueue = null; cb(false); };
+    document.head.appendChild(s);
+  }
+
+  function renderFileDiff(container, oldText, newText) {
+    const parts = window.Diff.diffLines(oldText || '', newText || '');
+    let added = 0; let removed = 0;
+    parts.forEach((part) => {
+      const cls = part.added ? 'add' : (part.removed ? 'del' : 'ctx');
+      if (part.added) added += part.count || 0;
+      if (part.removed) removed += part.count || 0;
+      const sign = part.added ? '+' : (part.removed ? '−' : ' ');
+      part.value.replace(/\n$/, '').split('\n').forEach((line) => {
+        container.appendChild(el('div', { class: 'diff-line ' + cls }, [
+          el('span', { class: 'diff-sign', text: sign }),
+          el('span', { class: 'diff-text', text: line }),
+        ]));
+      });
+    });
+    return { added, removed };
+  }
+
+  function showAiDiff(files) {
+    const project = State.getCurrentProject();
+    if (!project) return;
+    loadJsDiff((ok) => {
+      if (!ok) { showToast('Gagal memuat pustaka diff (periksa internet).', 'error'); return; }
+      const body = el('div', { class: 'diff-modal-body' });
+      files.forEach((f) => {
+        const isNew = project.files[f.path] === undefined;
+        const fileWrap = el('div', { class: 'diff-file' });
+        const stat = el('span', { class: 'diff-file-stat' });
+        const head = el('div', { class: 'diff-file-head' }, [
+          fileBadge(f.path),
+          el('span', { class: 'diff-file-name', text: f.path }),
+          el('span', { class: 'diff-file-badge ' + (isNew ? 'new' : 'edit'), text: isNew ? 'baru' : 'diubah' }),
+          stat,
+        ]);
+        const code = el('div', { class: 'diff-code' });
+        const counts = renderFileDiff(code, project.files[f.path] || '', f.code);
+        stat.textContent = '+' + counts.added + ' −' + counts.removed;
+        fileWrap.appendChild(head);
+        fileWrap.appendChild(code);
+        body.appendChild(fileWrap);
+      });
+      showModal({
+        title: '👁 Pratinjau Perubahan',
+        wide: true,
+        body,
+        actions: [
+          { label: 'Tutup' },
+          {
+            label: '⚡ Terapkan sekarang', primary: true,
+            onClick: () => { applyFiles(files); },
+          },
+        ],
+      });
+    });
+  }
+
   function attachApplyBox(bubble, visibleText, autoFocus, opts) {
     if (visibleText) bubble.dataset.aiVisible = visibleText;
     const existing = $('.ai-apply-box', bubble);
@@ -869,7 +938,16 @@ const AI = (() => {
       },
     });
 
-    bubble.appendChild(el('div', { class: 'ai-apply-box' }, [chips, applyBtn]));
+    const actions = [applyBtn];
+    // #12 Tombol diff — hanya bila ada file yang benar-benar berubah & lengkap
+    if (files.length && pending.length && !blocked) {
+      actions.push(el('button', {
+        class: 'btn-diff',
+        text: '👁 Lihat diff',
+        onclick: () => showAiDiff(pending.length ? pending : files),
+      }));
+    }
+    bubble.appendChild(el('div', { class: 'ai-apply-box' }, [chips, el('div', { class: 'ai-apply-actions' }, actions)]));
     if (autoFocus) scrollChat();
   }
 
@@ -1377,6 +1455,16 @@ const AI = (() => {
     sendPrompt(WEB_PREVIEW_PROMPT);
   }
 
+  // #13 Pra-isi input dari elemen yang dipilih di preview (inspect-to-edit)
+  function prefillFromInspect(context, label) {
+    switchTab('ai');
+    const input = $('#ai-input');
+    input.value = context;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+    showToast('Elemen ' + label + ' siap diubah — ketik perubahanmu lalu Kirim.', 'ok');
+  }
+
   function requestSnackRefresh() {
     Preview.setEngine('snack');
     Preview.refresh();
@@ -1391,7 +1479,7 @@ const AI = (() => {
 
   return {
     init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh,
-    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes,
+    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes, prefillFromInspect,
   };
 })();
 

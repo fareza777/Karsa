@@ -384,6 +384,10 @@ const App = (() => {
     // Sidebar
     $('#btn-new-file').addEventListener('click', () => FileTree.newFilePrompt());
     $('#btn-new-folder').addEventListener('click', () => FileTree.newFolderPrompt());
+    const assetsBtn = $('#btn-assets');
+    if (assetsBtn && typeof Assets !== 'undefined') assetsBtn.addEventListener('click', () => Assets.uploadDialog());
+    const inspectBtn = $('#btn-inspect');
+    if (inspectBtn) inspectBtn.addEventListener('click', () => Preview.toggleInspect());
 
     // Terima tautan berbagi yang ditempel saat aplikasi sudah terbuka
     window.addEventListener('hashchange', importFromHash);

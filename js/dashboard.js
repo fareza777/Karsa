@@ -225,15 +225,36 @@ const Dashboard = (() => {
     }).catch(() => showToast('Gagal membaca beberapa file dari folder.', 'error'));
   }
 
+  // #16 Thumbnail template: render HTML+CSS asli di iframe (tanpa script, aman & ringan)
+  function templateThumb(tpl) {
+    const hasHtml = tpl.files && tpl.files['index.html'] !== undefined;
+    if (!hasHtml) {
+      return el('div', { class: 'template-icon', text: tpl.icon, style: 'background:' + tpl.color });
+    }
+    const frame = el('iframe', {
+      class: 'template-thumb-frame',
+      loading: 'lazy',
+      sandbox: '',
+      tabindex: '-1',
+      'aria-hidden': 'true',
+      title: tpl.name,
+    });
+    try { frame.srcdoc = Preview.buildBundle({ files: tpl.files, name: tpl.name }); } catch (e) { /* abaikan */ }
+    return el('div', { class: 'template-thumb' }, [
+      frame,
+      el('span', { class: 'template-thumb-chip', text: tpl.icon, style: 'background:' + tpl.color }),
+    ]);
+  }
+
   function renderTemplates() {
     const strip = $('#template-strip');
     strip.innerHTML = '';
     TEMPLATES.forEach((tpl) => {
       strip.appendChild(el('button', {
-        class: 'template-card',
+        class: 'template-card template-card-thumb',
         onclick: () => newProjectDialog(tpl.id),
       }, [
-        el('div', { class: 'template-icon', text: tpl.icon, style: 'background:' + tpl.color }),
+        templateThumb(tpl),
         el('h3', { text: tpl.name }),
         el('p', { text: tpl.desc }),
       ]));

@@ -129,6 +129,60 @@ const Preview = (() => {
     });
   }
 
+  // #13 Inspect-to-edit: sorot elemen di bawah kursor, klik untuk memilih
+  var inspectOn = false, inspectHi = null, inspectTarget = null;
+  function cssPath(elm) {
+    if (!elm || elm === document.body) return 'body';
+    if (elm.id) return '#' + elm.id;
+    var parts = [];
+    var node = elm;
+    while (node && node.nodeType === 1 && node !== document.body && parts.length < 4) {
+      var sel = node.tagName.toLowerCase();
+      if (node.classList && node.classList.length) sel += '.' + Array.prototype.slice.call(node.classList).slice(0, 2).join('.');
+      var parent = node.parentNode;
+      if (parent) {
+        var sames = Array.prototype.filter.call(parent.children, function (c) { return c.tagName === node.tagName; });
+        if (sames.length > 1) sel += ':nth-of-type(' + (sames.indexOf(node) + 1) + ')';
+      }
+      parts.unshift(sel);
+      if (node.id) { parts[0] = '#' + node.id; break; }
+      node = node.parentNode;
+    }
+    return parts.join(' > ');
+  }
+  function setInspect(on) {
+    inspectOn = on;
+    if (!inspectHi) {
+      inspectHi = document.createElement('div');
+      inspectHi.style.cssText = 'position:fixed;z-index:2147483647;pointer-events:none;border:2px solid #7c5cff;background:rgba(124,92,255,.12);border-radius:3px;display:none;transition:all .05s;';
+      document.body.appendChild(inspectHi);
+    }
+    inspectHi.style.display = 'none';
+    document.body.style.cursor = on ? 'crosshair' : '';
+  }
+  document.addEventListener('mousemove', function (e) {
+    if (!inspectOn) return;
+    var t = e.target;
+    if (!t || t === inspectHi) return;
+    inspectTarget = t;
+    var r = t.getBoundingClientRect();
+    inspectHi.style.display = 'block';
+    inspectHi.style.left = r.left + 'px'; inspectHi.style.top = r.top + 'px';
+    inspectHi.style.width = r.width + 'px'; inspectHi.style.height = r.height + 'px';
+  }, true);
+  document.addEventListener('click', function (e) {
+    if (!inspectOn) return;
+    e.preventDefault(); e.stopPropagation();
+    var t = inspectTarget || e.target;
+    var html = t.outerHTML || '';
+    if (html.length > 1200) html = html.slice(0, 1200) + '…';
+    parent.postMessage({ __karsa_inspect_pick: { selector: cssPath(t), tag: t.tagName.toLowerCase(), text: (t.textContent || '').trim().slice(0, 80), html: html } }, '*');
+    setInspect(false);
+  }, true);
+  document.addEventListener('keydown', function (e) {
+    if (inspectOn && e.key === 'Escape') { setInspect(false); parent.postMessage({ __karsa_inspect_cancel: true }, '*'); }
+  });
+
   // REPL & perintah screenshot dari panel KARSA
   window.addEventListener('message', function (e) {
     var data = e.data;
@@ -136,6 +190,8 @@ const Preview = (() => {
     if (data.__karsa_shot === 'full') { ambilShot(); return; }
     if (data.__karsa_shot === 'thumb') { ambilShot(null, 'thumb'); return; }
     if (data.__karsa_shot === 'region') { pilihAreaShot(); return; }
+    if (data.__karsa_inspect === 'on') { setInspect(true); return; }
+    if (data.__karsa_inspect === 'off') { setInspect(false); return; }
     if (typeof data.__karsa_eval !== 'string') return;
     try {
       var hasil = (0, eval)(data.__karsa_eval);
@@ -193,6 +249,17 @@ const Preview = (() => {
         return '<script>\n' + files[path].replace(/<\/script>/gi, '<\\/script>') + '\n<\/script>';
       }
     );
+
+    // #14 Ganti referensi gambar lokal (disimpan sebagai data-URL) di src/href/url()
+    Object.keys(files).forEach((path) => {
+      const content = files[path];
+      if (typeof content !== 'string' || !/^data:image\//.test(content)) return;
+      [path, './' + path, '/' + path].forEach((ref) => {
+        html = html.split('"' + ref + '"').join('"' + content + '"');
+        html = html.split("'" + ref + "'").join("'" + content + "'");
+        html = html.split('(' + ref + ')').join('(' + content + ')');
+      });
+    });
 
     // Suntikkan jembatan console seawal mungkin
     if (/<head[^>]*>/i.test(html)) {
@@ -568,6 +635,21 @@ const Preview = (() => {
     img.src = dataUrl;
   }
 
+  // --- #13 Inspect-to-edit (sisi parent) ---
+  let inspectActive = false;
+  function setInspectButton(on) {
+    const btn = $('#btn-inspect');
+    if (btn) btn.classList.toggle('active', on);
+  }
+  function toggleInspect() {
+    const frame = $('#preview-frame');
+    if (!frame.contentWindow) return;
+    inspectActive = !inspectActive;
+    frame.contentWindow.postMessage({ __karsa_inspect: inspectActive ? 'on' : 'off' }, '*');
+    setInspectButton(inspectActive);
+    if (inspectActive) showToast('Klik elemen di preview untuk mengubahnya dengan AI (Esc batal).', 'info');
+  }
+
   window.addEventListener('message', (event) => {
     const data = event.data;
     if (!data) return;
@@ -576,6 +658,18 @@ const Preview = (() => {
       else showShotResult(data.__karsa_shot_done);
     } else if (data.__karsa_shot_err && data.__karsa_shot_err !== 'dibatalkan' && data.tag !== 'thumb') {
       showToast('Screenshot gagal: ' + data.__karsa_shot_err, 'error');
+    } else if (data.__karsa_inspect_cancel) {
+      inspectActive = false;
+      setInspectButton(false);
+    } else if (data.__karsa_inspect_pick) {
+      inspectActive = false;
+      setInspectButton(false);
+      const pick = data.__karsa_inspect_pick;
+      const label = pick.text ? '"' + pick.text + '"' : '<' + pick.tag + '>';
+      const context = 'Ubah elemen ini di preview (selector: ' + pick.selector + '):\n```html\n' + pick.html + '\n```\n\nPerubahan yang saya mau: ';
+      if (typeof AI !== 'undefined' && AI.prefillFromInspect) {
+        AI.prefillFromInspect(context, label);
+      }
     }
   });
 
@@ -586,6 +680,6 @@ const Preview = (() => {
 
   return {
     refresh, refreshDebounced, openInNewTab, setDevice, setEngine, buildBundle,
-    runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix,
+    runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect,
   };
 })();
