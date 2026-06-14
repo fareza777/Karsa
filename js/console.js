@@ -44,6 +44,14 @@ const ConsolePanel = (() => {
       } catch (e) { /* bukan JSON valid */ }
     }
     if (!pre) msg.appendChild(el('span', { text: text }));
+    // #6 Tombol "Perbaiki dengan AI" pada error runtime
+    if (level === 'error' && typeof AI !== 'undefined' && AI.prefillError) {
+      msg.appendChild(el('button', {
+        class: 'console-fix-btn',
+        text: '🔧 Perbaiki dengan AI',
+        onclick: (e) => { e.stopPropagation(); AI.prefillError(text); },
+      }));
+    }
     entry.appendChild(msg);
     entry.appendChild(el('span', { class: 'console-ts', text: nowTime() }));
     entry.appendChild(makeCopyButton(() => text, { class: 'console-copy' }));

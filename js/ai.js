@@ -1494,6 +1494,17 @@ const AI = (() => {
     showToast('Elemen ' + label + ' siap diubah — ketik perubahanmu lalu Kirim.', 'ok');
   }
 
+  // #6 Perbaiki error runtime dari console: kirim ke AI untuk diperbaiki
+  function prefillError(errorText) {
+    switchTab('ai');
+    const input = $('#ai-input');
+    input.value = 'Preview menampilkan error ini:\n\n' + errorText +
+      '\n\nTemukan penyebabnya dan perbaiki kodenya. Tulis ulang file yang perlu diubah secara utuh.';
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+    showToast('Error dikirim ke AI — klik Kirim untuk minta perbaikan. 🔧', 'info');
+  }
+
   function requestSnackRefresh() {
     Preview.setEngine('snack');
     Preview.refresh();
@@ -1508,7 +1519,7 @@ const AI = (() => {
 
   return {
     init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh,
-    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes, prefillFromInspect,
+    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes, prefillFromInspect, prefillError,
   };
 })();
 

@@ -6,6 +6,7 @@ const Palette = (() => {
   let listEl = null;
   let items = [];        // hasil terfilter saat ini
   let activeIndex = 0;
+  let mode = 'commands'; // 'commands' (Ctrl+K) | 'files' (Ctrl+P)
 
   // Daftar perintah. `when` opsional: hanya muncul bila true.
   function baseCommands() {
@@ -65,9 +66,19 @@ const Palette = (() => {
     document.body.appendChild(overlay);
   }
 
+  // #7 Daftar file proyek aktif (untuk mode quick-open)
+  function fileCommands() {
+    const project = typeof State !== 'undefined' && State.getCurrentProject();
+    if (!project) return [];
+    return Object.keys(project.files).sort().map((path) => ({
+      icon: null, file: path, label: path, hint: 'file',
+      run: () => Tabs.open(path),
+    }));
+  }
+
   function refresh() {
     const q = inputEl.value.trim().toLowerCase();
-    const all = baseCommands();
+    const all = mode === 'files' ? fileCommands() : baseCommands();
     items = q
       ? all.filter((c) => (c.label + ' ' + (c.hint || '')).toLowerCase().includes(q))
       : all;
@@ -82,13 +93,14 @@ const Palette = (() => {
       return;
     }
     items.forEach((cmd, i) => {
+      const leading = cmd.file ? fileBadge(cmd.file) : (iconSvg(cmd.icon) || el('span', { class: 'icon', text: '•' }));
       const row = el('button', {
         class: 'palette-item' + (i === activeIndex ? ' active' : ''),
         type: 'button',
         onmousemove: () => { if (activeIndex !== i) { activeIndex = i; updateActive(); } },
         onclick: () => execute(i),
       }, [
-        iconSvg(cmd.icon) || el('span', { class: 'icon', text: '•' }),
+        leading,
         el('span', { class: 'palette-item-label', text: cmd.label }),
         cmd.hint ? el('span', { class: 'palette-item-hint', text: cmd.hint }) : null,
       ]);
@@ -117,10 +129,14 @@ const Palette = (() => {
     try { cmd.run(); } catch (err) { showToast('Perintah gagal: ' + err.message, 'error'); }
   }
 
-  function open() {
+  function open(which) {
+    mode = which === 'files' ? 'files' : 'commands';
     if (!overlay) build();
     overlay.classList.add('show');
     inputEl.value = '';
+    inputEl.placeholder = mode === 'files'
+      ? 'Buka file… ketik nama file'
+      : 'Ketik perintah… (mis. publish, format, tema)';
     refresh();
     setTimeout(() => inputEl.focus(), 20);
   }
@@ -133,9 +149,16 @@ const Palette = (() => {
 
   function init() {
     document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const k = e.key.toLowerCase();
+      if (k === 'k') {
         e.preventDefault();
-        isOpen() ? close() : open();
+        (isOpen() && mode === 'commands') ? close() : open('commands');
+      } else if (k === 'p') {
+        // Hanya di IDE (ada proyek aktif & file)
+        if ($('#view-ide').classList.contains('hidden')) return;
+        e.preventDefault();
+        (isOpen() && mode === 'files') ? close() : open('files');
       }
     });
   }

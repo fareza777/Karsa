@@ -19,12 +19,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="css/base.css?v=20260616l">
-  <link rel="stylesheet" href="css/components.css?v=20260616l">
-  <link rel="stylesheet" href="css/dashboard.css?v=20260616l">
-  <link rel="stylesheet" href="css/ide.css?v=20260616l">
-  <link rel="stylesheet" href="css/ai.css?v=20260616l">
-  <link rel="stylesheet" href="css/palette.css?v=20260616l">
+  <link rel="stylesheet" href="css/base.css?v=20260616m">
+  <link rel="stylesheet" href="css/components.css?v=20260616m">
+  <link rel="stylesheet" href="css/dashboard.css?v=20260616m">
+  <link rel="stylesheet" href="css/ide.css?v=20260616m">
+  <link rel="stylesheet" href="css/ai.css?v=20260616m">
+  <link rel="stylesheet" href="css/palette.css?v=20260616m">
 </head>
 <body data-theme="dark">
 
@@ -67,6 +67,7 @@
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4Z"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/></symbol>
   </svg>
 
   <!-- ============ DASHBOARD ============ -->
@@ -98,6 +99,7 @@
             placeholder="Ceritakan aplikasi impianmu… mis. &quot;aplikasi kasir warung dengan keranjang dan struk&quot;"></textarea>
           <div class="hero-prompt-foot">
             <span class="hero-prompt-hint">⚡ Website bawaan — tulis &quot;Android&quot; atau &quot;Play Store&quot; kalau mau app HP</span>
+            <button id="hero-mic" class="icon-btn" title="Bicara untuk mengetik (id-ID)"><svg class="icon"><use href="#i-mic"/></svg></button>
             <button id="hero-prompt-send" class="btn btn-primary"><svg class="icon"><use href="#i-sparkles"/></svg> Buat dengan AI</button>
           </div>
         </div>
@@ -254,6 +256,7 @@
             <textarea id="ai-input" rows="3"
               placeholder="Jelaskan aplikasi atau perubahan yang kamu mau… Tempel (Ctrl+V) screenshot juga bisa!"></textarea>
             <div class="ai-input-actions">
+              <button id="ai-mic" class="icon-btn-sm" title="Bicara untuk mengetik (id-ID)"><svg class="icon"><use href="#i-mic"/></svg></button>
               <button id="ai-attach-btn" class="icon-btn-sm" title="Lampirkan gambar atau file"><svg class="icon"><use href="#i-paperclip"/></svg></button>
               <input type="file" id="ai-file-input" multiple hidden
                      accept="image/*,.txt,.md,.json,.csv,.html,.css,.js,.svg,.xml">
@@ -369,29 +372,30 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ============ APP ============ -->
-  <script src="js/utils.js?v=20260616l"></script>
-  <script src="js/storage.js?v=20260616l"></script>
-  <script src="js/templates.js?v=20260616l"></script>
-  <script src="js/project.js?v=20260616l"></script>
-  <script src="js/state.js?v=20260616l"></script>
-  <script src="js/components.js?v=20260616l"></script>
-  <script src="js/console.js?v=20260616l"></script>
-  <script src="js/snack.js?v=20260616l"></script>
-  <script src="js/preview.js?v=20260616l"></script>
-  <script src="js/editor.js?v=20260616l"></script>
-  <script src="js/tabs.js?v=20260616l"></script>
-  <script src="js/filetree.js?v=20260616l"></script>
-  <script src="js/dashboard.js?v=20260616l"></script>
-  <script src="js/assets.js?v=20260616l"></script>
-  <script src="js/plan.js?v=20260616l"></script>
-  <script src="js/auth.js?v=20260616l"></script>
-  <script src="js/sync.js?v=20260616l"></script>
-  <script src="js/publish.js?v=20260616l"></script>
-  <script src="js/playstore.js?v=20260616l"></script>
-  <script src="js/app.js?v=20260616l"></script>
-  <script src="js/palette.js?v=20260616l"></script>
-  <script src="js/onboarding.js?v=20260616l"></script>
-  <script src="js/ai.js?v=20260616l"></script>
+  <script src="js/voice.js?v=20260616m"></script>
+  <script src="js/utils.js?v=20260616m"></script>
+  <script src="js/storage.js?v=20260616m"></script>
+  <script src="js/templates.js?v=20260616m"></script>
+  <script src="js/project.js?v=20260616m"></script>
+  <script src="js/state.js?v=20260616m"></script>
+  <script src="js/components.js?v=20260616m"></script>
+  <script src="js/console.js?v=20260616m"></script>
+  <script src="js/snack.js?v=20260616m"></script>
+  <script src="js/preview.js?v=20260616m"></script>
+  <script src="js/editor.js?v=20260616m"></script>
+  <script src="js/tabs.js?v=20260616m"></script>
+  <script src="js/filetree.js?v=20260616m"></script>
+  <script src="js/dashboard.js?v=20260616m"></script>
+  <script src="js/assets.js?v=20260616m"></script>
+  <script src="js/plan.js?v=20260616m"></script>
+  <script src="js/auth.js?v=20260616m"></script>
+  <script src="js/sync.js?v=20260616m"></script>
+  <script src="js/publish.js?v=20260616m"></script>
+  <script src="js/playstore.js?v=20260616m"></script>
+  <script src="js/app.js?v=20260616m"></script>
+  <script src="js/palette.js?v=20260616m"></script>
+  <script src="js/onboarding.js?v=20260616m"></script>
+  <script src="js/ai.js?v=20260616m"></script>
   <script>
     // #17 Daftarkan service worker untuk dukungan offline (PWA)
     if ('serviceWorker' in navigator) {

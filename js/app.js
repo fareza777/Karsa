@@ -389,6 +389,12 @@ const App = (() => {
     const inspectBtn = $('#btn-inspect');
     if (inspectBtn) inspectBtn.addEventListener('click', () => Preview.toggleInspect());
 
+    // #5 Tombol mic suara-ke-teks (AI input + hero prompt)
+    if (typeof Voice !== 'undefined') {
+      Voice.attach($('#ai-mic'), $('#ai-input'));
+      Voice.attach($('#hero-mic'), $('#hero-prompt-input'));
+    }
+
     // Terima tautan berbagi yang ditempel saat aplikasi sudah terbuka
     window.addEventListener('hashchange', importFromHash);
 
