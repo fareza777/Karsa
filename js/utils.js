@@ -109,6 +109,44 @@ function isValidPath(path) {
   return path.split('/').every((seg) => /^[\w.\- ]+$/.test(seg) && seg !== '.' && seg !== '..');
 }
 
+// Salin teks ke clipboard (dengan fallback execCommand). Mengembalikan Promise<boolean>.
+function copyToClipboard(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(() => fallbackCopy(text));
+  }
+  return Promise.resolve(fallbackCopy(text));
+}
+
+function fallbackCopy(text) {
+  try {
+    const ta = el('textarea', { value: text });
+    ta.style.cssText = 'position:fixed;opacity:0;';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch (e) { return false; }
+}
+
+// Tombol salin kecil yang berubah jadi centang sesaat saat sukses.
+function makeCopyButton(getText, opts) {
+  const btn = el('button', {
+    class: 'copy-btn' + (opts && opts.class ? ' ' + opts.class : ''),
+    title: 'Salin',
+    text: '📋',
+    onclick: (e) => {
+      e.stopPropagation();
+      copyToClipboard(typeof getText === 'function' ? getText() : getText).then((ok) => {
+        btn.textContent = ok ? '✓' : '✕';
+        btn.classList.toggle('copied', ok);
+        setTimeout(() => { btn.textContent = '📋'; btn.classList.remove('copied'); }, 1200);
+      });
+    },
+  });
+  return btn;
+}
+
 function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = el('a', { href: url, download: filename });

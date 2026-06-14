@@ -6,65 +6,122 @@ const Dashboard = (() => {
     renderTemplates();
   }
 
+  // #8 State pencarian/urut/filter proyek
+  let projectQuery = '';
+  let projectSort = 'recent';
+  let projectFilter = 'all';
+  const FILTERS = [
+    { id: 'all', label: 'Semua' },
+    { id: 'live', label: '🟢 Live' },
+    { id: 'web', label: 'Web' },
+    { id: 'mobile', label: 'Mobile' },
+  ];
+  let controlsBound = false;
+
+  function projectKind(project) {
+    const a = analyzeProjectFiles(project.files);
+    if (project.projectType === 'playstore' || a.expoLike || (project.projectType && project.projectType !== 'web')) return 'mobile';
+    return 'web';
+  }
+
+  function matchesFilter(project) {
+    if (projectFilter === 'all') return true;
+    if (projectFilter === 'live') return !!(project.publish && project.publish.url);
+    return projectKind(project) === projectFilter;
+  }
+
+  function sortProjects(list) {
+    const arr = list.slice();
+    if (projectSort === 'name') arr.sort((a, b) => a.name.localeCompare(b.name, 'id'));
+    else if (projectSort === 'files') arr.sort((a, b) => Object.keys(b.files).length - Object.keys(a.files).length);
+    else arr.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    return arr;
+  }
+
+  function bindControls() {
+    if (controlsBound) return;
+    controlsBound = true;
+    const filtersRoot = $('#project-filters');
+    FILTERS.forEach((f) => {
+      filtersRoot.appendChild(el('button', {
+        class: 'project-filter-chip' + (f.id === 'all' ? ' active' : ''),
+        'data-filter': f.id,
+        text: f.label,
+        onclick: () => {
+          projectFilter = f.id;
+          $$('.project-filter-chip', filtersRoot).forEach((c) => c.classList.toggle('active', c.dataset.filter === f.id));
+          renderProjects();
+        },
+      }));
+    });
+    $('#project-search').addEventListener('input', (e) => { projectQuery = e.target.value.trim().toLowerCase(); renderProjects(); });
+    $('#project-sort').addEventListener('change', (e) => { projectSort = e.target.value; renderProjects(); });
+  }
+
+  function projectCard(project) {
+    const fileCount = Object.keys(project.files).length;
+    const cover = project.thumb
+      ? el('div', { class: 'project-cover' }, [el('img', { src: project.thumb, alt: project.name, loading: 'lazy' })])
+      : el('div', { class: 'project-cover', style: 'background:' + colorForId(project.id) }, [
+          el('span', { class: 'project-cover-initial', text: project.name.trim().charAt(0).toUpperCase() || '✦' }),
+        ]);
+
+    const card = el('div', {
+      class: 'project-card',
+      onclick: () => App.openProject(project.id),
+    }, [
+      cover,
+      el('div', { class: 'project-card-bottom' }, [
+        el('div', { class: 'project-card-info' }, [
+          el('h3', { text: project.name }),
+          el('div', { class: 'project-meta' }, [
+            el('span', { text: fileCount + ' file' }),
+            project.publish && project.publish.url
+              ? el('span', { class: 'project-tag live', text: '🟢 Live' })
+              : null,
+            project.projectType === 'playstore'
+              ? el('span', { class: 'project-tag playstore', text: '🏪 Play' })
+              : null,
+            (() => {
+              const a = analyzeProjectFiles(project.files);
+              if (a.expoLike) return el('span', { class: 'project-tag', text: 'Expo' });
+              if ((project.projectType || 'web') !== 'web') {
+                return el('span', { class: 'project-tag', text: getProjectType(project.projectType).name });
+              }
+              return null;
+            })(),
+            el('span', { text: formatRelativeTime(project.updatedAt) }),
+          ]),
+        ]),
+        el('button', {
+          class: 'icon-btn-sm project-menu-btn',
+          text: '⋯',
+          title: 'Opsi proyek',
+          onclick: (e) => { e.stopPropagation(); projectMenu(e, project); },
+        }),
+      ]),
+    ]);
+    card.addEventListener('contextmenu', (e) => { e.preventDefault(); projectMenu(e, project); });
+    return card;
+  }
+
   function renderProjects() {
-    const projects = State.getProjects();
+    const all = State.getProjects();
     const grid = $('#project-grid');
     grid.innerHTML = '';
-    $('#project-count').textContent = projects.length + ' proyek';
-    $('#empty-projects').classList.toggle('hidden', projects.length > 0);
+    $('#project-count').textContent = all.length + ' proyek';
+    $('#empty-projects').classList.toggle('hidden', all.length > 0);
 
-    projects.forEach((project) => {
-      const fileCount = Object.keys(project.files).length;
-      const cover = project.thumb
-        ? el('div', { class: 'project-cover' }, [el('img', { src: project.thumb, alt: project.name, loading: 'lazy' })])
-        : el('div', { class: 'project-cover', style: 'background:' + colorForId(project.id) }, [
-            el('span', { class: 'project-cover-initial', text: project.name.trim().charAt(0).toUpperCase() || '✦' }),
-          ]);
+    // Tampilkan kontrol cari/urut hanya bila proyek cukup banyak
+    bindControls();
+    $('#project-controls').classList.toggle('hidden', all.length < 4);
 
-      const card = el('div', {
-        class: 'project-card',
-        onclick: () => App.openProject(project.id),
-      }, [
-        cover,
-        el('div', { class: 'project-card-bottom' }, [
-          el('div', { class: 'project-card-info' }, [
-            el('h3', { text: project.name }),
-            el('div', { class: 'project-meta' }, [
-              el('span', { text: fileCount + ' file' }),
-              project.publish && project.publish.url
-                ? el('span', { class: 'project-tag live', text: '🟢 Live' })
-                : null,
-              project.projectType === 'playstore'
-                ? el('span', { class: 'project-tag playstore', text: '🏪 Play' })
-                : null,
-              (() => {
-                const a = analyzeProjectFiles(project.files);
-                if (a.expoLike) return el('span', { class: 'project-tag', text: 'Expo' });
-                if ((project.projectType || 'web') !== 'web') {
-                  return el('span', { class: 'project-tag', text: getProjectType(project.projectType).name });
-                }
-                return null;
-              })(),
-              el('span', { text: formatRelativeTime(project.updatedAt) }),
-            ]),
-          ]),
-          el('button', {
-            class: 'icon-btn-sm project-menu-btn',
-            text: '⋯',
-            title: 'Opsi proyek',
-            onclick: (e) => {
-              e.stopPropagation();
-              projectMenu(e, project);
-            },
-          }),
-        ]),
-      ]);
-      card.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        projectMenu(e, project);
-      });
-      grid.appendChild(card);
-    });
+    const filtered = sortProjects(all.filter((p) =>
+      matchesFilter(p) && (!projectQuery || p.name.toLowerCase().includes(projectQuery))
+    ));
+    $('#project-noresult').classList.toggle('hidden', !(all.length > 0 && filtered.length === 0));
+
+    filtered.forEach((project) => grid.appendChild(projectCard(project)));
   }
 
   function projectMenu(e, project) {

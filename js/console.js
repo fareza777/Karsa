@@ -46,6 +46,7 @@ const ConsolePanel = (() => {
     if (!pre) msg.appendChild(el('span', { text: text }));
     entry.appendChild(msg);
     entry.appendChild(el('span', { class: 'console-ts', text: nowTime() }));
+    entry.appendChild(makeCopyButton(() => text, { class: 'console-copy' }));
     if (pre) {
       entry.appendChild(pre);
       entry.addEventListener('click', () => {

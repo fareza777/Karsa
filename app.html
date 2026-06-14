@@ -19,12 +19,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="css/base.css?v=20260616k">
-  <link rel="stylesheet" href="css/components.css?v=20260616k">
-  <link rel="stylesheet" href="css/dashboard.css?v=20260616k">
-  <link rel="stylesheet" href="css/ide.css?v=20260616k">
-  <link rel="stylesheet" href="css/ai.css?v=20260616k">
-  <link rel="stylesheet" href="css/palette.css?v=20260616k">
+  <link rel="stylesheet" href="css/base.css?v=20260616l">
+  <link rel="stylesheet" href="css/components.css?v=20260616l">
+  <link rel="stylesheet" href="css/dashboard.css?v=20260616l">
+  <link rel="stylesheet" href="css/ide.css?v=20260616l">
+  <link rel="stylesheet" href="css/ai.css?v=20260616l">
+  <link rel="stylesheet" href="css/palette.css?v=20260616l">
 </head>
 <body data-theme="dark">
 
@@ -137,7 +137,20 @@
           <h2>Proyek Kamu</h2>
           <span id="project-count" class="badge"></span>
         </div>
+        <div id="project-controls" class="project-controls hidden">
+          <div class="project-search-wrap">
+            <svg class="icon project-search-ic"><use href="#i-globe"/></svg>
+            <input id="project-search" class="project-search" type="text" placeholder="Cari proyek…" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="project-filters" id="project-filters" role="group" aria-label="Filter proyek"></div>
+          <select id="project-sort" class="project-sort" title="Urutkan">
+            <option value="recent">Terbaru</option>
+            <option value="name">Nama A–Z</option>
+            <option value="files">Terbanyak file</option>
+          </select>
+        </div>
         <div id="project-grid" class="project-grid"></div>
+        <div id="project-noresult" class="empty-state hidden"><p>Tidak ada proyek yang cocok dengan pencarian.</p></div>
         <div id="empty-projects" class="empty-state hidden">
           <svg class="empty-illust" viewBox="0 0 120 100" fill="none" aria-hidden="true">
             <defs>
@@ -356,29 +369,29 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ============ APP ============ -->
-  <script src="js/utils.js?v=20260616k"></script>
-  <script src="js/storage.js?v=20260616k"></script>
-  <script src="js/templates.js?v=20260616k"></script>
-  <script src="js/project.js?v=20260616k"></script>
-  <script src="js/state.js?v=20260616k"></script>
-  <script src="js/components.js?v=20260616k"></script>
-  <script src="js/console.js?v=20260616k"></script>
-  <script src="js/snack.js?v=20260616k"></script>
-  <script src="js/preview.js?v=20260616k"></script>
-  <script src="js/editor.js?v=20260616k"></script>
-  <script src="js/tabs.js?v=20260616k"></script>
-  <script src="js/filetree.js?v=20260616k"></script>
-  <script src="js/dashboard.js?v=20260616k"></script>
-  <script src="js/assets.js?v=20260616k"></script>
-  <script src="js/plan.js?v=20260616k"></script>
-  <script src="js/auth.js?v=20260616k"></script>
-  <script src="js/sync.js?v=20260616k"></script>
-  <script src="js/publish.js?v=20260616k"></script>
-  <script src="js/playstore.js?v=20260616k"></script>
-  <script src="js/app.js?v=20260616k"></script>
-  <script src="js/palette.js?v=20260616k"></script>
-  <script src="js/onboarding.js?v=20260616k"></script>
-  <script src="js/ai.js?v=20260616k"></script>
+  <script src="js/utils.js?v=20260616l"></script>
+  <script src="js/storage.js?v=20260616l"></script>
+  <script src="js/templates.js?v=20260616l"></script>
+  <script src="js/project.js?v=20260616l"></script>
+  <script src="js/state.js?v=20260616l"></script>
+  <script src="js/components.js?v=20260616l"></script>
+  <script src="js/console.js?v=20260616l"></script>
+  <script src="js/snack.js?v=20260616l"></script>
+  <script src="js/preview.js?v=20260616l"></script>
+  <script src="js/editor.js?v=20260616l"></script>
+  <script src="js/tabs.js?v=20260616l"></script>
+  <script src="js/filetree.js?v=20260616l"></script>
+  <script src="js/dashboard.js?v=20260616l"></script>
+  <script src="js/assets.js?v=20260616l"></script>
+  <script src="js/plan.js?v=20260616l"></script>
+  <script src="js/auth.js?v=20260616l"></script>
+  <script src="js/sync.js?v=20260616l"></script>
+  <script src="js/publish.js?v=20260616l"></script>
+  <script src="js/playstore.js?v=20260616l"></script>
+  <script src="js/app.js?v=20260616l"></script>
+  <script src="js/palette.js?v=20260616l"></script>
+  <script src="js/onboarding.js?v=20260616l"></script>
+  <script src="js/ai.js?v=20260616l"></script>
   <script>
     // #17 Daftarkan service worker untuk dukungan offline (PWA)
     if ('serviceWorker' in navigator) {

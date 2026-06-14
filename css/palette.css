@@ -294,3 +294,130 @@
   border: 1px solid var(--border);
   display: block;
 }
+
+/* ===== Gelombang E: salin, ringkasan AI, cari proyek, WA+QR ===== */
+
+/* #2 Tombol salin (kartu kode AI & console) */
+.copy-btn {
+  font-size: 12px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.copy-btn:hover { background: var(--bg-hover); color: var(--text); }
+.copy-btn.copied { color: var(--ok); border-color: var(--ok); }
+.ai-code-card { position: relative; }
+.ai-code-copy {
+  position: absolute;
+  top: 6px; right: 30px;
+  opacity: 0;
+  z-index: 2;
+}
+.ai-code-card:hover .ai-code-copy { opacity: 1; }
+.console-entry { position: relative; }
+.console-copy {
+  position: absolute;
+  top: 2px; right: 8px;
+  opacity: 0;
+  padding: 1px 5px;
+  font-size: 10px;
+}
+.console-entry:hover .console-copy { opacity: 1; }
+.console-entry:hover .console-ts { opacity: 0; }
+
+/* #9 Ringkasan perubahan AI */
+.ai-change-summary {
+  background: color-mix(in srgb, var(--ok) 8%, var(--bg-3));
+  border: 1px solid color-mix(in srgb, var(--ok) 35%, var(--border));
+  border-radius: 12px;
+  padding: 11px 13px;
+  align-self: stretch;
+  max-width: 100%;
+}
+.ai-change-head { font-size: 12.5px; font-weight: 700; color: var(--ok); margin-bottom: 8px; }
+.ai-change-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+}
+.ai-change-path { font-family: var(--font-code); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-change-tag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; padding: 1px 6px; border-radius: 5px; }
+.ai-change-tag.new { background: rgba(16,185,129,.18); color: var(--ok); }
+.ai-change-tag.edit { background: rgba(245,158,11,.18); color: var(--warn); }
+.ai-change-delta { font-family: var(--font-code); font-size: 11px; color: var(--muted); }
+
+/* #8 Kontrol cari/urut/filter proyek */
+.project-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.project-search-wrap { position: relative; flex: 1 1 220px; }
+.project-search-ic {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  width: 15px; height: 15px; color: var(--muted); pointer-events: none;
+}
+.project-search {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color .15s;
+}
+.project-search:focus { border-color: var(--accent); }
+.project-filters { display: flex; gap: 6px; }
+.project-filter-chip {
+  padding: 7px 13px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  transition: all .15s;
+}
+.project-filter-chip:hover { color: var(--text); }
+.project-filter-chip.active { background: var(--gradient); color: #fff; border-color: transparent; }
+.project-sort {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* #10 WhatsApp + QR */
+.publish-share-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.btn-wa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25d366;
+  color: #062b13;
+  font-weight: 700;
+  text-decoration: none;
+}
+.btn-wa:hover { filter: brightness(1.06); }
+.publish-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.publish-qr img, .publish-qr canvas { border-radius: 10px; border: 6px solid #fff; }
+.publish-qr-cap { font-size: 12px; color: var(--muted); }

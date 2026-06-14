@@ -222,6 +222,19 @@ const Publish = (() => {
     });
   }
 
+  // #10 Muat pustaka QR dari CDN saat dibutuhkan
+  let qrQueue = null;
+  function loadQRCode(cb) {
+    if (window.QRCode) return cb(true);
+    if (qrQueue) { qrQueue.push(cb); return; }
+    qrQueue = [cb];
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload = () => { const q = qrQueue; qrQueue = null; q.forEach((f) => f(true)); };
+    s.onerror = () => { qrQueue = null; cb(false); };
+    document.head.appendChild(s);
+  }
+
   function showSuccessModal(data) {
     const urls = [];
     if (data.subdomainUrl) urls.push({ label: 'Subdomain KARSA', url: data.subdomainUrl });
@@ -238,6 +251,29 @@ const Publish = (() => {
         el('input', { type: 'text', value: u.url, readonly: 'readonly', class: 'publish-live-url' }),
       ]));
     });
+
+    // #10 Bagikan langsung ke WhatsApp + QR code
+    const waText = encodeURIComponent('Lihat website saya: ' + primary);
+    const qrBox = el('div', { class: 'publish-qr' });
+    bodyKids.push(el('div', { class: 'publish-share-row' }, [
+      el('a', {
+        class: 'btn btn-wa', href: 'https://wa.me/?text=' + waText, target: '_blank', rel: 'noopener',
+        html: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15l-1.3 4.7 4.8-1.3A10 10 0 1 0 12 2zm5.8 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.5-1.2-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.5c-.2.2-.3.4-.1.7.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.2.1.4.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.9.9c.2.1.4.2.5.3.1.2.1.8-.1 1.3z"/></svg> Bagikan ke WhatsApp',
+      }),
+      el('button', {
+        class: 'btn btn-ghost', text: '🔳 Tampilkan QR',
+        onclick: (ev) => {
+          ev.currentTarget.remove();
+          loadQRCode((ok) => {
+            if (!ok) { qrBox.textContent = 'QR gagal dimuat (perlu internet).'; return; }
+            qrBox.innerHTML = '';
+            new window.QRCode(qrBox, { text: primary, width: 160, height: 160, colorDark: '#0a0c12', colorLight: '#ffffff' });
+            qrBox.appendChild(el('span', { class: 'publish-qr-cap', text: 'Scan untuk buka situs' }));
+          });
+        },
+      }),
+    ]));
+    bodyKids.push(qrBox);
     if (data.dns) {
       bodyKids.push(el('div', { class: 'publish-dns-box' }, [
         el('strong', { text: 'DNS untuk domain kamu' }),

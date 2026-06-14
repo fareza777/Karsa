@@ -576,6 +576,7 @@ const AI = (() => {
     ]);
     card.appendChild(head);
     if (!isWriting) {
+      card.appendChild(makeCopyButton(() => code, { class: 'ai-code-copy' }));
       const codeEl = el('code');
       highlightInto(codeEl, code, title);
       const body = el('pre', { class: 'ai-code-body hidden' }, [codeEl]);
@@ -984,6 +985,15 @@ const AI = (() => {
       showToast('Tidak ada kode file yang valid untuk diterapkan.', 'warn');
       return false;
     }
+    // #9 Rekam ringkasan SEBELUM menimpa (baru/diubah + selisih baris)
+    const project = State.getCurrentProject();
+    const summary = valid.map((f) => {
+      const old = project ? project.files[f.path] : undefined;
+      const newLines = f.code.split('\n').length;
+      const oldLines = old === undefined ? 0 : old.split('\n').length;
+      return { path: f.path, isNew: old === undefined, lines: newLines, delta: newLines - oldLines };
+    });
+
     State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
     valid.forEach((f) => State.setFile(f.path, f.code));
     FileTree.render();
@@ -991,8 +1001,27 @@ const AI = (() => {
     Tabs.open(entry.path);
     Preview.refresh();
     confettiBurst();
+    appendChangeSummary(summary);
     showToast(valid.length + ' file diterapkan — preview diperbarui', 'ok');
     return true;
+  }
+
+  // #9 Ringkasan "apa yang berubah" sebagai gelembung di chat
+  function appendChangeSummary(summary) {
+    const head = el('div', { class: 'ai-change-head', text: '✓ Diterapkan — ' + summary.length + ' file' });
+    const items = summary.map((s) => {
+      const deltaText = s.isNew
+        ? '+' + s.lines + ' baris'
+        : (s.delta === 0 ? 'disesuaikan' : (s.delta > 0 ? '+' + s.delta : String(s.delta)) + ' baris');
+      return el('div', { class: 'ai-change-item' }, [
+        fileBadge(s.path),
+        el('span', { class: 'ai-change-path', text: s.path }),
+        el('span', { class: 'ai-change-tag ' + (s.isNew ? 'new' : 'edit'), text: s.isNew ? 'baru' : 'diubah' }),
+        el('span', { class: 'ai-change-delta', text: deltaText }),
+      ]);
+    });
+    chatEl().appendChild(el('div', { class: 'ai-msg ai-change-summary' }, [head].concat(items)));
+    scrollChat();
   }
 
   // --- Streaming chat ---
