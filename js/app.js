@@ -236,12 +236,20 @@ const App = (() => {
     }
     const words = idea.replace(/["'`]/g, '').split(/\s+/).slice(0, 5).join(' ');
     const name = words.charAt(0).toUpperCase() + words.slice(1);
-    const project = State.createProject(name, getTemplate('blank').files, { projectType: 'web' });
+    const projectType = detectProjectTypeFromPrompt(idea);
+    const tpl = getTemplate(templateIdForProjectType(projectType));
+    const project = State.createProject(name, tpl.files, { projectType });
     input.value = '';
     openProject(project.id);
     AI.switchTab('ai');
-    AI.sendPrompt(idea, { autoApplyOnce: true });
-    showToast('Proyek dibuat — KARSA AI mulai membangun! 🚀', 'ok');
+    AI.sendPrompt(idea);
+    if (projectType === 'playstore') {
+      showToast('Proyek Play Store dibuat — KARSA AI mulai membangun! Cek checklist 🏪', 'ok');
+    } else if (projectType === 'mobile') {
+      showToast('Proyek Android dibuat — KARSA AI mulai membangun! 📱', 'ok');
+    } else {
+      showToast('Proyek website dibuat — KARSA AI mulai membangun! 🚀', 'ok');
+    }
   }
 
   // --- Modal bantuan shortcut ---

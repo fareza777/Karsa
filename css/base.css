@@ -126,3 +126,32 @@ input, textarea {
   color: var(--muted);
 }
 .empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-illust {
+  width: 120px;
+  height: 100px;
+  margin: 0 auto 14px;
+  display: block;
+  opacity: .9;
+  animation: emptyFloat 3.5s ease-in-out infinite;
+}
+@keyframes emptyFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Skeleton shimmer (placeholder loading) */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-3);
+  border-radius: var(--radius-sm);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 8%, transparent), transparent);
+  animation: shimmer 1.3s ease-in-out infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }

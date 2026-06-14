@@ -5,7 +5,8 @@ const AI = (() => {
   const HISTORY_KEY = 'karsa.ai.history.v1';
   const MODEL_FAST = 'MiniMax-M2.7-highspeed';
   const MODEL_SMART = 'MiniMax-M3';
-  const DEFAULT_SETTINGS = { v: 2, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: false };
+  const BRAND_AI = 'KARSA AI';
+  const DEFAULT_SETTINGS = { v: 3, endpoint: '/api/chat', model: MODEL_FAST, apiKey: '', autoApply: false };
   const DIRECT_URL = 'https://api.minimax.io/v1/chat/completions';
   const MAX_OUTPUT_TOKENS = 65536;
   const MAX_FILE_CHARS = 18000;
@@ -50,6 +51,10 @@ const AI = (() => {
     '18. Proyek besar (Expo/mobile): maks 2 file per respons. Jangan keluarkan banyak file sekaligus — pecah per screen/file.',
     'PENGGUNA AWAM:',
     '19. Mayoritas pengguna tidak paham coding — mereka hanya bilang "buatkan aplikasi/website …". Jangan tanya balik hal teknis. Jangan suruh mereka pecah permintaan atau sebut nama file. Kamu yang rencanakan & kerjakan bertahap; jelaskan hasil dengan bahasa sederhana.',
+    'WEBSITE vs LANDING:',
+    '20. "Website editor foto / kalkulator / kasir / game …" = buat ALAT WEB yang BERFUNGSI di browser (upload, canvas, tombol, slider). BUKAN landing page marketing atau mockup HP yang mengiklankan aplikasi mobile.',
+    '21. Frasa "website untuk aplikasi X" dari user awam = mereka mau situs web yang berfungsi seperti aplikasi X — bukan halaman promosi "download app".',
+    '22. Mockup/gambar telepon HANYA kalau user minta landing page / promosi / profil usaha secara eksplisit.',
   ].join('\n');
 
   function getSystemPrompt() {
@@ -68,19 +73,25 @@ const AI = (() => {
   let renderedProjectId = null;
   let busy = false;
   let abortCtrl = null;
-  let autoApplyOnce = false; // utk alur prompt-to-app dari dashboard
+
+  function sanitizePublicError(msg) {
+    if (!msg || typeof msg !== 'string') return 'Terjadi kesalahan. Coba lagi.';
+    let s = msg;
+    s = s.replace(/MiniMax[-\w.]*/gi, BRAND_AI);
+    s = s.replace(/\bM\d+(?:\.\d+)?(?:-highspeed)?\b/gi, BRAND_AI);
+    s = s.replace(/(KARSA AI\s+){2,}/gi, BRAND_AI + ' ');
+    return s.trim();
+  }
 
   function loadSettings() {
     try {
       const raw = localStorage.getItem(SETTINGS_KEY);
       const saved = raw ? JSON.parse(raw) : {};
       const merged = { ...DEFAULT_SETTINGS, ...saved };
-      // Migrasi v1→v2: default lama (M3) diganti mode Cepat sebagai bawaan
-      if (!saved.v) {
-        merged.v = 2;
-        merged.model = MODEL_FAST;
+      if (!saved.v || saved.v < 3) {
+        merged.v = 3;
+        merged.autoApply = false;
       }
-      if (saved.autoApply === undefined) merged.autoApply = true;
       return merged;
     } catch (err) {
       return { ...DEFAULT_SETTINGS };
@@ -173,7 +184,7 @@ const AI = (() => {
     const reader = new FileReader();
     reader.onload = () => downscaleImage(reader.result, (dataUrl) => {
       if (pushAttachment({ kind: 'image', name: file.name || namaDefault || 'gambar.png', dataUrl })) {
-        showToast('Gambar dilampirkan — akan dianalisis mode vision (M3).', 'ok');
+        showToast('Gambar dilampirkan — ' + BRAND_AI + ' akan menganalisisnya.', 'ok');
       }
     });
     reader.readAsDataURL(file);
@@ -338,16 +349,27 @@ const AI = (() => {
       }
     } else if (scaffold || (create && !files['index.html'])) {
       phases.push({
-        label: 'Membuat halaman utama…',
-        apiText:
-          'Permintaan pengguna: «' + userAsk + '»\n\n' +
-          'CATATAN SISTEM: Pengguna biasa — jangan tanya balik.\n' +
-          'Buat index.html + css/style.css + js/app.js — tampilan sesuai permintaan, mobile-first, menarik. Fitur utama terlihat di UI.',
+        label: null,
+        apiText: webAwamSystemNote(userAsk, userAsk),
+      });
+    } else if (create) {
+      phases.push({
+        label: null,
+        apiText: webAwamSystemNote(userAsk, userAsk),
       });
     } else {
       phases.push({ label: null, apiText: prompt });
     }
     return phases.length ? phases.slice(0, MAX_AWAM_PHASES) : [{ label: null, apiText: prompt }];
+  }
+
+  function expandAwamPrompt(prompt, project) {
+    return planAwamPhases(prompt, project)[0].apiText;
+  }
+
+  function isAutoApplyOn() {
+    const toggle = $('#ai-auto-apply');
+    return !!(toggle && toggle.checked);
   }
 
   function buildUserInstruction(prompt, hasImages) {
@@ -363,6 +385,10 @@ const AI = (() => {
     if (isNarrowChangeRequest(prompt)) {
       parts.push(
         '[PERUBAHAN SPESIFIK: sentuh hanya elemen/properti yang disebut. Sisanya biarkan sama persis.]',
+      );
+    } else if (isInteractiveWebToolPrompt(prompt)) {
+      parts.push(
+        '[WEB APP FUNGSIONAL: buat alat yang bisa dipakai di browser — bukan landing promosi atau mockup telepon.]',
       );
     }
     parts.push(prompt);
@@ -413,7 +439,7 @@ const AI = (() => {
     const box = el('div', { class: 'ai-welcome' }, [
       el('div', { class: 'ai-welcome-icon', text: '✨' }),
       el('h3', { text: 'Vibecoding dengan KARSA AI' }),
-      el('p', { text: 'Cukup bilang apa yang kamu mau — misalnya "buatkan aplikasi catatan keuangan". KARSA yang urus sisanya; preview di kanan muncul otomatis saat siap.' }),
+      el('p', { text: 'Cukup bilang apa yang kamu mau — misalnya "buatkan website editor foto". Setelah AI selesai, klik ⚡ Terapkan (atau centang Auto-terapkan) untuk lihat di editor & preview.' }),
       el('div', { class: 'ai-examples' }, examples.map((ex) =>
         el('button', {
           class: 'ai-example',
@@ -507,6 +533,31 @@ const AI = (() => {
     });
   }
 
+  // Mode CodeMirror per ekstensi (untuk runMode highlighting)
+  function cmModeFor(path) {
+    const ext = fileExt(path);
+    if (ext === 'css' || ext === 'scss') return 'css';
+    if (ext === 'json') return { name: 'javascript', json: true };
+    if (['js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx'].includes(ext)) return 'javascript';
+    if (['html', 'htm', 'xml', 'svg', 'vue'].includes(ext)) return 'htmlmixed';
+    if (ext === 'md') return 'markdown';
+    return null;
+  }
+
+  // Isi <code> dengan token berwarna via CodeMirror.runMode; fallback teks polos
+  function highlightInto(codeEl, code, path) {
+    const mode = cmModeFor(path);
+    if (mode && typeof CodeMirror !== 'undefined' && CodeMirror.runMode) {
+      codeEl.textContent = '';
+      try {
+        CodeMirror.runMode(code, mode, codeEl);
+        codeEl.classList.add('cm-s-material-darker');
+        return;
+      } catch (err) { /* fallback di bawah */ }
+    }
+    codeEl.textContent = code;
+  }
+
   // Kartu kode: saat ditulis tampil spinner + hitungan baris; setelah selesai bisa dibuka-tutup
   function buildCodeCard(rawBlock, isWriting) {
     const newline = rawBlock.indexOf('\n');
@@ -518,14 +569,16 @@ const AI = (() => {
 
     const card = el('div', { class: 'ai-code-card' + (isWriting ? ' writing' : '') });
     const head = el('button', { class: 'ai-code-head', type: 'button' }, [
-      el('span', { text: isWriting ? '✍' : fileIcon(title) }),
+      isWriting ? el('span', { class: 'ai-code-pen', text: '✍' }) : fileBadge(title),
       el('span', { class: 'ai-code-name', text: title }),
       el('span', { class: 'ai-code-meta', text: isWriting ? 'menulis… ' + lineCount + ' baris' : lineCount + ' baris' }),
       isWriting ? el('span', { class: 'ai-spinner' }) : el('span', { class: 'ai-code-caret', text: '▾' }),
     ]);
     card.appendChild(head);
     if (!isWriting) {
-      const body = el('pre', { class: 'ai-code-body hidden' }, [el('code', { text: code })]);
+      const codeEl = el('code');
+      highlightInto(codeEl, code, title);
+      const body = el('pre', { class: 'ai-code-body hidden' }, [codeEl]);
       card.appendChild(body);
       head.addEventListener('click', () => {
         body.classList.toggle('hidden');
@@ -820,11 +873,6 @@ const AI = (() => {
     if (autoFocus) scrollChat();
   }
 
-  function shouldAutoApply() {
-    const toggle = $('#ai-auto-apply');
-    return (toggle ? toggle.checked : !!settings.autoApply) || autoApplyOnce;
-  }
-
   function refreshApplyBox(bubble) {
     const visible = bubble.dataset.aiVisible;
     if (!visible) return;
@@ -840,7 +888,7 @@ const AI = (() => {
   }
 
   function tryAutoApply(bubble, visible, truncated) {
-    if (!shouldAutoApply() || truncated) return;
+    if (!isAutoApplyOn() || truncated) return;
     const allFiles = collectFileBlocks(bubble, visible);
     const parsedFiles = allFiles.filter((f) => isFileComplete(f.code, f.path));
     if (parsedFiles.length < allFiles.length) {
@@ -871,6 +919,7 @@ const AI = (() => {
 
   // --- Streaming chat ---
   function setBusy(value, statusText) {
+    if (value !== busy && typeof setGlobalBusy === 'function') setGlobalBusy(value);
     busy = value;
     $('#ai-send').disabled = value;
     $('#ai-stop').classList.toggle('hidden', !value);
@@ -904,7 +953,7 @@ const AI = (() => {
         const errJson = await response.json();
         detail = errJson.error?.message || errJson.error || detail;
       } catch (e) { /* bukan JSON */ }
-      throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
+      throw new Error(sanitizePublicError(typeof detail === 'string' ? detail : JSON.stringify(detail)));
     }
 
     const reader = response.body.getReader();
@@ -923,7 +972,7 @@ const AI = (() => {
         if (payload === '[DONE]') continue;
         try {
           const json = JSON.parse(payload);
-          if (json.error) throw new Error(json.error.message || json.error);
+          if (json.error) throw new Error(sanitizePublicError(json.error.message || json.error));
           if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
           const delta = json.choices?.[0]?.delta?.content;
           if (delta) {
@@ -997,7 +1046,7 @@ const AI = (() => {
     const history = getHistory();
     history.push({ role: 'user', content: displayText });
 
-    const awamPhases = planAwamPhases(prompt, project);
+    const expandedPrompt = expandAwamPrompt(prompt, project);
     const modelUsed = resolveModel(imageAtts.length > 0, project);
     if (imageAtts.length) {
       showToast('Ada gambar — AI menganalisis screenshot.', 'info');
@@ -1014,13 +1063,10 @@ const AI = (() => {
 
     const startedAt = Date.now();
     let phase = 'menghubungi';
-    let awamPhaseLabel = '';
     const histLimit = isMobileProject(project) ? 6 : MAX_HISTORY;
     const ticker = setInterval(() => {
       const secs = Math.round((Date.now() - startedAt) / 1000);
-      const label = awamPhaseLabel
-        ? awamPhaseLabel
-        : phase === 'menghubungi' ? 'menghubungi KARSA AI'
+      const label = phase === 'menghubungi' ? 'menghubungi KARSA AI'
         : phase === 'berpikir' ? 'AI sedang berpikir 💭'
         : phase === 'melanjutkan' ? 'melanjutkan tulis otomatis ✍'
         : 'AI sedang menulis ✍';
@@ -1028,7 +1074,6 @@ const AI = (() => {
     }, 1000);
 
     const useDirect = !!settings.apiKey;
-    let grandVisible = '';
     let totalContinueRounds = 0;
     let finishReason = null;
     let activeModel = modelUsed;
@@ -1037,48 +1082,38 @@ const AI = (() => {
     try {
       const onPhase = (p) => { phase = p; };
 
-      for (let phaseIdx = 0; phaseIdx < awamPhases.length; phaseIdx++) {
-        const awamPhase = awamPhases[phaseIdx];
-        awamPhaseLabel = awamPhase.label || '';
-        if (awamPhase.label && awamPhases.length > 1) {
-          phase = 'tahap';
-          setBusy(true, awamPhase.label);
-        }
+      let textPayload = buildUserInstruction(expandedPrompt, imageAtts.length > 0);
+      textAtts.forEach((a) => {
+        textPayload += '\n\nLAMPIRAN "' + a.name + '":\n```\n' + a.content + '\n```';
+      });
 
-        let textPayload = buildUserInstruction(awamPhase.apiText, imageAtts.length > 0 && phaseIdx === 0);
-        if (phaseIdx === 0) {
-          textAtts.forEach((a) => {
-            textPayload += '\n\nLAMPIRAN "' + a.name + '":\n```\n' + a.content + '\n```';
-          });
-        }
+      const messages = [
+        { role: 'system', content: getSystemPrompt() },
+        { role: 'user', content: buildProjectContext() },
+        ...compactHistoryForApi(history.slice(-histLimit)),
+      ];
+      messages[messages.length - 1] = {
+        role: 'user',
+        content: imageAtts.length
+          ? [
+              { type: 'text', text: textPayload },
+              ...imageAtts.map((a) => ({ type: 'image_url', image_url: { url: a.dataUrl } })),
+            ]
+          : textPayload,
+      };
 
-        const messages = [
-          { role: 'system', content: getSystemPrompt() },
-          { role: 'user', content: buildProjectContext() },
-          ...compactHistoryForApi(history.slice(-histLimit)),
-        ];
-        messages[messages.length - 1] = {
-          role: 'user',
-          content: imageAtts.length && phaseIdx === 0
-            ? [
-                { type: 'text', text: textPayload },
-                ...imageAtts.map((a) => ({ type: 'image_url', image_url: { url: a.dataUrl } })),
-              ]
-            : textPayload,
-        };
+      const baseMessages = trimMessagesForApi(messages);
+      if (messagesTextTotal(messages) > API_TEXT_BUDGET) {
+        showToast('Riwayat chat panjang — dirapikan otomatis.', 'info');
+      }
 
-        const baseMessages = trimMessagesForApi(messages);
-        if (phaseIdx === 0 && messagesTextTotal(messages) > API_TEXT_BUDGET) {
-          showToast('Riwayat chat panjang — dirapikan otomatis.', 'info');
-        }
+      let continueRound = 0;
+      let fastRetry = false;
+      let lastMergeFp = '';
+      accumulatedVisible = '';
+      activeModel = modelUsed;
 
-        let continueRound = 0;
-        let fastRetry = false;
-        let lastMergeFp = '';
-        accumulatedVisible = '';
-        activeModel = modelUsed;
-
-        for (;;) {
+      for (;;) {
           let apiMessages = baseMessages;
           if (continueRound > 0) {
             const contMsg = buildContinueMessage(accumulatedVisible);
@@ -1104,13 +1139,12 @@ const AI = (() => {
               fastRetry = true;
               activeModel = MODEL_FAST;
               phase = 'menghubungi';
-              awamPhaseLabel = '';
               bubble.innerHTML = '';
               bubble.appendChild(el('span', {
                 class: 'ai-thinking',
-                text: 'Mencoba lagi dengan mode lebih cepat…',
+                text: 'Mencoba lagi…',
               }));
-              showToast('Sedikit lama — beralih mode cepat.', 'warn');
+              showToast('Sedikit lama — ' + BRAND_AI + ' mencoba lagi…', 'warn');
               continue;
             }
             if (finishReason === 'length') {
@@ -1132,40 +1166,19 @@ const AI = (() => {
           }
           lastMergeFp = mergeFp;
 
-          const displayVisible = grandVisible && phaseIdx > 0
-            ? mergeContinuedOutput(grandVisible, accumulatedVisible)
-            : accumulatedVisible;
-          renderAssistantHtml(bubble, displayVisible);
-          storeMergedFiles(bubble, displayVisible);
+          renderAssistantHtml(bubble, accumulatedVisible);
+          storeMergedFiles(bubble, accumulatedVisible);
 
           const stillTruncated = isResponseTruncated(accumulatedVisible, finishReason);
           if (!stillTruncated || continueRound >= MAX_AUTO_CONTINUE) break;
 
           continueRound++;
           phase = 'melanjutkan';
-          awamPhaseLabel = '';
           setBusy(true, 'Melanjutkan otomatis… bagian ' + (continueRound + 1));
-        }
-
-        totalContinueRounds += continueRound;
-        grandVisible = phaseIdx === 0
-          ? accumulatedVisible
-          : mergeContinuedOutput(grandVisible, accumulatedVisible);
-
-        const phaseTruncated = isResponseTruncated(accumulatedVisible, finishReason);
-        const phaseFiles = parseFileBlocks(accumulatedVisible).filter((f) => isFileComplete(f.code, f.path));
-        if (phaseFiles.length && shouldAutoApply() && !phaseTruncated) {
-          const pending = phaseFiles.filter((f) => !projectFileMatches(f.path, f.code));
-          if (pending.length) applyFiles(pending);
-        }
-
-        // Hanya satu tahap per pesan — tidak ada tahap "percantik" otomatis
-        if (phaseTruncated) break;
       }
 
-      awamPhaseLabel = '';
-      const visible = grandVisible;
-      accumulatedVisible = visible;
+      totalContinueRounds = continueRound;
+      const visible = accumulatedVisible;
       const truncated = isResponseTruncated(visible, finishReason);
       attachApplyBox(bubble, visible, true, { truncated });
       const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
@@ -1175,7 +1188,9 @@ const AI = (() => {
       } else if (totalContinueRounds > 0) {
         showToast('Selesai ✓', 'ok');
       } else if (parsedFiles.length && !truncated) {
-        showToast('Selesai — klik Terapkan kalau belum auto.', 'ok');
+        showToast(isAutoApplyOn()
+          ? 'Selesai ✓'
+          : 'Selesai — klik ⚡ Terapkan supaya kode masuk ke editor & preview.', 'ok');
       } else if (!parsedFiles.length && (looksLikeCodeChangeRequest(prompt) || responseHasFilePlaceholder(visible))) {
         bubble.appendChild(el('button', {
           class: 'ai-retry-btn',
@@ -1188,13 +1203,12 @@ const AI = (() => {
       const phaseNote = '';
       bubble.appendChild(el('div', {
         class: 'ai-meta',
-        text: '⚡ ' + elapsed + ' dtk · ' + activeModel.replace('MiniMax-', '') + phaseNote + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (totalContinueRounds ? ' · ↻ ' + totalContinueRounds + 'x lanjut' : ''),
+        text: '⚡ ' + elapsed + ' dtk · ' + BRAND_AI + phaseNote + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (totalContinueRounds ? ' · ↻ ' + totalContinueRounds + 'x lanjut' : ''),
       }));
       history.push({ role: 'assistant', content: visible });
       saveHistory();
       Plan.recordAiUse();
       tryAutoApply(bubble, visible, truncated);
-      autoApplyOnce = false;
     } catch (err) {
       if (err.name === 'AbortError' && accumulatedVisible.trim()) {
         renderAssistantHtml(bubble, accumulatedVisible);
@@ -1212,7 +1226,7 @@ const AI = (() => {
         if (err.name === 'AbortError') {
           appendErrorBubble('Dihentikan. Kirim ulang permintaan yang sama kalau mau lanjut.');
         } else {
-          let hint = err.message;
+          let hint = sanitizePublicError(err.message);
           if (/200000|terlalu besar/i.test(hint)) {
             hint = 'Percakapan terlalu panjang. Klik ikon 🗑 di atas chat untuk bersihkan, lalu kirim ulang: «' + prompt.slice(0, 80) + '»';
           }
@@ -1226,7 +1240,6 @@ const AI = (() => {
         attachments = sentAttachments;
         renderAttachments();
       }
-      autoApplyOnce = false;
     } finally {
       clearInterval(ticker);
       setBusy(false, '');
@@ -1301,6 +1314,12 @@ const AI = (() => {
   }
 
   function init() {
+    try {
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      const saved = raw ? JSON.parse(raw) : {};
+      if (!saved.v || saved.v < 3) saveSettings({ v: 3, autoApply: false });
+    } catch (err) { /* abaikan */ }
+
     $('#side-tab-files').addEventListener('click', () => switchTab('files'));
     $('#side-tab-ai').addEventListener('click', () => switchTab('ai'));
     $('#ai-send').addEventListener('click', send);
@@ -1349,14 +1368,13 @@ const AI = (() => {
   }
 
   // Kirim prompt secara terprogram (dipakai alur prompt-to-app dashboard)
-  function sendPrompt(text, options) {
+  function sendPrompt(text) {
     $('#ai-input').value = text;
-    if (options && options.autoApplyOnce) autoApplyOnce = true;
     send();
   }
 
   function requestWebPreview() {
-    sendPrompt(WEB_PREVIEW_PROMPT, { autoApplyOnce: true });
+    sendPrompt(WEB_PREVIEW_PROMPT);
   }
 
   function requestSnackRefresh() {

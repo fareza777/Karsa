@@ -146,13 +146,13 @@ export default async function handler(req, res) {
       }),
     });
   } catch (err) {
-    res.status(502).json({ error: 'Gagal menghubungi MiniMax: ' + err.message });
+    res.status(502).json({ error: 'Gagal menghubungi KARSA AI: ' + err.message });
     return;
   }
 
   if (!upstream.ok) {
     const detail = await upstream.text().catch(() => '');
-    res.status(upstream.status).json({ error: 'MiniMax menolak permintaan (' + upstream.status + ').', detail: detail.slice(0, 500) });
+    res.status(upstream.status).json({ error: 'KARSA AI menolak permintaan (' + upstream.status + ').', detail: detail.slice(0, 500) });
     return;
   }
 

@@ -13,11 +13,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="css/base.css?v=20260615j">
-  <link rel="stylesheet" href="css/components.css?v=20260615j">
-  <link rel="stylesheet" href="css/dashboard.css?v=20260615j">
-  <link rel="stylesheet" href="css/ide.css?v=20260615j">
-  <link rel="stylesheet" href="css/ai.css?v=20260615j">
+  <link rel="stylesheet" href="css/base.css?v=20260616d">
+  <link rel="stylesheet" href="css/components.css?v=20260616d">
+  <link rel="stylesheet" href="css/dashboard.css?v=20260616d">
+  <link rel="stylesheet" href="css/ide.css?v=20260616d">
+  <link rel="stylesheet" href="css/ai.css?v=20260616d">
 </head>
 <body data-theme="dark">
 
@@ -90,7 +90,7 @@
           <textarea id="hero-prompt-input" rows="2"
             placeholder="Ceritakan aplikasi impianmu… mis. &quot;aplikasi kasir warung dengan keranjang dan struk&quot;"></textarea>
           <div class="hero-prompt-foot">
-            <span class="hero-prompt-hint">⚡ KARSA AI langsung membangunnya untukmu</span>
+            <span class="hero-prompt-hint">⚡ Website bawaan — tulis &quot;Android&quot; atau &quot;Play Store&quot; kalau mau app HP</span>
             <button id="hero-prompt-send" class="btn btn-primary"><svg class="icon"><use href="#i-sparkles"/></svg> Buat dengan AI</button>
           </div>
         </div>
@@ -132,8 +132,19 @@
         </div>
         <div id="project-grid" class="project-grid"></div>
         <div id="empty-projects" class="empty-state hidden">
-          <div class="empty-icon">🌱</div>
-          <p>Belum ada proyek. Mulai dari template di bawah, atau buat dari nol!</p>
+          <svg class="empty-illust" viewBox="0 0 120 100" fill="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="eg" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3ee"/>
+              </linearGradient>
+            </defs>
+            <rect x="22" y="26" width="76" height="56" rx="8" stroke="url(#eg)" stroke-width="2.5"/>
+            <path d="M22 38h76" stroke="url(#eg)" stroke-width="2.5"/>
+            <circle cx="30" cy="32" r="2" fill="url(#eg)"/><circle cx="38" cy="32" r="2" fill="url(#eg)"/>
+            <path d="M48 58h24M48 66h16" stroke="url(#eg)" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M60 6v10M54 11l6 5 6-5" stroke="url(#eg)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p>Belum ada proyek. Ceritakan idemu ke AI di atas, atau mulai dari template di bawah!</p>
         </div>
       </section>
 
@@ -183,6 +194,7 @@
         <button id="ide-theme-toggle" class="icon-btn" title="Ganti tema"><svg class="icon"><use href="#i-moon"/></svg></button>
       </div>
     </header>
+    <div id="global-progress" class="global-progress" aria-hidden="true"><span></span></div>
 
     <div class="ide-body">
       <aside id="sidebar" class="sidebar">
@@ -310,6 +322,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/runmode/runmode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
@@ -328,25 +341,25 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ============ APP ============ -->
-  <script src="js/utils.js?v=20260615j"></script>
-  <script src="js/storage.js?v=20260615j"></script>
-  <script src="js/templates.js?v=20260615j"></script>
-  <script src="js/project.js?v=20260615j"></script>
-  <script src="js/state.js?v=20260615j"></script>
-  <script src="js/components.js?v=20260615j"></script>
-  <script src="js/console.js?v=20260615j"></script>
-  <script src="js/snack.js?v=20260615j"></script>
-  <script src="js/preview.js?v=20260615j"></script>
-  <script src="js/editor.js?v=20260615j"></script>
-  <script src="js/tabs.js?v=20260615j"></script>
-  <script src="js/filetree.js?v=20260615j"></script>
-  <script src="js/dashboard.js?v=20260615j"></script>
-  <script src="js/plan.js?v=20260615j"></script>
-  <script src="js/auth.js?v=20260615j"></script>
-  <script src="js/sync.js?v=20260615j"></script>
-  <script src="js/publish.js?v=20260615j"></script>
-  <script src="js/playstore.js?v=20260615j"></script>
-  <script src="js/app.js?v=20260615j"></script>
-  <script src="js/ai.js?v=20260615j"></script>
+  <script src="js/utils.js?v=20260616d"></script>
+  <script src="js/storage.js?v=20260616d"></script>
+  <script src="js/templates.js?v=20260616d"></script>
+  <script src="js/project.js?v=20260616d"></script>
+  <script src="js/state.js?v=20260616d"></script>
+  <script src="js/components.js?v=20260616d"></script>
+  <script src="js/console.js?v=20260616d"></script>
+  <script src="js/snack.js?v=20260616d"></script>
+  <script src="js/preview.js?v=20260616d"></script>
+  <script src="js/editor.js?v=20260616d"></script>
+  <script src="js/tabs.js?v=20260616d"></script>
+  <script src="js/filetree.js?v=20260616d"></script>
+  <script src="js/dashboard.js?v=20260616d"></script>
+  <script src="js/plan.js?v=20260616d"></script>
+  <script src="js/auth.js?v=20260616d"></script>
+  <script src="js/sync.js?v=20260616d"></script>
+  <script src="js/publish.js?v=20260616d"></script>
+  <script src="js/playstore.js?v=20260616d"></script>
+  <script src="js/app.js?v=20260616d"></script>
+  <script src="js/ai.js?v=20260616d"></script>
 </body>
 </html>

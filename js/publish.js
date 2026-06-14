@@ -81,14 +81,19 @@ const Publish = (() => {
       const code = await fetchProCode();
       if (code) body.proCode = code;
     }
-    const res = await fetch('/api/publish', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Publish gagal (HTTP ' + res.status + ')');
-    return data;
+    if (typeof setGlobalBusy === 'function') setGlobalBusy(true);
+    try {
+      const res = await fetch('/api/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Publish gagal (HTTP ' + res.status + ')');
+      return data;
+    } finally {
+      if (typeof setGlobalBusy === 'function') setGlobalBusy(false);
+    }
   }
 
   function showSuccessModal(data) {

@@ -278,40 +278,21 @@ const Preview = (() => {
     }
     const msg = friendlyPreviewMessage(diag);
     const aiBusy = isAiBusy();
-    const attempts = fixAttemptsByProject[project.id] || 0;
 
     showPreviewStatus({
       title: msg.title,
       body: aiBusy
         ? 'KARSA AI sedang menulis kode. Preview akan muncul otomatis setelah selesai.'
         : msg.body,
-      spinning: true,
-      action: (!aiBusy && attempts >= MAX_AUTO_FIX) ? {
+      spinning: !aiBusy,
+      action: !aiBusy ? {
         label: '✨ Selesaikan aplikasi',
         onclick: () => {
-          fixAttemptsByProject[project.id] = attempts + 1;
           AI.switchTab('ai');
           AI.sendPrompt(PREVIEW_FIX_PROMPT);
         },
       } : null,
     });
-
-    if (aiBusy || attempts >= MAX_AUTO_FIX) return;
-
-    fixAttemptsByProject[project.id] = attempts + 1;
-    const projectId = project.id;
-    setTimeout(() => {
-      const current = State.getCurrentProject();
-      if (!current || current.id !== projectId) return;
-      if (isAiBusy()) return;
-      const d2 = Snack.diagnoseProject(current);
-      if (d2.ok) {
-        hidePreviewStatus();
-        return;
-      }
-      AI.switchTab('ai');
-      AI.sendPrompt(PREVIEW_FIX_PROMPT);
-    }, 2500);
   }
 
   function usesSnackEngine(project) {

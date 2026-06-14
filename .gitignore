@@ -3,4 +3,7 @@ Thumbs.db
 .DS_Store
 
 .vercel
+.env
+.env.*
 .env*.local
+scripts/fetch-service-role.mjs

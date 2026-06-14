@@ -31,6 +31,57 @@ function getProjectType(id) {
   return PROJECT_TYPES.find((t) => t.id === id) || PROJECT_TYPES[0];
 }
 
+// Deteksi jenis proyek dari ide user (hero dashboard / prompt-to-app)
+function detectProjectTypeFromPrompt(text) {
+  const t = (text || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+
+  if (/\b(website|web\s*app|situs(\s+web)?|halaman\s+web)\b/.test(t)) return 'web';
+
+  if (/\b(play\s*store|playstore|google\s*play|upload\s+(ke\s+)?play|publikasi\s+play|listing\s+play|rilis\s+play|siap\s+play|ke\s+play\s*store|di\s+play\s*store|aab|app\s+bundle|android\s+play)\b/.test(t)) {
+    return 'playstore';
+  }
+
+  if (/\b(aplikasi\s+android|app\s+android|android\s+app|react\s*native|\bexpo\b|aplikasi\s+(mobile|hp|ponsel)|mobile\s+app|untuk\s+(android|hp|ponsel)|di\s+android)\b/.test(t)) {
+    return 'mobile';
+  }
+
+  return 'web';
+}
+
+function templateIdForProjectType(projectType) {
+  if (projectType === 'mobile') return 'expo-blank';
+  if (projectType === 'playstore') return 'expo-playstore';
+  return 'blank';
+}
+
+function isLandingPagePrompt(text) {
+  const t = (text || '').toLowerCase();
+  return /\b(landing\s*page|halaman\s+promosi|marketing|iklan\s+app|promosi\s+aplikasi|download\s+app|mockup\s+hp|profil\s+usaha|company\s+profile|hero\s+section)\b/.test(t);
+}
+
+function isInteractiveWebToolPrompt(text) {
+  const t = (text || '').toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+  if (isLandingPagePrompt(text)) return false;
+  if (/\bwebsite\b/.test(t) && /\b(editor|edit|tool|alat|aplikasi)\b/.test(t)) return true;
+  return /\b(editor\s*foto|edit\s*foto|photo\s*edit|kalkulator|kasir|pos\b|todo|to-?do|catatan|game|kuis|quiz|konverter|generator|upload\s*gambar|crop|filter\s*foto|retouch|invoice|faktur|keranjang|scanner|pemindaian)\b/.test(t);
+}
+
+function webAwamSystemNote(prompt, userAsk) {
+  const base = 'Permintaan pengguna: «' + userAsk + '»\n\nCATATAN SISTEM: Pengguna biasa — jangan tanya balik.\n';
+  if (isLandingPagePrompt(prompt)) {
+    return base + 'Buat landing page web (index.html + css/style.css + js/app.js): hero, CTA, mobile-first. Boleh mockup HP kalau relevan.';
+  }
+  if (isInteractiveWebToolPrompt(prompt)) {
+    return base + [
+      'Ini WEBSITE YANG BISA DIPAKAI LANGSUNG di browser — bukan landing page promosi "download aplikasi".',
+      'JANGAN bungkus UI dalam mockup/gambar telepon — tampilkan alatnya langsung layar penuh.',
+      'Buat index.html + css/style.css + js/app.js dengan fitur yang BERFUNGSI (input file, canvas, slider, tombol aksi, dll).',
+      'Kalau editor foto: upload gambar, preview, crop/filter/rotate/brightness, reset & unduh — pakai Canvas/File API, tanpa backend.',
+    ].join('\n');
+  }
+  return base + 'Buat website (index.html + css/style.css + js/app.js) sesuai permintaan. Kalau ini aplikasi/tool, buat versi web yang bisa dipakai — bukan halaman promosi kosong.';
+}
+
 // Urutan file untuk konteks AI: web dulu, Expo/React Native belakangan
 function sortedProjectPaths(files) {
   const score = (p) => {
@@ -128,8 +179,9 @@ const MOBILE_AI_PROMPT = [
 ].join('\n');
 
 const WEB_PREVIEW_PROMPT =
-  'Buatkan preview web untuk proyek ini: file index.html + css/style.css + js/app.js (mobile-first, muat frame HP). ' +
-  'Samakan UI/fitur utama dari kode yang ada. Jangan hapus file Expo/React Native yang sudah ada. ' +
+  'Buatkan preview web untuk proyek ini: file index.html + css/style.css + js/app.js (mobile-first, nyaman di layar HP). ' +
+  'Samakan UI/fitur utama dari kode yang ada — alat yang bisa dipakai di browser, bukan landing promosi atau mockup telepon. ' +
+  'Jangan hapus file Expo/React Native yang sudah ada. ' +
   'Pastikan semua script di-load di index.html dan init() hanya dipanggil sekali.';
 
 const CARA_HOSTING_MD = `# Cara hosting website KARSA

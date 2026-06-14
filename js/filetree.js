@@ -50,7 +50,7 @@ const FileTree = (() => {
         },
       }, [
         el('span', { class: 'tree-caret', text: '▶' }),
-        el('span', { class: 'file-icon', text: '📁' }),
+        iconSvg(isCollapsed ? 'folder' : 'folder-open') || el('span', { class: 'file-icon', text: '📁' }),
         el('span', { class: 'tree-folder-label', text: name }),
       ]);
       container.appendChild(header);
@@ -72,7 +72,7 @@ const FileTree = (() => {
           fileContextMenu(e, file.path);
         },
       }, [
-        el('span', { class: 'file-icon', text: fileIcon(file.path) }),
+        fileBadge(file.path),
         el('span', { text: file.name }),
       ]));
     });

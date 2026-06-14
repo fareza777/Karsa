@@ -72,6 +72,30 @@ function fileIcon(path) {
   return FILE_ICONS[fileExt(path)] || '📄';
 }
 
+// Badge tipe file berwarna per bahasa (rasa IDE sungguhan)
+const FILE_TYPES = {
+  html: { c: '#e34f26', l: '<>' }, htm: { c: '#e34f26', l: '<>' },
+  css: { c: '#2965f1', l: 'css' }, scss: { c: '#cf649a', l: 'sc' },
+  js: { c: '#f0db4f', l: 'js' }, mjs: { c: '#f0db4f', l: 'js' }, cjs: { c: '#f0db4f', l: 'js' },
+  jsx: { c: '#61dafb', l: 'jsx' },
+  ts: { c: '#3178c6', l: 'ts' }, tsx: { c: '#3178c6', l: 'tsx' },
+  json: { c: '#10b981', l: '{}' },
+  md: { c: '#94a3b8', l: 'md' },
+  svg: { c: '#a855f7', l: 'svg' },
+  png: { c: '#ec4899', l: 'img' }, jpg: { c: '#ec4899', l: 'img' }, jpeg: { c: '#ec4899', l: 'img' }, gif: { c: '#ec4899', l: 'img' }, webp: { c: '#ec4899', l: 'img' },
+  txt: { c: '#94a3b8', l: 'txt' }, xml: { c: '#f59e0b', l: 'xml' }, csv: { c: '#22c55e', l: 'csv' },
+};
+
+function fileTypeInfo(path) {
+  return FILE_TYPES[fileExt(path)] || { c: '#8b94a7', l: '•' };
+}
+
+// Node badge file. Dipakai di file-tree, tab editor, kartu kode AI.
+function fileBadge(path) {
+  const t = fileTypeInfo(path);
+  return el('span', { class: 'file-badge', style: '--fc:' + t.c, text: t.l });
+}
+
 function baseName(path) {
   return path.split('/').pop();
 }

@@ -32,6 +32,15 @@ function confettiBurst() {
   setTimeout(() => root.remove(), 1500);
 }
 
+// Progress bar gradien global di bawah topbar (AI/publish bekerja).
+// Mendukung beberapa pemanggil sekaligus via penghitung referensi.
+let _globalBusyCount = 0;
+function setGlobalBusy(on) {
+  _globalBusyCount = Math.max(0, _globalBusyCount + (on ? 1 : -1));
+  const bar = document.getElementById('global-progress');
+  if (bar) bar.classList.toggle('active', _globalBusyCount > 0);
+}
+
 function closeModal() {
   const overlay = $('.modal-overlay');
   if (overlay) overlay.remove();

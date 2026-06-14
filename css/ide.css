@@ -182,23 +182,53 @@
 }
 .tabbar::-webkit-scrollbar { height: 3px; }
 .tab {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   padding: 8px 12px;
   font-size: 13px;
   border-right: 1px solid var(--border);
   color: var(--muted);
   cursor: pointer;
   white-space: nowrap;
-  border-top: 2px solid transparent;
   transition: background var(--transition), color var(--transition);
 }
 .tab:hover { background: var(--bg-hover); }
 .tab.active {
   background: var(--editor-bg);
   color: var(--text);
-  border-top-color: var(--accent);
+}
+/* Underline gradien animasi pada tab aktif */
+.tab.active::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: var(--gradient);
+  animation: tabUnderline .22s ease;
+}
+@keyframes tabUnderline { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.tab-name { overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+
+/* Badge tipe file berwarna (file-tree, tab, kartu kode AI) */
+.file-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 4px;
+  font-family: var(--font-code);
+  font-size: 8.5px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.3px;
+  color: var(--fc, #8b94a7);
+  background: color-mix(in srgb, var(--fc, #8b94a7) 20%, transparent);
+  flex-shrink: 0;
+  text-transform: lowercase;
 }
 .tab-close {
   width: 16px; height: 16px;
@@ -247,6 +277,31 @@
   font-size: 14px;
 }
 .editor-empty .empty-icon { font-size: 36px; opacity: .5; }
+
+/* Progress bar gradien global (AI/publish bekerja) */
+.global-progress {
+  height: 2px;
+  flex-shrink: 0;
+  background: transparent;
+  overflow: hidden;
+  position: relative;
+}
+.global-progress span {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+  transform: translateX(-100%);
+  opacity: 0;
+}
+.global-progress.active span {
+  opacity: 1;
+  animation: globalProgress 1.1s ease-in-out infinite;
+}
+@keyframes globalProgress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
 
 .statusbar {
   display: flex;

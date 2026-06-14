@@ -228,7 +228,7 @@ const PlayStore = (() => {
           onclick: () => {
             closeModal();
             AI.switchTab('ai');
-            AI.sendPrompt(PLAYSTORE_AI_PROMPT, { autoApplyOnce: true });
+            AI.sendPrompt(PLAYSTORE_AI_PROMPT);
           },
         }),
       ]),

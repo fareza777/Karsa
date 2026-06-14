@@ -351,6 +351,26 @@ body.is-superuser #btn-ai-settings {
   border-radius: 0;
   max-height: 260px;
 }
+/* Syntax highlighting (CodeMirror runMode) di dalam kartu kode AI */
+.ai-code-body code.cm-s-material-darker { color: #c5cae9; }
+.ai-code-body .cm-keyword { color: #c792ea; }
+.ai-code-body .cm-atom { color: #f78c6c; }
+.ai-code-body .cm-number { color: #fd9170; }
+.ai-code-body .cm-def { color: #82aaff; }
+.ai-code-body .cm-variable { color: #c5cae9; }
+.ai-code-body .cm-variable-2 { color: #82aaff; }
+.ai-code-body .cm-variable-3, .ai-code-body .cm-type { color: #f07178; }
+.ai-code-body .cm-property { color: #82aaff; }
+.ai-code-body .cm-operator { color: #89ddff; }
+.ai-code-body .cm-string { color: #c3e88d; }
+.ai-code-body .cm-string-2 { color: #f07178; }
+.ai-code-body .cm-meta { color: #ffcb6b; }
+.ai-code-body .cm-tag { color: #f07178; }
+.ai-code-body .cm-attribute { color: #c792ea; }
+.ai-code-body .cm-builtin { color: #ffcb6b; }
+.ai-code-body .cm-comment { color: #546e7a; font-style: italic; }
+.ai-code-body .cm-bracket { color: #89ddff; }
+.ai-code-pen { font-size: 13px; }
 
 /* Kartu yang sedang ditulis AI */
 .ai-code-card.writing {

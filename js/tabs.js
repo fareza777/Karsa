@@ -13,8 +13,8 @@ const Tabs = (() => {
         title: path,
         onclick: () => activate(path),
       }, [
-        el('span', { class: 'file-icon', text: fileIcon(path) }),
-        el('span', { text: baseName(path) }),
+        fileBadge(path),
+        el('span', { class: 'tab-name', text: baseName(path) }),
         el('span', {
           class: 'tab-close',
           text: '✕',
