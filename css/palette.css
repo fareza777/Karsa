@@ -241,13 +241,14 @@
   position: fixed;
   inset: 0;
   z-index: 240;
-  background: rgba(5, 8, 14, .62);
   animation: fadeIn .2s ease;
+  cursor: pointer;
 }
+/* Dim + cutout HANYA dari box-shadow spotlight (tidak ada dim ganda) */
 .ob-spot {
   position: absolute;
   border-radius: 12px;
-  box-shadow: 0 0 0 9999px rgba(5, 8, 14, .62), 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 9999px rgba(5, 8, 14, .66), 0 0 0 2px var(--accent);
   background: transparent;
   transition: all .25s cubic-bezier(.2, .8, .2, 1);
   pointer-events: none;
@@ -255,14 +256,25 @@
 .ob-tip {
   position: absolute;
   width: 300px;
+  max-width: calc(100vw - 24px);
   background: var(--bg-2);
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow: var(--shadow);
   padding: 16px;
+  cursor: default;
   animation: popIn .2s ease;
   transition: left .25s, top .25s;
 }
+.ob-close {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.ob-close:hover { background: var(--bg-hover); color: var(--text); }
 .ob-count {
   font-size: 11px;
   font-family: var(--font-code);

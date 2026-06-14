@@ -1070,7 +1070,7 @@ const AI = (() => {
               bubble.innerHTML = '';
               bubble.appendChild(el('span', {
                 class: 'ai-thinking',
-                text: 'AI menyusun rencana… (' + rawText.length + ' karakter penalaran)',
+                text: 'AI menyusun rencana…',
               }));
               scrollChat();
             }

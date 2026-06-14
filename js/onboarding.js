@@ -30,6 +30,11 @@ const Onboarding = (() => {
     try { localStorage.setItem(KEY, '1'); } catch (e) { /* abaikan */ }
     if (overlay) { overlay.remove(); overlay = null; }
     window.removeEventListener('resize', position);
+    document.removeEventListener('keydown', onKey);
+  }
+
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); done(); }
   }
 
   function position() {
@@ -47,10 +52,15 @@ const Onboarding = (() => {
     tip.querySelector('.ob-body').textContent = step.body;
     tip.querySelector('.ob-count').textContent = (idx + 1) + ' / ' + STEPS.length;
 
-    // Tempatkan tooltip di bawah target bila muat, jika tidak di atas
-    const below = r.bottom + 150 < window.innerHeight;
-    tip.style.left = Math.max(12, Math.min(window.innerWidth - 312, r.left)) + 'px';
-    tip.style.top = (below ? r.bottom + 14 : r.top - tip.offsetHeight - 14) + 'px';
+    // Tempatkan tooltip di bawah target bila muat, jika tidak di atas;
+    // lalu jepit agar SELALU di dalam layar (tombol tak pernah ketutup).
+    const th = tip.offsetHeight || 180;
+    const tw = 300;
+    let top = (r.bottom + th + 24 < window.innerHeight) ? r.bottom + 14 : r.top - th - 14;
+    top = Math.max(12, Math.min(window.innerHeight - th - 12, top));
+    const left = Math.max(12, Math.min(window.innerWidth - tw - 12, r.left));
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
   }
 
   function next() {
@@ -62,6 +72,7 @@ const Onboarding = (() => {
   function build() {
     spot = el('div', { class: 'ob-spot' });
     tip = el('div', { class: 'ob-tip' }, [
+      el('button', { class: 'ob-close', text: '✕', title: 'Tutup', onclick: done }),
       el('span', { class: 'ob-count' }),
       el('h4', { class: 'ob-title' }),
       el('p', { class: 'ob-body' }),
@@ -70,14 +81,22 @@ const Onboarding = (() => {
         el('button', { class: 'ob-next btn btn-primary btn-sm', text: 'Lanjut →', onclick: next }),
       ]),
     ]);
-    overlay = el('div', { class: 'ob-overlay' }, [spot, tip]);
+    // Klik area gelap (di luar tooltip) menutup tur — anti-stuck.
+    overlay = el('div', { class: 'ob-overlay', onclick: done }, [spot, tip]);
+    tip.addEventListener('click', (e) => e.stopPropagation());
     document.body.appendChild(overlay);
     window.addEventListener('resize', position);
+    document.addEventListener('keydown', onKey);
     position();
   }
 
   function maybeStart() {
     try { if (localStorage.getItem(KEY)) return; } catch (e) { return; }
+    // Hanya untuk pengguna benar-benar baru: belum punya proyek sama sekali
+    if (typeof State !== 'undefined' && State.getProjects && State.getProjects().length > 0) {
+      try { localStorage.setItem(KEY, '1'); } catch (e) { /* abaikan */ }
+      return;
+    }
     // Hanya di dashboard, dan saat elemen sudah ada
     if ($('#view-dashboard').classList.contains('hidden')) return;
     if (!document.querySelector('#hero-prompt-input')) return;
