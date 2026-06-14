@@ -47,10 +47,20 @@ const Preview = (() => {
       return String(val);
     } catch (e) { return String(val); }
   }
+  // Noise dari pustaka screenshot (dom-to-image) saat membaca stylesheet
+  // lintas-origin (mis. Google Fonts) — tak berbahaya, jangan tampilkan di panel.
+  function noiseInternal(args) {
+    var first = args[0];
+    return typeof first === 'string' && (
+      first.indexOf('Error while reading CSS rules from') === 0 ||
+      first.indexOf('Error loading') === 0 && /fonts\.googleapis|gstatic/.test(args.join(' '))
+    );
+  }
   ['log', 'info', 'warn', 'error'].forEach(function (level) {
     var asli = console[level];
     console[level] = function () {
-      kirim(level, Array.prototype.slice.call(arguments));
+      var args = Array.prototype.slice.call(arguments);
+      if (!noiseInternal(args)) kirim(level, args);
       asli.apply(console, arguments);
     };
   });
