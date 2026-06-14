@@ -251,6 +251,52 @@
       obs.observe(demoSection);
     }
 
+    // --- #5 Count-up angka hero ---
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.querySelectorAll('[data-countup]').forEach((node) => {
+      const target = parseInt(node.dataset.countup, 10) || 0;
+      if (reduceMotion || target <= 0) { node.textContent = String(target); return; }
+      const start = performance.now();
+      const dur = 900;
+      const tick = (now) => {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3);
+        node.textContent = String(Math.round(eased * target));
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+
+    // --- #5 Scroll-reveal (progressive enhancement) ---
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      const revealTargets = document.querySelectorAll(
+        '.lp-bento-cell, .lp-step, .lp-price-card, .lp-article-card, .lp-demo-step-card, .lp-faq-item, #transformasi, .lp-section-head'
+      );
+      const revObs = new IntersectionObserver((entries, ob) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) { e.target.classList.add('is-visible'); ob.unobserve(e.target); }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      revealTargets.forEach((node, i) => {
+        node.classList.add('lp-reveal');
+        node.style.transitionDelay = (Math.min(i % 4, 3) * 60) + 'ms';
+        revObs.observe(node);
+      });
+    }
+
+    // --- #3 Before/after slider ---
+    const baRange = document.getElementById('lp-ba-range');
+    const baBefore = document.getElementById('lp-ba-before');
+    const baHandle = document.getElementById('lp-ba-handle');
+    if (baRange && baBefore && baHandle) {
+      const setBa = (v) => {
+        baBefore.style.width = v + '%';
+        baHandle.style.left = v + '%';
+      };
+      baRange.addEventListener('input', () => setBa(baRange.value));
+      setBa(50);
+    }
+
     fetch('/api/config')
       .then((r) => r.json())
       .then((cfg) => {

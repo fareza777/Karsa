@@ -86,10 +86,15 @@
           <a href="#demo" class="lp-btn lp-btn-ghost lp-btn-play"><span class="lp-play-icon" aria-hidden="true">▶</span> Lihat demo</a>
         </div>
         <div class="lp-hero-meta">
-          <div><strong>30</strong> prompt AI/hari</div>
-          <div><strong>0</strong> instalasi</div>
-          <div><strong>1</strong> klik publish</div>
+          <div><strong data-countup="30">0</strong> prompt AI/hari</div>
+          <div><strong data-countup="0">0</strong> instalasi</div>
+          <div><strong data-countup="1">0</strong> klik publish</div>
         </div>
+        <ul class="lp-trust" aria-label="Kenapa percaya KARSA">
+          <li><svg class="lp-trust-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Gratis, tanpa kartu kredit</li>
+          <li><svg class="lp-trust-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Jalan penuh di browser</li>
+          <li><svg class="lp-trust-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Data tersimpan di perangkatmu</li>
+        </ul>
       </div>
       <div class="lp-showcase" aria-hidden="true">
         <div class="lp-frame lp-frame-hero">
@@ -147,6 +152,41 @@
             <h3>Publish</h3>
             <p>Satu klik — situs live di karsa.work.</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="lp-section lp-ba-section lp-reveal" id="transformasi" style="padding-top:0">
+      <div class="lp-wrap">
+        <div class="lp-section-head">
+          <h2>Dari kalimat, jadi <em>tampilan</em></h2>
+          <p>Geser untuk melihat perbedaan: satu prompt bahasa Indonesia di kiri, hasil app jadi di kanan.</p>
+        </div>
+        <div class="lp-ba" id="lp-ba">
+          <div class="lp-ba-after">
+            <div class="lp-ba-card lp-ba-mockup">
+              <div class="lp-ba-mockup-head">☕ Kopi Nusantara</div>
+              <div class="lp-ba-mockup-hero">Barista lokal, rasa autentik</div>
+              <div class="lp-ba-mockup-grid">
+                <span>Espresso<br><b>Rp 18K</b></span>
+                <span>Latte<br><b>Rp 28K</b></span>
+                <span>V60<br><b>Rp 32K</b></span>
+                <span>Kue<br><b>Rp 15K</b></span>
+              </div>
+              <div class="lp-ba-mockup-btn">Pesan sekarang</div>
+            </div>
+          </div>
+          <div class="lp-ba-before" id="lp-ba-before">
+            <div class="lp-ba-card lp-ba-prompt">
+              <span class="lp-ba-prompt-label">PROMPT</span>
+              <p>"Bikin landing page warung kopi kekinian, ada menu kopi dengan harga, tombol pesan, dan warna hangat."</p>
+              <span class="lp-ba-cursor"></span>
+            </div>
+          </div>
+          <input type="range" min="0" max="100" value="50" class="lp-ba-range" id="lp-ba-range" aria-label="Geser banding sebelum/sesudah">
+          <div class="lp-ba-handle" id="lp-ba-handle" aria-hidden="true"><span>⟺</span></div>
+          <span class="lp-ba-tag lp-ba-tag-before">Prompt</span>
+          <span class="lp-ba-tag lp-ba-tag-after">Hasil</span>
         </div>
       </div>
     </section>
