@@ -134,6 +134,19 @@ const App = (() => {
     showToast('JSON berhasil diunduh!', 'ok');
   }
 
+  // #1 Atur panel yang tampil di layar mobile
+  function setMobileView(view) {
+    const body = $('.ide-body');
+    if (!body) return;
+    const target = view === 'ai' ? 'sidebar' : view;
+    body.dataset.mview = target;
+    if (view === 'ai' && typeof AI !== 'undefined') AI.switchTab('ai');
+    if (view === 'sidebar' && typeof AI !== 'undefined') AI.switchTab('files');
+    $$('.mnav-btn').forEach((b) => b.classList.toggle('active', b.dataset.mview === view));
+    if (typeof Preview !== 'undefined' && target === 'preview') Preview.refresh();
+    if (typeof Editor !== 'undefined' && target === 'editor') Editor.refresh();
+  }
+
   // --- Bagikan tautan: proyek ter-encode di hash URL ---
   function shareProject() {
     const project = State.getCurrentProject();
@@ -394,6 +407,11 @@ const App = (() => {
       Voice.attach($('#ai-mic'), $('#ai-input'));
       Voice.attach($('#hero-mic'), $('#hero-prompt-input'));
     }
+
+    // #1 Navigasi bawah mobile: ganti panel aktif
+    $$('.mnav-btn').forEach((btn) => {
+      btn.addEventListener('click', () => setMobileView(btn.dataset.mview));
+    });
 
     // Terima tautan berbagi yang ditempel saat aplikasi sudah terbuka
     window.addEventListener('hashchange', importFromHash);

@@ -132,6 +132,11 @@ const Editor = (() => {
     if (cm) cm.setOption('theme', theme === 'dark' ? 'material-darker' : 'default');
   }
 
+  // Paksa CodeMirror menghitung ulang ukuran (mis. setelah panel dari display:none)
+  function refresh() {
+    if (cm) setTimeout(() => cm.refresh(), 0);
+  }
+
   // --- Ukuran font editor ---
   function applyFontSize() {
     const size = State.getSettings().fontSize || 13.5;
@@ -206,6 +211,6 @@ const Editor = (() => {
 
   return {
     init, openFile, closeFile, handleRename, resetForProject,
-    setTheme, changeFontSize, getCurrentPath, formatCurrentFile,
+    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh,
   };
 })();
