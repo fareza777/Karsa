@@ -173,3 +173,112 @@
 /* tombol inspect aktif */
 #btn-inspect.active { background: var(--accent); color: #fff; }
 #btn-inspect.active .icon { color: #fff; }
+
+/* ===== #8 Frame ponsel realistis per merek ===== */
+.preview-frame-wrap.device-phone::before {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #05070c;
+  box-shadow: inset 0 0 0 1.5px #11151f, 0 0 0 2px rgba(0,0,0,.25);
+}
+.preview-frame-wrap.device-phone[data-brand="oppo"]::before { left: 24px; transform: none; }
+.preview-frame-wrap.device-phone[data-brand="xiaomi"]::before { width: 11px; height: 11px; }
+.preview-frame-wrap.device-phone[data-brand="samsung"] { border-radius: 30px; }
+.preview-frame-wrap.device-phone[data-brand="xiaomi"] { border-radius: 22px; }
+/* status-bar tint tipis biar terasa "device" */
+.preview-frame-wrap.device-phone::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: 0; left: 0; right: 0;
+  height: 26px;
+  background: linear-gradient(180deg, rgba(0,0,0,.10), transparent);
+  pointer-events: none;
+}
+.phone-model-select.hidden { display: none; }
+
+/* ===== #11 Console ala DevTools ===== */
+.console-entry {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: start;
+  gap: 8px;
+  padding: 3px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+.console-ic { text-align: center; opacity: .8; font-weight: 700; }
+.console-msg { min-width: 0; word-break: break-word; white-space: pre-wrap; }
+.console-ts { font-size: 10px; color: var(--muted); opacity: .6; font-variant-numeric: tabular-nums; }
+.console-entry.level-error { background: rgba(244, 63, 94, .08); }
+.console-entry.level-error .console-ic { color: var(--danger); }
+.console-entry.level-warn .console-ic { color: var(--warn); }
+.console-entry.level-info .console-ic { color: var(--accent-2); }
+.console-entry.level-result .console-ic { color: var(--ok); }
+.console-entry.level-input .console-msg { color: var(--accent-2); }
+.console-expandable { cursor: pointer; }
+.console-expandable:hover { background: var(--bg-hover); }
+.console-caret { display: inline-block; width: 12px; color: var(--muted); }
+.console-obj {
+  grid-column: 2 / 4;
+  margin: 4px 0 2px;
+  padding: 8px 10px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font-size: 11px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+/* ===== #18 Onboarding coachmark ===== */
+.ob-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  background: rgba(5, 8, 14, .62);
+  animation: fadeIn .2s ease;
+}
+.ob-spot {
+  position: absolute;
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(5, 8, 14, .62), 0 0 0 2px var(--accent);
+  background: transparent;
+  transition: all .25s cubic-bezier(.2, .8, .2, 1);
+  pointer-events: none;
+}
+.ob-tip {
+  position: absolute;
+  width: 300px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  animation: popIn .2s ease;
+  transition: left .25s, top .25s;
+}
+.ob-count {
+  font-size: 11px;
+  font-family: var(--font-code);
+  color: var(--accent-2);
+  font-weight: 700;
+}
+.ob-tip h4 { font-size: 15px; margin: 6px 0 6px; }
+.ob-body { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+.ob-actions { display: flex; justify-content: space-between; align-items: center; }
+.ob-skip { font-size: 12.5px; color: var(--muted); }
+.ob-skip:hover { color: var(--text); }
+
+/* ===== #20 Share card preview ===== */
+.share-card-canvas {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  display: block;
+}

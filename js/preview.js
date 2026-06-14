@@ -530,6 +530,15 @@ const Preview = (() => {
   };
   let currentDevice = 'desktop';
 
+  // #8 Merek ponsel → posisi punch-hole kamera + tombol samping
+  let phoneBrand = 'generic';
+  function applyPhoneBrand() {
+    const wrap = $('#preview-frame-wrap');
+    if (wrap) wrap.setAttribute('data-brand', phoneBrand);
+    const sel = $('#phone-model-select');
+    if (sel) sel.classList.toggle('hidden', currentDevice !== 'phone');
+  }
+
   function setDevice(device) {
     currentDevice = device;
     const wrap = $('#preview-frame-wrap');
@@ -538,8 +547,18 @@ const Preview = (() => {
     $$('.device-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.device === device);
     });
+    applyPhoneBrand();
     fitDevice();
   }
+
+  (() => {
+    const sel = $('#phone-model-select');
+    if (!sel) return;
+    sel.addEventListener('change', () => {
+      phoneBrand = (sel.value || 'phone').replace(/^phone-?/, '') || 'generic';
+      applyPhoneBrand();
+    });
+  })();
 
   // Skalakan frame device agar selalu utuh terlihat di panel (ala DevTools)
   function fitDevice() {

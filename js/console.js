@@ -5,16 +5,57 @@ const ConsolePanel = (() => {
 
   function logElement() { return $('#console-log'); }
 
+  const LEVEL_ICON = { log: '›', info: 'ℹ', warn: '⚠', error: '✖', input: '»', result: '←' };
+
+  function nowTime() {
+    const d = new Date();
+    return [d.getHours(), d.getMinutes(), d.getSeconds()]
+      .map((n) => String(n).padStart(2, '0')).join(':');
+  }
+
+  function summarize(obj) {
+    if (Array.isArray(obj)) return 'Array(' + obj.length + ')';
+    const keys = Object.keys(obj);
+    return '{' + keys.slice(0, 3).join(', ') + (keys.length > 3 ? ', …' : '') + '}';
+  }
+
   function append(level, text) {
     const log = logElement();
     const placeholder = $('.console-empty-msg', log);
     if (placeholder) placeholder.remove();
 
-    const prefix = { log: '›', info: 'ℹ', warn: '⚠', error: '✖', input: '»', result: '←' }[level] || '›';
-    log.appendChild(el('div', {
-      class: 'console-entry level-' + level,
-      text: prefix + ' ' + text,
-    }));
+    const entry = el('div', { class: 'console-entry level-' + level });
+    entry.appendChild(el('span', { class: 'console-ic', text: LEVEL_ICON[level] || '›' }));
+
+    const msg = el('span', { class: 'console-msg' });
+    const trimmed = (text || '').trim();
+    const looksJson = (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+      (trimmed.startsWith('[') && trimmed.endsWith(']'));
+    let pre = null;
+    if (looksJson && trimmed.length > 2) {
+      try {
+        const obj = JSON.parse(trimmed);
+        if (typeof obj === 'object' && obj !== null) {
+          entry.classList.add('console-expandable');
+          msg.appendChild(el('span', { class: 'console-caret', text: '▸' }));
+          msg.appendChild(el('span', { text: summarize(obj) }));
+          pre = el('pre', { class: 'console-obj hidden', text: JSON.stringify(obj, null, 2) });
+        }
+      } catch (e) { /* bukan JSON valid */ }
+    }
+    if (!pre) msg.appendChild(el('span', { text: text }));
+    entry.appendChild(msg);
+    entry.appendChild(el('span', { class: 'console-ts', text: nowTime() }));
+    if (pre) {
+      entry.appendChild(pre);
+      entry.addEventListener('click', () => {
+        pre.classList.toggle('hidden');
+        const caret = $('.console-caret', entry);
+        if (caret) caret.textContent = pre.classList.contains('hidden') ? '▸' : '▾';
+      });
+    }
+
+    log.appendChild(entry);
     log.scrollTop = log.scrollHeight;
 
     if (level === 'error') {

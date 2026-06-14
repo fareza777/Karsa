@@ -7,18 +7,24 @@
   <link rel="canonical" href="https://karsa.work/app">
   <title>KARSA App — Dari Ide, Jadi Aplikasi</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Cpath d='M32 12l4.8 15.2L52 32l-15.2 4.8L32 52l-4.8-15.2L12 32l15.2-4.8Z' fill='white'/%3E%3C/svg%3E">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#7c5cff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KARSA">
+  <link rel="apple-touch-icon" href="/icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/dialog/dialog.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
-  <link rel="stylesheet" href="css/base.css?v=20260616f">
-  <link rel="stylesheet" href="css/components.css?v=20260616f">
-  <link rel="stylesheet" href="css/dashboard.css?v=20260616f">
-  <link rel="stylesheet" href="css/ide.css?v=20260616f">
-  <link rel="stylesheet" href="css/ai.css?v=20260616f">
-  <link rel="stylesheet" href="css/palette.css?v=20260616f">
+  <link rel="stylesheet" href="css/base.css?v=20260616h">
+  <link rel="stylesheet" href="css/components.css?v=20260616h">
+  <link rel="stylesheet" href="css/dashboard.css?v=20260616h">
+  <link rel="stylesheet" href="css/ide.css?v=20260616h">
+  <link rel="stylesheet" href="css/ai.css?v=20260616h">
+  <link rel="stylesheet" href="css/palette.css?v=20260616h">
 </head>
 <body data-theme="dark">
 
@@ -277,6 +283,12 @@
             <button type="button" class="preview-engine-btn" data-engine="web" title="Preview web HTML"><svg class="icon"><use href="#i-globe"/></svg> Web</button>
             <button type="button" class="preview-engine-btn" data-engine="snack" title="Preview Expo Snack"><svg class="icon"><use href="#i-phone"/></svg> Mobile</button>
           </div>
+          <select id="phone-model-select" class="phone-model-select hidden" title="Model HP untuk frame preview">
+            <option value="phone">HP umum</option>
+            <option value="phone-samsung">Samsung</option>
+            <option value="phone-oppo">OPPO / vivo</option>
+            <option value="phone-xiaomi">Xiaomi</option>
+          </select>
           <span id="preview-url" class="preview-url">karsa.work/preview</span>
           <button id="btn-inspect" class="icon-btn-sm" title="Pilih elemen untuk diubah AI"><svg class="icon"><use href="#i-wand"/></svg></button>
           <button id="btn-shot-full" class="icon-btn-sm" title="Screenshot satu layar preview"><svg class="icon"><use href="#i-camera"/></svg></button>
@@ -344,27 +356,36 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ============ APP ============ -->
-  <script src="js/utils.js?v=20260616f"></script>
-  <script src="js/storage.js?v=20260616f"></script>
-  <script src="js/templates.js?v=20260616f"></script>
-  <script src="js/project.js?v=20260616f"></script>
-  <script src="js/state.js?v=20260616f"></script>
-  <script src="js/components.js?v=20260616f"></script>
-  <script src="js/console.js?v=20260616f"></script>
-  <script src="js/snack.js?v=20260616f"></script>
-  <script src="js/preview.js?v=20260616f"></script>
-  <script src="js/editor.js?v=20260616f"></script>
-  <script src="js/tabs.js?v=20260616f"></script>
-  <script src="js/filetree.js?v=20260616f"></script>
-  <script src="js/dashboard.js?v=20260616f"></script>
-  <script src="js/assets.js?v=20260616f"></script>
-  <script src="js/plan.js?v=20260616f"></script>
-  <script src="js/auth.js?v=20260616f"></script>
-  <script src="js/sync.js?v=20260616f"></script>
-  <script src="js/publish.js?v=20260616f"></script>
-  <script src="js/playstore.js?v=20260616f"></script>
-  <script src="js/app.js?v=20260616f"></script>
-  <script src="js/palette.js?v=20260616f"></script>
-  <script src="js/ai.js?v=20260616f"></script>
+  <script src="js/utils.js?v=20260616h"></script>
+  <script src="js/storage.js?v=20260616h"></script>
+  <script src="js/templates.js?v=20260616h"></script>
+  <script src="js/project.js?v=20260616h"></script>
+  <script src="js/state.js?v=20260616h"></script>
+  <script src="js/components.js?v=20260616h"></script>
+  <script src="js/console.js?v=20260616h"></script>
+  <script src="js/snack.js?v=20260616h"></script>
+  <script src="js/preview.js?v=20260616h"></script>
+  <script src="js/editor.js?v=20260616h"></script>
+  <script src="js/tabs.js?v=20260616h"></script>
+  <script src="js/filetree.js?v=20260616h"></script>
+  <script src="js/dashboard.js?v=20260616h"></script>
+  <script src="js/assets.js?v=20260616h"></script>
+  <script src="js/plan.js?v=20260616h"></script>
+  <script src="js/auth.js?v=20260616h"></script>
+  <script src="js/sync.js?v=20260616h"></script>
+  <script src="js/publish.js?v=20260616h"></script>
+  <script src="js/playstore.js?v=20260616h"></script>
+  <script src="js/app.js?v=20260616h"></script>
+  <script src="js/palette.js?v=20260616h"></script>
+  <script src="js/onboarding.js?v=20260616h"></script>
+  <script src="js/ai.js?v=20260616h"></script>
+  <script>
+    // #17 Daftarkan service worker untuk dukungan offline (PWA)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js').catch(function () { /* offline tetap jalan dgn cache lama */ });
+      });
+    }
+  </script>
 </body>
 </html>

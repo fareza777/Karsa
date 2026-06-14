@@ -96,6 +96,132 @@ const Publish = (() => {
     }
   }
 
+  // #20 Kartu bagikan: kanvas OG (1200×630) berisi nama proyek + URL + thumbnail
+  function drawShareCard(canvas, project, url) {
+    const ctx = canvas.getContext('2d');
+    const W = 1200; const H = 630;
+    canvas.width = W; canvas.height = H;
+
+    // Latar gradien gelap + cahaya
+    ctx.fillStyle = '#0a0c12';
+    ctx.fillRect(0, 0, W, H);
+    const glow = ctx.createRadialGradient(W * 0.78, H * 0.2, 40, W * 0.78, H * 0.2, 620);
+    glow.addColorStop(0, 'rgba(124,92,255,.45)');
+    glow.addColorStop(1, 'rgba(124,92,255,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    // Wordmark
+    ctx.fillStyle = '#fff';
+    ctx.font = '800 40px Inter, system-ui, sans-serif';
+    ctx.fillText('✦ KARSA', 72, 96);
+
+    // Nama proyek (wrap 2 baris)
+    ctx.font = '800 70px "Syne", Inter, sans-serif';
+    const name = project.name || 'Aplikasi KARSA';
+    const words = name.split(' ');
+    let line = ''; const lines = [];
+    words.forEach((w) => {
+      const test = line ? line + ' ' + w : w;
+      if (ctx.measureText(test).width > 640 && line) { lines.push(line); line = w; }
+      else line = test;
+    });
+    if (line) lines.push(line);
+    lines.slice(0, 2).forEach((ln, i) => {
+      const grad = ctx.createLinearGradient(72, 0, 712, 0);
+      grad.addColorStop(0, '#c4b5fd'); grad.addColorStop(1, '#67e8f9');
+      ctx.fillStyle = grad;
+      ctx.fillText(ln, 72, 240 + i * 84);
+    });
+
+    // URL pill
+    const label = (url || '').replace(/^https?:\/\//, '');
+    ctx.font = '500 30px "JetBrains Mono", monospace';
+    const tw = ctx.measureText(label).width;
+    ctx.fillStyle = 'rgba(255,255,255,.08)';
+    roundRect(ctx, 72, 470, tw + 72, 60, 30);
+    ctx.fill();
+    ctx.fillStyle = '#22d3ee';
+    ctx.fillText('🌐  ' + label, 100, 509);
+
+    // Footer
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    ctx.font = '500 26px Inter, sans-serif';
+    ctx.fillText('Dibuat tanpa coding di karsa.work', 72, 580);
+
+    // Thumbnail proyek di kanan (browser frame)
+    if (project.thumb) {
+      const img = new Image();
+      img.onload = () => {
+        const fx = 760; const fy = 150; const fw = 380; const fh = 300;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 20;
+        ctx.fillStyle = '#1a1f2e';
+        roundRect(ctx, fx, fy, fw, fh, 16); ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = '#11151f';
+        roundRect(ctx, fx, fy, fw, 34, 16); ctx.fill();
+        ['#f87171', '#fbbf24', '#34d399'].forEach((c, i) => {
+          ctx.fillStyle = c; ctx.beginPath(); ctx.arc(fx + 22 + i * 22, fy + 17, 6, 0, 7); ctx.fill();
+        });
+        ctx.save();
+        roundRect(ctx, fx, fy + 34, fw, fh - 34, 0); ctx.clip();
+        ctx.drawImage(img, fx, fy + 34, fw, (fw / img.width) * img.height);
+        ctx.restore();
+      };
+      img.src = project.thumb;
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function shareCardDialog(url) {
+    const project = State.getCurrentProject();
+    if (!project) return;
+    const canvas = el('canvas', { class: 'share-card-canvas' });
+    drawShareCard(canvas, project, url);
+    const filename = (project.name || 'karsa').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-karsa.png';
+
+    showModal({
+      title: '🖼 Kartu Bagikan',
+      wide: true,
+      body: el('div', {}, [
+        el('p', { class: 'modal-desc', text: 'Unduh kartu ini dan bagikan ke WhatsApp, Instagram, atau X untuk pamer karyamu.' }),
+        canvas,
+      ]),
+      actions: [
+        { label: 'Tutup' },
+        {
+          label: '📲 Bagikan',
+          onClick: () => {
+            canvas.toBlob((blob) => {
+              const file = new File([blob], filename, { type: 'image/png' });
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({ files: [file], title: project.name, text: 'Lihat aplikasi yang saya buat di KARSA! ' + url });
+              } else {
+                downloadBlob(blob, filename);
+                showToast('Perangkat tidak mendukung share — kartu diunduh.', 'info');
+              }
+            });
+            return true;
+          },
+        },
+        {
+          label: '⬇ Unduh PNG', primary: true,
+          onClick: () => { canvas.toBlob((blob) => { downloadBlob(blob, filename); showToast('Kartu diunduh! 🖼', 'ok'); }); return true; },
+        },
+      ],
+    });
+  }
+
   function showSuccessModal(data) {
     const urls = [];
     if (data.subdomainUrl) urls.push({ label: 'Subdomain KARSA', url: data.subdomainUrl });
@@ -126,6 +252,10 @@ const Publish = (() => {
       body: el('div', {}, bodyKids),
       actions: [
         { label: 'Tutup' },
+        {
+          label: '🖼 Kartu Bagikan',
+          onClick: () => { shareCardDialog(primary); return true; },
+        },
         {
           label: 'Buka Situs ↗',
           primary: true,
@@ -260,5 +390,5 @@ const Publish = (() => {
     });
   }
 
-  return { openDialog, loadConfig };
+  return { openDialog, loadConfig, shareCardDialog };
 })();
