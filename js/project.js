@@ -75,6 +75,7 @@ function webAwamSystemNote(prompt, userAsk) {
     return base + [
       'Ini WEBSITE YANG BISA DIPAKAI LANGSUNG di browser — bukan landing page promosi "download aplikasi".',
       'JANGAN bungkus UI dalam mockup/gambar telepon — tampilkan alatnya langsung layar penuh.',
+      'JANGAN pakai div.phone-frame atau bingkai HP di HTML — KARSA sudah punya mockup di panel preview.',
       'Buat index.html + css/style.css + js/app.js dengan fitur yang BERFUNGSI (input file, canvas, slider, tombol aksi, dll).',
       'Kalau editor foto: upload gambar, preview, crop/filter/rotate/brightness, reset & unduh — pakai Canvas/File API, tanpa backend.',
     ].join('\n');
@@ -176,7 +177,7 @@ function previewHintForProject(project) {
       dismissKey,
       title: a.webPreview ? 'Preview web siap' : 'Proyek campuran Expo + Web',
       body: a.webPreview
-        ? 'Gunakan tab Web di atas preview. Tab Mobile (Snack) hanya untuk App.tsx — kalau putih, tetap pakai Web.'
+        ? 'Prototipe HTML aktif di tab Web. Tab App.tsx = kode React Native asli (Expo Snack).'
         : 'Preview kosong? Minta AI buat preview/index.html + css + js, atau cek Console.',
     };
   }
@@ -197,6 +198,7 @@ const MOBILE_AI_PROMPT = [
   '5. package.json harus menyertakan expo, react, react-native. app.json valid untuk Expo SDK 52.',
   '6. Jawab bahasa Indonesia. Hangat & kolaboratif. Tutup dengan 2-3 ide iterasi.',
   '7. Mobile-first, aman di layar 360–412px lebar.',
+  '7b. DILARANG membungkus UI dalam div.phone-frame / mockup HP — KARSA sudah punya bingkai ponsel di panel preview.',
   '8. Maksimal 2 file per respons. File besar (App.tsx, screen) — satu file per respons. Jangan keluarkan 5+ file sekaligus.',
   '9. Jangan tulis ulang package.json / app.json jika tidak berubah.',
   '10. Jika respons terpotong, sistem akan minta lanjutan otomatis — pastikan setiap file yang dikeluarkan valid & lengkap.',

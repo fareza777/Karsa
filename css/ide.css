@@ -526,7 +526,12 @@ body.resizing * { user-select: none !important; }
 }
 @keyframes previewSpin { to { transform: rotate(360deg); } }
 /* Ukuran viewport device nyata; diskalakan otomatis agar pas panel (JS fitDevice) */
-.preview-stage.device-mode { overflow: hidden; }
+.preview-stage.device-mode {
+  overflow: auto;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 0;
+}
 .preview-frame-wrap.device-tablet {
   width: 768px;
   height: 1024px;

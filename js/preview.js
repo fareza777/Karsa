@@ -318,11 +318,18 @@ const Preview = (() => {
       (m, q, hash) => 'href=' + q + hash + q
     );
 
-    // Suntikkan jembatan console seawal mungkin
+    // Suntikkan jembatan console + perbaikan layout di dalam iframe (hindari double mockup HP)
+    const KARSA_PREVIEW_FIT = '<style id="karsa-preview-fit">html,body{margin:0;padding:0;width:100%;min-height:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}' +
+      '.phone-frame,.device-frame,.app-frame,.app-shell,.phone-mockup{width:100%!important;max-width:100%!important;' +
+      'min-height:100%!important;height:100%!important;margin:0!important;border-radius:0!important;' +
+      'box-shadow:none!important;transform:none!important;border:none!important}' +
+      'main,#content,.main-content,.app-content{flex:1;min-height:0;overflow-y:auto}' +
+      '.bottom-nav,.bottom-nav-bar,.tab-bar{position:sticky;bottom:0;z-index:20;width:100%}</style>';
+    const headInject = CONSOLE_BRIDGE + KARSA_PREVIEW_FIT;
     if (/<head[^>]*>/i.test(html)) {
-      html = html.replace(/<head[^>]*>/i, (m) => m + '\n' + CONSOLE_BRIDGE);
+      html = html.replace(/<head[^>]*>/i, (m) => m + '\n' + headInject);
     } else {
-      html = CONSOLE_BRIDGE + html;
+      html = headInject + html;
     }
 
     return html;
@@ -343,6 +350,30 @@ const Preview = (() => {
   function isAiBusy() {
     const btn = $('#ai-send');
     return btn ? btn.disabled : false;
+  }
+
+  function isMobileLayoutHtml(html) {
+    return /phone-frame|bottom-nav|100dvh|mobile-viewport|tab-bar/i.test(html || '');
+  }
+
+  function afterWebPreviewLoad(project) {
+    if (!project || usesSnackEngine(project)) return;
+    const path = webPreviewEntryPath(project.files);
+    if (!path) return;
+    if (isMobileLayoutHtml(project.files[path]) && currentDevice !== 'phone') {
+      setDevice('phone');
+    }
+    try {
+      sessionStorage.setItem('karsa.hint.dismiss.' + project.id, '1');
+    } catch (e) { /* abaikan */ }
+    hidePreviewStatus();
+    updatePreviewHint(project);
+  }
+
+  function snackAppReady(project) {
+    if (!project) return false;
+    const diag = Snack.diagnoseProject(project);
+    return diag.ok;
   }
 
   function hidePreviewStatus() {
@@ -492,9 +523,10 @@ const Preview = (() => {
     }
     if (data.showSnack || data.kind === 'expo' || data.kind === 'mixed') {
       if (Snack.canPreview(project)) {
+        const snackLabel = snackAppReady(project) ? '📱 Preview App.tsx' : '📱 Preview App.tsx (belum siap)';
         actions.appendChild(el('button', {
           class: 'btn btn-primary btn-sm',
-          text: '📱 Preview Mobile',
+          text: snackLabel,
           onclick: () => { setEngine('snack'); refresh(); },
         }));
       }
@@ -556,7 +588,15 @@ const Preview = (() => {
       frame.removeAttribute('src');
       const diag = Snack.diagnoseProject(project);
       frame.srcdoc = Snack.buildEmbedPage(project);
-      maybeAutoFixPreview(project, diag);
+      if (diag.ok) {
+        hidePreviewStatus();
+        try {
+          sessionStorage.setItem('karsa.hint.dismiss.' + project.id, '1');
+        } catch (e) { /* abaikan */ }
+        updatePreviewHint(project);
+      } else {
+        maybeAutoFixPreview(project, diag);
+      }
     } else {
       hidePreviewStatus();
       loadLocalPreview(frame, project);
@@ -709,7 +749,11 @@ const Preview = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    $('#preview-frame').addEventListener('load', () => setPreviewLoading(false));
+    $('#preview-frame').addEventListener('load', () => {
+      setPreviewLoading(false);
+      const project = State.getCurrentProject();
+      if (project && !usesSnackEngine(project)) afterWebPreviewLoad(project);
+    });
     const urlLabel = $('#preview-url');
     if (urlLabel) {
       urlLabel.style.cursor = 'pointer';

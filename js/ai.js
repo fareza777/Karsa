@@ -346,7 +346,7 @@ const AI = (() => {
             '• preview/index.html (href="style.css", src="app.js")\n' +
             '• preview/style.css\n' +
             '• preview/app.js\n' +
-            'UI mobile-first, semua layar & fitur utama bisa diklik (data contoh boleh). Bukan mockup telepon kosong.\n' +
+            'UI mobile-first, semua layar & fitur utama bisa diklik (data contoh boleh). Bukan mockup telepon kosong. Jangan pakai div.phone-frame di HTML.\n' +
             'App.tsx boleh disertakan ringkas jika masih ada — jangan tulis App.tsx 500+ baris dalam satu respons.',
         });
       } else {
