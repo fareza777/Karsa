@@ -20,7 +20,7 @@ const App = (() => {
 
     $('#view-dashboard').classList.add('hidden');
     $('#view-ide').classList.remove('hidden');
-    $('.ide-body').classList.remove('preview-full', 'ide-mobile-awam', 'ide-mobile-awam-dev');
+    $('.ide-body').classList.remove('preview-full', 'ide-mobile-awam');
     $('#project-name-input').value = project.name;
 
     const awamMobile = isMobileAwamProject(project);
@@ -32,29 +32,18 @@ const App = (() => {
         AI.setAutoApply(true);
         AI.setAwamMobileMode(true);
       }
-      Tabs.reset();
-      const empty = $('#editor-empty p');
-      if (empty) {
-        empty.textContent = 'Pratinjau aplikasi ada di panel kanan. Ceritakan perubahan lewat chat KARSA AI.';
-      }
       Preview.setEngine('web');
       Preview.setDevice('phone');
-      const devBtn = $('#btn-dev-code');
-      if (devBtn) devBtn.classList.remove('hidden');
     } else {
       if (typeof AI !== 'undefined') AI.setAwamMobileMode(false);
-      const devBtn = $('#btn-dev-code');
-      if (devBtn) devBtn.classList.add('hidden');
-      FileTree.render();
-      const webEntry = webPreviewEntryPath(project.files);
-      const entry = webEntry
-        || (project.files['index.html'] !== undefined ? 'index.html' : null)
-        || Object.keys(project.files)[0];
-      if (entry) Tabs.open(entry);
-      Preview.setEngine(Preview.pickPreviewEngine(project));
     }
 
     FileTree.render();
+    const webEntry = webPreviewEntryPath(project.files);
+    const entry = webEntry
+      || (project.files['index.html'] !== undefined ? 'index.html' : null)
+      || Object.keys(project.files)[0];
+    if (entry) Tabs.open(entry);
     const a = analyzeProjectFiles(project.files);
     Preview.setEngine(awamMobile ? 'web' : Preview.pickPreviewEngine(project));
     if (awamMobile) Preview.setDevice('phone');
@@ -411,11 +400,6 @@ const App = (() => {
     $('#btn-share').addEventListener('click', shareProject);
     $('#btn-publish').addEventListener('click', () => Publish.openDialog());
     $('#btn-playstore').addEventListener('click', () => PlayStore.openChecklist());
-    $('#btn-dev-code')?.addEventListener('click', () => {
-      $('.ide-body')?.classList.toggle('ide-mobile-awam-dev');
-      const on = $('.ide-body')?.classList.contains('ide-mobile-awam-dev');
-      showToast(on ? 'Mode kode aktif' : 'Mode pratinjau — fokus aplikasi', 'info');
-    });
     $('#btn-export').addEventListener('click', exportDialog);
     $('#btn-history').addEventListener('click', historyDialog);
     $('#btn-format').addEventListener('click', () => Editor.formatCurrentFile());

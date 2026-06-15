@@ -659,22 +659,7 @@ body.resizing * { user-select: none !important; }
 .ide-body.preview-full .resizer { display: none; }
 .ide-body.preview-full .preview-pane { width: 100% !important; border-left: none; }
 
-/* Mode aplikasi HP untuk pengguna awam — chat + pratinjau, tanpa editor */
-.ide-body.ide-mobile-awam:not(.ide-mobile-awam-dev) .editor-pane,
-.ide-body.ide-mobile-awam:not(.ide-mobile-awam-dev) #resizer-left,
-.ide-body.ide-mobile-awam:not(.ide-mobile-awam-dev) #resizer-right {
-  display: none !important;
-}
-.ide-body.ide-mobile-awam:not(.ide-mobile-awam-dev) .sidebar {
-  width: 40% !important;
-  max-width: 520px;
-}
-.ide-body.ide-mobile-awam:not(.ide-mobile-awam-dev) .preview-pane {
-  flex: 1 !important;
-  width: auto !important;
-  min-width: 280px;
-  border-left: 1px solid var(--border);
-}
+/* Mode aplikasi HP — pratinjau ponsel + label ramah, editor tetap ada */
 .ide-body.ide-mobile-awam .preview-title-default { display: none; }
 .ide-body.ide-mobile-awam .preview-title-awam { display: inline-flex; }
 .ide-body:not(.ide-mobile-awam) .preview-title-awam { display: none; }
@@ -691,23 +676,8 @@ body.resizing * { user-select: none !important; }
   opacity: .55;
   pointer-events: none;
 }
-.ide-body.ide-mobile-awam .ai-code-card .ai-code-body,
-.ide-body.ide-mobile-awam .ai-code-card .ai-code-copy {
-  display: none !important;
-}
 .ide-body.ide-mobile-awam .ai-code-name {
   font-family: var(--font-sans);
-}
-.ide-body.ide-mobile-awam #side-tab-files {
-  display: none;
-}
-.ide-body.ide-mobile-awam-dev .editor-pane,
-.ide-body.ide-mobile-awam-dev #resizer-left,
-.ide-body.ide-mobile-awam-dev #resizer-right {
-  display: flex !important;
-}
-.ide-body.ide-mobile-awam-dev #side-tab-files {
-  display: inline-flex;
 }
 
 .preview-title-awam {

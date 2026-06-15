@@ -213,7 +213,7 @@ const MOBILE_AI_PROMPT = [
   '6. Jawab bahasa Indonesia. Hangat & kolaboratif. Tutup dengan 2-3 ide iterasi.',
   '7. Mobile-first, aman di layar 360–412px lebar.',
   '7b. DILARANG membungkus UI dalam div.phone-frame / mockup HP — KARSA sudah punya bingkai ponsel di panel preview.',
-  '8. Maksimal 2 file per respons. File besar (App.tsx, screen) — satu file per respons. Jangan keluarkan 5+ file sekaligus.',
+  '8. SATU file per respons untuk preview web (html, lalu css, lalu js). Jangan keluarkan 3+ file sekaligus — respons terpotong = gagal.',
   '9. Jangan tulis ulang package.json / app.json jika tidak berubah.',
   '10. Jika respons terpotong, sistem akan minta lanjutan otomatis — pastikan setiap file yang dikeluarkan valid & lengkap.',
   '11. Penalaran internal dilarang panjang — langsung tulis App.tsx / screen. Lihat MODE KERJA di prompt sistem.',
