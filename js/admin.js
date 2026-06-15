@@ -371,10 +371,10 @@
   async function loadAiConfig() {
     const user = Auth.getUser();
     if (!user?.email) return null;
-    const res = await fetch('/api/admin-ai-config', {
+    const res = await fetch('/api/admin-analytics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email, action: 'get' }),
+      body: JSON.stringify({ email: user.email, action: 'ai-get' }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Gagal memuat pengaturan AI');
@@ -443,10 +443,10 @@
       apiKey: $('#admin-ai-api-key').value,
     };
     try {
-      const res = await fetch('/api/admin-ai-config', {
+      const res = await fetch('/api/admin-analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, action: 'save', config }),
+        body: JSON.stringify({ email: user.email, action: 'ai-save', config }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Gagal menyimpan');

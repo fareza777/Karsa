@@ -1,8 +1,49 @@
-/* ===== KARSA — dashboard analitik (superuser only) ===== */
+/* ===== KARSA — dashboard analitik + pengaturan LLM (superuser only) ===== */
 
 import { isSuperuserEmail } from '../lib/superuser.js';
 import { analyticsEnabled, getStatsRange, getRecentActivity } from '../lib/analytics.js';
 import { getAdminOverview, adminConfigured } from '../lib/supabase-admin.js';
+import { kvConfigured } from '../lib/kv.js';
+import {
+  defaultAiConfig,
+  getAiConfig,
+  saveAiConfig,
+  maskAiConfig,
+} from '../lib/ai-config.js';
+
+async function handleAiConfig(req, res) {
+  const action = String(req.body?.action || 'ai-get');
+
+  if (action === 'ai-save') {
+    const result = await saveAiConfig(req.body.config || {}, req.body.email);
+    if (result.error) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+    res.status(200).json({
+      ok: true,
+      kvConfigured: kvConfigured(),
+      config: result.config,
+    });
+    return;
+  }
+
+  const cfg = await getAiConfig();
+  const envDefaults = defaultAiConfig();
+
+  res.status(200).json({
+    ok: true,
+    kvConfigured: kvConfigured(),
+    config: maskAiConfig(cfg),
+    envDefaults: {
+      upstreamUrl: envDefaults.upstreamUrl,
+      defaultModel: envDefaults.defaultModel,
+      visionModel: envDefaults.visionModel,
+      maxOutputTokens: envDefaults.maxOutputTokens,
+      apiKeyConfigured: !!process.env.MINIMAX_API_KEY,
+    },
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -12,6 +53,12 @@ export default async function handler(req, res) {
   const email = String(req.body?.email || '').trim().toLowerCase();
   if (!isSuperuserEmail(email)) {
     res.status(403).json({ error: 'Akses admin ditolak.' });
+    return;
+  }
+
+  const action = String(req.body?.action || 'stats');
+  if (action === 'ai-get' || action === 'ai-save') {
+    await handleAiConfig(req, res);
     return;
   }
 

@@ -19,8 +19,7 @@
     "api/verify-license.js": { "maxDuration": 15 },
     "api/superuser-sync.js": { "maxDuration": 15 },
     "api/analytics-event.js": { "maxDuration": 10 },
-    "api/admin-analytics.js": { "maxDuration": 30 },
-    "api/admin-ai-config.js": { "maxDuration": 15 }
+    "api/admin-analytics.js": { "maxDuration": 30 }
   },
   "headers": [
     {
