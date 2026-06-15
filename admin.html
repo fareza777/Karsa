@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css?v=20260612">
 </head>
 <body data-theme="dark" class="admin-page">
 
@@ -22,6 +22,7 @@
       </a>
       <div class="admin-header-actions">
         <button id="admin-refresh" class="btn btn-ghost btn-sm" type="button">↻ Muat ulang</button>
+        <a href="#admin-ai-section" class="btn btn-ghost btn-sm">⚙ KARSA AI</a>
         <a href="/app" class="btn btn-ghost btn-sm">← Kembali ke app</a>
       </div>
     </div>
@@ -51,6 +52,52 @@
       </div>
 
       <div id="admin-warnings" class="admin-warnings hidden"></div>
+
+      <section class="admin-section admin-panel" id="admin-ai-section">
+        <div class="admin-section-title">
+          <h2>KARSA AI · LLM</h2>
+          <span class="admin-pill admin-pill-ai">Provider</span>
+        </div>
+        <p id="admin-ai-note" class="admin-muted admin-section-note">Memuat pengaturan…</p>
+        <form id="admin-ai-form" class="admin-ai-form hidden" autocomplete="off">
+          <div class="admin-ai-grid">
+            <label class="admin-field">
+              <span>Upstream URL</span>
+              <input type="url" id="admin-ai-upstream" name="upstreamUrl" placeholder="https://api.minimax.io/v1/chat/completions" required>
+            </label>
+            <label class="admin-field">
+              <span>Model default (teks)</span>
+              <input type="text" id="admin-ai-default-model" name="defaultModel" placeholder="MiniMax-M2.7-highspeed" required>
+            </label>
+            <label class="admin-field">
+              <span>Model vision (gambar)</span>
+              <input type="text" id="admin-ai-vision-model" name="visionModel" placeholder="MiniMax-M3" required>
+            </label>
+            <label class="admin-field">
+              <span>API key</span>
+              <input type="password" id="admin-ai-api-key" name="apiKey" placeholder="Kosongkan untuk tetap pakai yang tersimpan" autocomplete="new-password">
+              <small id="admin-ai-key-hint" class="admin-field-hint"></small>
+            </label>
+            <label class="admin-field admin-field-sm">
+              <span>Max token output</span>
+              <input type="number" id="admin-ai-max-tokens" name="maxOutputTokens" min="1024" max="131072" step="1024">
+            </label>
+            <label class="admin-field admin-field-sm">
+              <span>Temperature</span>
+              <input type="number" id="admin-ai-temperature" name="temperature" min="0" max="2" step="0.1">
+            </label>
+          </div>
+          <label class="admin-field">
+            <span>Model diizinkan <small class="admin-muted">(satu per baris)</small></span>
+            <textarea id="admin-ai-allowed" name="allowedModels" rows="5" spellcheck="false"></textarea>
+          </label>
+          <div class="admin-ai-actions">
+            <button type="submit" class="btn btn-primary">💾 Simpan pengaturan</button>
+            <button type="button" id="admin-ai-reset-env" class="btn btn-ghost">↺ Isi dari env default</button>
+          </div>
+          <p id="admin-ai-status" class="admin-ai-status admin-muted" aria-live="polite"></p>
+        </form>
+      </section>
 
       <section class="admin-bento">
         <div class="admin-panel admin-charts-panel">
@@ -136,6 +183,6 @@
   <script src="js/utils.js"></script>
   <script src="js/plan.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/admin.js"></script>
+  <script src="js/admin.js?v=20260612"></script>
 </body>
 </html>

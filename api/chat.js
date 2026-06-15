@@ -1,6 +1,7 @@
-/* ===== KARSA AI — proxy serverless ke MiniMax (API key aman di server) ===== */
+/* ===== KARSA AI — proxy serverless ke provider LLM (API key aman di server) ===== */
 
 import { trackAiUsage } from '../lib/analytics.js';
+import { getAiConfig, resolveChatModel } from '../lib/ai-config.js';
 
 // Wajib: tanpa ini Vercel mem-buffer seluruh respons sebelum dikirim ke browser,
 // sehingga streaming tidak pernah tampil dan permintaan panjang mati kena timeout.
@@ -10,17 +11,10 @@ export const config = {
 };
 
 const MINIMAX_URL = 'https://api.minimax.io/v1/chat/completions';
-const ALLOWED_MODELS = [
-  'MiniMax-M3',
-  'MiniMax-M2.7', 'MiniMax-M2.7-highspeed',
-  'MiniMax-M2.5', 'MiniMax-M2.5-highspeed',
-  'MiniMax-M2.1', 'MiniMax-M2.1-highspeed',
-  'MiniMax-M2',
-];
 const MAX_MESSAGES = 40;
 const MAX_TEXT_CHARS = 200000;
 const MAX_TOTAL_CHARS = 3500000; // termasuk gambar data-URL (batas body Vercel ±4,5 MB)
-const MAX_OUTPUT_TOKENS = Number(process.env.KARSA_AI_MAX_TOKENS) || 65536;
+const MAX_OUTPUT_TOKENS_DEFAULT = Number(process.env.KARSA_AI_MAX_TOKENS) || 65536;
 
 // Konten boleh string, atau array bagian {type:'text'}|{type:'image_url'} (vision)
 function contentSize(content) {
@@ -105,9 +99,10 @@ export default async function handler(req, res) {
     return;
   }
 
-  const apiKey = process.env.MINIMAX_API_KEY;
+  const aiCfg = await getAiConfig();
+  const apiKey = aiCfg.apiKey;
   if (!apiKey) {
-    res.status(500).json({ error: 'MINIMAX_API_KEY belum dikonfigurasi di server.' });
+    res.status(500).json({ error: 'API key LLM belum dikonfigurasi (env atau Admin → KARSA AI).' });
     return;
   }
 
@@ -119,7 +114,13 @@ export default async function handler(req, res) {
     return;
   }
 
-  const chosenModel = ALLOWED_MODELS.includes(model) ? model : 'MiniMax-M2.7-highspeed';
+  const hasImages = messages.some((msg) =>
+    Array.isArray(msg.content) && msg.content.some((p) => p && p.type === 'image_url')
+  );
+  const chosenModel = resolveChatModel(model, aiCfg, hasImages);
+  const maxOutputTokens = aiCfg.maxOutputTokens || MAX_OUTPUT_TOKENS_DEFAULT;
+  const upstreamUrl = aiCfg.upstreamUrl || MINIMAX_URL;
+  const temperature = aiCfg.temperature ?? 0.7;
   let inputChars = 0;
   for (const msg of messages) {
     const s = contentSize(msg.content);
@@ -128,7 +129,7 @@ export default async function handler(req, res) {
 
   let upstream;
   try {
-    upstream = await fetch(MINIMAX_URL, {
+    upstream = await fetch(upstreamUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -138,10 +139,9 @@ export default async function handler(req, res) {
         model: chosenModel,
         messages,
         stream: true,
-        max_completion_tokens: MAX_OUTPUT_TOKENS,
-        max_tokens: MAX_OUTPUT_TOKENS,
-        temperature: 0.7,
-        // Model reasoning (M3): pangkas penalaran — user tidak perlu prompt manual
+        max_completion_tokens: maxOutputTokens,
+        max_tokens: maxOutputTokens,
+        temperature,
         ...(chosenModel.includes('M3') ? { reasoning_effort: 'low' } : {}),
       }),
     });

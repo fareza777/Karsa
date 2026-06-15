@@ -366,6 +366,115 @@
     renderCards(box, sb, DB_METRICS);
   }
 
+  let aiEnvDefaults = null;
+
+  async function loadAiConfig() {
+    const user = Auth.getUser();
+    if (!user?.email) return null;
+    const res = await fetch('/api/admin-ai-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: user.email, action: 'get' }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Gagal memuat pengaturan AI');
+    return data;
+  }
+
+  function fillAiForm(cfg, envDefaults) {
+    const form = $('#admin-ai-form');
+    const note = $('#admin-ai-note');
+    if (!form) return;
+    $('#admin-ai-upstream').value = cfg.upstreamUrl || '';
+    $('#admin-ai-default-model').value = cfg.defaultModel || '';
+    $('#admin-ai-vision-model').value = cfg.visionModel || '';
+    $('#admin-ai-max-tokens').value = cfg.maxOutputTokens || 65536;
+    $('#admin-ai-temperature').value = cfg.temperature ?? 0.7;
+    $('#admin-ai-allowed').value = (cfg.allowedModels || []).join('\n');
+    $('#admin-ai-api-key').value = '';
+    const hint = $('#admin-ai-key-hint');
+    if (hint) {
+      hint.textContent = cfg.apiKeyConfigured
+        ? 'Tersimpan: ' + cfg.apiKey + ' — kosongkan field kalau tidak mau ganti.'
+        : 'Belum ada key di KV — isi di sini atau set MINIMAX_API_KEY di Vercel.';
+    }
+    if (note) {
+      const src = cfg.source === 'kv' ? 'Vercel KV' : 'Environment Vercel';
+      const kv = cfg.source === 'kv' ? '' : ' (simpan form untuk tulis ke KV)';
+      note.textContent = 'Sumber aktif: ' + src + kv
+        + (cfg.updatedAt ? ' · diubah ' + new Date(cfg.updatedAt).toLocaleString('id-ID') : '');
+    }
+    form.classList.remove('hidden');
+    aiEnvDefaults = envDefaults;
+  }
+
+  async function saveAiConfigForm(ev) {
+    ev.preventDefault();
+    const user = Auth.getUser();
+    const status = $('#admin-ai-status');
+    if (!user?.email) return;
+    if (status) {
+      status.textContent = 'Menyimpan…';
+      status.className = 'admin-ai-status admin-muted';
+    }
+    const config = {
+      upstreamUrl: $('#admin-ai-upstream').value.trim(),
+      defaultModel: $('#admin-ai-default-model').value.trim(),
+      visionModel: $('#admin-ai-vision-model').value.trim(),
+      maxOutputTokens: Number($('#admin-ai-max-tokens').value),
+      temperature: Number($('#admin-ai-temperature').value),
+      allowedModels: $('#admin-ai-allowed').value,
+      apiKey: $('#admin-ai-api-key').value,
+    };
+    try {
+      const res = await fetch('/api/admin-ai-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, action: 'save', config }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gagal menyimpan');
+      fillAiForm(data.config, aiEnvDefaults);
+      if (status) {
+        status.textContent = '✓ Pengaturan LLM disimpan — berlaku untuk semua pengguna KARSA AI.';
+        status.className = 'admin-ai-status ok';
+      }
+    } catch (e) {
+      if (status) {
+        status.textContent = e.message || 'Gagal menyimpan';
+        status.className = 'admin-ai-status err';
+      }
+    }
+  }
+
+  function resetAiFormToEnv() {
+    if (!aiEnvDefaults) return;
+    $('#admin-ai-upstream').value = aiEnvDefaults.upstreamUrl || '';
+    $('#admin-ai-default-model').value = aiEnvDefaults.defaultModel || '';
+    $('#admin-ai-vision-model').value = aiEnvDefaults.visionModel || '';
+    $('#admin-ai-max-tokens').value = aiEnvDefaults.maxOutputTokens || 65536;
+    const status = $('#admin-ai-status');
+    if (status) {
+      status.textContent = 'Form diisi ulang dari env default — klik Simpan untuk terapkan ke KV.';
+      status.className = 'admin-ai-status admin-muted';
+    }
+  }
+
+  async function renderAiSettings() {
+    const note = $('#admin-ai-note');
+    try {
+      const data = await loadAiConfig();
+      fillAiForm(data.config, data.envDefaults);
+      if (note) {
+        if (!data.kvConfigured) {
+          note.textContent = (note.textContent || '') + ' · KV belum aktif — simpan akan gagal sampai KV_REST_API_* di-set di Vercel.';
+        }
+      }
+    } catch (e) {
+      if (note) note.textContent = e.message || 'Gagal memuat pengaturan AI.';
+    }
+  }
+
   function renderDashboard(data) {
     renderWarnings(data);
     renderHeroKpis(data.today);
@@ -414,7 +523,7 @@
     if (previewTimer) clearInterval(previewTimer);
     show('admin-loading');
     try {
-      const data = await loadStats();
+      const [data] = await Promise.all([loadStats(), renderAiSettings()]);
       renderDashboard(data);
       show('admin-dashboard');
     } catch (e) {
@@ -450,6 +559,8 @@
       return;
     }
     $('#admin-refresh')?.addEventListener('click', refresh);
+    $('#admin-ai-form')?.addEventListener('submit', saveAiConfigForm);
+    $('#admin-ai-reset-env')?.addEventListener('click', resetAiFormToEnv);
     await refresh();
   }
 
