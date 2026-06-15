@@ -49,6 +49,23 @@
 .topbar-center { display: flex; align-items: center; gap: 14px; }
 .topbar-right { display: flex; align-items: center; gap: 6px; }
 
+/* Tinggi seragam semua kontrol di topbar → toolbar rapi sejajar */
+.ide-topbar .icon-btn,
+.ide-topbar .btn,
+.ide-topbar .btn-run,
+.ide-topbar .btn-publish,
+.ide-topbar .btn-playstore,
+.ide-topbar .device-group,
+.ide-topbar .auth-trigger {
+  height: 32px;
+  box-sizing: border-box;
+}
+.ide-topbar .icon-btn { width: 32px; }
+.ide-topbar .btn-run,
+.ide-topbar .btn-publish,
+.ide-topbar .btn-playstore,
+.ide-topbar .btn { padding-top: 0; padding-bottom: 0; }
+
 .device-group {
   display: flex;
   background: var(--bg-3);

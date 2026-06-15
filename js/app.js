@@ -348,6 +348,23 @@ const App = (() => {
       e.target.value = '';
     });
     $('#dash-theme-toggle').addEventListener('click', toggleTheme);
+
+    // Feature card → arahkan ke aksi utama (fokus prompt AI di hero)
+    $$('.feature-card').forEach((card) => {
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      const go = () => {
+        const input = $('#hero-prompt-input');
+        if (input) {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => input.focus(), 280);
+        }
+      };
+      card.addEventListener('click', go);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+      });
+    });
     $('#hero-prompt-send').addEventListener('click', promptToApp);
     $('#hero-prompt-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
