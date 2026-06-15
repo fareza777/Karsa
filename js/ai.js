@@ -338,12 +338,16 @@ const AI = (() => {
     if (mobile) {
       if (scaffold || create) {
         phases.push({
-          label: 'Membuat tampilan utama aplikasi…',
+          label: 'Membuat preview web & tampilan aplikasi…',
           apiText:
             'Permintaan pengguna: «' + userAsk + '»\n\n' +
             'CATATAN SISTEM: Pengguna biasa (tidak paham coding). Jangan tanya balik. Jangan suruh mereka pecah permintaan.\n' +
-            'Buat file App.tsx lengkap & valid: layar utama cantik sesuai permintaan. Semua fitur yang mereka bayangkan ' +
-            'tampak di UI (tombol, panel, preview) — boleh pakai data contoh. Satu file App.tsx saja (~250 baris max). Langsung tulis kode.',
+            'WAJIB keluarkan 3 file web yang langsung bisa dilihat di preview browser:\n' +
+            '• preview/index.html (href="style.css", src="app.js")\n' +
+            '• preview/style.css\n' +
+            '• preview/app.js\n' +
+            'UI mobile-first, semua layar & fitur utama bisa diklik (data contoh boleh). Bukan mockup telepon kosong.\n' +
+            'App.tsx boleh disertakan ringkas jika masih ada — jangan tulis App.tsx 500+ baris dalam satu respons.',
         });
       } else {
         phases.push({ label: null, apiText: prompt });
@@ -998,8 +1002,14 @@ const AI = (() => {
     State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
     valid.forEach((f) => State.setFile(f.path, f.code));
     FileTree.render();
-    const entry = valid.find((f) => f.path === 'index.html') || valid[0];
-    Tabs.open(entry.path);
+    const htmlApplied = valid.find((f) => f.path === 'preview/index.html')
+      || valid.find((f) => f.path === 'index.html')
+      || valid.find((f) => /\.html$/i.test(f.path));
+    const entry = htmlApplied ? htmlApplied.path : valid[0].path;
+    Tabs.open(entry);
+    if (valid.some((f) => /\.html$/i.test(f.path))) {
+      Preview.setEngine('web');
+    }
     Preview.refresh();
     confettiBurst();
     appendChangeSummary(summary);

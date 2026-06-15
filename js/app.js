@@ -23,14 +23,14 @@ const App = (() => {
     $('#project-name-input').value = project.name;
 
     FileTree.render();
-    // Buka file utama secara otomatis
-    const entry = project.files['index.html'] !== undefined
-      ? 'index.html'
-      : Object.keys(project.files)[0];
+    const webEntry = webPreviewEntryPath(project.files);
+    const entry = webEntry
+      || (project.files['index.html'] !== undefined ? 'index.html' : null)
+      || Object.keys(project.files)[0];
     if (entry) Tabs.open(entry);
     const a = analyzeProjectFiles(project.files);
     const isMobileLike = project.projectType === 'mobile' || project.projectType === 'playstore';
-    Preview.setEngine(isMobileLike && a.expoLike ? 'snack' : 'auto');
+    Preview.setEngine(Preview.pickPreviewEngine(project));
     Preview.refresh();
     const snackBtn = $('#btn-snack-tab');
     if (snackBtn) snackBtn.classList.toggle('hidden', !a.expoLike);

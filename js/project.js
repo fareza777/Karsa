@@ -82,11 +82,35 @@ function webAwamSystemNote(prompt, userAsk) {
   return base + 'Buat website (index.html + css/style.css + js/app.js) sesuai permintaan. Kalau ini aplikasi/tool, buat versi web yang bisa dipakai — bukan halaman promosi kosong.';
 }
 
+function webPreviewEntryPath(files) {
+  if (!files) return null;
+  const preview = files['preview/index.html'];
+  if (preview && preview.trim().length > 200) return 'preview/index.html';
+  const root = files['index.html'];
+  if (root && root.trim().length > 200) return 'index.html';
+  const any = Object.keys(files).find((p) => fileExt(p) === 'html' && (files[p] || '').trim().length > 120);
+  return any || null;
+}
+
+function hasUsableWebPreview(files) {
+  return !!webPreviewEntryPath(files);
+}
+
+function resolveProjectFileRef(files, htmlPath, ref) {
+  const norm = ref.replace(/^\.\//, '').replace(/^\//, '');
+  if (files[norm] !== undefined) return norm;
+  const dir = htmlPath.includes('/') ? htmlPath.replace(/\/[^/]+$/, '') + '/' : '';
+  const joined = dir + norm;
+  if (files[joined] !== undefined) return joined;
+  return null;
+}
+
 // Urutan file untuk konteks AI: web dulu, Expo/React Native belakangan
 function sortedProjectPaths(files) {
   const score = (p) => {
     const ext = fileExt(p);
     if (p === 'index.html') return 0;
+    if (p === 'preview/index.html') return 0.5;
     if (ext === 'html') return 1;
     if (ext === 'css') return 2;
     if (ext === 'js') return 3;
@@ -120,7 +144,7 @@ function analyzeProjectFiles(files) {
   else if (hasHtml) preview = 'web';
   else if (expoLike) preview = 'expo';
 
-  return { hasHtml, isExpo, isRn, expoLike, preview };
+  return { hasHtml, isExpo, isRn, expoLike, preview, webPreview: hasUsableWebPreview(files) };
 }
 
 function expoEntryPath(files) {
@@ -150,8 +174,10 @@ function previewHintForProject(project) {
       kind: 'mixed',
       compact: true,
       dismissKey,
-      title: 'Proyek campuran Expo + Web',
-      body: 'Preview kosong? Cek Console — sering karena error JS atau script belum terhubung di index.html.',
+      title: a.webPreview ? 'Preview web siap' : 'Proyek campuran Expo + Web',
+      body: a.webPreview
+        ? 'Gunakan tab Web di atas preview. Tab Mobile (Snack) hanya untuk App.tsx — kalau putih, tetap pakai Web.'
+        : 'Preview kosong? Minta AI buat preview/index.html + css + js, atau cek Console.',
     };
   }
   return {
@@ -167,7 +193,7 @@ const MOBILE_AI_PROMPT = [
   '1. Tulis file UTUH dalam blok ```tsx file=App.tsx (atribut file= WAJIB pakai nama file asli, bukan "tsx" atau "ts"). Path contoh: App.tsx, app.json, screens/Home.tsx.',
   '2. Entry point: App.tsx. Gunakan komponen react-native (View, Text, StyleSheet, Pressable, ScrollView).',
   '3. Jangan pakai HTML/CSS web. Jangan pakai div/span.',
-  '4. OPSIONAL tapi disarankan: buat juga preview/index.html + css + js sebagai prototipe web cepat (dual output).',
+  '4. WAJIB untuk preview browser (orang awam harus langsung lihat hasil): buat preview/index.html + preview/style.css + preview/app.js. Di HTML pakai href="style.css" dan src="app.js" (relatif ke folder preview/). UI mobile-first, fitur utama bisa diklik — bukan mockup telepon kosong.',
   '5. package.json harus menyertakan expo, react, react-native. app.json valid untuk Expo SDK 52.',
   '6. Jawab bahasa Indonesia. Hangat & kolaboratif. Tutup dengan 2-3 ide iterasi.',
   '7. Mobile-first, aman di layar 360–412px lebar.',
@@ -179,10 +205,11 @@ const MOBILE_AI_PROMPT = [
 ].join('\n');
 
 const WEB_PREVIEW_PROMPT =
-  'Buatkan preview web untuk proyek ini: file index.html + css/style.css + js/app.js (mobile-first, nyaman di layar HP). ' +
+  'Buatkan preview web untuk proyek ini: file preview/index.html + preview/style.css + preview/app.js (mobile-first, nyaman di layar HP). ' +
+  'Di index.html pakai href="style.css" dan src="app.js". ' +
   'Samakan UI/fitur utama dari kode yang ada — alat yang bisa dipakai di browser, bukan landing promosi atau mockup telepon. ' +
   'Jangan hapus file Expo/React Native yang sudah ada. ' +
-  'Pastikan semua script di-load di index.html dan init() hanya dipanggil sekali.';
+  'Pastikan semua script di-load dan init() hanya dipanggil sekali.';
 
 const CARA_HOSTING_MD = `# Cara hosting website KARSA
 

@@ -255,9 +255,9 @@ const Preview = (() => {
   // Gabungkan file proyek jadi satu dokumen HTML mandiri
   function buildBundle(project) {
     const files = project.files;
-    const htmlPath = files['index.html'] !== undefined
-      ? 'index.html'
-      : Object.keys(files).find((p) => fileExt(p) === 'html');
+    const htmlPath = webPreviewEntryPath(files)
+      || (files['index.html'] !== undefined ? 'index.html' : null)
+      || Object.keys(files).find((p) => fileExt(p) === 'html');
 
     if (!htmlPath) {
       return '<body style="font-family:system-ui;display:grid;place-content:center;height:100vh;color:#64748b">' +
@@ -271,9 +271,9 @@ const Preview = (() => {
       /<link\b[^>]*href=["']([^"']+)["'][^>]*>/gi,
       (tag, href) => {
         if (!/stylesheet/i.test(tag) || !isLocalRef(href)) return tag;
-        const path = normalizePath(href);
-        if (files[path] === undefined) {
-          return '<style>/* KARSA: file "' + path + '" tidak ditemukan */</style>';
+        const path = resolveProjectFileRef(files, htmlPath, href);
+        if (!path || files[path] === undefined) {
+          return '<style>/* KARSA: file "' + normalizePath(href) + '" tidak ditemukan */</style>';
         }
         return '<style>\n' + files[path] + '\n</style>';
       }
@@ -284,9 +284,9 @@ const Preview = (() => {
       /<script\b[^>]*src=["']([^"']+)["'][^>]*>\s*<\/script>/gi,
       (tag, src) => {
         if (!isLocalRef(src)) return tag;
-        const path = normalizePath(src);
-        if (files[path] === undefined) {
-          return '<script>console.warn("KARSA: file \\"' + path + '\\" tidak ditemukan");<\/script>';
+        const path = resolveProjectFileRef(files, htmlPath, src);
+        if (!path || files[path] === undefined) {
+          return '<script>console.warn("KARSA: file \\"' + normalizePath(src) + '\\" tidak ditemukan");<\/script>';
         }
         return '<script>\n' + files[path].replace(/<\/script>/gi, '<\\/script>') + '\n<\/script>';
       }
@@ -423,9 +423,20 @@ const Preview = (() => {
     const a = analyzeProjectFiles(project.files);
     if (previewEngine === 'web') return false;
     if (previewEngine === 'snack') return Snack.canPreview(project);
+    // Proyek mobile + preview web → orang awam harus lihat tab Web dulu
+    if (hasUsableWebPreview(project.files)) return false;
     if (project.projectType === 'mobile' && a.expoLike) return Snack.canPreview(project);
     if (a.expoLike && !a.hasHtml) return Snack.canPreview(project);
     return false;
+  }
+
+  function pickPreviewEngine(project) {
+    if (!project) return 'auto';
+    const a = analyzeProjectFiles(project.files);
+    if (hasUsableWebPreview(project.files)) return 'web';
+    const isMobileLike = project.projectType === 'mobile' || project.projectType === 'playstore';
+    if (isMobileLike && a.expoLike) return 'snack';
+    return 'auto';
   }
 
   function setEngine(mode) {
@@ -771,7 +782,7 @@ const Preview = (() => {
   }
 
   return {
-    refresh, refreshDebounced, openInNewTab, setDevice, setEngine, buildBundle,
+    refresh, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
     runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect,
   };
 })();
