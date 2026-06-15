@@ -385,27 +385,43 @@
     const form = $('#admin-ai-form');
     const note = $('#admin-ai-note');
     if (!form) return;
-    $('#admin-ai-upstream').value = cfg.upstreamUrl || '';
-    $('#admin-ai-default-model').value = cfg.defaultModel || '';
-    $('#admin-ai-vision-model').value = cfg.visionModel || '';
-    $('#admin-ai-max-tokens').value = cfg.maxOutputTokens || 65536;
-    $('#admin-ai-temperature').value = cfg.temperature ?? 0.7;
-    $('#admin-ai-allowed').value = (cfg.allowedModels || []).join('\n');
+    const safe = cfg || {};
+    $('#admin-ai-upstream').value = safe.upstreamUrl || 'https://api.minimax.io/v1/chat/completions';
+    $('#admin-ai-default-model').value = safe.defaultModel || 'MiniMax-M2.7-highspeed';
+    $('#admin-ai-vision-model').value = safe.visionModel || 'MiniMax-M3';
+    $('#admin-ai-max-tokens').value = safe.maxOutputTokens || 65536;
+    $('#admin-ai-temperature').value = safe.temperature ?? 0.7;
+    $('#admin-ai-allowed').value = (safe.allowedModels || [
+      'MiniMax-M3',
+      'MiniMax-M2.7', 'MiniMax-M2.7-highspeed',
+      'MiniMax-M2.5', 'MiniMax-M2.5-highspeed',
+      'MiniMax-M2.1', 'MiniMax-M2.1-highspeed',
+      'MiniMax-M2',
+    ]).join('\n');
     $('#admin-ai-api-key').value = '';
     const hint = $('#admin-ai-key-hint');
     if (hint) {
-      hint.textContent = cfg.apiKeyConfigured
-        ? 'Tersimpan: ' + cfg.apiKey + ' — kosongkan field kalau tidak mau ganti.'
+      hint.textContent = safe.apiKeyConfigured
+        ? 'Tersimpan: ' + safe.apiKey + ' — kosongkan field kalau tidak mau ganti.'
         : 'Belum ada key di KV — isi di sini atau set MINIMAX_API_KEY di Vercel.';
     }
     if (note) {
-      const src = cfg.source === 'kv' ? 'Vercel KV' : 'Environment Vercel';
-      const kv = cfg.source === 'kv' ? '' : ' (simpan form untuk tulis ke KV)';
+      const src = safe.source === 'kv' ? 'Vercel KV' : 'Environment Vercel';
+      const kv = safe.source === 'kv' ? '' : ' (simpan form untuk tulis ke KV)';
       note.textContent = 'Sumber aktif: ' + src + kv
-        + (cfg.updatedAt ? ' · diubah ' + new Date(cfg.updatedAt).toLocaleString('id-ID') : '');
+        + (safe.updatedAt ? ' · diubah ' + new Date(safe.updatedAt).toLocaleString('id-ID') : '');
     }
     form.classList.remove('hidden');
     aiEnvDefaults = envDefaults;
+  }
+
+  function showAiLoadError(msg) {
+    const note = $('#admin-ai-note');
+    if (note) {
+      note.textContent = msg + ' — form di bawah tetap bisa diisi manual.';
+      note.classList.add('admin-ai-note-warn');
+    }
+    fillAiForm(null, null);
   }
 
   async function saveAiConfigForm(ev) {
@@ -462,16 +478,20 @@
 
   async function renderAiSettings() {
     const note = $('#admin-ai-note');
+    if (note) note.classList.remove('admin-ai-note-warn');
     try {
       const data = await loadAiConfig();
+      if (!data) {
+        showAiLoadError('Belum login');
+        return;
+      }
       fillAiForm(data.config, data.envDefaults);
-      if (note) {
-        if (!data.kvConfigured) {
-          note.textContent = (note.textContent || '') + ' · KV belum aktif — simpan akan gagal sampai KV_REST_API_* di-set di Vercel.';
-        }
+      if (note && !data.kvConfigured) {
+        note.textContent = (note.textContent || '') + ' · KV belum aktif — simpan akan gagal sampai KV_REST_API_* di-set di Vercel.';
+        note.classList.add('admin-ai-note-warn');
       }
     } catch (e) {
-      if (note) note.textContent = e.message || 'Gagal memuat pengaturan AI.';
+      showAiLoadError(e.message || 'Gagal memuat pengaturan AI');
     }
   }
 
@@ -523,9 +543,10 @@
     if (previewTimer) clearInterval(previewTimer);
     show('admin-loading');
     try {
-      const [data] = await Promise.all([loadStats(), renderAiSettings()]);
+      const data = await loadStats();
       renderDashboard(data);
       show('admin-dashboard');
+      renderAiSettings();
     } catch (e) {
       const user = Auth.getUser();
       if (e.message === 'not_logged_in' || !user) {

@@ -879,6 +879,46 @@ body.admin-page::before {
   }
 }
 
+.admin-hero-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-hero-links {
+  margin-top: 12px;
+}
+
+.admin-hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: var(--bg-2);
+  color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.admin-hero-link:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-2));
+}
+
+.admin-hero-link-ai {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  color: var(--accent-2);
+}
+
+#admin-ai-section {
+  scroll-margin-top: 72px;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
 /* --- Pengaturan KARSA AI / LLM --- */
 .admin-pill-ai {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
@@ -957,6 +997,10 @@ body.admin-page::before {
 
 .admin-ai-status.ok { color: #34d399; }
 .admin-ai-status.err { color: #f87171; }
+
+.admin-ai-note-warn {
+  color: #fbbf24 !important;
+}
 
 @media (max-width: 720px) {
   .admin-ai-grid { grid-template-columns: 1fr; }

@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/admin.css?v=20260612">
+  <link rel="stylesheet" href="css/admin.css?v=20260615">
 </head>
 <body data-theme="dark" class="admin-page">
 
@@ -47,6 +47,9 @@
           <p class="admin-eyebrow">Superuser · KARSA</p>
           <h1>Analitik web</h1>
           <p id="admin-updated" class="admin-muted"></p>
+          <div class="admin-hero-links">
+            <a href="#admin-ai-section" class="admin-hero-link admin-hero-link-ai">⚙ Pengaturan KARSA AI (LLM)</a>
+          </div>
         </div>
         <div id="admin-hero-kpis" class="admin-hero-kpis"></div>
       </div>
@@ -59,7 +62,7 @@
           <span class="admin-pill admin-pill-ai">Provider</span>
         </div>
         <p id="admin-ai-note" class="admin-muted admin-section-note">Memuat pengaturan…</p>
-        <form id="admin-ai-form" class="admin-ai-form hidden" autocomplete="off">
+        <form id="admin-ai-form" class="admin-ai-form" autocomplete="off">
           <div class="admin-ai-grid">
             <label class="admin-field">
               <span>Upstream URL</span>
@@ -183,6 +186,6 @@
   <script src="js/utils.js"></script>
   <script src="js/plan.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/admin.js?v=20260612"></script>
+  <script src="js/admin.js?v=20260615"></script>
 </body>
 </html>
