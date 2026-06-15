@@ -13,7 +13,7 @@ const AI = (() => {
   const MAX_CONTEXT_CHARS = 100000;
   const MAX_HISTORY = 12;
   const API_TEXT_BUDGET = 180000; // di bawah batas server 200k karakter
-  const MAX_AWAM_PHASES = 3; // mobile baru: html → css → js (satu file per tahap, hindari terpotong)
+  const MAX_AWAM_PHASES = 1; // satu tahap per pesan — tidak ada "percantik" otomatis tanpa diminta
 
   const ANTI_REASONING_PROMPT = [
     'MODE KERJA (otomatis — user awam tidak perlu mengetik ini, tapi kamu WAJIB patuh):',
@@ -346,30 +346,17 @@ const AI = (() => {
     const files = project.files || {};
     if (mobile) {
       if (scaffold || create) {
-        const note =
-          'CATATAN SISTEM: Pengguna biasa (tidak paham coding). Jangan tanya balik. Jangan suruh mereka pecah permintaan.\n' +
-          'Fokus preview web di pratinjau HP KARSA (preview/index.html + style.css + app.js). Jangan pakai div.phone-frame.\n' +
-          'App.tsx / React Native jangan ditulis kecuali user minta eksplisit — prioritas preview web.\n';
         phases.push({
-          label: 'Langkah 1/3: struktur halaman…',
+          label: 'Membuat preview web & tampilan aplikasi…',
           apiText:
-            'Permintaan pengguna: «' + userAsk + '»\n\n' + note +
-            'Tahap ini: keluarkan HANYA SATU file preview/index.html (atau index.html).\n' +
-            'href="style.css" src="app.js" relatif. UI mobile-first, struktur & navigasi lengkap. Tanpa CSS/JS inline panjang.',
-        });
-        phases.push({
-          label: 'Langkah 2/3: tampilan visual…',
-          apiText:
-            'Permintaan pengguna: «' + userAsk + '»\n\n' + note +
-            'Tahap ini: keluarkan HANYA SATU file preview/style.css (atau style.css).\n' +
-            'Sesuaikan dengan HTML yang sudah ada di proyek. Mobile-first 360–412px. Estetika modern.',
-        });
-        phases.push({
-          label: 'Langkah 3/3: interaksi & data…',
-          apiText:
-            'Permintaan pengguna: «' + userAsk + '»\n\n' + note +
-            'Tahap ini: keluarkan HANYA SATU file preview/app.js (atau app.js).\n' +
-            'Fitur utama bisa diklik, data contoh boleh. Sesuaikan dengan HTML/CSS proyek. init() sekali saja.',
+            'Permintaan pengguna: «' + userAsk + '»\n\n' +
+            'CATATAN SISTEM: Pengguna biasa (tidak paham coding). Jangan tanya balik. Jangan suruh mereka pecah permintaan.\n' +
+            'WAJIB keluarkan preview web yang langsung tampil di pratinjau HP KARSA:\n' +
+            '• index.html ATAU preview/index.html (href="style.css", src="app.js")\n' +
+            '• style.css atau preview/style.css\n' +
+            '• app.js atau preview/app.js\n' +
+            'UI mobile-first, semua layar & fitur utama bisa diklik (data contoh boleh). Bukan mockup telepon kosong. Jangan pakai div.phone-frame di HTML.\n' +
+            'App.tsx boleh disertakan ringkas jika masih ada — jangan tulis App.tsx 500+ baris dalam satu respons.',
         });
       } else {
         phases.push({ label: null, apiText: prompt });
@@ -391,7 +378,7 @@ const AI = (() => {
   }
 
   function expandAwamPrompt(prompt, project) {
-    return planAwamPhases(prompt, project);
+    return planAwamPhases(prompt, project)[0].apiText;
   }
 
   function isAutoApplyOn() {
@@ -707,7 +694,7 @@ const AI = (() => {
     return files.some((f) => !isFileComplete(f.code, f.path));
   }
 
-  const MAX_AUTO_CONTINUE = 8;
+  const MAX_AUTO_CONTINUE = 3;
 
   function extractProse(text) {
     const idx = text.indexOf('```');
@@ -748,16 +735,6 @@ const AI = (() => {
       }
     });
     return rebuildWithFiles(previous, Object.keys(map).map((path) => ({ path, code: map[path] })));
-  }
-
-  function mergePhaseOutputs(acc, next) {
-    if (!next.trim()) return acc;
-    if (!acc.trim()) return next;
-    const prevFiles = parseFileBlocks(acc);
-    const newFiles = parseFileBlocks(next);
-    const map = Object.fromEntries(prevFiles.map((f) => [f.path, f.code]));
-    newFiles.forEach((f) => { map[f.path] = f.code; });
-    return rebuildWithFiles(acc, Object.keys(map).map((path) => ({ path, code: map[path] })));
   }
 
   function buildContinueMessage(accumulatedVisible) {
@@ -944,13 +921,13 @@ const AI = (() => {
 
     const pending = files.filter((f) => !projectFileMatches(f.path, f.code));
 
-    const blocked = !files.length;
+    const blocked = truncated || incomplete.length > 0;
 
     if (truncated || incomplete.length) {
       bubble.appendChild(el('div', {
         class: 'ai-truncated-warn',
         text: incomplete.length
-          ? '⚠ Sebagian file belum lengkap — lanjutan otomatis berjalan. File yang sudah lengkap bisa diterapkan.'
+          ? '⚠ File belum lengkap — tunggu lanjutan otomatis atau klik Lanjutkan tulis.'
           : '⚠ Respons terpotong — tunggu lanjutan otomatis atau klik Lanjutkan tulis.',
       }));
     }
@@ -975,8 +952,8 @@ const AI = (() => {
             : '⚡ Terapkan (' + pending.length + '/' + allFiles.length + ' file siap)')),
       disabled: !files.length || blocked,
       onclick: () => {
-        if (!files.length) {
-          showToast('Belum ada file lengkap — tunggu lanjutan otomatis.', 'warn');
+        if (blocked) {
+          showToast('File belum lengkap — tunggu lanjutan otomatis atau klik Lanjutkan tulis.', 'warn');
           return;
         }
         const toApply = pending.length ? pending : files;
@@ -1017,16 +994,10 @@ const AI = (() => {
   function tryAutoApply(bubble, visible, truncated) {
     const force = isAwamMobileMode();
     if (!force && !isAutoApplyOn()) return;
+    if (truncated) return;
     const allFiles = collectFileBlocks(bubble, visible);
     const parsedFiles = allFiles.filter((f) => isFileComplete(f.code, f.path));
-    if (!parsedFiles.length) {
-      if (truncated) return;
-      if (parsedFiles.length < allFiles.length) {
-        showToast('Auto-terapkan ditunda — file belum lengkap.', 'warn');
-      }
-      return;
-    }
-    if (!truncated && parsedFiles.length < allFiles.length) {
+    if (parsedFiles.length < allFiles.length) {
       showToast('Auto-terapkan ditunda — file belum lengkap.', 'warn');
       return;
     }
@@ -1062,7 +1033,9 @@ const AI = (() => {
       || valid.find((f) => f.path === 'index.html')
       || valid.find((f) => /\.html$/i.test(f.path));
     const entry = htmlApplied ? htmlApplied.path : valid[0].path;
-    Tabs.open(entry);
+    if (!isAwamMobileMode()) {
+      Tabs.open(entry);
+    }
     if (valid.some((f) => /\.html$/i.test(f.path)) || isAwamMobileMode()) {
       Preview.setEngine('web');
       Preview.setDevice('phone');
@@ -1188,84 +1161,6 @@ const AI = (() => {
     return { visible, finishReason, rawText };
   }
 
-  async function streamWithAutoContinue(opts) {
-    const {
-      baseMessages, bubble, modelUsed, useDirect, signal, onPhase,
-    } = opts;
-    let accumulatedVisible = '';
-    let finishReason = null;
-    let continueRound = 0;
-    let fastRetry = false;
-    let lastMergeFp = '';
-    let activeModel = modelUsed;
-
-    for (;;) {
-      let apiMessages = baseMessages;
-      if (continueRound > 0) {
-        const contMsg = buildContinueMessage(accumulatedVisible);
-        if (!contMsg) break;
-        apiMessages = trimMessagesForApi(baseMessages.concat([
-          { role: 'assistant', content: compactAssistantForApi(accumulatedVisible) },
-          { role: 'user', content: contMsg },
-        ]));
-      }
-
-      const result = await runAiStream({
-        messages: apiMessages,
-        modelUsed: activeModel,
-        useDirect,
-        signal,
-        bubble,
-        onPhase,
-      });
-      finishReason = result.finishReason;
-
-      if (!result.visible.trim()) {
-        if (!fastRetry && result.rawText.length > 6000 && activeModel.includes('M3')) {
-          fastRetry = true;
-          activeModel = MODEL_FAST;
-          bubble.innerHTML = '';
-          bubble.appendChild(el('span', { class: 'ai-thinking', text: 'Mencoba lagi…' }));
-          showToast('Sedikit lama — ' + BRAND_AI + ' mencoba lagi…', 'warn');
-          continue;
-        }
-        if (finishReason === 'length' && continueRound < MAX_AUTO_CONTINUE) {
-          continueRound++;
-          continue;
-        }
-        if (!accumulatedVisible.trim()) {
-          if (finishReason === 'length') {
-            throw new Error('Respons terlalu panjang. KARSA akan melanjutkan otomatis — tunggu atau kirim ulang permintaan yang sama.');
-          }
-          throw new Error(result.rawText.length === 0
-            ? 'Tidak ada respons dari server AI. Periksa koneksi internetmu lalu coba lagi.'
-            : 'AI belum selesai menulis. Coba kirim ulang permintaan yang sama.');
-        }
-        break;
-      }
-
-      const beforeMerge = accumulatedVisible;
-      accumulatedVisible = continueRound === 0
-        ? result.visible
-        : mergeContinuedOutput(accumulatedVisible, result.visible);
-
-      const mergeFp = mergeFingerprint(accumulatedVisible);
-      if (continueRound > 0 && (mergeFp === lastMergeFp || accumulatedVisible === beforeMerge)) break;
-      lastMergeFp = mergeFp;
-
-      renderAssistantHtml(bubble, accumulatedVisible);
-      storeMergedFiles(bubble, accumulatedVisible);
-
-      const stillTruncated = isResponseTruncated(accumulatedVisible, finishReason);
-      if (!stillTruncated || continueRound >= MAX_AUTO_CONTINUE) break;
-
-      continueRound++;
-      if (onPhase) onPhase('melanjutkan');
-    }
-
-    return { accumulatedVisible, finishReason, continueRounds: continueRound, activeModel };
-  }
-
   async function send() {
     if (busy) return;
     const input = $('#ai-input');
@@ -1303,7 +1198,7 @@ const AI = (() => {
     const history = getHistory();
     history.push({ role: 'user', content: displayText });
 
-    const expandedPhases = expandAwamPrompt(prompt, project);
+    const expandedPrompt = expandAwamPrompt(prompt, project);
     const modelUsed = resolveModel(imageAtts.length > 0, project);
     if (imageAtts.length) {
       showToast('Ada gambar — AI menganalisis screenshot.', 'info');
@@ -1339,79 +1234,102 @@ const AI = (() => {
     try {
       const onPhase = (p) => { phase = p; };
 
-      const messagesBase = [
+      let textPayload = buildUserInstruction(expandedPrompt, imageAtts.length > 0);
+      textAtts.forEach((a) => {
+        textPayload += '\n\nLAMPIRAN "' + a.name + '":\n```\n' + a.content + '\n```';
+      });
+
+      const messages = [
         { role: 'system', content: getSystemPrompt() },
         { role: 'user', content: buildProjectContext() },
         ...compactHistoryForApi(history.slice(-histLimit)),
       ];
-      if (messagesTextTotal(messagesBase) > API_TEXT_BUDGET) {
+      messages[messages.length - 1] = {
+        role: 'user',
+        content: imageAtts.length
+          ? [
+              { type: 'text', text: textPayload },
+              ...imageAtts.map((a) => ({ type: 'image_url', image_url: { url: a.dataUrl } })),
+            ]
+          : textPayload,
+      };
+
+      const baseMessages = trimMessagesForApi(messages);
+      if (messagesTextTotal(messages) > API_TEXT_BUDGET) {
         showToast('Riwayat chat panjang — dirapikan otomatis.', 'info');
       }
 
+      let continueRound = 0;
+      let fastRetry = false;
+      let lastMergeFp = '';
       accumulatedVisible = '';
       activeModel = modelUsed;
 
-      for (let phaseIdx = 0; phaseIdx < expandedPhases.length; phaseIdx++) {
-        const phaseDef = expandedPhases[phaseIdx];
-        if (phaseDef.label) {
-          phase = 'menulis';
-          setBusy(true, phaseDef.label);
-          bubble.appendChild(el('div', { class: 'ai-phase-label', text: phaseDef.label }));
-          scrollChat();
-        }
+      for (;;) {
+          let apiMessages = baseMessages;
+          if (continueRound > 0) {
+            const contMsg = buildContinueMessage(accumulatedVisible);
+            if (!contMsg) break;
+            apiMessages = trimMessagesForApi(baseMessages.concat([
+              { role: 'assistant', content: compactAssistantForApi(accumulatedVisible) },
+              { role: 'user', content: contMsg },
+            ]));
+          }
 
-        let textPayload = buildUserInstruction(phaseDef.apiText, imageAtts.length > 0 && phaseIdx === 0);
-        if (phaseIdx === 0) {
-          textAtts.forEach((a) => {
-            textPayload += '\n\nLAMPIRAN "' + a.name + '":\n```\n' + a.content + '\n```';
+          const result = await runAiStream({
+            messages: apiMessages,
+            modelUsed: activeModel,
+            useDirect,
+            signal: abortCtrl.signal,
+            bubble,
+            onPhase,
           });
-        }
+          finishReason = result.finishReason;
 
-        const messages = messagesBase.slice();
-        messages[messages.length - 1] = {
-          role: 'user',
-          content: (imageAtts.length && phaseIdx === 0)
-            ? [
-                { type: 'text', text: textPayload },
-                ...imageAtts.map((a) => ({ type: 'image_url', image_url: { url: a.dataUrl } })),
-              ]
-            : textPayload,
-        };
+          if (!result.visible.trim()) {
+            if (!fastRetry && result.rawText.length > 6000 && activeModel.includes('M3')) {
+              fastRetry = true;
+              activeModel = MODEL_FAST;
+              phase = 'menghubungi';
+              bubble.innerHTML = '';
+              bubble.appendChild(el('span', {
+                class: 'ai-thinking',
+                text: 'Mencoba lagi…',
+              }));
+              showToast('Sedikit lama — ' + BRAND_AI + ' mencoba lagi…', 'warn');
+              continue;
+            }
+            if (finishReason === 'length') {
+              throw new Error('Respons terlalu panjang. KARSA akan melanjutkan otomatis — tunggu atau kirim ulang permintaan yang sama.');
+            }
+            throw new Error(result.rawText.length === 0
+              ? 'Tidak ada respons dari server AI. Periksa koneksi internetmu lalu coba lagi.'
+              : 'AI belum selesai menulis. Coba kirim ulang permintaan yang sama.');
+          }
 
-        const baseMessages = trimMessagesForApi(messages);
+          const beforeMerge = accumulatedVisible;
+          accumulatedVisible = continueRound === 0
+            ? result.visible
+            : mergeContinuedOutput(accumulatedVisible, result.visible);
 
-        const phaseResult = await streamWithAutoContinue({
-          baseMessages,
-          bubble,
-          modelUsed: activeModel,
-          useDirect,
-          signal: abortCtrl.signal,
-          onPhase,
-        });
-        activeModel = phaseResult.activeModel;
-        totalContinueRounds += phaseResult.continueRounds;
-        finishReason = phaseResult.finishReason;
+          const mergeFp = mergeFingerprint(accumulatedVisible);
+          if (continueRound > 0 && (mergeFp === lastMergeFp || accumulatedVisible === beforeMerge)) {
+            break;
+          }
+          lastMergeFp = mergeFp;
 
-        accumulatedVisible = phaseIdx === 0
-          ? phaseResult.accumulatedVisible
-          : mergePhaseOutputs(accumulatedVisible, phaseResult.accumulatedVisible);
+          renderAssistantHtml(bubble, accumulatedVisible);
+          storeMergedFiles(bubble, accumulatedVisible);
 
-        renderAssistantHtml(bubble, accumulatedVisible);
-        storeMergedFiles(bubble, accumulatedVisible);
+          const stillTruncated = isResponseTruncated(accumulatedVisible, finishReason);
+          if (!stillTruncated || continueRound >= MAX_AUTO_CONTINUE) break;
 
-        const phaseFiles = parseFileBlocks(accumulatedVisible)
-          .filter((f) => isFileComplete(f.code, f.path))
-          .filter((f) => !projectFileMatches(f.path, f.code));
-        if (phaseFiles.length && (isAwamMobileMode() || phaseIdx < expandedPhases.length - 1)) {
-          applyFiles(phaseFiles);
-        }
-
-        const phaseTruncated = isResponseTruncated(phaseResult.accumulatedVisible, finishReason);
-        if (phaseTruncated && phaseIdx < expandedPhases.length - 1) {
-          showToast('Tahap terpotong — melanjutkan otomatis…', 'warn');
-          break;
-        }
+          continueRound++;
+          phase = 'melanjutkan';
+          setBusy(true, 'Melanjutkan otomatis… bagian ' + (continueRound + 1));
       }
+
+      totalContinueRounds = continueRound;
       const visible = accumulatedVisible;
       const truncated = isResponseTruncated(visible, finishReason);
       attachApplyBox(bubble, visible, true, { truncated });
