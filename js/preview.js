@@ -70,6 +70,38 @@ const Preview = (() => {
   window.addEventListener('unhandledrejection', function (e) {
     kirim('error', ['Promise ditolak: ' + format(e.reason)]);
   });
+  // Cegah link menu landing mengarah ke karsa.work (preview lokal pakai srcdoc, bukan hosting)
+  function scrollToHash(hash) {
+    if (!hash || hash.charAt(0) !== '#') return false;
+    var id = decodeURIComponent(hash.slice(1));
+    if (!id) return false;
+    var el = document.getElementById(id) || document.querySelector('[name="' + id + '"]');
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); return true; }
+    return false;
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a) return;
+    var href = (a.getAttribute('href') || '').trim();
+    if (!href || href === '#') { e.preventDefault(); return; }
+    if (href.charAt(0) === '#') {
+      e.preventDefault();
+      if (!scrollToHash(href)) kirim('warn', ['Bagian "' + href.slice(1) + '" tidak ditemukan di halaman.']);
+      return;
+    }
+    if (/^javascript:/i.test(href)) return;
+    var luar = /^https?:\\/\\//i.test(href) || href.indexOf('//') === 0;
+    var halaman = /\\.html?(\\?|#|$)/i.test(href) || (href.charAt(0) === '/' && href.charAt(1) !== '/');
+    if (luar || halaman) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        var u = new URL(href, document.baseURI || 'about:srcdoc');
+        if (u.hash && scrollToHash(u.hash)) return;
+      } catch (err) { /* abaikan */ }
+      parent.postMessage({ __karsa_preview_link: href }, '*');
+    }
+  }, true);
   // --- Screenshot: dom-to-image 2.6.0 (html2canvas & dom-to-image-more gagal
   //     di iframe sandbox karena memakai iframe internal lintas-origin) ---
   var d2iAntrian = null;
@@ -270,6 +302,12 @@ const Preview = (() => {
         html = html.split('(' + ref + ')').join('(' + content + ')');
       });
     });
+
+    // Link menu ke karsa.work / URL live → anchor # (preview lokal pakai srcdoc, bukan hosting)
+    html = html.replace(
+      /\bhref=(["'])https?:\/\/[^"'#]*?karsa\.work[^"'#]*(#[^"']*)?\1/gi,
+      (m, q, hash) => 'href=' + q + (hash || '#') + q
+    );
 
     // Suntikkan jembatan console seawal mungkin
     if (/<head[^>]*>/i.test(html)) {
@@ -480,6 +518,26 @@ const Preview = (() => {
     if (active) loadingFailsafe = setTimeout(() => wrap.classList.remove('loading'), 4000);
   }
 
+  function recoverPreviewIfBroken() {
+    const frame = $('#preview-frame');
+    const project = State.getCurrentProject();
+    if (!frame || !project || usesSnackEngine(project)) return;
+    const src = frame.getAttribute('src');
+    let broken = !!(src && !/^about:/i.test(src));
+    if (!broken) {
+      try {
+        const href = frame.contentWindow.location.href;
+        broken = !!(href && !/^about:/i.test(href));
+      } catch (e) {
+        broken = !!src;
+      }
+    }
+    if (!broken) return;
+    frame.removeAttribute('src');
+    frame.srcdoc = buildBundle(project);
+    showToast('Preview dimuat ulang — menu atas scroll ke bagian (#), bukan alamat online.', 'info');
+  }
+
   function refresh() {
     const project = State.getCurrentProject();
     if (!project) return;
@@ -517,7 +575,9 @@ const Preview = (() => {
       urlLabel.textContent = (project.publish.subdomainUrl || project.publish.customUrl || project.publish.url)
         .replace(/^https?:\/\//, '');
     }
-    else ensurePublishHost().then((host) => { urlLabel.textContent = slug + '.' + host; });
+    else ensurePublishHost().then((host) => {
+      urlLabel.textContent = slug + '.' + host + (project.publish ? '' : ' · preview lokal');
+    });
   }
 
   const refreshDebounced = debounce(() => {
@@ -645,7 +705,10 @@ const Preview = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    $('#preview-frame').addEventListener('load', () => setPreviewLoading(false));
+    $('#preview-frame').addEventListener('load', () => {
+      setPreviewLoading(false);
+      recoverPreviewIfBroken();
+    });
   });
 
   // Simpan thumbnail proyek (diperkecil ke 360px JPEG agar hemat penyimpanan)
@@ -687,6 +750,8 @@ const Preview = (() => {
       else showShotResult(data.__karsa_shot_done);
     } else if (data.__karsa_shot_err && data.__karsa_shot_err !== 'dibatalkan' && data.tag !== 'thumb') {
       showToast('Screenshot gagal: ' + data.__karsa_shot_err, 'error');
+    } else if (data.__karsa_preview_link) {
+      showToast('Preview lokal — link itu untuk versi online (Publish). Pakai menu # atau scroll di halaman.', 'info');
     } else if (data.__karsa_inspect_cancel) {
       inspectActive = false;
       setInspectButton(false);

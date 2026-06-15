@@ -69,7 +69,7 @@ function isInteractiveWebToolPrompt(text) {
 function webAwamSystemNote(prompt, userAsk) {
   const base = 'Permintaan pengguna: «' + userAsk + '»\n\nCATATAN SISTEM: Pengguna biasa — jangan tanya balik.\n';
   if (isLandingPagePrompt(prompt)) {
-    return base + 'Buat landing page web (index.html + css/style.css + js/app.js): hero, CTA, mobile-first. Boleh mockup HP kalau relevan.';
+    return base + 'Buat landing page web (index.html + css/style.css + js/app.js): hero, CTA, mobile-first. Menu navigasi atas wajib pakai anchor <a href="#id-section"> — jangan link ke karsa.work atau URL absolut.';
   }
   if (isInteractiveWebToolPrompt(prompt)) {
     return base + [

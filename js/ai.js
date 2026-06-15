@@ -55,6 +55,7 @@ const AI = (() => {
     '20. "Website editor foto / kalkulator / kasir / game …" = buat ALAT WEB yang BERFUNGSI di browser (upload, canvas, tombol, slider). BUKAN landing page marketing atau mockup HP yang mengiklankan aplikasi mobile.',
     '21. Frasa "website untuk aplikasi X" dari user awam = mereka mau situs web yang berfungsi seperti aplikasi X — bukan halaman promosi "download app".',
     '22. Mockup/gambar telepon HANYA kalau user minta landing page / promosi / profil usaha secara eksplisit.',
+    '23. Menu navigasi landing page: pakai <a href="#id-bagian"> untuk scroll ke section. JANGAN href ke karsa.work, domain live, atau URL absolut untuk menu dalam halaman yang sama.',
   ].join('\n');
 
   function getSystemPrompt() {
