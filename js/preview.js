@@ -451,6 +451,7 @@ const Preview = (() => {
   }
 
   function usesSnackEngine(project) {
+    if (isMobileAwamProject(project)) return false;
     const a = analyzeProjectFiles(project.files);
     if (previewEngine === 'web') return false;
     if (previewEngine === 'snack') return Snack.canPreview(project);
@@ -463,6 +464,7 @@ const Preview = (() => {
 
   function pickPreviewEngine(project) {
     if (!project) return 'auto';
+    if (isMobileAwamProject(project)) return 'web';
     const a = analyzeProjectFiles(project.files);
     if (hasUsableWebPreview(project.files)) return 'web';
     const isMobileLike = project.projectType === 'mobile' || project.projectType === 'playstore';
@@ -492,7 +494,7 @@ const Preview = (() => {
       btn.classList.toggle('active', active);
     });
     const project = State.getCurrentProject();
-    const show = project && analyzeProjectFiles(project.files).expoLike;
+    const show = project && analyzeProjectFiles(project.files).expoLike && !isMobileAwamProject(project);
     const bar = $('#preview-engine-bar');
     if (bar) bar.classList.toggle('hidden', !show);
   }
@@ -500,6 +502,20 @@ const Preview = (() => {
   function updatePreviewHint(project) {
     const hint = $('#preview-hint');
     if (!hint) return;
+    if (isMobileAwamProject(project)) {
+      if (hasUsableWebPreview(project.files)) {
+        hint.className = 'preview-hint hidden';
+        hint.innerHTML = '';
+        return;
+      }
+      hint.className = 'preview-hint preview-hint-compact';
+      hint.innerHTML = '';
+      hint.appendChild(el('div', { class: 'preview-hint-inner' }, [
+        el('strong', { text: 'Menunggu aplikasi…' }),
+        el('p', { text: 'Ceritakan aplikasi yang kamu mau di chat KARSA AI — pratinjau HP akan muncul otomatis di sini.' }),
+      ]));
+      return;
+    }
     if (usesSnackEngine(project)) {
       hint.className = 'preview-hint hidden';
       hint.innerHTML = '';
@@ -599,7 +615,16 @@ const Preview = (() => {
       }
     } else {
       hidePreviewStatus();
-      loadLocalPreview(frame, project);
+      if (isMobileAwamProject(project) && !hasUsableWebPreview(project.files)) {
+        frame.removeAttribute('src');
+        frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+          '<style>body{margin:0;min-height:100dvh;display:flex;align-items:center;justify-content:center;background:linear-gradient(165deg,#f0f4ff,#e8ecf4);' +
+          'font-family:system-ui,sans-serif;color:#64748b;text-align:center;padding:24px}.i{font-size:48px;margin-bottom:12px}</style></head>' +
+          '<body><div><div class="i">📱</div><p><strong>Pratinjau siap sebentar lagi</strong></p>' +
+          '<p style="font-size:13px;margin-top:8px">Jelaskan aplikasi di chat — hasilnya tampil di sini.</p></div></body></html>';
+      } else {
+        loadLocalPreview(frame, project);
+      }
     }
     updatePreviewHint(project);
 
@@ -614,7 +639,9 @@ const Preview = (() => {
     }
     const urlLabel = $('#preview-url');
     const slug = project.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'preview';
-    if (snackMode) urlLabel.textContent = 'snack.expo.dev · ' + slug;
+    if (isMobileAwamProject(project)) {
+      urlLabel.textContent = hasUsableWebPreview(project.files) ? 'Pratinjau aplikasi' : 'Menunggu…';
+    } else if (snackMode) urlLabel.textContent = 'snack.expo.dev · ' + slug;
     else if (project.publish && (project.publish.subdomainUrl || project.publish.customUrl || project.publish.url)) {
       urlLabel.textContent = (project.publish.subdomainUrl || project.publish.customUrl || project.publish.url)
         .replace(/^https?:\/\//, '');

@@ -83,6 +83,20 @@ function webAwamSystemNote(prompt, userAsk) {
   return base + 'Buat website (index.html + css/style.css + js/app.js) sesuai permintaan. Kalau ini aplikasi/tool, buat versi web yang bisa dipakai — bukan halaman promosi kosong.';
 }
 
+function isMobileAwamProject(project) {
+  return !!(project && (project.projectType === 'mobile' || project.projectType === 'playstore'));
+}
+
+function friendlyAwamFileLabel(path) {
+  const p = String(path || '').toLowerCase();
+  if (/index\.html$/.test(p)) return 'Layar aplikasi';
+  if (/style\.css$/.test(p)) return 'Tampilan & warna';
+  if (/app\.js$/.test(p)) return 'Tombol & fitur';
+  if (/app\.tsx$/.test(p)) return 'Versi HP (internal)';
+  if (/readme/i.test(p)) return 'Catatan';
+  return 'Bagian aplikasi';
+}
+
 function webPreviewEntryPath(files) {
   if (!files) return null;
   const preview = files['preview/index.html'];
