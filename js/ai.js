@@ -74,15 +74,6 @@ const AI = (() => {
   let renderedProjectId = null;
   let busy = false;
   let abortCtrl = null;
-  let awamMobileMode = false;
-
-  function setAwamMobileMode(on) {
-    awamMobileMode = !!on;
-  }
-
-  function isAwamMobileMode() {
-    return awamMobileMode || isMobileAwamProject(State.getCurrentProject());
-  }
 
   function sanitizePublicError(msg) {
     if (!msg || typeof msg !== 'string') return 'Terjadi kesalahan. Coba lagi.';
@@ -351,10 +342,10 @@ const AI = (() => {
           apiText:
             'Permintaan pengguna: «' + userAsk + '»\n\n' +
             'CATATAN SISTEM: Pengguna biasa (tidak paham coding). Jangan tanya balik. Jangan suruh mereka pecah permintaan.\n' +
-            'WAJIB keluarkan preview web yang langsung tampil di pratinjau HP KARSA:\n' +
-            '• index.html ATAU preview/index.html (href="style.css", src="app.js")\n' +
-            '• style.css atau preview/style.css\n' +
-            '• app.js atau preview/app.js\n' +
+            'WAJIB keluarkan 3 file web yang langsung bisa dilihat di preview browser:\n' +
+            '• preview/index.html (href="style.css", src="app.js")\n' +
+            '• preview/style.css\n' +
+            '• preview/app.js\n' +
             'UI mobile-first, semua layar & fitur utama bisa diklik (data contoh boleh). Bukan mockup telepon kosong. Jangan pakai div.phone-frame di HTML.\n' +
             'App.tsx boleh disertakan ringkas jika masih ada — jangan tulis App.tsx 500+ baris dalam satu respons.',
         });
@@ -445,23 +436,15 @@ const AI = (() => {
   }
 
   function renderWelcome() {
-    const project = State.getCurrentProject();
-    const mobile = isAwamMobileMode();
-    const examples = mobile ? [
-      '📱 Tambahkan layar catat tinggi & berat badan',
-      '📊 Buat grafik pertumbuhan per bulan',
-      '🥗 Tambahkan panduan nutrisi untuk anak',
-    ] : [
+    const examples = [
       '🪙 Buatkan aplikasi pencatat keuangan harian dengan grafik batang',
       '🎨 Percantik tampilannya: tema gelap modern dengan aksen neon',
       '🎮 Buat game tebak angka 1-100 yang seru dengan skor',
     ];
     const box = el('div', { class: 'ai-welcome' }, [
-      el('div', { class: 'ai-welcome-icon', text: mobile ? '📱' : '✨' }),
-      el('h3', { text: mobile ? 'Buat aplikasi HP kamu' : 'Vibecoding dengan KARSA AI' }),
-      el('p', { text: mobile
-        ? 'Ceritakan saja aplikasi yang kamu mau — misalnya "aplikasi monitoring tinggi badan anak". Hasilnya langsung tampil di pratinjau HP di sebelah kanan. Edit terus sampai puas, cukup chat di sini.'
-        : 'Cukup bilang apa yang kamu mau — misalnya "buatkan website editor foto". Setelah AI selesai, klik ⚡ Terapkan (atau centang Auto-terapkan) untuk lihat di editor & preview.' }),
+      el('div', { class: 'ai-welcome-icon', text: '✨' }),
+      el('h3', { text: 'Vibecoding dengan KARSA AI' }),
+      el('p', { text: 'Cukup bilang apa yang kamu mau — misalnya "buatkan website editor foto". Setelah AI selesai, klik ⚡ Terapkan (atau centang Auto-terapkan) untuk lihat di editor & preview.' }),
       el('div', { class: 'ai-examples' }, examples.map((ex) =>
         el('button', {
           class: 'ai-example',
@@ -586,17 +569,14 @@ const AI = (() => {
     const info = newline === -1 ? rawBlock : rawBlock.slice(0, newline);
     const code = newline === -1 ? '' : rawBlock.slice(newline + 1).replace(/\n$/, '');
     const fileMatch = info.match(/file=([^\s]+)/);
-    const rawTitle = fileMatch ? fileMatch[1] : (info.trim().split(/\s+/)[0] || 'kode');
-    const title = isAwamMobileMode() ? friendlyAwamFileLabel(rawTitle) : rawTitle;
+    const title = fileMatch ? fileMatch[1] : (info.trim().split(/\s+/)[0] || 'kode');
     const lineCount = code ? code.split('\n').length : 0;
 
     const card = el('div', { class: 'ai-code-card' + (isWriting ? ' writing' : '') });
     const head = el('button', { class: 'ai-code-head', type: 'button' }, [
-      isWriting ? el('span', { class: 'ai-code-pen', text: '✍' }) : fileBadge(isAwamMobileMode() ? '📱' : title),
+      isWriting ? el('span', { class: 'ai-code-pen', text: '✍' }) : fileBadge(title),
       el('span', { class: 'ai-code-name', text: title }),
-      el('span', { class: 'ai-code-meta', text: isWriting
-        ? (isAwamMobileMode() ? 'membuat…' : 'menulis… ' + lineCount + ' baris')
-        : (isAwamMobileMode() ? 'selesai' : lineCount + ' baris') }),
+      el('span', { class: 'ai-code-meta', text: isWriting ? 'menulis… ' + lineCount + ' baris' : lineCount + ' baris' }),
       isWriting ? el('span', { class: 'ai-spinner' }) : el('span', { class: 'ai-code-caret', text: '▾' }),
     ]);
     card.appendChild(head);
@@ -992,9 +972,7 @@ const AI = (() => {
   }
 
   function tryAutoApply(bubble, visible, truncated) {
-    const force = isAwamMobileMode();
-    if (!force && !isAutoApplyOn()) return;
-    if (truncated) return;
+    if (!isAutoApplyOn() || truncated) return;
     const allFiles = collectFileBlocks(bubble, visible);
     const parsedFiles = allFiles.filter((f) => isFileComplete(f.code, f.path));
     if (parsedFiles.length < allFiles.length) {
@@ -1004,11 +982,6 @@ const AI = (() => {
     const pending = parsedFiles.filter((f) => !projectFileMatches(f.path, f.code));
     if (!pending.length) return;
     if (applyFiles(pending)) markApplyButtonDone(bubble);
-    if (force && typeof Preview !== 'undefined') {
-      Preview.setEngine('web');
-      Preview.setDevice('phone');
-      Preview.refresh();
-    }
   }
 
   function applyFiles(files) {
@@ -1033,28 +1006,21 @@ const AI = (() => {
       || valid.find((f) => f.path === 'index.html')
       || valid.find((f) => /\.html$/i.test(f.path));
     const entry = htmlApplied ? htmlApplied.path : valid[0].path;
-    if (!isAwamMobileMode()) {
-      Tabs.open(entry);
-    }
-    if (valid.some((f) => /\.html$/i.test(f.path)) || isAwamMobileMode()) {
+    Tabs.open(entry);
+    if (valid.some((f) => /\.html$/i.test(f.path))) {
       Preview.setEngine('web');
-      Preview.setDevice('phone');
     }
     Preview.refresh();
     confettiBurst();
     appendChangeSummary(summary);
-    showToast(isAwamMobileMode() ? 'Pratinjau aplikasi diperbarui ✓' : valid.length + ' file diterapkan — preview diperbarui', 'ok');
+    showToast(valid.length + ' file diterapkan — preview diperbarui', 'ok');
     return true;
   }
 
   // #9 Ringkasan "apa yang berubah" sebagai gelembung di chat
   function appendChangeSummary(summary) {
-    const awam = isAwamMobileMode();
-    const head = el('div', {
-      class: 'ai-change-head',
-      text: awam ? '✓ Pratinjau diperbarui' : '✓ Diterapkan — ' + summary.length + ' file',
-    });
-    const items = awam ? [] : summary.map((s) => {
+    const head = el('div', { class: 'ai-change-head', text: '✓ Diterapkan — ' + summary.length + ' file' });
+    const items = summary.map((s) => {
       const deltaText = s.isNew
         ? '+' + s.lines + ' baris'
         : (s.delta === 0 ? 'disesuaikan' : (s.delta > 0 ? '+' + s.delta : String(s.delta)) + ' baris');
@@ -1221,7 +1187,7 @@ const AI = (() => {
       const label = phase === 'menghubungi' ? 'menghubungi KARSA AI'
         : phase === 'berpikir' ? 'AI sedang berpikir 💭'
         : phase === 'melanjutkan' ? 'melanjutkan tulis otomatis ✍'
-        : (isAwamMobileMode() ? 'membuat aplikasi' : 'AI sedang menulis ✍');
+        : 'AI sedang menulis ✍';
       $('#ai-status').textContent = label + '… ' + secs + ' dtk';
     }, 1000);
 
@@ -1564,7 +1530,7 @@ const AI = (() => {
 
   return {
     init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh,
-    setAutoApply, setAwamMobileMode, openSettings: settingsDialog, refreshApplyBoxes, prefillFromInspect, prefillError,
+    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes, prefillFromInspect, prefillError,
   };
 })();
 
