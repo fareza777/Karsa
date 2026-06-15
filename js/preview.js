@@ -527,35 +527,9 @@ const Preview = (() => {
     if (active) loadingFailsafe = setTimeout(() => wrap.classList.remove('loading'), 4000);
   }
 
-  function isPreviewBroken(frame) {
-    if (!frame) return false;
-    const src = frame.getAttribute('src');
-    if (src && !/^about:/i.test(src)) return true;
-    try {
-      const href = frame.contentWindow.location.href || '';
-      if (/^https?:/i.test(href) || /^chrome-error:/i.test(href)) return true;
-      return !!(href && !/^about:(srcdoc|blank)$/i.test(href));
-    } catch (e) {
-      return true;
-    }
-  }
-
   function loadLocalPreview(frame, project) {
-    const bundle = buildBundle(project);
     frame.removeAttribute('src');
-    frame.removeAttribute('srcdoc');
-    try { frame.src = 'about:blank'; } catch (e) { /* abaikan */ }
-    frame.srcdoc = bundle;
-  }
-
-  function recoverPreviewIfBroken() {
-    const frame = $('#preview-frame');
-    const project = State.getCurrentProject();
-    if (!frame || !project || usesSnackEngine(project)) return false;
-    if (!isPreviewBroken(frame)) return false;
-    loadLocalPreview(frame, project);
-    showToast('Preview lokal dimuat ulang — menu atas pakai #bagian, bukan alamat online.', 'info');
-    return true;
+    frame.srcdoc = buildBundle(project);
   }
 
   function refresh() {
@@ -724,11 +698,7 @@ const Preview = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const frame = $('#preview-frame');
-    frame.addEventListener('load', () => {
-      setPreviewLoading(false);
-      recoverPreviewIfBroken();
-    });
+    $('#preview-frame').addEventListener('load', () => setPreviewLoading(false));
     const urlLabel = $('#preview-url');
     if (urlLabel) {
       urlLabel.style.cursor = 'pointer';
@@ -737,10 +707,6 @@ const Preview = (() => {
         if (State.getCurrentProject()) refresh();
       });
     }
-    // Pulihkan preview rusak saat IDE sudah terbuka (mis. setelah deploy JS baru)
-    setTimeout(() => {
-      if (!$('#view-ide').classList.contains('hidden')) recoverPreviewIfBroken();
-    }, 400);
   });
 
   // Simpan thumbnail proyek (diperkecil ke 360px JPEG agar hemat penyimpanan)
