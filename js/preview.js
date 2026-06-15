@@ -303,10 +303,19 @@ const Preview = (() => {
       });
     });
 
+    // Hapus base/meta redirect ke karsa.work (bikin semua link keluar preview lokal)
+    html = html.replace(/<base\b[^>]*href=["']https?:\/\/[^"']*karsa\.work[^"']*["'][^>]*>/gi, '');
+    html = html.replace(/<meta\b[^>]*http-equiv=["']refresh["'][^>]*content=["'][^"']*url=https?:\/\/[^"']*karsa\.work[^"']*["'][^>]*>/gi, '');
+
     // Link menu ke karsa.work / URL live → anchor # (preview lokal pakai srcdoc, bukan hosting)
     html = html.replace(
-      /\bhref=(["'])https?:\/\/[^"'#]*?karsa\.work[^"'#]*(#[^"']*)?\1/gi,
+      /\bhref=(["'])https?:\/\/[^"'#]*?karsa\.work[^"']*(#[^"']*)?\1/gi,
       (m, q, hash) => 'href=' + q + (hash || '#') + q
+    );
+    // URL absolut lain di href menu (tanpa karsa.work) → hash kalau ada, else #
+    html = html.replace(
+      /\bhref=(["'])https?:\/\/[^"']+(#[^"']*)\1/gi,
+      (m, q, hash) => 'href=' + q + hash + q
     );
 
     // Suntikkan jembatan console seawal mungkin
@@ -518,24 +527,35 @@ const Preview = (() => {
     if (active) loadingFailsafe = setTimeout(() => wrap.classList.remove('loading'), 4000);
   }
 
+  function isPreviewBroken(frame) {
+    if (!frame) return false;
+    const src = frame.getAttribute('src');
+    if (src && !/^about:/i.test(src)) return true;
+    try {
+      const href = frame.contentWindow.location.href || '';
+      if (/^https?:/i.test(href) || /^chrome-error:/i.test(href)) return true;
+      return !!(href && !/^about:(srcdoc|blank)$/i.test(href));
+    } catch (e) {
+      return true;
+    }
+  }
+
+  function loadLocalPreview(frame, project) {
+    const bundle = buildBundle(project);
+    frame.removeAttribute('src');
+    frame.removeAttribute('srcdoc');
+    try { frame.src = 'about:blank'; } catch (e) { /* abaikan */ }
+    frame.srcdoc = bundle;
+  }
+
   function recoverPreviewIfBroken() {
     const frame = $('#preview-frame');
     const project = State.getCurrentProject();
-    if (!frame || !project || usesSnackEngine(project)) return;
-    const src = frame.getAttribute('src');
-    let broken = !!(src && !/^about:/i.test(src));
-    if (!broken) {
-      try {
-        const href = frame.contentWindow.location.href;
-        broken = !!(href && !/^about:/i.test(href));
-      } catch (e) {
-        broken = !!src;
-      }
-    }
-    if (!broken) return;
-    frame.removeAttribute('src');
-    frame.srcdoc = buildBundle(project);
-    showToast('Preview dimuat ulang — menu atas scroll ke bagian (#), bukan alamat online.', 'info');
+    if (!frame || !project || usesSnackEngine(project)) return false;
+    if (!isPreviewBroken(frame)) return false;
+    loadLocalPreview(frame, project);
+    showToast('Preview lokal dimuat ulang — menu atas pakai #bagian, bukan alamat online.', 'info');
+    return true;
   }
 
   function refresh() {
@@ -554,8 +574,7 @@ const Preview = (() => {
       maybeAutoFixPreview(project, diag);
     } else {
       hidePreviewStatus();
-      frame.removeAttribute('src');
-      frame.srcdoc = buildBundle(project);
+      loadLocalPreview(frame, project);
     }
     updatePreviewHint(project);
 
@@ -705,10 +724,23 @@ const Preview = (() => {
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    $('#preview-frame').addEventListener('load', () => {
+    const frame = $('#preview-frame');
+    frame.addEventListener('load', () => {
       setPreviewLoading(false);
       recoverPreviewIfBroken();
     });
+    const urlLabel = $('#preview-url');
+    if (urlLabel) {
+      urlLabel.style.cursor = 'pointer';
+      urlLabel.title = 'Klik untuk muat ulang preview lokal';
+      urlLabel.addEventListener('click', () => {
+        if (State.getCurrentProject()) refresh();
+      });
+    }
+    // Pulihkan preview rusak saat IDE sudah terbuka (mis. setelah deploy JS baru)
+    setTimeout(() => {
+      if (!$('#view-ide').classList.contains('hidden')) recoverPreviewIfBroken();
+    }, 400);
   });
 
   // Simpan thumbnail proyek (diperkecil ke 360px JPEG agar hemat penyimpanan)
