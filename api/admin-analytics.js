@@ -69,10 +69,13 @@ export default async function handler(req, res) {
 
   const supabase = adminConfigured() ? await getAdminOverview() : null;
   const activity = analyticsEnabled() ? await getRecentActivity(40) : [];
+  const aiBrief = maskAiConfig(await getAiConfig());
 
   res.status(200).json({
     analyticsEnabled: analyticsEnabled(),
+    kvConfigured: kvConfigured(),
     supabaseConfigured: adminConfigured(),
+    aiBrief,
     today,
     last7: {
       logins: sum('logins'),

@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Syne:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/admin.css?v=20260615">
+  <link rel="stylesheet" href="css/admin.css?v=20260616">
 </head>
 <body data-theme="dark" class="admin-page">
 
@@ -111,21 +111,24 @@
           <div id="admin-charts" class="admin-charts"></div>
         </div>
 
-        <div class="admin-panel admin-preview-panel">
+        <div class="admin-panel admin-side-panel">
           <div class="admin-section-title">
-            <h2>Sekilas penggunaan</h2>
-            <span class="admin-pill admin-pill-live"><span class="admin-live-dot"></span> Live replay</span>
+            <h2>Status platform</h2>
+            <span class="admin-muted">Realtime</span>
           </div>
-          <p class="admin-preview-desc admin-muted">Pratinjau animasi aktivitas terbaru di KARSA — seperti melihat layar pengguna sebentar.</p>
-          <div class="admin-preview">
-            <div class="admin-preview-chrome">
-              <span></span><span></span><span></span>
-              <div class="admin-preview-url">karsa.work/app</div>
-            </div>
-            <div id="admin-preview-stage" class="admin-preview-stage" aria-live="polite"></div>
-            <div id="admin-preview-caption" class="admin-preview-caption"></div>
+          <div id="admin-platform-status" class="admin-status-grid"></div>
+
+          <div class="admin-section-title admin-section-title-spaced">
+            <h2>Ringkasan AI</h2>
+            <span class="admin-muted">Token</span>
           </div>
-          <div id="admin-activity-feed" class="admin-feed"></div>
+          <div id="admin-ai-summary" class="admin-ai-summary"></div>
+
+          <div class="admin-section-title admin-section-title-spaced">
+            <h2>Log aktivitas</h2>
+            <span class="admin-muted">Terbaru</span>
+          </div>
+          <div id="admin-activity-feed" class="admin-feed admin-feed-tall"></div>
         </div>
       </section>
 
@@ -186,6 +189,6 @@
   <script src="js/utils.js"></script>
   <script src="js/plan.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/admin.js?v=20260615b"></script>
+  <script src="js/admin.js?v=20260616"></script>
 </body>
 </html>

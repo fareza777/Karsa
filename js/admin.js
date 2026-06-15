@@ -2,9 +2,6 @@
 
 (function () {
   const fmt = (n) => (Number(n) || 0).toLocaleString('id-ID');
-  let previewTimer = null;
-  let previewIndex = 0;
-  let previewItems = [];
 
   const METRICS = [
     ['Login', 'logins', 'admin-card--login', '↪', false],
@@ -29,13 +26,6 @@
     ai: { icon: '✦', label: 'Permintaan AI', cls: 'ai' },
     publish: { icon: '⬡', label: 'Publish situs', cls: 'publish' },
   };
-
-  const DEMO_ACTIVITY = [
-    { type: 'login', t: Date.now(), uid: 'demo' },
-    { type: 'ai', t: Date.now() - 60000, n: 1200 },
-    { type: 'publish', t: Date.now() - 120000 },
-    { type: 'signup', t: Date.now() - 180000, uid: 'demo2' },
-  ];
 
   function fmtDate(iso) {
     if (!iso) return '—';
@@ -153,123 +143,79 @@
     renderChart(box, 'Token keluar', last7, 'tokens_out', 'admin-chart--token');
   }
 
-  function sceneLogin(item) {
-    const uid = item?.uid || 'user';
-    return el('div', { class: 'admin-scene' }, [
-      el('div', { class: 'admin-scene-header' }, [
-        el('div', { class: 'admin-scene-logo', text: '✦' }),
-        el('span', { class: 'admin-scene-title', text: 'KARSA — Dashboard' }),
-      ]),
-      el('div', { class: 'admin-scene-body' }, [
-        el('div', { style: 'display:flex;align-items:center;gap:10px;margin-bottom:8px' }, [
-          el('div', { class: 'admin-mock-avatar', text: (uid[0] || 'U').toUpperCase() }),
-          el('div', {}, [
-            el('div', { class: 'admin-mock-row w40', style: 'height:8px;margin-bottom:6px' }),
-            el('div', { class: 'admin-mock-row w60', style: 'height:6px' }),
-          ]),
-        ]),
-        el('div', { class: 'admin-mock-card' }, [
-          el('div', { style: 'font-size:.72rem;color:var(--accent-2)', text: '✓ Login berhasil' }),
-          el('div', { class: 'admin-mock-row w80', style: 'height:6px;margin-top:8px' }),
-        ]),
-        el('div', { class: 'admin-mock-row w80' }),
-        el('div', { class: 'admin-mock-row w60' }),
+  function statusRow(label, ok, detail) {
+    return el('div', { class: 'admin-status-row' }, [
+      el('span', { class: 'admin-status-dot ' + (ok ? 'ok' : 'warn'), 'aria-hidden': 'true' }),
+      el('div', { class: 'admin-status-copy' }, [
+        el('span', { class: 'admin-status-label', text: label }),
+        el('span', { class: 'admin-status-detail', text: detail }),
       ]),
     ]);
   }
 
-  function sceneSignup() {
-    return el('div', { class: 'admin-scene' }, [
-      el('div', { class: 'admin-scene-header' }, [
-        el('div', { class: 'admin-scene-logo', text: '✦' }),
-        el('span', { class: 'admin-scene-title', text: 'Daftar akun baru' }),
-      ]),
-      el('div', { class: 'admin-scene-body' }, [
-        el('div', { class: 'admin-mock-card green' }, [
-          el('div', { style: 'font-size:.75rem;font-weight:600', text: 'Selamat datang di KARSA!' }),
-          el('div', { style: 'font-size:.68rem;color:var(--muted);margin-top:4px', text: 'Akun siap — mulai buat proyek pertama.' }),
-        ]),
-        el('div', { class: 'admin-mock-row w80' }),
-        el('div', { class: 'admin-mock-row w60' }),
-      ]),
-    ]);
+  function renderPlatformStatus(data) {
+    const box = $('#admin-platform-status');
+    if (!box) return;
+    box.innerHTML = '';
+    const ai = data.aiBrief || {};
+    box.appendChild(statusRow(
+      'Vercel KV',
+      !!data.kvConfigured,
+      data.kvConfigured ? 'Aktif — analytics & config LLM' : 'Belum dikonfigurasi'
+    ));
+    box.appendChild(statusRow(
+      'Analytics',
+      !!data.analyticsEnabled,
+      data.analyticsEnabled ? 'Mencatat login, AI, publish' : 'Statistik tidak tercatat'
+    ));
+    box.appendChild(statusRow(
+      'Supabase admin',
+      !!data.supabaseConfigured,
+      data.supabaseConfigured ? 'Ringkasan user & proyek OK' : 'Butuh SUPABASE_SERVICE_ROLE_KEY'
+    ));
+    box.appendChild(statusRow(
+      'KARSA AI',
+      !!ai.apiKeyConfigured,
+      ai.apiKeyConfigured
+        ? (ai.defaultModel || '—') + ' · key ' + (ai.apiKey || 'tersimpan')
+        : 'API key belum diset'
+    ));
+    box.appendChild(statusRow(
+      'Sumber LLM',
+      ai.source === 'kv',
+      ai.source === 'kv'
+        ? 'Vercel KV' + (ai.updatedAt ? ' · ' + new Date(ai.updatedAt).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '')
+        : 'Environment Vercel — simpan di form LLM untuk KV'
+    ));
   }
 
-  function sceneAi(item) {
-    const tokens = item?.n ? ' ~' + fmt(item.n) + ' token' : '';
-    return el('div', { class: 'admin-scene' }, [
-      el('div', { class: 'admin-scene-header' }, [
-        el('div', { class: 'admin-scene-logo', text: '✦' }),
-        el('span', { class: 'admin-scene-title', text: 'AI Vibecoding' }),
-      ]),
-      el('div', { class: 'admin-scene-body admin-mock-chat' }, [
-        el('div', { class: 'admin-mock-bubble user', text: 'Buatkan landing page warung kopi…' }),
-        el('div', { class: 'admin-mock-bubble ai', text: 'Oke! Saya buatkan index.html + CSS…' }),
-        el('div', { class: 'admin-mock-typing' }, [
-          el('span'), el('span'), el('span'),
-        ]),
-        el('div', { style: 'font-size:.65rem;color:var(--muted);text-align:center', text: tokens || 'Menghasilkan kode…' }),
-      ]),
-    ]);
+  function summaryStat(label, value, sub) {
+    return el('div', { class: 'admin-summary-stat' }, [
+      el('div', { class: 'admin-summary-label', text: label }),
+      el('div', { class: 'admin-summary-value', text: value }),
+      sub ? el('div', { class: 'admin-summary-sub admin-muted', text: sub }) : null,
+    ].filter(Boolean));
   }
 
-  function scenePublish() {
-    return el('div', { class: 'admin-scene' }, [
-      el('div', { class: 'admin-scene-header' }, [
-        el('div', { class: 'admin-scene-logo', text: '✦' }),
-        el('span', { class: 'admin-scene-title', text: 'Publish ke web' }),
-      ]),
-      el('div', { class: 'admin-scene-body' }, [
-        el('div', { class: 'admin-mock-card green' }, [
-          el('div', { style: 'font-size:.75rem;font-weight:600', text: '🚀 Situs live!' }),
-          el('div', { class: 'admin-mock-publish-url', text: 'namabisnis.karsa.work' }),
-        ]),
-        el('div', { class: 'admin-mock-row w80' }),
-        el('div', { class: 'admin-mock-row w40' }),
-      ]),
-    ]);
-  }
+  function renderAiSummary(data) {
+    const box = $('#admin-ai-summary');
+    if (!box) return;
+    box.innerHTML = '';
+    const today = data.today || {};
+    const week = data.last7 || {};
+    const todayReq = Number(today.ai_requests) || 0;
+    const weekReq = Number(week.ai_requests) || 0;
+    const todayOut = Number(today.tokens_out) || 0;
+    const weekOut = Number(week.tokens_out) || 0;
+    const avgToday = todayReq > 0 ? Math.round(todayOut / todayReq) : 0;
+    const avgWeek = weekReq > 0 ? Math.round(weekOut / weekReq) : 0;
 
-  function buildScene(item) {
-    switch (item.type) {
-      case 'login': return sceneLogin(item);
-      case 'signup': return sceneSignup(item);
-      case 'ai': return sceneAi(item);
-      case 'publish': return scenePublish(item);
-      default: return sceneLogin(item);
-    }
-  }
-
-  function activityCaption(item) {
-    const meta = ACTIVITY_META[item.type] || { label: item.type };
-    let detail = meta.label;
-    if (item.uid && item.uid !== 'demo' && item.uid !== 'demo2') detail += ' · ' + item.uid;
-    if (item.type === 'ai' && item.n) detail += ' · ' + fmt(item.n) + ' token';
-    return detail;
-  }
-
-  function showPreviewScene(index) {
-    const stage = $('#admin-preview-stage');
-    const caption = $('#admin-preview-caption');
-    if (!stage || !previewItems.length) return;
-    previewIndex = index % previewItems.length;
-    const item = previewItems[previewIndex];
-    stage.innerHTML = '';
-    const scene = buildScene(item);
-    scene.classList.add('active');
-    stage.appendChild(scene);
-    if (caption) {
-      caption.innerHTML = '<strong>' + (ACTIVITY_META[item.type]?.label || 'Aktivitas') + '</strong> — ' + fmtTime(item.t);
-    }
-  }
-
-  function startPreviewReplay(activity) {
-    if (previewTimer) clearInterval(previewTimer);
-    previewItems = (activity && activity.length) ? activity.slice(0, 20) : DEMO_ACTIVITY;
-    showPreviewScene(0);
-    previewTimer = setInterval(() => {
-      showPreviewScene(previewIndex + 1);
-    }, 4200);
+    box.appendChild(el('div', { class: 'admin-summary-grid' }, [
+      summaryStat('AI hari ini', fmt(todayReq), 'permintaan'),
+      summaryStat('Token out hari ini', fmt(todayOut), avgToday ? '~' + fmt(avgToday) + ' / req' : 'belum ada'),
+      summaryStat('AI 7 hari', fmt(weekReq), 'permintaan'),
+      summaryStat('Token out 7 hari', fmt(weekOut), avgWeek ? '~' + fmt(avgWeek) + ' / req' : 'belum ada'),
+    ]));
   }
 
   function renderActivityFeed(activity) {
@@ -499,7 +445,8 @@
     renderWarnings(data);
     renderHeroKpis(data.today);
     renderCharts(data.days);
-    startPreviewReplay(data.activity);
+    renderPlatformStatus(data);
+    renderAiSummary(data);
     renderActivityFeed(data.activity);
     renderCards($('#admin-today-cards'), data.today || {}, METRICS);
     renderCards($('#admin-week-cards'), data.last7 || {}, METRICS);
@@ -540,7 +487,6 @@
   }
 
   async function refresh() {
-    if (previewTimer) clearInterval(previewTimer);
     show('admin-loading');
     try {
       const data = await loadStats();
