@@ -376,8 +376,8 @@ const App = (() => {
     // IDE topbar
     $('#btn-home').addEventListener('click', showDashboard);
     $('#ide-theme-toggle').addEventListener('click', toggleTheme);
-    $('#btn-run').addEventListener('click', () => Preview.refresh());
-    $('#btn-refresh-preview').addEventListener('click', () => Preview.refresh());
+    $('#btn-run').addEventListener('click', () => Preview.refreshHome());
+    $('#btn-refresh-preview').addEventListener('click', () => Preview.refreshHome());
     $('#btn-shot-full').addEventListener('click', () => Preview.screenshot('full'));
     $('#btn-shot-region').addEventListener('click', () => Preview.screenshot('region'));
     $('#btn-open-tab').addEventListener('click', () => Preview.openInNewTab());

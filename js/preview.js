@@ -91,16 +91,19 @@ const Preview = (() => {
     }
     if (/^javascript:/i.test(href)) return;
     var luar = /^https?:\\/\\//i.test(href) || href.indexOf('//') === 0;
-    var halaman = /\\.html?(\\?|#|$)/i.test(href) || (href.charAt(0) === '/' && href.charAt(1) !== '/');
-    if (luar || halaman) {
+    if (luar) {
+      // Link ke situs lain → buka tab baru, jangan navigasi iframe ke KARSA
       e.preventDefault();
       e.stopPropagation();
-      try {
-        var u = new URL(href, document.baseURI || 'about:srcdoc');
-        if (u.hash && scrollToHash(u.hash)) return;
-      } catch (err) { /* abaikan */ }
       parent.postMessage({ __karsa_preview_link: href }, '*');
+      return;
     }
+    if (/^(mailto:|tel:|sms:)/i.test(href)) return; // biarkan browser tangani
+    // Sisanya = link internal proyek (halaman lain, relatif, atau tanpa ekstensi)
+    // → minta KARSA render halaman itu (jangan biarkan navigasi keluar preview)
+    e.preventDefault();
+    e.stopPropagation();
+    parent.postMessage({ __karsa_preview_navigate: href }, '*');
   }, true);
   // --- Screenshot: dom-to-image 2.6.0 (html2canvas & dom-to-image-more gagal
   //     di iframe sandbox karena memakai iframe internal lintas-origin) ---
@@ -253,9 +256,10 @@ const Preview = (() => {
   }
 
   // Gabungkan file proyek jadi satu dokumen HTML mandiri
-  function buildBundle(project) {
+  function buildBundle(project, entryOverride) {
     const files = project.files;
-    const htmlPath = webPreviewEntryPath(files)
+    const htmlPath = (entryOverride && files[entryOverride] !== undefined ? entryOverride : null)
+      || webPreviewEntryPath(files)
       || (files['index.html'] !== undefined ? 'index.html' : null)
       || Object.keys(files).find((p) => fileExt(p) === 'html');
 
@@ -570,14 +574,42 @@ const Preview = (() => {
     if (active) loadingFailsafe = setTimeout(() => wrap.classList.remove('loading'), 4000);
   }
 
+  // Halaman aktif di preview (untuk situs multi-halaman). null = entry default.
+  let currentPreviewEntry = null;
+
   function loadLocalPreview(frame, project) {
     frame.removeAttribute('src');
-    frame.srcdoc = buildBundle(project);
+    if (currentPreviewEntry && project.files[currentPreviewEntry] === undefined) currentPreviewEntry = null;
+    frame.srcdoc = buildBundle(project, currentPreviewEntry);
   }
+
+  // Navigasi antar-halaman lokal di dalam preview (klik link ke file .html lain)
+  function navigatePreviewTo(href) {
+    const project = State.getCurrentProject();
+    if (!project) return;
+    const fromEntry = currentPreviewEntry || webPreviewEntryPath(project.files) || 'index.html';
+    const bare = String(href).split('#')[0].split('?')[0];
+    const target = resolveProjectFileRef(project.files, fromEntry, bare);
+    if (target && project.files[target] !== undefined && /^html?$/i.test(fileExt(target))) {
+      currentPreviewEntry = target;
+      setPreviewLoading(true);
+      loadLocalPreview($('#preview-frame'), project);
+      showToast('📄 Halaman: ' + target, 'info');
+    } else {
+      const name = normalizePath(bare) || href;
+      showToast('Halaman "' + name + '" belum dibuat. Minta KARSA AI membuatnya, ya 😊', 'warn');
+    }
+  }
+
+  function resetPreviewEntry() { currentPreviewEntry = null; }
+
+  let lastPreviewProjectId = null;
 
   function refresh() {
     const project = State.getCurrentProject();
     if (!project) return;
+    // Proyek berganti → kembali ke halaman entry default
+    if (project.id !== lastPreviewProjectId) { currentPreviewEntry = null; lastPreviewProjectId = project.id; }
     ConsolePanel.clear();
     const frame = $('#preview-frame');
     const snackMode = usesSnackEngine(project);
@@ -622,6 +654,12 @@ const Preview = (() => {
     else ensurePublishHost().then((host) => {
       urlLabel.textContent = slug + '.' + host + (project.publish ? '' : ' · preview lokal');
     });
+  }
+
+  // Jalankan/Refresh manual → kembali ke halaman entry (beranda), bukan sub-halaman
+  function refreshHome() {
+    currentPreviewEntry = null;
+    refresh();
   }
 
   const refreshDebounced = debounce(() => {
@@ -803,8 +841,10 @@ const Preview = (() => {
       else showShotResult(data.__karsa_shot_done);
     } else if (data.__karsa_shot_err && data.__karsa_shot_err !== 'dibatalkan' && data.tag !== 'thumb') {
       showToast('Screenshot gagal: ' + data.__karsa_shot_err, 'error');
+    } else if (data.__karsa_preview_navigate) {
+      navigatePreviewTo(data.__karsa_preview_navigate);
     } else if (data.__karsa_preview_link) {
-      showToast('Preview lokal — link itu untuk versi online (Publish). Pakai menu # atau scroll di halaman.', 'info');
+      window.open(data.__karsa_preview_link, '_blank', 'noopener');
     } else if (data.__karsa_inspect_cancel) {
       inspectActive = false;
       setInspectButton(false);
@@ -826,7 +866,7 @@ const Preview = (() => {
   }
 
   return {
-    refresh, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
+    refresh, refreshHome, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
     runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect,
   };
 })();

@@ -99,10 +99,15 @@ function hasUsableWebPreview(files) {
 
 function resolveProjectFileRef(files, htmlPath, ref) {
   const norm = ref.replace(/^\.\//, '').replace(/^\//, '');
-  if (files[norm] !== undefined) return norm;
   const dir = htmlPath.includes('/') ? htmlPath.replace(/\/[^/]+$/, '') + '/' : '';
-  const joined = dir + norm;
-  if (files[joined] !== undefined) return joined;
+  // Kandidat: persis, relatif folder; untuk link tanpa ekstensi tambah .html / /index.html
+  const candidates = [norm, dir + norm];
+  if (norm && !/\.[a-z0-9]+$/i.test(norm)) {
+    candidates.push(norm + '.html', norm + '/index.html', dir + norm + '.html', dir + norm + '/index.html');
+  }
+  for (let i = 0; i < candidates.length; i++) {
+    if (candidates[i] && files[candidates[i]] !== undefined) return candidates[i];
+  }
   return null;
 }
 
