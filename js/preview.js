@@ -124,34 +124,89 @@ const Preview = (() => {
   // gambar yang sebetulnya ber-CORS agar ikut tertangkap.
   var SHOT_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAOXl5QAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
   var SHOT_OPTS = { bgcolor: '#ffffff', cacheBust: true, imagePlaceholder: SHOT_PLACEHOLDER };
+  // Catatan: bridge ini berupa template-literal → backslash di regex akan luruh
+  // saat string dibangun. Gunakan pemeriksaan string biasa, BUKAN regex ber-backslash.
   function pesanShotError(err) {
-    // dom-to-image menolak dengan Event saat gambar gagal dimuat → jelaskan ramah
-    if (!err || err instanceof Event || /\[object (Event|Object)\]/.test(String(err))) {
-      return 'Sebagian gambar dari internet tak bisa ditangkap. Coba lagi.';
+    var s = String(err);
+    if (!err || err instanceof Event || s.indexOf('[object ') === 0) {
+      return 'Tangkapan gagal diproses. Coba lagi.';
     }
-    return String(err);
+    return s;
+  }
+  function eksternal(url) {
+    if (!url) return false;
+    var u = String(url).toLowerCase();
+    return (u.indexOf('http://') === 0 || u.indexOf('https://') === 0) && String(url).indexOf(location.origin) !== 0;
+  }
+  // Lumpuhkan SEMUA sumber daya lintas-origin (gambar, latar, stylesheet/web-font)
+  // agar dom-to-image tak punya apa pun yang gagal di-inline. Gaya terkomputasi
+  // sudah disalin per-elemen, jadi tata letak & warna tetap; hanya web-font yang
+  // jatuh ke fallback. Kembalikan fungsi pemulih untuk restore setelah tangkap.
+  function lumpuhkanEksternal() {
+    var restore = [];
+    Array.prototype.forEach.call(document.images, function (img) {
+      var src = img.getAttribute('src') || '';
+      if (eksternal(img.currentSrc || src) || (!img.complete || img.naturalWidth === 0)) {
+        restore.push(function () { if (src) img.setAttribute('src', src); });
+        img.setAttribute('src', SHOT_PLACEHOLDER);
+      }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('*'), function (el) {
+      var bg = '';
+      try { bg = getComputedStyle(el).backgroundImage; } catch (e) {}
+      var low = bg ? bg.toLowerCase() : '';
+      if (low.indexOf('url(') >= 0 && (low.indexOf('http://') >= 0 || low.indexOf('https://') >= 0) && bg.indexOf(location.origin) < 0) {
+        var prev = el.style.backgroundImage;
+        restore.push(function () { el.style.backgroundImage = prev; });
+        el.style.backgroundImage = 'none';
+      }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('link[rel="stylesheet"],style'), function (node) {
+      var href = node.getAttribute && node.getAttribute('href');
+      var luar = eksternal(href);
+      var teks = (node.textContent || '').toLowerCase();
+      var fontImpor = node.tagName === 'STYLE' && (teks.indexOf('@import') >= 0 || teks.indexOf('@font-face') >= 0);
+      if ((luar || fontImpor) && !node.disabled && node.sheet) {
+        try { node.sheet.disabled = true; restore.push(function () { try { node.sheet.disabled = false; } catch (e) {} }); } catch (e) {}
+      }
+    });
+    return function () { restore.forEach(function (f) { try { f(); } catch (e) {} }); };
+  }
+  function renderPng() {
+    return window.domtoimage.toPng(document.body, SHOT_OPTS);
+  }
+  function kirimHasil(dataUrl, area, tag) {
+    if (!area) { parent.postMessage({ __karsa_shot_done: dataUrl, tag: tag }, '*'); return; }
+    var img = new Image();
+    img.onload = function () {
+      var skala = img.width / Math.max(1, document.body.scrollWidth);
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(area.width * skala));
+      c.height = Math.max(1, Math.round(area.height * skala));
+      c.getContext('2d').drawImage(
+        img, area.x * skala, area.y * skala, area.width * skala, area.height * skala,
+        0, 0, c.width, c.height
+      );
+      parent.postMessage({ __karsa_shot_done: c.toDataURL('image/png') }, '*');
+    };
+    img.onerror = function () { parent.postMessage({ __karsa_shot_err: 'Gagal memotong area.' }, '*'); };
+    img.src = dataUrl;
   }
   function ambilShot(area, tag) {
     muatD2I(function () {
-      window.domtoimage.toPng(document.body, SHOT_OPTS).then(function (dataUrl) {
-        if (!area) { parent.postMessage({ __karsa_shot_done: dataUrl, tag: tag }, '*'); return; }
-        var img = new Image();
-        img.onload = function () {
-          var skala = img.width / Math.max(1, document.body.scrollWidth);
-          var c = document.createElement('canvas');
-          c.width = Math.max(1, Math.round(area.width * skala));
-          c.height = Math.max(1, Math.round(area.height * skala));
-          c.getContext('2d').drawImage(
-            img,
-            area.x * skala, area.y * skala, area.width * skala, area.height * skala,
-            0, 0, c.width, c.height
-          );
-          parent.postMessage({ __karsa_shot_done: c.toDataURL('image/png') }, '*');
-        };
-        img.onerror = function () { parent.postMessage({ __karsa_shot_err: 'Gagal memotong area.' }, '*'); };
-        img.src = dataUrl;
-      }).catch(function (err) {
-        parent.postMessage({ __karsa_shot_err: pesanShotError(err), tag: tag }, '*');
+      // Tahap 1: tangkap apa adanya (kualitas penuh; sumber ber-CORS ikut).
+      renderPng().then(function (dataUrl) {
+        kirimHasil(dataUrl, area, tag);
+      }).catch(function () {
+        // Tahap 2: lumpuhkan semua sumber lintas-origin → tangkap pasti jadi.
+        var pulihkan = lumpuhkanEksternal();
+        renderPng().then(function (dataUrl) {
+          pulihkan();
+          kirimHasil(dataUrl, area, tag);
+        }).catch(function (err) {
+          pulihkan();
+          parent.postMessage({ __karsa_shot_err: pesanShotError(err), tag: tag }, '*');
+        });
       });
     });
   }
