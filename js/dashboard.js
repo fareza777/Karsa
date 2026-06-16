@@ -222,42 +222,74 @@ const Dashboard = (() => {
         el('p', { class: 'modal-desc', text: 'Pilih sumber proyek yang mau diimpor:' }),
         el('button', {
           class: 'btn btn-ghost', style: 'width:100%;margin-bottom:10px;justify-content:flex-start',
-          html: '📁 &nbsp;<b>Folder di komputer</b> — semua file HTML/CSS/JS di dalamnya',
+          html: '📁 &nbsp;<b>Folder di komputer</b> — file kode (HTML/CSS/JS/TS dll.)',
           onclick: () => { closeModal(); $('#import-folder-input').click(); },
+        }),
+        el('button', {
+          class: 'btn btn-ghost', style: 'width:100%;margin-bottom:10px;justify-content:flex-start',
+          html: '🗜️ &nbsp;<b>File ZIP</b> — arsip proyek (mis. dari Export KARSA)',
+          onclick: () => { closeModal(); $('#import-zip-input').click(); },
         }),
         el('button', {
           class: 'btn btn-ghost', style: 'width:100%;justify-content:flex-start',
           html: '🧾 &nbsp;<b>File JSON KARSA</b> — hasil ekspor dari KARSA',
           onclick: () => { closeModal(); $('#import-input').click(); },
         }),
+        el('p', { class: 'modal-hint muted', style: 'margin-top:12px;font-size:12px',
+          text: 'Aset & binary (gambar, font, .apk) otomatis dilewati. Maks 600 file kode, 1MB/file. Untuk app native penuh, impor kode → lanjut iterasi di KARSA, build di komputer.' }),
       ]),
       actions: [{ label: 'Batal' }],
     });
   }
 
   // --- Impor folder: baca semua file teks, pertahankan struktur subfolder ---
-  const FOLDER_TEXT_EXTS = ['html', 'htm', 'css', 'js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx', 'json', 'md', 'txt', 'svg', 'xml', 'csv'];
-  const FOLDER_MAX_FILES = 150;
-  const FOLDER_MAX_SIZE = 400 * 1024;
+  const FOLDER_TEXT_EXTS = ['html', 'htm', 'css', 'js', 'mjs', 'cjs', 'jsx', 'ts', 'tsx', 'json', 'md', 'txt', 'svg', 'xml', 'csv', 'yml', 'yaml', 'env', 'gitignore', 'babelrc', 'gradle', 'properties', 'kt', 'java', 'plist'];
+  const FOLDER_MAX_FILES = 600;        // IndexedDB muat besar, bukan localStorage lagi
+  const FOLDER_MAX_SIZE = 1024 * 1024; // 1MB/file teks
+
+  // Bangun proyek dari map path→isi: laporkan skip per kategori secara transparan.
+  function buildImportedProject(rootName, filesMap, skipInfo) {
+    const detected = analyzeProjectFiles(filesMap);
+    const project = State.createProject(rootName, filesMap, {
+      projectType: detected.expoLike && !detected.hasHtml ? 'mobile' : 'web',
+    });
+    render();
+
+    const n = Object.keys(filesMap).length;
+    let msg = 'Folder "' + rootName + '" diimpor: ' + n + ' file masuk';
+    const parts = [];
+    if (skipInfo.binary) parts.push(skipInfo.binary + ' aset/biner');
+    if (skipInfo.tooBig) parts.push(skipInfo.tooBig + ' file >1MB');
+    if (skipInfo.overflow) parts.push(skipInfo.overflow + ' di atas batas ' + FOLDER_MAX_FILES);
+    if (parts.length) msg += ' · dilewati: ' + parts.join(', ');
+    showToast(msg + ' 🎉', skipInfo.binary || skipInfo.tooBig || skipInfo.overflow ? 'warn' : 'ok');
+
+    if (detected.expoLike && !detected.hasHtml) {
+      setTimeout(() => showToast('Proyek Expo terdeteksi. Preview penuh & build AAB: Export ZIP → jalankan «npx expo start» / «eas build» di komputer. Di KARSA bisa lanjut iterasi + preview web.', 'info'), 1200);
+    }
+    App.openProject(project.id);
+  }
 
   function importProjectFolder(fileList) {
     const files = Array.from(fileList);
     if (!files.length) return;
     const rootName = (files[0].webkitRelativePath || files[0].name).split('/')[0] || 'Proyek Folder';
 
-    let skipped = 0;
-    const chosen = files.filter((file) => {
+    const skip = { binary: 0, tooBig: 0, overflow: 0 };
+    const candidates = files.filter((file) => {
       const rel = (file.webkitRelativePath || file.name).split('/').slice(1).join('/');
       const ext = rel.split('.').pop().toLowerCase();
-      const tersembunyi = rel.split('/').some((seg) => seg.startsWith('.') || seg === 'node_modules');
-      const ok = rel && !tersembunyi && FOLDER_TEXT_EXTS.includes(ext) &&
-        file.size <= FOLDER_MAX_SIZE && isValidPath(rel);
-      if (!ok) skipped++;
-      return ok;
-    }).slice(0, FOLDER_MAX_FILES);
+      const tersembunyi = rel.split('/').some((seg) => seg === 'node_modules' || seg === '.git' || seg === '.expo' || seg === 'android' || seg === 'ios' || seg === 'build' || seg === 'dist');
+      if (!rel || tersembunyi || !isValidPath(rel)) return false;
+      if (!FOLDER_TEXT_EXTS.includes(ext)) { skip.binary++; return false; }
+      if (file.size > FOLDER_MAX_SIZE) { skip.tooBig++; return false; }
+      return true;
+    });
+    if (candidates.length > FOLDER_MAX_FILES) skip.overflow = candidates.length - FOLDER_MAX_FILES;
+    const chosen = candidates.slice(0, FOLDER_MAX_FILES);
 
     if (!chosen.length) {
-      showToast('Tidak ada file teks (HTML/CSS/JS dll.) yang bisa diimpor dari folder itu.', 'warn');
+      showToast('Tidak ada file teks (HTML/CSS/JS/TS dll.) yang bisa diimpor. Aset & binary dilewati otomatis.', 'warn');
       return;
     }
 
@@ -269,17 +301,46 @@ const Dashboard = (() => {
     )).then((entries) => {
       const filesMap = {};
       entries.forEach(([path, content]) => { filesMap[path] = content; });
-      const detected = analyzeProjectFiles(filesMap);
-      const project = State.createProject(rootName, filesMap, { projectType: 'web' });
-      render();
-      let msg = 'Folder "' + rootName + '" diimpor: ' + entries.length + ' file';
-      if (skipped) msg += ' (' + skipped + ' dilewati)';
-      if (detected.expoLike && !detected.hasHtml) {
-        msg += '. Proyek Expo — buat preview web lewat AI atau ekspor ZIP untuk npx expo start.';
-      }
-      showToast(msg + ' 🎉', 'ok');
-      App.openProject(project.id);
+      buildImportedProject(rootName, filesMap, skip);
     }).catch(() => showToast('Gagal membaca beberapa file dari folder.', 'error'));
+  }
+
+  // Impor file .zip (JSZip sudah dimuat untuk ekspor) — ekstrak file teks.
+  function importProjectZip(file) {
+    if (typeof JSZip === 'undefined') {
+      showToast('Pustaka ZIP belum termuat — coba lagi sebentar.', 'warn');
+      return;
+    }
+    const rootName = (file.name || 'Proyek ZIP').replace(/\.zip$/i, '') || 'Proyek ZIP';
+    showToast('Membuka ZIP…', 'info');
+    JSZip.loadAsync(file).then((zip) => {
+      const skip = { binary: 0, tooBig: 0, overflow: 0 };
+      const entries = Object.values(zip.files).filter((e) => !e.dir);
+      const texts = [];
+      // Jika semua file di bawah satu folder root, buang prefix-nya
+      const topDirs = new Set(entries.map((e) => e.name.split('/')[0]));
+      const stripRoot = topDirs.size === 1 && entries.some((e) => e.name.includes('/'));
+      entries.forEach((e) => {
+        const usePath = stripRoot ? e.name.replace(/^[^/]+\//, '') : e.name;
+        const ext = usePath.split('.').pop().toLowerCase();
+        const tersembunyi = usePath.split('/').some((seg) => seg === 'node_modules' || seg === '.git' || seg === '.expo' || seg === 'build' || seg === 'dist');
+        if (tersembunyi || !isValidPath(usePath)) return;
+        if (!FOLDER_TEXT_EXTS.includes(ext)) { skip.binary++; return; }
+        texts.push({ path: usePath, entry: e });
+      });
+      if (texts.length > FOLDER_MAX_FILES) skip.overflow = texts.length - FOLDER_MAX_FILES;
+      const chosen = texts.slice(0, FOLDER_MAX_FILES);
+      if (!chosen.length) { showToast('ZIP tidak berisi file teks yang bisa diimpor.', 'warn'); return; }
+      return Promise.all(chosen.map((c) => c.entry.async('string').then((content) => {
+        if (content.length > FOLDER_MAX_SIZE) { skip.tooBig++; return null; }
+        return [c.path, content];
+      }))).then((pairs) => {
+        const filesMap = {};
+        pairs.forEach((p) => { if (p) filesMap[p[0]] = p[1]; });
+        if (!Object.keys(filesMap).length) { showToast('ZIP tidak berisi file teks yang bisa diimpor.', 'warn'); return; }
+        buildImportedProject(rootName, filesMap, skip);
+      });
+    }).catch(() => showToast('Gagal membuka ZIP — file mungkin rusak.', 'error'));
   }
 
   // #16 Thumbnail template: render HTML+CSS asli di iframe (tanpa script, aman & ringan)
@@ -431,5 +492,5 @@ const Dashboard = (() => {
     });
   }
 
-  return { render, newProjectDialog, importProjectJson, importDialog, importProjectFolder };
+  return { render, newProjectDialog, importProjectJson, importProjectZip, importDialog, importProjectFolder };
 })();

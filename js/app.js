@@ -347,6 +347,10 @@ const App = (() => {
       if (e.target.files.length) Dashboard.importProjectFolder(e.target.files);
       e.target.value = '';
     });
+    $('#import-zip-input').addEventListener('change', (e) => {
+      if (e.target.files.length) Dashboard.importProjectZip(e.target.files[0]);
+      e.target.value = '';
+    });
     $('#dash-theme-toggle').addEventListener('click', toggleTheme);
 
     // Feature card → arahkan ke aksi utama (fokus prompt AI di hero)
