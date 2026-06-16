@@ -13,6 +13,11 @@ const State = (() => {
   function getProjects() { return projects; }
   function getSettings() { return settings; }
 
+  // Isi proyek dari storage async (IndexedDB) saat boot — dipanggil App.init
+  function hydrate(list) {
+    projects = Array.isArray(list) ? list.filter((p) => p && p.id && p.files) : [];
+  }
+
   function getCurrentProject() {
     return projects.find((p) => p.id === currentProjectId) || null;
   }
@@ -151,7 +156,7 @@ const State = (() => {
   }
 
   return {
-    getProjects, getSettings, getCurrentProject, setCurrentProject,
+    getProjects, getSettings, getCurrentProject, setCurrentProject, hydrate,
     updateSettings, createProject, updateProject, deleteProject, duplicateProject,
     setFile, deleteFile, renameFile, deleteFolder, addFolder,
     addCheckpoint, restoreCheckpoint, replaceProjects, purgeDeletedProjects,

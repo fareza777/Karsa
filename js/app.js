@@ -462,6 +462,8 @@ const App = (() => {
     const settings = State.getSettings();
     applyTheme(settings.theme);
     $('#auto-run-toggle').checked = settings.autoRun;
+    // Muat proyek dari IndexedDB (kuota besar) + migrasi dari localStorage lama
+    try { State.hydrate(await Storage.initProjects()); } catch (e) { /* fallback sudah di Storage */ }
     Auth.bindTriggers();
     await Auth.init();
     if (typeof CloudSync !== 'undefined') await CloudSync.purgeLocalTombstones();

@@ -1,34 +1,124 @@
-/* ===== KARSA — persistensi localStorage ===== */
+/* ===== KARSA — persistensi proyek: IndexedDB (kuota besar) + fallback localStorage =====
+   localStorage hanya ~5MB → tak cukup untuk proyek mobile/Play Store besar.
+   IndexedDB memberi ratusan MB–GB. Migrasi otomatis dari localStorage lama sekali jalan. */
 
 const Storage = (() => {
-  const PROJECTS_KEY = 'karsa.projects.v1';
+  const PROJECTS_KEY = 'karsa.projects.v1';   // localStorage (lama / fallback)
   const SETTINGS_KEY = 'karsa.settings.v1';
+  const DB_NAME = 'karsa-db';
+  const STORE = 'kv';
+  const PROJECTS_REC = 'projects';
 
-  function loadProjects() {
+  let dbPromise = null;
+
+  function idbSupported() {
+    try { return typeof indexedDB !== 'undefined' && indexedDB !== null; }
+    catch (e) { return false; }
+  }
+
+  function openDB() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE);
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbPromise;
+  }
+
+  function idbGet(key) {
+    return openDB().then((db) => new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const r = tx.objectStore(STORE).get(key);
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+    }));
+  }
+
+  function idbSet(key, value) {
+    return openDB().then((db) => new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).put(value, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error || new Error('idb write error'));
+      tx.onabort = () => reject(tx.error || new Error('idb write aborted'));
+    }));
+  }
+
+  function validProject(p) {
+    return p && typeof p.id === 'string' && p.files && typeof p.files === 'object';
+  }
+
+  function loadProjectsLS() {
     try {
       const raw = localStorage.getItem(PROJECTS_KEY);
       if (!raw) return [];
       const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return [];
-      // Validasi minimal struktur tiap proyek
-      return parsed.filter((p) => p && typeof p.id === 'string' && p.files && typeof p.files === 'object');
+      return Array.isArray(parsed) ? parsed.filter(validProject) : [];
     } catch (err) {
       console.error('KARSA: gagal memuat proyek dari localStorage', err);
       return [];
     }
   }
 
-  function saveProjects(projects) {
+  // Boot async: muat proyek dari IndexedDB; migrasi dari localStorage lama sekali jalan.
+  async function initProjects() {
+    if (!idbSupported()) return loadProjectsLS();
     try {
-      localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
-      return true;
-    } catch (err) {
-      console.error('KARSA: gagal menyimpan proyek', err);
-      if (typeof showToast === 'function') {
-        showToast('Gagal menyimpan: penyimpanan browser penuh.', 'error');
+      let arr = await idbGet(PROJECTS_REC);
+      // Migrasi dari localStorage lama bila IDB belum ada / masih kosong tapi LS berisi
+      if (!Array.isArray(arr) || arr.length === 0) {
+        const ls = loadProjectsLS();
+        if (ls.length) {
+          await idbSet(PROJECTS_REC, ls);
+          try { localStorage.removeItem(PROJECTS_KEY); } catch (e) { /* abaikan */ }
+          arr = ls;
+        } else {
+          arr = Array.isArray(arr) ? arr : [];
+        }
       }
-      return false;
+      return arr.filter(validProject);
+    } catch (err) {
+      console.error('KARSA: IndexedDB gagal — pakai localStorage', err);
+      return loadProjectsLS();
     }
+  }
+
+  // Sinkron (dipakai State saat parse): IDB → kosong (diisi nanti via initProjects + hydrate).
+  function loadProjects() {
+    return idbSupported() ? [] : loadProjectsLS();
+  }
+
+  function saveProjects(projects) {
+    if (!idbSupported()) {
+      try {
+        localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+        return true;
+      } catch (err) {
+        console.error('KARSA: gagal menyimpan proyek', err);
+        if (typeof showToast === 'function') {
+          showToast('Gagal menyimpan: penyimpanan browser penuh.', 'error');
+        }
+        return false;
+      }
+    }
+    // IndexedDB: tulis async (fire-and-forget); kuota jauh lebih besar.
+    idbSet(PROJECTS_REC, projects).catch((err) => {
+      console.error('KARSA: gagal menyimpan ke IndexedDB', err);
+      if (typeof showToast === 'function') {
+        showToast('Gagal menyimpan proyek — penyimpanan perangkat mungkin penuh.', 'error');
+      }
+    });
+    return true;
+  }
+
+  // Perkiraan ukuran semua proyek (byte) — untuk peringatan impor besar.
+  function estimateProjectsBytes(projects) {
+    try { return JSON.stringify(projects || []).length; } catch (e) { return 0; }
   }
 
   function loadSettings() {
@@ -53,5 +143,5 @@ const Storage = (() => {
     }
   }
 
-  return { loadProjects, saveProjects, loadSettings, saveSettings };
+  return { loadProjects, initProjects, saveProjects, estimateProjectsBytes, loadSettings, saveSettings, idbSupported };
 })();
