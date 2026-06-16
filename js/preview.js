@@ -118,9 +118,22 @@ const Preview = (() => {
     s.onerror = function () { d2iAntrian = null; parent.postMessage({ __karsa_shot_err: 'Gagal memuat pustaka screenshot (periksa internet).' }, '*'); };
     document.head.appendChild(s);
   }
+  // Gambar dari internet (lintas-origin) tak bisa di-inline → dom-to-image dulu
+  // menggagalkan SELURUH tangkapan. imagePlaceholder mengganti gambar gagal
+  // dengan kotak abu transparan agar screenshot tetap jadi; cacheBust membantu
+  // gambar yang sebetulnya ber-CORS agar ikut tertangkap.
+  var SHOT_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAOXl5QAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+  var SHOT_OPTS = { bgcolor: '#ffffff', cacheBust: true, imagePlaceholder: SHOT_PLACEHOLDER };
+  function pesanShotError(err) {
+    // dom-to-image menolak dengan Event saat gambar gagal dimuat → jelaskan ramah
+    if (!err || err instanceof Event || /\[object (Event|Object)\]/.test(String(err))) {
+      return 'Sebagian gambar dari internet tak bisa ditangkap. Coba lagi.';
+    }
+    return String(err);
+  }
   function ambilShot(area, tag) {
     muatD2I(function () {
-      window.domtoimage.toPng(document.body, { bgcolor: '#ffffff' }).then(function (dataUrl) {
+      window.domtoimage.toPng(document.body, SHOT_OPTS).then(function (dataUrl) {
         if (!area) { parent.postMessage({ __karsa_shot_done: dataUrl, tag: tag }, '*'); return; }
         var img = new Image();
         img.onload = function () {
@@ -138,7 +151,7 @@ const Preview = (() => {
         img.onerror = function () { parent.postMessage({ __karsa_shot_err: 'Gagal memotong area.' }, '*'); };
         img.src = dataUrl;
       }).catch(function (err) {
-        parent.postMessage({ __karsa_shot_err: String(err), tag: tag }, '*');
+        parent.postMessage({ __karsa_shot_err: pesanShotError(err), tag: tag }, '*');
       });
     });
   }
