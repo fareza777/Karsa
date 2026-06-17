@@ -39,7 +39,7 @@ const AI = (() => {
     '8. Setelah blok file, SELALU tutup dengan pertanyaan iterasi singkat berisi 2-3 ide konkret (contoh: "Mau kutambahkan efek suara, mode gelap, atau papan peringkat?").',
     '9. Jika permintaan terlalu ambigu untuk dibuat dengan baik, JANGAN buat file dulu — ajukan 2-3 pertanyaan pilihan singkat tentang preferensi pengguna.',
     'DESAIN:',
-    '10. Mobile-first dan muat satu layar: untuk game serta aplikasi interaktif, seluruh UI harus pas dalam viewport tanpa scroll vertikal (gunakan height:100dvh, flexbox, ukuran ringkas) dan tetap nyaman di layar ponsel Android modern (lebar 360-412px).',
+    '10. Mobile-first: shell app height:100dvh + flex column; header & tabbar fixed; isi (.screen-body / main) flex:1 min-height:0 overflow-y:auto. Game/interaktif ringan boleh tanpa scroll; tab dengan banyak kartu (Beranda, Nutrisi) WAJIB scroll di dalam area isi — jangan overflow ke body.',
     '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
     '12. Penalaran internal: lihat aturan MODE KERJA di bawah — singkat, lalu langsung file.',
     '13. File besar (>80 baris): pisah ke index.html + css/style.css + js/app.js. Jangan gabung HTML+CSS+JS inline ke satu file kecuali user minta — file terpotong = app rusak.',
@@ -60,6 +60,10 @@ const AI = (() => {
     '24. "Blur", "kabur", "kurang fokus" pada tab/halaman tertentu → biasanya CSS screen non-aktif (opacity/filter:blur/backdrop-filter/transform) atau class .active tidak dipasang di app.js. Perbaiki HANYA selector halaman itu — jangan rombak seluruh style.css.',
     '25. Layar/tab AKTIF wajib: opacity:1, filter:none, backdrop-filter:none. Layar non-aktif: pakai display:none atau visibility:hidden — JANGAN blur/opacity rendah pada layar yang sedang ditampilkan.',
     '26. Jika user sebut nama tab/halaman (mis. Tumbuh, Nutrisi, Beranda): ubah minimal di css/style.css atau preview/style.css + app.js bagian navigasi — jangan sentuh file lain.',
+    'LAYOUT SATU LAYAR HP:',
+    '27. "Pas 1 halaman HP" / "seperti Riwayat/Profil" = SALIN struktur CSS+HTML halaman REFERENSI yang sudah benar (class, flex, padding, font-size). Jangan kecilkan :root/--font-size global. Jangan hapus section/kartu.',
+    '28. Halaman padat (Beranda): sama seperti Riwayat — .app-shell 100dvh, header tetap, .screen-body scroll internal. Jangan shrink semua font/padding global.',
+    '29. Satu permintaan layout = maks 1–2 halaman target per respons. Kerjakan Beranda dulu, baru Tumbuh, baru Nutrisi — jangan patch CSS global sekaligus.',
   ].join('\n');
 
   function getSystemPrompt() {
@@ -291,8 +295,64 @@ const AI = (() => {
   }
 
   function isNarrowChangeRequest(text) {
-    return /warna|warni|tulisan|teks|font|ukuran|besar|kecil|bold|italic|margin|padding|spasi|rata|align|opacity|transparan|blur|kabur|fokus|tajam|layar|tab|halaman|screen/i.test(text || '')
-      && !/redesign|ganti tema|percanti|ubah semua|rombak|overhaul|total/i.test(text || '');
+    return /warna|warni|tulisan|teks|font|ukuran|besar|kecil|bold|italic|margin|padding|spasi|rata|align|opacity|transparan|blur|kabur|fokus|tajam/i.test(text || '')
+      && !/redesign|ganti tema|percanti|ubah semua|rombak|overhaul|total|pas\s*1|satu\s*layar|seperti\s/i.test(text || '');
+  }
+
+  function isLayoutFitRequest(text) {
+    const t = (text || '').toLowerCase();
+    return /pas\s*(1\s*)?(halaman|layar)|muat\s*(di\s*)?(1\s*)?(halaman|layar)|satu\s*layar|fit\s*(1\s*)?screen|seperti\s+(riwayat|profil|beranda|tumbuh|nutrisi)/i.test(t)
+      || (/seperti/i.test(t) && /riwayat|profil|beranda|tumbuh|nutrisi/i.test(t));
+  }
+
+  function cssPathForProject(files) {
+    if (files['preview/style.css']) return 'preview/style.css';
+    if (files['css/style.css']) return 'css/style.css';
+    if (files['style.css']) return 'style.css';
+    return null;
+  }
+
+  // Ambil cuplikan CSS halaman referensi agar AI meniru pola, bukan menebak
+  function extractScreenCssSnippet(css, screenKey) {
+    if (!css || !screenKey) return '';
+    const key = screenKey.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const patterns = [
+      new RegExp('(?:#screen-' + key + '|#page-' + key + '|\\.screen-' + key + '|\\[data-screen="' + key + '"\\])\\s*\\{[^}]*\\}', 'gi'),
+      new RegExp('(?:#screen-' + key + '|#page-' + key + '|\\.screen-' + key + ')[^{]*\\{[^}]*\\}', 'gi'),
+    ];
+    const chunks = [];
+    patterns.forEach((re) => {
+      let m;
+      while ((m = re.exec(css)) && chunks.length < 4) chunks.push(m[0]);
+    });
+    return chunks.join('\n');
+  }
+
+  function buildLayoutFitHint(prompt, project) {
+    if (!project || !isLayoutFitRequest(prompt)) return '';
+    const t = (prompt || '').toLowerCase();
+    const refs = [];
+    ['riwayat', 'profil', 'profile', 'history'].forEach((k) => {
+      if (t.includes(k) && (/seperti|sama\s+(kayak|dengan)|like/i.test(t))) refs.push(k.replace('profile', 'profil').replace('history', 'riwayat'));
+    });
+    if (!refs.length) refs.push('riwayat', 'profil');
+    const uniqRefs = [...new Set(refs)].slice(0, 2);
+    const cssPath = cssPathForProject(project.files || {});
+    const css = cssPath ? (project.files[cssPath] || '') : '';
+    const lines = [
+      '[LAYOUT SATU LAYAR HP — WAJIB PATUH]',
+      'Salin pola layout dari halaman REFERENSI (' + uniqRefs.join(', ') + ') ke halaman TARGET yang user sebut.',
+      'Struktur wajib: .app-shell{height:100dvh;display:flex;flex-direction:column} header/tabbar flex-shrink:0; .screen-body{flex:1;min-height:0;overflow-y:auto}.',
+      'DILARANG: mengecilkan font/padding global (:root, body, *); menghapus kartu/section; transform:scale; filter:blur.',
+      'Kerjakan 1 halaman target per respons. File CSS saja kecuali HTML struktur screen perlu disamakan.',
+    ];
+    if (css && cssPath) {
+      uniqRefs.forEach((ref) => {
+        const snip = extractScreenCssSnippet(css, ref);
+        if (snip) lines.push('Contoh CSS referensi (' + ref + ') dari ' + cssPath + ':\n' + snip);
+      });
+    }
+    return lines.join('\n');
   }
 
   function isMobileProject(project) {
@@ -390,7 +450,10 @@ const AI = (() => {
         '[Ubah HANYA yang diminta user. Jangan redesign tema/glow/border/background jika tidak diminta.]',
       );
     }
-    if (isNarrowChangeRequest(prompt)) {
+    if (isLayoutFitRequest(prompt)) {
+      const layoutHint = buildLayoutFitHint(prompt, State.getCurrentProject());
+      if (layoutHint) parts.push(layoutHint);
+    } else if (isNarrowChangeRequest(prompt)) {
       parts.push(
         '[PERUBAHAN SPESIFIK: sentuh hanya elemen/properti yang disebut. Sisanya biarkan sama persis.]',
         '[Jangan tulis ulang file utuh jika cukup patch kecil. Maks 1–2 file. Jangan ubah variabel :root/tema global kecuali diminta.]',
