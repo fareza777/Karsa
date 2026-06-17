@@ -210,6 +210,7 @@ const MOBILE_AI_PROMPT = [
   '10. Jika respons terpotong, sistem akan minta lanjutan otomatis — pastikan setiap file yang dikeluarkan valid & lengkap.',
   '11. Penalaran internal dilarang panjang — langsung tulis App.tsx / screen. Lihat MODE KERJA di prompt sistem.',
   '12. PENGGUNA AWAM: mereka tidak tahu file, kode, atau istilah teknis. Hanya bilang "buat aplikasi X". Kamu yang rencanakan & kerjakan bertahap — jangan minta mereka pecah permintaan atau paham coding.',
+  '13. BLUR/KABUR pada tab tertentu: perbaiki class .active di app.js + CSS screen — layar aktif opacity:1 filter:none; non-aktif pakai display:none. Jangan rombak seluruh CSS.',
 ].join('\n');
 
 const WEB_PREVIEW_PROMPT =

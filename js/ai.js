@@ -56,6 +56,10 @@ const AI = (() => {
     '21. Frasa "website untuk aplikasi X" dari user awam = mereka mau situs web yang berfungsi seperti aplikasi X — bukan halaman promosi "download app".',
     '22. Mockup/gambar telepon HANYA kalau user minta landing page / promosi / profil usaha secara eksplisit.',
     '23. Menu navigasi landing page: pakai <a href="#id-bagian"> untuk scroll ke section. JANGAN href ke karsa.work, domain live, atau URL absolut untuk menu dalam halaman yang sama.',
+    'BLUR / FOKUS / TAB HALAMAN:',
+    '24. "Blur", "kabur", "kurang fokus" pada tab/halaman tertentu → biasanya CSS screen non-aktif (opacity/filter:blur/backdrop-filter/transform) atau class .active tidak dipasang di app.js. Perbaiki HANYA selector halaman itu — jangan rombak seluruh style.css.',
+    '25. Layar/tab AKTIF wajib: opacity:1, filter:none, backdrop-filter:none. Layar non-aktif: pakai display:none atau visibility:hidden — JANGAN blur/opacity rendah pada layar yang sedang ditampilkan.',
+    '26. Jika user sebut nama tab/halaman (mis. Tumbuh, Nutrisi, Beranda): ubah minimal di css/style.css atau preview/style.css + app.js bagian navigasi — jangan sentuh file lain.',
   ].join('\n');
 
   function getSystemPrompt() {
@@ -287,7 +291,7 @@ const AI = (() => {
   }
 
   function isNarrowChangeRequest(text) {
-    return /warna|warni|tulisan|teks|font|ukuran|besar|kecil|bold|italic|margin|padding|spasi|rata|align|opacity|transparan/i.test(text || '')
+    return /warna|warni|tulisan|teks|font|ukuran|besar|kecil|bold|italic|margin|padding|spasi|rata|align|opacity|transparan|blur|kabur|fokus|tajam|layar|tab|halaman|screen/i.test(text || '')
       && !/redesign|ganti tema|percanti|ubah semua|rombak|overhaul|total/i.test(text || '');
   }
 
@@ -389,6 +393,11 @@ const AI = (() => {
     if (isNarrowChangeRequest(prompt)) {
       parts.push(
         '[PERUBAHAN SPESIFIK: sentuh hanya elemen/properti yang disebut. Sisanya biarkan sama persis.]',
+        '[Jangan tulis ulang file utuh jika cukup patch kecil. Maks 1–2 file. Jangan ubah variabel :root/tema global kecuali diminta.]',
+      );
+    } else if (/blur|kabur|fokus|tajam|kurang fokus/i.test(prompt)) {
+      parts.push(
+        '[FIX BLUR: layar aktif harus opacity:1 filter:none. Cek class .active di app.js + CSS screen/tab. Hanya edit bagian Tumbuh/Nutrisi yang disebut — jangan redesign.]',
       );
     } else if (isInteractiveWebToolPrompt(prompt)) {
       parts.push(

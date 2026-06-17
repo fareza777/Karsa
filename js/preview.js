@@ -820,6 +820,7 @@ const Preview = (() => {
     stage.classList.toggle('device-mode', !!dims);
     if (!dims) {
       wrap.style.transform = '';
+      wrap.style.zoom = '';
       wrap.style.width = '';
       wrap.style.height = '';
       return;
@@ -832,7 +833,17 @@ const Preview = (() => {
       (rect.width - 20) / (dims[0] + dims[2]),
       (rect.height - 20) / (dims[1] + dims[2])
     );
-    wrap.style.transform = scale < 1 ? 'scale(' + scale.toFixed(3) + ')' : '';
+    // zoom lebih tajam daripada transform:scale (subpixel blur di Chrome/Edge)
+    const snapped = scale < 1 ? Math.max(0.5, Math.round(scale * 20) / 20) : 1;
+    wrap.style.transform = '';
+    if (snapped < 1 && 'zoom' in wrap.style) {
+      wrap.style.zoom = String(snapped);
+    } else if (snapped < 1) {
+      wrap.style.zoom = '';
+      wrap.style.transform = 'scale(' + snapped.toFixed(3) + ')';
+    } else {
+      wrap.style.zoom = '';
+    }
   }
 
   if (typeof ResizeObserver !== 'undefined') {
