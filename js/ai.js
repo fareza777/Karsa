@@ -34,6 +34,7 @@ const AI = (() => {
     '5. Jangan pakai fitur server (API backend sendiri, database). localStorage boleh.',
     '6. Jawab dalam bahasa Indonesia. Jangan ulangi file yang tidak berubah — tapi jika user bilang belum berubah / minta ulang, tulis ulang file yang perlu diperbarui secara UTUH.',
     '6b. DILARANG menulis placeholder seperti "[blok file di ringkas]" atau ringkasan kode. Setiap perubahan kode HARUS pakai blok ``` dengan file=path dan isi file lengkap.',
+    '6c. CSS/JS yang sudah ada: keluarkan ISI FILE UTUH yang sudah diperbarui — bukan patch/cuplikan 20–50 baris saja. KARSA menimpa file; patch partial menghapus layout lama.',
     'GAYA PERCAKAPAN:',
     '7. Hangat dan kolaboratif seperti rekan satu tim. Buka dengan 1-2 kalimat tentang apa yang akan kamu buat beserta pilihan desain utamanya, baru blok file.',
     '8. Setelah blok file, SELALU tutup dengan pertanyaan iterasi singkat berisi 2-3 ide konkret (contoh: "Mau kutambahkan efek suara, mode gelap, atau papan peringkat?").',
@@ -64,6 +65,7 @@ const AI = (() => {
     '27. "Pas 1 halaman HP" / "seperti Riwayat/Profil" = SALIN struktur CSS+HTML halaman REFERENSI yang sudah benar (class, flex, padding, font-size). Jangan kecilkan :root/--font-size global. Jangan hapus section/kartu.',
     '28. Halaman padat (Beranda): sama seperti Riwayat — .app-shell 100dvh, header tetap, .screen-body scroll internal. Jangan shrink semua font/padding global.',
     '29. Satu permintaan layout = maks 1–2 halaman target per respons. Kerjakan Beranda dulu, baru Tumbuh, baru Nutrisi — jangan patch CSS global sekaligus.',
+    '30. DILARANG margin negatif besar (mis. margin-top:-68px) untuk "mepadatkan". DILARANG blok komentar PADATKAN/PATCH tanpa file CSS lengkap.',
   ].join('\n');
 
   function getSystemPrompt() {
@@ -343,7 +345,7 @@ const AI = (() => {
       '[LAYOUT SATU LAYAR HP — WAJIB PATUH]',
       'Salin pola layout dari halaman REFERENSI (' + uniqRefs.join(', ') + ') ke halaman TARGET yang user sebut.',
       'Struktur wajib: .app-shell{height:100dvh;display:flex;flex-direction:column} header/tabbar flex-shrink:0; .screen-body{flex:1;min-height:0;overflow-y:auto}.',
-      'DILARANG: mengecilkan font/padding global (:root, body, *); menghapus kartu/section; transform:scale; filter:blur.',
+      'DILARANG: mengecilkan font/padding global (:root, body, *); menghapus kartu/section; transform:scale; filter:blur; margin negatif besar; patch CSS partial — tulis file CSS UTUH.',
       'Kerjakan 1 halaman target per respons. File CSS saja kecuali HTML struktur screen perlu disamakan.',
     ];
     if (css && cssPath) {
@@ -703,6 +705,43 @@ const AI = (() => {
     return b === 0 && p === 0 && br === 0;
   }
 
+  const KARSA_CSS_PATCH_MARK = '/* --- KARSA AI patch --- */';
+
+  function stripKarsaCssPatches(css) {
+    return (css || '').replace(/\n\/\* --- KARSA AI patch --- \*\/[\s\S]*$/m, '').trimEnd();
+  }
+
+  function isLikelyCssPatch(oldContent, newContent) {
+    if (!oldContent || oldContent.length < 350) return false;
+    if (newContent.length >= oldContent.length * 0.62) return false;
+    if (/PADATKAN|PATCH ONLY|OVERRIDE ONLY|cuplikan css/i.test(newContent)) return true;
+    const core = /#app|\.app-shell|body\s*\{|\.screen|#p-home|#p-food|#p-growth/i;
+    if (core.test(oldContent) && !core.test(newContent) && newContent.length < oldContent.length * 0.55) return true;
+    return newContent.length < oldContent.length * 0.38;
+  }
+
+  function mergeCssPatch(oldContent, patch) {
+    const base = stripKarsaCssPatches(oldContent);
+    return base + '\n\n' + KARSA_CSS_PATCH_MARK + '\n' + patch.trim() + '\n';
+  }
+
+  function validateCssSafety(css) {
+    const issues = [];
+    if (!braceBalance(css)) issues.push('Kurung { } tidak seimbang — browser mengabaikan stylesheet.');
+    (css.match(/margin\s*:\s*[^;]*-\d{2,}/gi) || []).slice(0, 3).forEach((m) => {
+      issues.push('Margin negatif berbahaya: ' + m.trim());
+    });
+    return issues;
+  }
+
+  function prepareFileForApply(path, newCode, project) {
+    const old = project && project.files[path];
+    if (old === undefined || fileExt(path) !== 'css') return newCode;
+    if (!isLikelyCssPatch(old, newCode)) return newCode;
+    showToast('Patch CSS digabung ke style lama (bukan menimpa seluruh file).', 'info');
+    return mergeCssPatch(old, newCode);
+  }
+
   function isFileComplete(code, path) {
     const c = (code || '').trim();
     if (c.length < 4) return false;
@@ -716,7 +755,7 @@ const AI = (() => {
       const scriptClose = (c.match(/<\/script>/gi) || []).length;
       if (scripts > scriptClose) return false;
     }
-    if (ext === 'css') return true;
+    if (ext === 'css') return braceBalance(c);
     if (ext === 'js' || ext === 'ts' || ext === 'jsx' || ext === 'tsx') {
       if (/\[\.\.\.\]|BUKAN kode asli|penanda dipotong|← ini/i.test(c)) return false;
       if (!braceBalance(c)) return false;
@@ -1069,7 +1108,15 @@ const AI = (() => {
     });
 
     State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
-    valid.forEach((f) => State.setFile(f.path, f.code));
+    const merged = valid.map((f) => {
+      let code = prepareFileForApply(f.path, f.code, project);
+      if (fileExt(f.path) === 'css') {
+        const issues = validateCssSafety(code);
+        if (issues.length) showToast('⚠ CSS: ' + issues[0], 'warn');
+      }
+      return { path: f.path, code: code };
+    });
+    merged.forEach((f) => State.setFile(f.path, f.code));
     FileTree.render();
     const htmlApplied = valid.find((f) => f.path === 'preview/index.html')
       || valid.find((f) => f.path === 'index.html')
