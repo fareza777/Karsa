@@ -14,6 +14,7 @@ const AI = (() => {
   const MAX_HISTORY = 12;
   const API_TEXT_BUDGET = 180000; // di bawah batas server 200k karakter
   const MAX_AWAM_PHASES = 1; // satu tahap per pesan — tidak ada "percantik" otomatis tanpa diminta
+  const THINK_ABORT_MS = 55000; // M3 sering stuck di redacted_thinking — beralih ke mode cepat
 
   const ANTI_REASONING_PROMPT = [
     'MODE KERJA (otomatis — user awam tidak perlu mengetik ini, tapi kamu WAJIB patuh):',
@@ -84,6 +85,7 @@ const AI = (() => {
   let renderedProjectId = null;
   let busy = false;
   let abortCtrl = null;
+  let liveAbortReason = 'user';
 
   function sanitizePublicError(msg) {
     if (!msg || typeof msg !== 'string') return 'Terjadi kesalahan. Coba lagi.';
@@ -473,17 +475,44 @@ const AI = (() => {
     return parts.join('\n');
   }
 
-  function buildProjectContext() {
+  function isIterationRequest(prompt, project) {
+    if (!project || !prompt) return false;
+    if (isNarrowChangeRequest(prompt) || isLayoutFitRequest(prompt)) return true;
+    if (isMobileProject(project) && !isCreateLikePrompt(prompt) && !projectNeedsScaffold(project)) return true;
+    return false;
+  }
+
+  function buildProjectContext(prompt) {
     const project = State.getCurrentProject();
     if (!project) return 'Belum ada proyek terbuka.';
-    let context = 'FILE PROYEK "' + project.name + '" SAAT INI:\n';
-    let total = 0;
-    sortedProjectPaths(project.files).forEach((path) => {
-      let content = project.files[path];
-      if (content.length > MAX_FILE_CHARS) {
-        content = content.slice(0, MAX_FILE_CHARS) + '\n/* …dipotong, file terlalu panjang… */';
+    const files = project.files || {};
+    const slim = isIterationRequest(prompt || '', project);
+    let paths = sortedProjectPaths(files);
+    if (slim) {
+      paths = paths.filter((p) => {
+        if (/^screens\//i.test(p) || /^components\//i.test(p)) return false;
+        if (/^App\.tsx$/i.test(p) || /^app\.tsx$/i.test(p)) return false;
+        if (/^(package|app)\.json$/.test(p) || /babel\.config/i.test(p)) return false;
+        return /\.(html|css|js)$/i.test(p);
+      });
+      if (isNarrowChangeRequest(prompt) && !isLayoutFitRequest(prompt)) {
+        const cssPaths = paths.filter((p) => /\.css$/i.test(p) || /index\.html$/i.test(p));
+        if (cssPaths.length) paths = cssPaths;
       }
-      if (total + content.length > MAX_CONTEXT_CHARS) {
+    }
+    const fileLimit = slim ? 10000 : MAX_FILE_CHARS;
+    const ctxLimit = slim ? 45000 : MAX_CONTEXT_CHARS;
+    const jsLimit = slim ? 6000 : fileLimit;
+    let context = 'FILE PROYEK "' + project.name + '" SAAT INI:\n';
+    if (slim) context += '(Mode iterasi — hanya file preview web relevan)\n';
+    let total = 0;
+    paths.forEach((path) => {
+      let content = files[path] || '';
+      const cap = /\.js$/i.test(path) && slim ? jsLimit : fileLimit;
+      if (content.length > cap) {
+        content = content.slice(0, cap) + '\n/* …dipotong, file terlalu panjang… */';
+      }
+      if (total + content.length > ctxLimit) {
         context += '\n--- ' + path + ' --- (dilewati, konteks penuh)\n';
         return;
       }
@@ -1282,9 +1311,11 @@ const AI = (() => {
     history.push({ role: 'user', content: displayText });
 
     const expandedPrompt = expandAwamPrompt(prompt, project);
-    const modelUsed = resolveModel(imageAtts.length > 0, project);
+    const modelUsed = resolveModel(imageAtts.length > 0, project, expandedPrompt);
     if (imageAtts.length) {
       showToast('Ada gambar — AI menganalisis screenshot.', 'info');
+    } else if (modelUsed === MODEL_FAST && isMobileProject(project) && isIterationRequest(expandedPrompt, project)) {
+      showToast('Mode cepat ⚡ — iterasi layout/CSS tanpa menunggu lama.', 'info');
     }
 
     const bubble = el('div', { class: 'ai-msg ai-msg-assistant' }, [
@@ -1324,7 +1355,7 @@ const AI = (() => {
 
       const messages = [
         { role: 'system', content: getSystemPrompt() },
-        { role: 'user', content: buildProjectContext() },
+        { role: 'user', content: buildProjectContext(expandedPrompt) },
         ...compactHistoryForApi(history.slice(-histLimit)),
       ];
       messages[messages.length - 1] = {
@@ -1347,6 +1378,7 @@ const AI = (() => {
       let lastMergeFp = '';
       accumulatedVisible = '';
       activeModel = modelUsed;
+      liveAbortReason = 'user';
 
       for (;;) {
           let apiMessages = baseMessages;
@@ -1359,14 +1391,49 @@ const AI = (() => {
             ]));
           }
 
-          const result = await runAiStream({
-            messages: apiMessages,
-            modelUsed: activeModel,
-            useDirect,
-            signal: abortCtrl.signal,
-            bubble,
-            onPhase,
-          });
+          liveAbortReason = 'user';
+          let gotVisible = false;
+          let thinkWatchdog = null;
+          if (activeModel.includes('M3')) {
+            thinkWatchdog = setTimeout(() => {
+              if (!gotVisible && !abortCtrl.signal.aborted) {
+                liveAbortReason = 'timeout';
+                abortCtrl.abort();
+              }
+            }, THINK_ABORT_MS);
+          }
+
+          let result;
+          try {
+            result = await runAiStream({
+              messages: apiMessages,
+              modelUsed: activeModel,
+              useDirect,
+              signal: abortCtrl.signal,
+              bubble,
+              onPhase: (p) => {
+                onPhase(p);
+                if (p === 'menulis') gotVisible = true;
+              },
+            });
+          } catch (streamErr) {
+            clearTimeout(thinkWatchdog);
+            if (streamErr.name === 'AbortError' && liveAbortReason === 'timeout' && !fastRetry && activeModel.includes('M3')) {
+              fastRetry = true;
+              activeModel = MODEL_FAST;
+              abortCtrl = new AbortController();
+              phase = 'menghubungi';
+              bubble.innerHTML = '';
+              bubble.appendChild(el('span', {
+                class: 'ai-thinking',
+                text: 'Mode cepat — mencoba lagi…',
+              }));
+              showToast('Terlalu lama berpikir — beralih ke mode cepat ⚡', 'warn');
+              continue;
+            }
+            throw streamErr;
+          }
+          clearTimeout(thinkWatchdog);
           finishReason = result.finishReason;
 
           if (!result.visible.trim()) {
@@ -1529,10 +1596,11 @@ const AI = (() => {
     }
   }
 
-  // --- Pemilihan model: M3 untuk vision & mobile kompleks; M2.7 cepat untuk web ---
-  function resolveModel(hasImages, project) {
+  // --- Pemilihan model: M3 untuk vision & scaffold mobile baru; M2.7 cepat untuk iterasi/CSS/layout ---
+  function resolveModel(hasImages, project, prompt) {
     if (hasImages) return MODEL_SMART;
     if (project && (project.projectType === 'mobile' || project.projectType === 'playstore')) {
+      if (isIterationRequest(prompt || '', project)) return MODEL_FAST;
       return MODEL_SMART;
     }
     return MODEL_FAST;
@@ -1558,7 +1626,12 @@ const AI = (() => {
     $('#side-tab-files').addEventListener('click', () => switchTab('files'));
     $('#side-tab-ai').addEventListener('click', () => switchTab('ai'));
     $('#ai-send').addEventListener('click', send);
-    $('#ai-stop').addEventListener('click', () => { if (abortCtrl) abortCtrl.abort(); });
+    $('#ai-stop').addEventListener('click', () => {
+      if (abortCtrl) {
+        liveAbortReason = 'user';
+        abortCtrl.abort();
+      }
+    });
     const topSettings = $('#btn-ai-settings');
     if (topSettings) topSettings.addEventListener('click', settingsDialog);
     $('#ai-clear-btn').addEventListener('click', clearChat);
