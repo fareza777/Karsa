@@ -706,6 +706,10 @@ const Preview = (() => {
     if (!project) return;
     // Proyek berganti → kembali ke halaman entry default
     if (project.id !== lastPreviewProjectId) { currentPreviewEntry = null; lastPreviewProjectId = project.id; }
+    // Preview web siap → prioritaskan tab Web (Snack butuh screen file lengkap)
+    if (hasUsableWebPreview(project.files) && previewEngine === 'snack') {
+      setEngine('web');
+    }
     ConsolePanel.clear();
     const frame = $('#preview-frame');
     const snackMode = usesSnackEngine(project);
@@ -970,6 +974,6 @@ const Preview = (() => {
 
   return {
     refresh, refreshHome, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
-    runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect,
+    runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect, resetPreviewEntry,
   };
 })();

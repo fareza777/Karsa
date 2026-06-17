@@ -338,16 +338,15 @@ const AI = (() => {
     if (mobile) {
       if (scaffold || create) {
         phases.push({
-          label: 'Membuat preview web & tampilan aplikasi…',
+          label: 'Membuat preview web…',
           apiText:
             'Permintaan pengguna: «' + userAsk + '»\n\n' +
-            'CATATAN SISTEM: Pengguna biasa (tidak paham coding). Jangan tanya balik. Jangan suruh mereka pecah permintaan.\n' +
-            'WAJIB keluarkan 3 file web yang langsung bisa dilihat di preview browser:\n' +
-            '• preview/index.html (href="style.css", src="app.js")\n' +
+            'CATATAN SISTEM: Pengguna biasa (tidak paham coding). Jangan tanya balik.\n' +
+            'TAHAP 1 — HANYA 2 file (jangan App.tsx, jangan preview/app.js dulu):\n' +
+            '• preview/index.html (href="style.css" — kerangka UI mobile lengkap, data contoh, navigasi tab)\n' +
             '• preview/style.css\n' +
-            '• preview/app.js\n' +
-            'UI mobile-first, semua layar & fitur utama bisa diklik (data contoh boleh). Bukan mockup telepon kosong. Jangan pakai div.phone-frame di HTML.\n' +
-            'App.tsx boleh disertakan ringkas jika masih ada — jangan tulis App.tsx 500+ baris dalam satu respons.',
+            'UI mobile-first, muat layar HP. preview/app.js + App.tsx akan dilanjutkan otomatis setelah ini.\n' +
+            'Jangan pakai div.phone-frame di HTML.',
         });
       } else {
         phases.push({ label: null, apiText: prompt });
@@ -674,7 +673,7 @@ const AI = (() => {
     return files.some((f) => !isFileComplete(f.code, f.path));
   }
 
-  const MAX_AUTO_CONTINUE = 3;
+  const MAX_AUTO_CONTINUE = 5;
 
   function extractProse(text) {
     const idx = text.indexOf('```');
@@ -901,14 +900,12 @@ const AI = (() => {
 
     const pending = files.filter((f) => !projectFileMatches(f.path, f.code));
 
-    const blocked = truncated || incomplete.length > 0;
-
     if (truncated || incomplete.length) {
       bubble.appendChild(el('div', {
         class: 'ai-truncated-warn',
         text: incomplete.length
-          ? '⚠ File belum lengkap — tunggu lanjutan otomatis atau klik Lanjutkan tulis.'
-          : '⚠ Respons terpotong — tunggu lanjutan otomatis atau klik Lanjutkan tulis.',
+          ? '⚠ Sebagian file belum lengkap — terapkan yang sudah siap dulu, lalu klik Lanjutkan tulis.'
+          : '⚠ Respons terpotong — terapkan file yang siap, atau klik Lanjutkan tulis.',
       }));
     }
 
@@ -930,23 +927,21 @@ const AI = (() => {
           : (files.length === allFiles.length
             ? '⚡ Terapkan ke Proyek (' + pending.length + ' file)'
             : '⚡ Terapkan (' + pending.length + '/' + allFiles.length + ' file siap)')),
-      disabled: !files.length || blocked,
+      disabled: !files.length || !pending.length,
       onclick: () => {
-        if (blocked) {
-          showToast('File belum lengkap — tunggu lanjutan otomatis atau klik Lanjutkan tulis.', 'warn');
-          return;
-        }
         const toApply = pending.length ? pending : files;
         if (!toApply.length) return;
         if (applyFiles(toApply)) {
           applyBtn.textContent = '✓ ' + toApply.length + ' file diterapkan';
+          if (incomplete.length) {
+            showToast('Preview web diperbarui. Klik «Lanjutkan tulis» untuk file yang belum selesai.', 'info');
+          }
         }
       },
     });
 
     const actions = [applyBtn];
-    // #12 Tombol diff — hanya bila ada file yang benar-benar berubah & lengkap
-    if (files.length && pending.length && !blocked) {
+    if (files.length && pending.length) {
       actions.push(el('button', {
         class: 'btn-diff',
         text: '👁 Lihat diff',
@@ -972,16 +967,18 @@ const AI = (() => {
   }
 
   function tryAutoApply(bubble, visible, truncated) {
-    if (!isAutoApplyOn() || truncated) return;
+    if (!isAutoApplyOn()) return;
     const allFiles = collectFileBlocks(bubble, visible);
     const parsedFiles = allFiles.filter((f) => isFileComplete(f.code, f.path));
-    if (parsedFiles.length < allFiles.length) {
-      showToast('Auto-terapkan ditunda — file belum lengkap.', 'warn');
-      return;
-    }
+    if (!parsedFiles.length) return;
     const pending = parsedFiles.filter((f) => !projectFileMatches(f.path, f.code));
     if (!pending.length) return;
-    if (applyFiles(pending)) markApplyButtonDone(bubble);
+    if (applyFiles(pending)) {
+      markApplyButtonDone(bubble);
+      if (truncated || parsedFiles.length < allFiles.length) {
+        showToast('File siap diterapkan otomatis. Lanjutkan tulis untuk sisanya.', 'info');
+      }
+    }
   }
 
   function applyFiles(files) {
@@ -1007,8 +1004,9 @@ const AI = (() => {
       || valid.find((f) => /\.html$/i.test(f.path));
     const entry = htmlApplied ? htmlApplied.path : valid[0].path;
     Tabs.open(entry);
-    if (valid.some((f) => /\.html$/i.test(f.path))) {
+    if (valid.some((f) => f.path === 'preview/index.html' || f.path === 'index.html' || /\.html$/i.test(f.path))) {
       Preview.setEngine('web');
+      Preview.resetPreviewEntry();
     }
     Preview.refresh();
     confettiBurst();

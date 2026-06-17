@@ -47,6 +47,16 @@ const Snack = (() => {
     if (!braceBalance(code)) {
       errors.push('Kurung { } ( ) [ ] tidak seimbang — ada sintaks yang belum tertutup.');
     }
+    const importRe = /from\s+['"](\.\/[^'"]+)['"]/g;
+    let m;
+    while ((m = importRe.exec(code))) {
+      const ref = m[1].replace(/^\.\//, '');
+      const candidates = [ref, ref + '.tsx', ref + '.ts', ref + '.jsx', ref + '.js', ref + '/index.tsx', ref + '/index.js'];
+      if (!candidates.some((c) => files[c] !== undefined)) {
+        errors.push('Import "' + m[1] + '" belum ada filenya — buat dulu atau gunakan tab Web (preview/).');
+        break;
+      }
+    }
     if (/dipotong untuk preview Snack|…dipotong/.test(code)) {
       errors.push('App.tsx terlalu besar dan dipotong — preview tidak bisa menampilkan.');
     }
