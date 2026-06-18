@@ -35,13 +35,15 @@ const AI = (() => {
     '5. Jangan pakai fitur server (API backend sendiri, database). localStorage boleh.',
     '6. Jawab dalam bahasa Indonesia. Jangan ulangi file yang tidak berubah — tapi jika user bilang belum berubah / minta ulang, tulis ulang file yang perlu diperbarui secara UTUH.',
     '6b. DILARANG menulis placeholder seperti "[blok file di ringkas]" atau ringkasan kode. Setiap perubahan kode HARUS pakai blok ``` dengan file=path dan isi file lengkap.',
-    '6c. CSS/JS yang sudah ada: keluarkan ISI FILE UTUH yang sudah diperbarui — bukan patch/cuplikan 20–50 baris saja. KARSA menimpa file; patch partial menghapus layout lama.',
+    '6c. EDIT CSS pada file BESAR (>150 baris) yang sudah ada: untuk perubahan kecil/sedang, keluarkan blok CSS yang sama (file=path CSS itu) berisi HANYA aturan/selector yang berubah atau baru — awali dengan komentar /* KARSA-OVERRIDE */. KARSA otomatis menggabungkannya ke style lama (base tetap utuh, override kumulatif per-selector). JANGAN tulis ulang seluruh CSS besar untuk tweak kecil — output panjang itu sering terpotong dan GAGAL diterapkan. Tulis file CSS UTUH hanya untuk file baru, file kecil, atau redesign besar.',
+    '6d. EDIT JS/TS/HTML: tetap keluarkan file UTUH (merge parsial tak aman untuk logika). Jaga ringkas; pisah file bila perlu.',
     'GAYA PERCAKAPAN:',
     '7. Hangat dan kolaboratif seperti rekan satu tim. Buka dengan 1-2 kalimat tentang apa yang akan kamu buat beserta pilihan desain utamanya, baru blok file.',
     '8. Setelah blok file, SELALU tutup dengan pertanyaan iterasi singkat berisi 2-3 ide konkret (contoh: "Mau kutambahkan efek suara, mode gelap, atau papan peringkat?").',
     '9. Jika permintaan terlalu ambigu untuk dibuat dengan baik, JANGAN buat file dulu — ajukan 2-3 pertanyaan pilihan singkat tentang preferensi pengguna.',
     'DESAIN:',
     '10. Mobile-first: shell app height:100dvh + flex column; header & tabbar fixed; isi (.screen-body / main) flex:1 min-height:0 overflow-y:auto. Game/interaktif ringan boleh tanpa scroll; tab dengan banyak kartu (Beranda, Nutrisi) WAJIB scroll di dalam area isi — jangan overflow ke body.',
+    '10b. "Pas 1 layar HP" = STRUKTUR app HP yang benar (header tetap di atas, tabbar tetap di bawah, area isi tengah yang scroll) — BUKAN menyusutkan font/padding/kartu agar semua muat tanpa scroll. Jika konten lebih banyak dari 1 layar, biarkan area isi scroll; jangan rusak tata letak demi memaksa muat.',
     '11. Estetika modern: palet warna serasi, sudut membulat, transisi halus, emoji secukupnya.',
     '12. Penalaran internal: lihat aturan MODE KERJA di bawah — singkat, lalu langsung file.',
     '13. File besar (>80 baris): pisah ke index.html + css/style.css + js/app.js. Jangan gabung HTML+CSS+JS inline ke satu file kecuali user minta — file terpotong = app rusak.',
@@ -737,13 +739,55 @@ const AI = (() => {
   const KARSA_CSS_PATCH_MARK = '/* --- KARSA AI patch --- */';
 
   function stripKarsaCssPatches(css) {
-    return (css || '').replace(/\n\/\* --- KARSA AI patch --- \*\/[\s\S]*$/m, '').trimEnd();
+    return (css || '').replace(/\n*\/\* --- KARSA AI patch --- \*\/[\s\S]*$/m, '').trimEnd();
+  }
+
+  // Ambil isi blok patch lama (setelah penanda), kosong jika belum ada.
+  function extractPriorPatch(css) {
+    const idx = (css || '').indexOf(KARSA_CSS_PATCH_MARK);
+    if (idx === -1) return '';
+    return css.slice(idx + KARSA_CSS_PATCH_MARK.length).trim();
+  }
+
+  // Pisah CSS jadi blok top-level { key: selector/@media ternormalisasi, full }.
+  // Menangani sarang (mis. @media { ... }) via hitung kedalaman kurung.
+  function splitTopLevelCssRules(css) {
+    const rules = [];
+    let start = 0, depth = 0, preludeEnd = -1, q = null;
+    for (let i = 0; i < css.length; i++) {
+      const ch = css[i];
+      if (q) { if (ch === '\\') { i++; } else if (ch === q) { q = null; } continue; }
+      if (ch === '"' || ch === "'") { q = ch; continue; }
+      if (ch === '{') { if (depth === 0) preludeEnd = i; depth++; }
+      else if (ch === '}') {
+        depth--;
+        if (depth === 0) {
+          const full = css.slice(start, i + 1).trim();
+          const key = css.slice(start, preludeEnd).trim().replace(/\s+/g, ' ');
+          if (key) rules.push({ key: key, full: full });
+          start = i + 1; preludeEnd = -1;
+        }
+      }
+    }
+    return rules;
+  }
+
+  // Gabung override per-selector: aturan baru menimpa selector yang sama,
+  // aturan lama yang selektornya tak diubah TETAP dipertahankan (kumulatif),
+  // dedup per selector → tak menumpuk tanpa batas.
+  function mergeCssOverrides(oldPatchCss, newPatchCss) {
+    const map = new Map();
+    splitTopLevelCssRules(oldPatchCss || '').forEach((r) => map.set(r.key, r.full));
+    splitTopLevelCssRules(newPatchCss || '').forEach((r) => map.set(r.key, r.full));
+    return Array.from(map.values()).join('\n\n');
   }
 
   function isLikelyCssPatch(oldContent, newContent) {
-    if (!oldContent || oldContent.length < 350) return false;
+    if (!oldContent || oldContent.length < 120) return false;
+    // Penanda eksplisit dari AI menang tanpa lihat ukuran.
+    if (/KARSA-OVERRIDE|PADATKAN|PATCH ONLY|OVERRIDE ONLY|cuplikan css/i.test(newContent.slice(0, 120))) return true;
+    if (oldContent.length < 350) return false;
     if (newContent.length >= oldContent.length * 0.62) return false;
-    if (/PADATKAN|PATCH ONLY|OVERRIDE ONLY|cuplikan css/i.test(newContent)) return true;
     const core = /#app|\.app-shell|body\s*\{|\.screen|#p-home|#p-food|#p-growth/i;
     if (core.test(oldContent) && !core.test(newContent) && newContent.length < oldContent.length * 0.55) return true;
     return newContent.length < oldContent.length * 0.38;
@@ -751,7 +795,8 @@ const AI = (() => {
 
   function mergeCssPatch(oldContent, patch) {
     const base = stripKarsaCssPatches(oldContent);
-    return base + '\n\n' + KARSA_CSS_PATCH_MARK + '\n' + patch.trim() + '\n';
+    const merged = mergeCssOverrides(extractPriorPatch(oldContent), patch.trim());
+    return base + '\n\n' + KARSA_CSS_PATCH_MARK + '\n' + merged + '\n';
   }
 
   function validateCssSafety(css) {
