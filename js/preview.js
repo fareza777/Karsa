@@ -425,7 +425,16 @@ const Preview = (() => {
       'box-shadow:none!important;transform:none!important;border:none!important}' +
       'main,#content,.main-content,.app-content{flex:1;min-height:0;overflow-y:auto}' +
       '.bottom-nav,.bottom-nav-bar,.tab-bar{position:sticky;bottom:0;z-index:20;width:100%}</style>';
-    const headInject = CONSOLE_BRIDGE + KARSA_PREVIEW_FIT;
+    // PENGAMAN HP (hanya proyek mobile): apa pun CSS dari AI, jamin app shell isi
+    // 1 layar, area tengah bisa scroll, dan bottom-nav SELALU terlihat (tak terpotong).
+    // Hanya untuk projectType mobile/playstore agar tak mengganggu web/landing.
+    const KARSA_MOBILE_SHELL = '<style id="karsa-mobile-shell">' +
+      '#app,.app-shell,.app,.app-root,.screen-wrap{display:flex!important;flex-direction:column!important;min-height:100dvh!important;max-width:100%!important;overflow:visible!important}' +
+      'main,#content,.main-content,.app-content,.content,.screen-body,.app-main,.screen,.page,.tab-content,.scroll-area,.body-scroll{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;padding-bottom:76px}' +
+      '.bottom-nav,.bottom-nav-bar,.tab-bar,.tabbar,.navbar-bottom,.bottom-tabs,.tabs-bottom,[class*="bottom-nav"],[class*="tabbar"]{position:fixed!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:100%!important;z-index:9999!important;flex-shrink:0!important}' +
+      '</style>';
+    const isMobileProj = project && (project.projectType === 'mobile' || project.projectType === 'playstore');
+    const headInject = CONSOLE_BRIDGE + KARSA_PREVIEW_FIT + (isMobileProj ? KARSA_MOBILE_SHELL : '');
     if (/<head[^>]*>/i.test(html)) {
       html = html.replace(/<head[^>]*>/i, (m) => m + '\n' + headInject);
     } else {
