@@ -143,6 +143,7 @@ const State = (() => {
     const checkpoint = { id: uid(), label, at: Date.now(), files: { ...project.files } };
     const list = [...(project.checkpoints || []), checkpoint].slice(-5);
     updateProject(project.id, { checkpoints: list });
+    return checkpoint.id;
   }
 
   function restoreCheckpoint(checkpointId) {

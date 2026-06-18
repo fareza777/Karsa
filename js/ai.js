@@ -1183,7 +1183,7 @@ const AI = (() => {
       return { path: f.path, isNew: old === undefined, lines: newLines, delta: newLines - oldLines };
     });
 
-    State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
+    const undoId = State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
     const merged = valid.map((f) => {
       let code = prepareFileForApply(f.path, f.code, project);
       if (fileExt(f.path) === 'css') {
@@ -1205,14 +1205,36 @@ const AI = (() => {
     }
     Preview.refresh();
     confettiBurst();
-    appendChangeSummary(summary);
+    appendChangeSummary(summary, undoId);
     showToast(valid.length + ' file diterapkan — preview diperbarui', 'ok');
     return true;
   }
 
+  // Pulihkan proyek ke kondisi sebelum apply terakhir (1 klik, untuk pengguna awam).
+  function undoLastApply(checkpointId, btn) {
+    if (!checkpointId || !State.restoreCheckpoint(checkpointId)) {
+      showToast('Tidak bisa dikembalikan (checkpoint sudah tidak ada).', 'warn');
+      return;
+    }
+    const proj = State.getCurrentProject();
+    if (proj && typeof App !== 'undefined' && App.openProject) App.openProject(proj.id);
+    else if (typeof Preview !== 'undefined') Preview.refresh();
+    if (btn) { btn.textContent = '✓ Dikembalikan'; btn.disabled = true; }
+    showToast('Dikembalikan ke versi sebelum perubahan terakhir.', 'ok');
+  }
+
   // #9 Ringkasan "apa yang berubah" sebagai gelembung di chat
-  function appendChangeSummary(summary) {
+  function appendChangeSummary(summary, undoId) {
     const head = el('div', { class: 'ai-change-head', text: '✓ Diterapkan — ' + summary.length + ' file' });
+    if (undoId) {
+      const undoBtn = el('button', {
+        class: 'ai-change-undo',
+        title: 'Kembalikan ke versi sebelum perubahan ini',
+        text: '↩ Kembalikan',
+      });
+      undoBtn.addEventListener('click', () => undoLastApply(undoId, undoBtn));
+      head.appendChild(undoBtn);
+    }
     const items = summary.map((s) => {
       const deltaText = s.isNew
         ? '+' + s.lines + ' baris'

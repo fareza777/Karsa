@@ -338,7 +338,15 @@
   align-self: stretch;
   max-width: 100%;
 }
-.ai-change-head { font-size: 12.5px; font-weight: 700; color: var(--ok); margin-bottom: 8px; }
+.ai-change-head { font-size: 12.5px; font-weight: 700; color: var(--ok); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ai-change-undo {
+  font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  color: var(--ink); background: var(--bg-2);
+  border: 1px solid var(--border); border-radius: 999px; padding: 3px 11px;
+  white-space: nowrap; transition: background .15s, border-color .15s;
+}
+.ai-change-undo:hover { background: var(--bg-3); border-color: color-mix(in srgb, var(--warn, #f5a623) 60%, var(--border)); }
+.ai-change-undo:disabled { cursor: default; opacity: .6; }
 .ai-change-item {
   display: flex;
   align-items: center;
