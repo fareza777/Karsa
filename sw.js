@@ -1,5 +1,5 @@
 /* ===== KARSA — Service Worker (offline shell) ===== */
-const CACHE = 'karsa-v1';
+const CACHE = 'karsa-v2';
 
 // Aset inti yang dipracache agar app bisa dibuka offline
 const CORE = [
