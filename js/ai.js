@@ -15,6 +15,7 @@ const AI = (() => {
   const API_TEXT_BUDGET = 180000; // di bawah batas server 200k karakter
   const MAX_AWAM_PHASES = 1; // satu tahap per pesan — tidak ada "percantik" otomatis tanpa diminta
   const THINK_ABORT_MS = 55000; // M3 sering stuck di redacted_thinking — beralih ke mode cepat
+  const STREAM_IDLE_MS = 45000; // tak ada byte masuk selama ini → stream dianggap macet
 
   const ANTI_REASONING_PROMPT = [
     'MODE KERJA (otomatis — user awam tidak perlu mengetik ini, tapi kamu WAJIB patuh):',
@@ -714,31 +715,14 @@ const AI = (() => {
     return bubble;
   }
 
+  // Map path→konten file proyek aktif (untuk resolusi edit terarah di engine inti).
+  function currentFiles() {
+    const project = State.getCurrentProject();
+    return (project && project.files) || {};
+  }
+
   function braceBalance(code) {
-    let b = 0; let p = 0; let br = 0; let q = null;
-    for (let i = 0; i < code.length; i++) {
-      const ch = code[i];
-      if (q) {
-        if (ch === '\\') { i++; continue; }
-        if (ch === q) q = null;
-        continue;
-      }
-      if (ch === '"' || ch === "'" || ch === '`') { q = ch; continue; }
-      if (ch === '/' && code[i + 1] === '/') { while (i < code.length && code[i] !== '\n') i++; continue; }
-      if (ch === '/' && code[i + 1] === '*') {
-        i += 2;
-        while (i < code.length - 1 && !(code[i] === '*' && code[i + 1] === '/')) i++;
-        i++;
-        continue;
-      }
-      if (ch === '{') b++;
-      else if (ch === '}') b--;
-      else if (ch === '(') p++;
-      else if (ch === ')') p--;
-      else if (ch === '[') br++;
-      else if (ch === ']') br--;
-    }
-    return b === 0 && p === 0 && br === 0;
+    return KarsaAICore.braceBalance(code);
   }
 
   const KARSA_CSS_PATCH_MARK = '/* --- KARSA AI patch --- */';
@@ -822,115 +806,29 @@ const AI = (() => {
   }
 
   function isFileComplete(code, path) {
-    const c = (code || '').trim();
-    if (c.length < 4) return false;
-    const ext = fileExt(path);
-    if (ext === 'html') {
-      if (c.length > 250) {
-        const tail = c.slice(-120);
-        if (!/<\/(html|body)>/i.test(tail)) return false;
-      }
-      const scripts = (c.match(/<script\b/gi) || []).length;
-      const scriptClose = (c.match(/<\/script>/gi) || []).length;
-      if (scripts > scriptClose) return false;
-    }
-    if (ext === 'css') return braceBalance(c);
-    if (ext === 'js' || ext === 'ts' || ext === 'jsx' || ext === 'tsx') {
-      if (/\[\.\.\.\]|BUKAN kode asli|penanda dipotong|← ini/i.test(c)) return false;
-      if (!braceBalance(c)) return false;
-      if (/const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
-      if (/[{(,=]\s*$/.test(c)) return false;
-      if ((ext === 'tsx' || ext === 'jsx' || ext === 'ts') && !/export\s+default\b/.test(c)) return false;
-      // StyleSheet.create / komponen RN biasanya diakhiri `});` — jangan anggap terpotong
-    }
-    if (ext === 'json') {
-      try { JSON.parse(c); } catch (e) { return false; }
-    }
-    return true;
+    return KarsaAICore.isFileComplete(code, path);
   }
 
   function hasUnclosedCodeFence(text) {
-    return ((text.match(/```/g) || []).length % 2) !== 0;
+    return KarsaAICore.hasUnclosedCodeFence(text);
   }
 
   function isResponseTruncated(visible, finishReason) {
-    if (hasUnclosedCodeFence(visible)) return true;
-    const files = parseFileBlocks(visible);
-    if (!files.length) return finishReason === 'length';
-    const allComplete = files.every((f) => isFileComplete(f.code, f.path));
-    if (allComplete) return false;
-    if (finishReason === 'length') return true;
-    return files.some((f) => !isFileComplete(f.code, f.path));
+    return KarsaAICore.isResponseTruncated(visible, finishReason, currentFiles());
   }
 
   const MAX_AUTO_CONTINUE = 5;
 
   function extractProse(text) {
-    const idx = text.indexOf('```');
-    return idx === -1 ? text.trim() : text.slice(0, idx).trim();
+    return KarsaAICore.extractProse(text);
   }
 
-  function rebuildWithFiles(originalVisible, files) {
-    const prose = extractProse(originalVisible);
-    const blocks = files.map((f) => {
-      const lang = fileExt(f.path) || 'txt';
-      return '```' + lang + ' file=' + f.path + '\n' + f.code + '\n```';
-    });
-    return (prose ? prose + '\n\n' : '') + blocks.join('\n\n');
-  }
-
-  // Sambung kode terpotong dengan lanjutannya secara MULUS — kunci anti-rusak.
-  // Menangani tiga kasus tanpa menebak:
-  //  • lanjutan = file utuh (memuat awal prior)        → pakai lanjutan.
-  //  • lanjutan = sisa kode yang mengulang sebagian akhir prior → buang overlap, sambung.
-  //  • lanjutan = sisa murni tanpa overlap              → tempel langsung (tanpa \n sisipan).
-  // TIDAK PERNAH mengganti prior dengan potongan yang lebih pendek (penyebab preview rusak).
   function stitchCode(prior, cont) {
-    const a = (prior || '').replace(/\s+$/, '');
-    const b = (cont || '').replace(/^\n+/, '');
-    if (!a) return b;
-    if (!b.trim()) return a;
-    // Lanjutan ternyata menulis ulang file dari awal → pakai yang utuh.
-    const head = a.slice(0, Math.min(80, a.length)).trim();
-    if (head && b.trimStart().startsWith(head)) return b;
-    // Cari overlap terpanjang: akhir `a` == awal `b`.
-    const max = Math.min(a.length, b.length, 4000);
-    for (let len = max; len >= 12; len--) {
-      if (a.slice(a.length - len) === b.slice(0, len)) return a + b.slice(len);
-    }
-    // Tak ada overlap jelas: sambung langsung (tanpa \n sisipan yang bisa
-    // memecah token/tag di titik putus).
-    return a + b;
+    return KarsaAICore.stitchCode(prior, cont);
   }
 
   function mergeContinuedOutput(previous, continuation) {
-    const prevFiles = parseFileBlocks(previous);
-    const newFiles = parseFileBlocks(continuation);
-    if (!newFiles.length) {
-      // Lanjutan tanpa header file= → anggap kelanjutan file terakhir yang belum lengkap.
-      const tail = continuation.replace(/^[\s\S]*?```[\w-]*\s*\n?/m, '').replace(/```\s*$/m, '').trim();
-      const incomplete = prevFiles.filter((f) => !isFileComplete(f.code, f.path));
-      if (incomplete.length && tail) {
-        const last = incomplete[incomplete.length - 1];
-        last.code = stitchCode(last.code, tail);
-        return rebuildWithFiles(previous, prevFiles);
-      }
-      return previous;
-    }
-    const map = Object.fromEntries(prevFiles.map((f) => [f.path, f.code]));
-    newFiles.forEach((f) => {
-      const prior = map[f.path];
-      if (prior && !isFileComplete(prior, f.path)) {
-        // File yang belum lengkap: SAMBUNG (jangan timpa) agar awal kode tak hilang.
-        map[f.path] = stitchCode(prior, f.code);
-      } else if (prior && isFileComplete(prior, f.path) && f.code.trim().length < prior.trim().length * 0.6) {
-        // Prior sudah lengkap & lanjutan jauh lebih pendek → potongan, jangan timpa.
-        map[f.path] = prior;
-      } else {
-        map[f.path] = f.code;
-      }
-    });
-    return rebuildWithFiles(previous, Object.keys(map).map((path) => ({ path, code: map[path] })));
+    return KarsaAICore.mergeContinuedOutput(previous, continuation, currentFiles());
   }
 
   function buildContinueMessage(accumulatedVisible) {
@@ -1056,101 +954,14 @@ const AI = (() => {
     }
   }
 
-  // --- Edit terarah (SEARCH/REPLACE) — hindari tulis ulang file besar (anti-terpotong) ---
-  // Blok: ```html edit=index.html  <<<<<<< SEARCH … ======= … >>>>>>> REPLACE  ```
-  function parseEditBlocks(text) {
-    const blocks = [];
-    const blockRe = /```[\w-]*[ \t]+edit[=:]\s*["']?([^\s"'`]+)["']?[^\n]*\n([\s\S]*?)```/gi;
-    let m;
-    while ((m = blockRe.exec(text)) !== null) {
-      const path = m[1].trim().replace(/^\.\//, '');
-      if (!isValidPath(path)) continue;
-      const body = m[2];
-      const edits = [];
-      const pairRe = /<{5,}\s*SEARCH[^\n]*\n([\s\S]*?)\n={5,}[^\n]*\n([\s\S]*?)\n>{5,}\s*REPLACE/gi;
-      let p;
-      while ((p = pairRe.exec(body)) !== null) {
-        edits.push({ search: p[1], replace: p[2] });
-      }
-      if (edits.length) blocks.push({ path, edits });
-    }
-    return blocks;
-  }
-
-  // Cari `needle` dengan toleransi spasi/indentasi yang sedikit berbeda.
-  function matchFlexible(haystack, needle) {
-    const trimmed = (needle || '').trim();
-    if (!trimmed) return null;
-    const esc = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
-    try {
-      const re = new RegExp(esc);
-      const mm = re.exec(haystack);
-      if (mm) return { start: mm.index, end: mm.index + mm[0].length };
-    } catch (e) { /* regex gagal — abaikan */ }
-    return null;
-  }
-
-  // Terapkan pasangan SEARCH/REPLACE ke isi file proyek saat ini.
-  function resolveEdits(path, edits) {
-    const project = State.getCurrentProject();
-    if (!project || project.files[path] === undefined) return { ok: false, reason: 'nofile', missing: edits.length };
-    let code = project.files[path];
-    let applied = 0;
-    let missing = 0;
-    edits.forEach(({ search, replace }) => {
-      const s = search.replace(/\n$/, '');
-      const r = replace.replace(/\n$/, '');
-      if (!s) { missing++; return; }
-      const idx = code.indexOf(s);
-      if (idx !== -1) { code = code.slice(0, idx) + r + code.slice(idx + s.length); applied++; return; }
-      // Sudah diterapkan sebelumnya? anggap sukses (idempoten untuk "Terapkan ulang").
-      if (r && code.indexOf(r) !== -1) { applied++; return; }
-      const flex = matchFlexible(code, s);
-      if (flex) { code = code.slice(0, flex.start) + r + code.slice(flex.end); applied++; return; }
-      missing++;
-    });
-    return { ok: missing === 0 && applied > 0, code, applied, missing };
-  }
-
-  // Laporan resolusi edit untuk UI (mana yang gagal dicocokkan).
+  // --- Edit terarah (SEARCH/REPLACE) — delegasi ke engine inti (KarsaAICore) ---
   function editResolutionReport(text) {
-    const resolved = [];
-    const unresolved = [];
-    parseEditBlocks(text).forEach((b) => {
-      const res = resolveEdits(b.path, b.edits);
-      if (res.ok) resolved.push(b.path);
-      else unresolved.push({ path: b.path, missing: res.missing, reason: res.reason });
-    });
-    return { resolved, unresolved };
+    return KarsaAICore.editResolutionReport(text, currentFiles());
   }
 
-  // --- Parsing & penerapan file dari jawaban AI ---
+  // --- Parsing file dari jawaban AI (termasuk resolusi blok edit terarah) ---
   function parseFileBlocks(text) {
-    const files = [];
-    const patterns = [
-      /```[\w-]*[ \t]+file[=:]\s*["']?([^\s"'`]+)["']?[^\n]*\n([\s\S]*?)```/gi,
-      /```[\w-]*[ \t]+file=([^\s`]+)[ \t]*\n([\s\S]*?)```/g,
-      /```[\w-]*\nfile=([^\s`]+)[ \t]*\n([\s\S]*?)```/g,
-    ];
-    patterns.forEach((regex) => {
-      let match;
-      const re = new RegExp(regex.source, regex.flags);
-      while ((match = re.exec(text)) !== null) {
-        const path = match[1].trim().replace(/^\.\//, '');
-        const code = match[2].replace(/\n$/, '');
-        if (isValidPath(path) && code.trim()) files.push({ path, code });
-      }
-    });
-    const unique = {};
-    files.forEach((f) => { unique[f.path] = f.code; });
-    // Resolusi blok edit terarah → kode file UTUH. File utuh (file=) menang
-    // bila path yang sama juga punya blok edit.
-    parseEditBlocks(text).forEach((b) => {
-      if (unique[b.path] !== undefined) return;
-      const res = resolveEdits(b.path, b.edits);
-      if (res.ok) unique[b.path] = res.code;
-    });
-    return Object.keys(unique).map((path) => ({ path, code: unique[path] }));
+    return KarsaAICore.parseFileBlocks(text, currentFiles());
   }
 
   function looksLikeCodeChangeRequest(text) {
@@ -1280,8 +1091,12 @@ const AI = (() => {
     const editReport = editResolutionReport(visibleText || bubble.dataset.aiVisible || '');
     if (editReport.unresolved.length) {
       const paths = editReport.unresolved.map((u) => u.path);
+      const anyAmbiguous = editReport.unresolved.some((u) => u.reason === 'ambiguous');
+      const sebab = anyAmbiguous
+        ? 'teks lama muncul lebih dari sekali (kurang unik)'
+        : 'teks lama tak ditemukan';
       const warn = el('div', { class: 'ai-edit-fail ai-truncated-warn' }, [
-        el('div', { text: '⚠ Edit terarah gagal dicocokkan pada: ' + [...new Set(paths)].join(', ') + ' (teks lama tak ditemukan).' }),
+        el('div', { text: '⚠ Edit terarah gagal dicocokkan pada: ' + [...new Set(paths)].join(', ') + ' (' + sebab + ').' }),
         el('button', {
           class: 'ai-retry-btn',
           text: '📝 Minta tulis ulang file utuh',
@@ -1510,50 +1325,72 @@ const AI = (() => {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith('data:')) continue;
-        const payload = trimmed.slice(5).trim();
-        if (payload === '[DONE]') continue;
-        try {
-          const json = JSON.parse(payload);
-          if (json.error) throw new Error(sanitizePublicError(json.error.message || json.error));
-          if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
-          const delta = json.choices?.[0]?.delta?.content;
-          if (delta) {
-            rawText += delta;
-            const { visible, thinking } = stripThink(rawText);
-            const phase = thinking && !visible.trim() ? 'berpikir' : 'menulis';
-            if (onPhase) onPhase(phase, rawText.length);
-            const now = Date.now();
-            if (visible.trim()) {
-              if (now - lastRenderAt > 180) {
+    // #5 Watchdog idle: kalau tak ada byte masuk selama STREAM_IDLE_MS, anggap
+    // stream macet (bukan cuma lambat berpikir) lalu hentikan — jangan menggantung.
+    let idleTimer = null;
+    try {
+      for (;;) {
+        const { done, value } = await Promise.race([
+          reader.read(),
+          new Promise((_, reject) => {
+            idleTimer = setTimeout(() => reject(new Error('__karsa_stream_idle')), STREAM_IDLE_MS);
+          }),
+        ]);
+        clearTimeout(idleTimer);
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const payload = trimmed.slice(5).trim();
+          if (payload === '[DONE]') continue;
+          try {
+            const json = JSON.parse(payload);
+            if (json.error) throw new Error(sanitizePublicError(json.error.message || json.error));
+            if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
+            const delta = json.choices?.[0]?.delta?.content;
+            if (delta) {
+              rawText += delta;
+              const { visible, thinking } = stripThink(rawText);
+              const phase = thinking && !visible.trim() ? 'berpikir' : 'menulis';
+              if (onPhase) onPhase(phase, rawText.length);
+              const now = Date.now();
+              if (visible.trim()) {
+                if (now - lastRenderAt > 180) {
+                  lastRenderAt = now;
+                  renderAssistantHtml(bubble, visible, true);
+                  scrollChat();
+                }
+              } else if (thinking && now - lastRenderAt > 400) {
                 lastRenderAt = now;
-                renderAssistantHtml(bubble, visible, true);
+                bubble.innerHTML = '';
+                bubble.appendChild(el('span', {
+                  class: 'ai-thinking',
+                  text: 'AI menyusun rencana…',
+                }));
                 scrollChat();
               }
-            } else if (thinking && now - lastRenderAt > 400) {
-              lastRenderAt = now;
-              bubble.innerHTML = '';
-              bubble.appendChild(el('span', {
-                class: 'ai-thinking',
-                text: 'AI menyusun rencana…',
-              }));
-              scrollChat();
             }
+          } catch (parseErr) {
+            if (parseErr.message && !payload.startsWith('{')) continue;
+            if (parseErr instanceof SyntaxError) continue;
+            throw parseErr;
           }
-        } catch (parseErr) {
-          if (parseErr.message && !payload.startsWith('{')) continue;
-          if (parseErr instanceof SyntaxError) continue;
-          throw parseErr;
         }
       }
+    } catch (streamErr) {
+      clearTimeout(idleTimer);
+      if (streamErr && streamErr.message === '__karsa_stream_idle') {
+        try { await reader.cancel(); } catch (_) { /* abaikan */ }
+        // Kalau sudah ada sebagian teks, kembalikan agar bisa dilanjutkan — bukan error keras.
+        if (rawText.trim()) return { visible: stripThink(rawText).visible, finishReason: 'length', rawText };
+        throw new Error('Koneksi ke ' + BRAND_AI + ' terhenti di tengah jalan. Coba kirim ulang permintaan yang sama.');
+      }
+      throw streamErr;
+    } finally {
+      clearTimeout(idleTimer);
     }
 
     const { visible } = stripThink(rawText);
