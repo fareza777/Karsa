@@ -1250,14 +1250,23 @@ const AI = (() => {
       || valid.find((f) => /\.html$/i.test(f.path));
     const entry = htmlApplied ? htmlApplied.path : valid[0].path;
     Tabs.open(entry);
-    if (valid.some((f) => f.path === 'preview/index.html' || f.path === 'index.html' || /\.html$/i.test(f.path))) {
-      Preview.setEngine('web');
-      Preview.resetPreviewEntry();
+    // #10 Perubahan CSS-saja → hot-swap tanpa reload iframe (anti-kedip, state
+    // UI tetap: scroll, tab aktif, isi form). Selain itu reload penuh.
+    const allCss = valid.every((f) => fileExt(f.path) === 'css');
+    let hotSwapped = false;
+    if (allCss && typeof Preview.hotSwapCss === 'function') {
+      hotSwapped = Preview.hotSwapCss(merged);
     }
-    Preview.refresh();
+    if (!hotSwapped) {
+      if (valid.some((f) => f.path === 'preview/index.html' || f.path === 'index.html' || /\.html$/i.test(f.path))) {
+        Preview.setEngine('web');
+        Preview.resetPreviewEntry();
+      }
+      Preview.refresh();
+    }
     confettiBurst();
     appendChangeSummary(summary, undoId);
-    showToast(valid.length + ' file diterapkan — preview diperbarui', 'ok');
+    showToast(valid.length + ' file diterapkan — preview diperbarui' + (hotSwapped ? ' (tanpa reload)' : ''), 'ok');
     return true;
   }
 
