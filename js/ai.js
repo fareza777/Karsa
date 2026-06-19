@@ -876,15 +876,40 @@ const AI = (() => {
     return (prose ? prose + '\n\n' : '') + blocks.join('\n\n');
   }
 
+  // Sambung kode terpotong dengan lanjutannya secara MULUS — kunci anti-rusak.
+  // Menangani tiga kasus tanpa menebak:
+  //  • lanjutan = file utuh (memuat awal prior)        → pakai lanjutan.
+  //  • lanjutan = sisa kode yang mengulang sebagian akhir prior → buang overlap, sambung.
+  //  • lanjutan = sisa murni tanpa overlap              → tempel langsung (tanpa \n sisipan).
+  // TIDAK PERNAH mengganti prior dengan potongan yang lebih pendek (penyebab preview rusak).
+  function stitchCode(prior, cont) {
+    const a = (prior || '').replace(/\s+$/, '');
+    const b = (cont || '').replace(/^\n+/, '');
+    if (!a) return b;
+    if (!b.trim()) return a;
+    // Lanjutan ternyata menulis ulang file dari awal → pakai yang utuh.
+    const head = a.slice(0, Math.min(80, a.length)).trim();
+    if (head && b.trimStart().startsWith(head)) return b;
+    // Cari overlap terpanjang: akhir `a` == awal `b`.
+    const max = Math.min(a.length, b.length, 4000);
+    for (let len = max; len >= 12; len--) {
+      if (a.slice(a.length - len) === b.slice(0, len)) return a + b.slice(len);
+    }
+    // Tak ada overlap jelas: sambung langsung (tanpa \n sisipan yang bisa
+    // memecah token/tag di titik putus).
+    return a + b;
+  }
+
   function mergeContinuedOutput(previous, continuation) {
     const prevFiles = parseFileBlocks(previous);
     const newFiles = parseFileBlocks(continuation);
     if (!newFiles.length) {
+      // Lanjutan tanpa header file= → anggap kelanjutan file terakhir yang belum lengkap.
       const tail = continuation.replace(/^[\s\S]*?```[\w-]*\s*\n?/m, '').replace(/```\s*$/m, '').trim();
       const incomplete = prevFiles.filter((f) => !isFileComplete(f.code, f.path));
       if (incomplete.length && tail) {
         const last = incomplete[incomplete.length - 1];
-        last.code = last.code + '\n' + tail;
+        last.code = stitchCode(last.code, tail);
         return rebuildWithFiles(previous, prevFiles);
       }
       return previous;
@@ -893,9 +918,11 @@ const AI = (() => {
     newFiles.forEach((f) => {
       const prior = map[f.path];
       if (prior && !isFileComplete(prior, f.path)) {
-        const p = prior.trim();
-        const n = f.code.trim();
-        map[f.path] = (n.startsWith(p.slice(0, Math.min(60, p.length))) || n.length >= p.length) ? f.code : prior + '\n' + f.code;
+        // File yang belum lengkap: SAMBUNG (jangan timpa) agar awal kode tak hilang.
+        map[f.path] = stitchCode(prior, f.code);
+      } else if (prior && isFileComplete(prior, f.path) && f.code.trim().length < prior.trim().length * 0.6) {
+        // Prior sudah lengkap & lanjutan jauh lebih pendek → potongan, jangan timpa.
+        map[f.path] = prior;
       } else {
         map[f.path] = f.code;
       }
@@ -909,13 +936,18 @@ const AI = (() => {
     if (!incomplete.length) return null;
     const f = incomplete[incomplete.length - 1];
     const lang = fileExt(f.path) || 'txt';
+    // Beri ANCHOR: minta model mengulang persis cuplikan akhir lalu teruskan.
+    // stitchCode akan membuang tumpang-tindihnya → sambungan mulus, anti-rusak.
+    const anchor = f.code.slice(-200);
     return [
       '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
       '[Langsung tulis sisa kode — jangan berpikir panjang. Jangan ulang file dari awal.]',
-      'File "' + f.path + '" belum lengkap. Lanjutkan HANYA sisa kode dari titik putus.',
-      'Keluarkan satu blok ```' + lang + ' file=' + f.path + ' berisi sisa file sampai valid.',
-      'Baris terakhir yang sudah ada:',
-      f.code.slice(-700),
+      'File "' + f.path + '" belum lengkap. Lanjutkan dari titik putus sampai file VALID & tertutup.',
+      'Keluarkan SATU blok ```' + lang + ' file=' + f.path + '.',
+      'WAJIB: mulai blok dengan MENGULANG PERSIS cuplikan akhir di bawah ini, lalu teruskan kodenya.',
+      'Jangan tulis ulang file dari awal. Jangan tambah penjelasan di luar blok.',
+      'Cuplikan akhir yang sudah ada (ulangi persis di awal blok, lalu lanjutkan):',
+      anchor,
     ].join('\n');
   }
 
@@ -925,16 +957,100 @@ const AI = (() => {
   }
 
   function appendContinueButton(bubble, visible) {
-    const tail = visible.slice(-1400);
-    bubble.appendChild(el('button', {
-      class: 'ai-retry-btn',
+    if (bubble.dataset.aiVisible !== visible) bubble.dataset.aiVisible = visible;
+    const btn = el('button', {
+      class: 'ai-retry-btn ai-continue-btn',
       text: '▶ Lanjutkan tulis (terpotong)',
-      onclick: () => {
-        $('#ai-input').value =
-          'Respons terpotong. Lanjutkan menulis dari titik putus — keluarkan blok ``` file=path dengan SISA kode yang belum ada (jangan ulang dari awal):\n\n' + tail;
-        send();
-      },
-    }));
+      onclick: () => { continueIncomplete(bubble); },
+    });
+    bubble.appendChild(btn);
+  }
+
+  // Lanjutkan file yang terpotong DI GELEMBUNG YANG SAMA — menyambung ke kode
+  // yang sudah ada (bukan membuat respons baru yang menimpa). Ini yang membuat
+  // "Lanjutkan tulis" tidak lagi merusak preview.
+  async function continueIncomplete(bubble) {
+    if (busy) return;
+    const project = State.getCurrentProject();
+    if (!project) { showToast('Buka proyek dulu.', 'warn'); return; }
+    let accumulatedVisible = bubble.dataset.aiVisible || '';
+    if (!accumulatedVisible.trim()) { showToast('Tidak ada kode untuk dilanjutkan.', 'warn'); return; }
+    if (!buildContinueMessage(accumulatedVisible)) {
+      showToast('Semua file sudah lengkap ✓', 'ok');
+      attachApplyBox(bubble, accumulatedVisible, true);
+      return;
+    }
+    // Bersihkan tombol lanjut & peringatan lama dari gelembung ini.
+    $$('.ai-continue-btn', bubble).forEach((b) => b.remove());
+    $$('.ai-truncated-warn', bubble).forEach((b) => b.remove());
+
+    const history = getHistory();
+    const useDirect = !!settings.apiKey;
+    const modelUsed = MODEL_FAST; // lanjutan: cepat & deterministik, hindari reasoning
+    abortCtrl = new AbortController();
+    setBusy(true, 'Melanjutkan tulis…');
+
+    const baseMessages = trimMessagesForApi([
+      { role: 'system', content: getSystemPrompt() },
+      { role: 'user', content: buildProjectContext('') },
+    ]);
+
+    try {
+      let continueRound = 0;
+      let lastMergeFp = mergeFingerprint(accumulatedVisible);
+      for (;;) {
+        const contMsg = buildContinueMessage(accumulatedVisible);
+        if (!contMsg) break;
+        const apiMessages = trimMessagesForApi(baseMessages.concat([
+          { role: 'assistant', content: compactAssistantForApi(accumulatedVisible) },
+          { role: 'user', content: contMsg },
+        ]));
+        const result = await runAiStream({
+          messages: apiMessages, modelUsed, useDirect,
+          signal: abortCtrl.signal, bubble, onPhase: () => {},
+        });
+        if (!result.visible.trim()) break;
+        const before = accumulatedVisible;
+        accumulatedVisible = mergeContinuedOutput(accumulatedVisible, result.visible);
+        const fp = mergeFingerprint(accumulatedVisible);
+        if (fp === lastMergeFp || accumulatedVisible === before) break; // tak ada kemajuan
+        lastMergeFp = fp;
+        renderAssistantHtml(bubble, accumulatedVisible);
+        storeMergedFiles(bubble, accumulatedVisible);
+        continueRound++;
+        if (!isResponseTruncated(accumulatedVisible, result.finishReason) || continueRound >= MAX_AUTO_CONTINUE) break;
+        setBusy(true, 'Melanjutkan otomatis… bagian ' + (continueRound + 1));
+      }
+
+      const truncated = isResponseTruncated(accumulatedVisible, null);
+      attachApplyBox(bubble, accumulatedVisible, true, { truncated });
+      // Simpan kembali ke riwayat (gantikan versi terpotong).
+      for (let i = history.length - 1; i >= 0; i--) {
+        if (history[i].role === 'assistant') { history[i].content = accumulatedVisible; break; }
+      }
+      saveHistory();
+      if (truncated) {
+        appendContinueButton(bubble, accumulatedVisible);
+        showToast('Masih ada sisa — klik "Lanjutkan tulis" sekali lagi.', 'warn');
+      } else {
+        showToast('Lengkap ✓ — klik ⚡ Terapkan untuk perbarui preview.', 'ok');
+        tryAutoApply(bubble, accumulatedVisible, false);
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        attachApplyBox(bubble, accumulatedVisible, true, { truncated: true });
+        appendContinueButton(bubble, accumulatedVisible);
+        showToast('Dihentikan — kode parsial tetap ada.', 'info');
+      } else {
+        attachApplyBox(bubble, accumulatedVisible, true, { truncated: true });
+        appendContinueButton(bubble, accumulatedVisible);
+        appendErrorBubble(sanitizePublicError(err.message));
+      }
+    } finally {
+      setBusy(false, '');
+      abortCtrl = null;
+      scrollChat();
+    }
   }
 
   // --- Parsing & penerapan file dari jawaban AI ---
@@ -1077,6 +1193,8 @@ const AI = (() => {
     if (visibleText) bubble.dataset.aiVisible = visibleText;
     const existing = $('.ai-apply-box', bubble);
     if (existing) existing.remove();
+    // Hindari peringatan terpotong menumpuk saat box di-refresh berkali-kali.
+    $$('.ai-truncated-warn', bubble).forEach((w) => w.remove());
     const allFiles = collectFileBlocks(bubble, visibleText);
     if (allFiles.length === 0) return;
     const truncated = opts && opts.truncated;
