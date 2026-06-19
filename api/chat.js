@@ -2,6 +2,7 @@
 
 import { trackAiUsage } from '../lib/analytics.js';
 import { getAiConfig, resolveChatModel } from '../lib/ai-config.js';
+import { checkChatLimits } from '../lib/ratelimit.js';
 
 // Wajib: tanpa ini Vercel mem-buffer seluruh respons sebelum dikirim ke browser,
 // sehingga streaming tidak pernah tampil dan permintaan panjang mati kena timeout.
@@ -96,6 +97,19 @@ function trimMessagesToFit(messages, maxText) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Gunakan metode POST.' });
+    return;
+  }
+
+  // #7 Lindungi API key: cek origin + rate-limit per-IP + penjaga anggaran.
+  let limit;
+  try {
+    limit = await checkChatLimits(req);
+  } catch (e) {
+    limit = { ok: true }; // fail-open kalau mekanisme limit error
+  }
+  if (!limit.ok) {
+    if (limit.retryAfter) res.setHeader('Retry-After', String(Math.max(1, Math.ceil(limit.retryAfter))));
+    res.status(limit.status || 429).json({ error: limit.error });
     return;
   }
 
