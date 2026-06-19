@@ -1,7 +1,7 @@
 /* ===== KARSA AI — proxy serverless ke provider LLM (API key aman di server) ===== */
 
 import { trackAiUsage } from '../lib/analytics.js';
-import { getAiConfig, resolveChatModel } from '../lib/ai-config.js';
+import { getAiConfig, resolveChatModel, buildModelCandidates } from '../lib/ai-config.js';
 import { checkChatLimits } from '../lib/ratelimit.js';
 
 // Wajib: tanpa ini Vercel mem-buffer seluruh respons sebelum dikirim ke browser,
@@ -141,32 +141,48 @@ export default async function handler(req, res) {
     if (s) inputChars += s.total;
   }
 
-  let upstream;
-  try {
-    upstream = await fetch(upstreamUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: chosenModel,
-        messages,
-        stream: true,
-        max_completion_tokens: maxOutputTokens,
-        max_tokens: maxOutputTokens,
-        temperature,
-        ...(chosenModel.includes('M3') ? { reasoning_effort: 'low' } : {}),
-      }),
-    });
-  } catch (err) {
-    res.status(502).json({ error: 'Gagal menghubungi KARSA AI: ' + err.message });
-    return;
+  // #9 Fallback model: kalau model terpilih sibuk (429) atau error server
+  // (5xx), coba model lain dari allowedModels sebelum menyerah. Untuk gambar
+  // (vision) tetap satu model. Fallback hanya SEBELUM streaming dimulai.
+  const candidates = buildModelCandidates(chosenModel, aiCfg, hasImages);
+  const makeBody = (m) => JSON.stringify({
+    model: m,
+    messages,
+    stream: true,
+    max_completion_tokens: maxOutputTokens,
+    max_tokens: maxOutputTokens,
+    temperature,
+    ...(m.includes('M3') ? { reasoning_effort: 'low' } : {}),
+  });
+
+  let upstream = null;
+  let lastErr = '';
+  for (let i = 0; i < candidates.length; i++) {
+    const m = candidates[i];
+    let resp;
+    try {
+      resp = await fetch(upstreamUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: makeBody(m),
+      });
+    } catch (err) {
+      lastErr = err.message;
+      continue; // error jaringan → coba model berikutnya
+    }
+    if (resp.ok) { upstream = resp; break; }
+    const retryable = resp.status === 429 || resp.status >= 500;
+    const detail = await resp.text().catch(() => '');
+    lastErr = 'HTTP ' + resp.status;
+    if (!retryable || i === candidates.length - 1) {
+      res.status(resp.status).json({ error: 'KARSA AI menolak permintaan (' + resp.status + ').', detail: detail.slice(0, 500) });
+      return;
+    }
+    // retryable & masih ada kandidat → coba model berikutnya
   }
 
-  if (!upstream.ok) {
-    const detail = await upstream.text().catch(() => '');
-    res.status(upstream.status).json({ error: 'KARSA AI menolak permintaan (' + upstream.status + ').', detail: detail.slice(0, 500) });
+  if (!upstream) {
+    res.status(502).json({ error: 'Gagal menghubungi KARSA AI: ' + lastErr });
     return;
   }
 
