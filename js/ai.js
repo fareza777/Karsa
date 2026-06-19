@@ -36,7 +36,8 @@ const AI = (() => {
     '6. Jawab dalam bahasa Indonesia. Jangan ulangi file yang tidak berubah — tapi jika user bilang belum berubah / minta ulang, tulis ulang file yang perlu diperbarui secara UTUH.',
     '6b. DILARANG menulis placeholder seperti "[blok file di ringkas]" atau ringkasan kode. Setiap perubahan kode HARUS pakai blok ``` dengan file=path dan isi file lengkap.',
     '6c. EDIT CSS pada file BESAR (>150 baris) yang sudah ada: untuk perubahan kecil/sedang, keluarkan blok CSS yang sama (file=path CSS itu) berisi HANYA aturan/selector yang berubah atau baru — awali dengan komentar /* KARSA-OVERRIDE */. KARSA otomatis menggabungkannya ke style lama (base tetap utuh, override kumulatif per-selector). JANGAN tulis ulang seluruh CSS besar untuk tweak kecil — output panjang itu sering terpotong dan GAGAL diterapkan. Tulis file CSS UTUH hanya untuk file baru, file kecil, atau redesign besar.',
-    '6d. EDIT JS/TS/HTML: tetap keluarkan file UTUH (merge parsial tak aman untuk logika). Jaga ringkas; pisah file bila perlu.',
+    '6d. EDIT KECIL pada file HTML/JS/TS yang SUDAH ADA & besar (>120 baris): JANGAN tulis ulang seluruh file — output panjang sering TERPOTONG dan app rusak. Pakai EDIT TERARAH (search/replace) berformat persis:\n```html edit=index.html\n<<<<<<< SEARCH\n(salin PERSIS beberapa baris lama yang unik dari file, termasuk spasi/indentasi)\n=======\n(versi baru)\n>>>>>>> REPLACE\n```\nBoleh beberapa pasang SEARCH/REPLACE dalam satu blok edit. SEARCH harus cocok PERSIS dengan isi file saat ini & cukup unik (jangan terlalu pendek). KARSA menerapkannya ke file asli.',
+    '6e. Tulis file UTUH (```lang file=path) HANYA untuk: file BARU, file kecil (<120 baris), atau redesign/perubahan besar. Untuk membuat fungsi/logika baru yang besar, file utuh tetap dipakai.',
     'GAYA PERCAKAPAN:',
     '7. Hangat dan kolaboratif seperti rekan satu tim. Buka dengan 1-2 kalimat tentang apa yang akan kamu buat beserta pilihan desain utamanya, baru blok file.',
     '8. Setelah blok file, SELALU tutup dengan pertanyaan iterasi singkat berisi 2-3 ide konkret (contoh: "Mau kutambahkan efek suara, mode gelap, atau papan peringkat?").',
@@ -674,15 +675,17 @@ const AI = (() => {
     const newline = rawBlock.indexOf('\n');
     const info = newline === -1 ? rawBlock : rawBlock.slice(0, newline);
     const code = newline === -1 ? '' : rawBlock.slice(newline + 1).replace(/\n$/, '');
+    const editMatch = info.match(/edit=([^\s]+)/);
     const fileMatch = info.match(/file=([^\s]+)/);
-    const title = fileMatch ? fileMatch[1] : (info.trim().split(/\s+/)[0] || 'kode');
+    const isEdit = !!editMatch && !fileMatch;
+    const title = editMatch ? editMatch[1] : (fileMatch ? fileMatch[1] : (info.trim().split(/\s+/)[0] || 'kode'));
     const lineCount = code ? code.split('\n').length : 0;
 
-    const card = el('div', { class: 'ai-code-card' + (isWriting ? ' writing' : '') });
+    const card = el('div', { class: 'ai-code-card' + (isWriting ? ' writing' : '') + (isEdit ? ' ai-edit-card' : '') });
     const head = el('button', { class: 'ai-code-head', type: 'button' }, [
       isWriting ? el('span', { class: 'ai-code-pen', text: '✍' }) : fileBadge(title),
       el('span', { class: 'ai-code-name', text: title }),
-      el('span', { class: 'ai-code-meta', text: isWriting ? 'menulis… ' + lineCount + ' baris' : lineCount + ' baris' }),
+      el('span', { class: 'ai-code-meta', text: isWriting ? 'menulis… ' + lineCount + ' baris' : (isEdit ? 'edit terarah' : lineCount + ' baris') }),
       isWriting ? el('span', { class: 'ai-spinner' }) : el('span', { class: 'ai-code-caret', text: '▾' }),
     ]);
     card.appendChild(head);
@@ -1053,6 +1056,74 @@ const AI = (() => {
     }
   }
 
+  // --- Edit terarah (SEARCH/REPLACE) — hindari tulis ulang file besar (anti-terpotong) ---
+  // Blok: ```html edit=index.html  <<<<<<< SEARCH … ======= … >>>>>>> REPLACE  ```
+  function parseEditBlocks(text) {
+    const blocks = [];
+    const blockRe = /```[\w-]*[ \t]+edit[=:]\s*["']?([^\s"'`]+)["']?[^\n]*\n([\s\S]*?)```/gi;
+    let m;
+    while ((m = blockRe.exec(text)) !== null) {
+      const path = m[1].trim().replace(/^\.\//, '');
+      if (!isValidPath(path)) continue;
+      const body = m[2];
+      const edits = [];
+      const pairRe = /<{5,}\s*SEARCH[^\n]*\n([\s\S]*?)\n={5,}[^\n]*\n([\s\S]*?)\n>{5,}\s*REPLACE/gi;
+      let p;
+      while ((p = pairRe.exec(body)) !== null) {
+        edits.push({ search: p[1], replace: p[2] });
+      }
+      if (edits.length) blocks.push({ path, edits });
+    }
+    return blocks;
+  }
+
+  // Cari `needle` dengan toleransi spasi/indentasi yang sedikit berbeda.
+  function matchFlexible(haystack, needle) {
+    const trimmed = (needle || '').trim();
+    if (!trimmed) return null;
+    const esc = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+    try {
+      const re = new RegExp(esc);
+      const mm = re.exec(haystack);
+      if (mm) return { start: mm.index, end: mm.index + mm[0].length };
+    } catch (e) { /* regex gagal — abaikan */ }
+    return null;
+  }
+
+  // Terapkan pasangan SEARCH/REPLACE ke isi file proyek saat ini.
+  function resolveEdits(path, edits) {
+    const project = State.getCurrentProject();
+    if (!project || project.files[path] === undefined) return { ok: false, reason: 'nofile', missing: edits.length };
+    let code = project.files[path];
+    let applied = 0;
+    let missing = 0;
+    edits.forEach(({ search, replace }) => {
+      const s = search.replace(/\n$/, '');
+      const r = replace.replace(/\n$/, '');
+      if (!s) { missing++; return; }
+      const idx = code.indexOf(s);
+      if (idx !== -1) { code = code.slice(0, idx) + r + code.slice(idx + s.length); applied++; return; }
+      // Sudah diterapkan sebelumnya? anggap sukses (idempoten untuk "Terapkan ulang").
+      if (r && code.indexOf(r) !== -1) { applied++; return; }
+      const flex = matchFlexible(code, s);
+      if (flex) { code = code.slice(0, flex.start) + r + code.slice(flex.end); applied++; return; }
+      missing++;
+    });
+    return { ok: missing === 0 && applied > 0, code, applied, missing };
+  }
+
+  // Laporan resolusi edit untuk UI (mana yang gagal dicocokkan).
+  function editResolutionReport(text) {
+    const resolved = [];
+    const unresolved = [];
+    parseEditBlocks(text).forEach((b) => {
+      const res = resolveEdits(b.path, b.edits);
+      if (res.ok) resolved.push(b.path);
+      else unresolved.push({ path: b.path, missing: res.missing, reason: res.reason });
+    });
+    return { resolved, unresolved };
+  }
+
   // --- Parsing & penerapan file dari jawaban AI ---
   function parseFileBlocks(text) {
     const files = [];
@@ -1072,6 +1143,13 @@ const AI = (() => {
     });
     const unique = {};
     files.forEach((f) => { unique[f.path] = f.code; });
+    // Resolusi blok edit terarah → kode file UTUH. File utuh (file=) menang
+    // bila path yang sama juga punya blok edit.
+    parseEditBlocks(text).forEach((b) => {
+      if (unique[b.path] !== undefined) return;
+      const res = resolveEdits(b.path, b.edits);
+      if (res.ok) unique[b.path] = res.code;
+    });
     return Object.keys(unique).map((path) => ({ path, code: unique[path] }));
   }
 
@@ -1085,7 +1163,7 @@ const AI = (() => {
 
   function parseFileBlocksFromDom(bubble) {
     const files = [];
-    bubble.querySelectorAll('.ai-code-card:not(.writing)').forEach((card) => {
+    bubble.querySelectorAll('.ai-code-card:not(.writing):not(.ai-edit-card)').forEach((card) => {
       const path = card.querySelector('.ai-code-name')?.textContent?.trim();
       const code = card.querySelector('.ai-code-body code')?.textContent;
       if (!path || !code || !isValidPath(path)) return;
@@ -1193,8 +1271,30 @@ const AI = (() => {
     if (visibleText) bubble.dataset.aiVisible = visibleText;
     const existing = $('.ai-apply-box', bubble);
     if (existing) existing.remove();
-    // Hindari peringatan terpotong menumpuk saat box di-refresh berkali-kali.
+    // Hindari peringatan terpotong/edit menumpuk saat box di-refresh berkali-kali.
     $$('.ai-truncated-warn', bubble).forEach((w) => w.remove());
+    $$('.ai-edit-fail', bubble).forEach((w) => w.remove());
+
+    // Edit terarah yang gagal dicocokkan: jangan diam-diam hilang — beri
+    // tombol minta AI tulis ulang file utuh.
+    const editReport = editResolutionReport(visibleText || bubble.dataset.aiVisible || '');
+    if (editReport.unresolved.length) {
+      const paths = editReport.unresolved.map((u) => u.path);
+      const warn = el('div', { class: 'ai-edit-fail ai-truncated-warn' }, [
+        el('div', { text: '⚠ Edit terarah gagal dicocokkan pada: ' + [...new Set(paths)].join(', ') + ' (teks lama tak ditemukan).' }),
+        el('button', {
+          class: 'ai-retry-btn',
+          text: '📝 Minta tulis ulang file utuh',
+          onclick: () => {
+            $('#ai-input').value = 'Edit terarah gagal diterapkan ke ' + [...new Set(paths)].join(', ') +
+              ' karena teks lama tak cocok. Tulis ulang file tersebut secara UTUH (blok ```lang file=path) dengan perubahan yang sama.';
+            send();
+          },
+        }),
+      ]);
+      bubble.appendChild(warn);
+    }
+
     const allFiles = collectFileBlocks(bubble, visibleText);
     if (allFiles.length === 0) return;
     const truncated = opts && opts.truncated;
