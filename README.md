@@ -79,6 +79,32 @@ vercel deploy --prod
 > `python -m http.server`), buka ⚙ di panel AI dan isi API key — mode langsung
 > ini hanya untuk mesinmu sendiri, jangan dipakai di situs publik.
 
+### Perlindungan biaya `/api/chat`
+
+`api/chat.js` memakai API key milik server, jadi endpoint dilindungi agar tak
+disalahgunakan (lihat [`lib/ratelimit.js`](lib/ratelimit.js)): cek origin
+(hanya host app & subdomain publish), rate-limit per-IP, dan penjaga anggaran
+harian global. Aktif otomatis bila **Vercel KV** terkonfigurasi; tanpa KV
+(lokal/dev) pembatasan dilewati. Variabel opsional:
+
+```bash
+KARSA_CHAT_RL_PER_MIN=20      # maks permintaan per-IP per menit (default 20)
+KARSA_CHAT_RL_PER_DAY=300     # maks permintaan per-IP per hari (default 300)
+KARSA_CHAT_DAILY_MAX=0        # batas total semua user/hari (0 = nonaktif)
+KARSA_ALLOWED_ORIGINS=        # origin tambahan yang diizinkan (pisah koma)
+```
+
+## 🛠 Pengembangan & test
+
+```bash
+npm install
+npm test        # unit test engine AI + rate-limit (Vitest)
+npm run check   # syntax check
+```
+
+CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) menjalankan keduanya
+di tiap push & pull request.
+
 ## ⌨ Shortcut
 
 | Tombol | Aksi |

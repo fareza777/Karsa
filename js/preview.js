@@ -333,6 +333,14 @@ const Preview = (() => {
     if (data.__karsa_shot === 'region') { pilihAreaShot(); return; }
     if (data.__karsa_inspect === 'on') { setInspect(true); return; }
     if (data.__karsa_inspect === 'off') { setInspect(false); return; }
+    if (data.__karsa_css && typeof data.__karsa_css.path === 'string') {
+      var sel = 'style[data-karsa-css="' + data.__karsa_css.path.replace(/"/g, '\\\\"') + '"]';
+      var st = document.querySelector(sel);
+      var ok = !!st;
+      if (st) st.textContent = String(data.__karsa_css.css || '');
+      parent.postMessage({ __karsa_css_applied: { path: data.__karsa_css.path, ok: ok } }, '*');
+      return;
+    }
     if (typeof data.__karsa_eval !== 'string') return;
     try {
       var hasil = (0, eval)(data.__karsa_eval);
@@ -375,7 +383,10 @@ const Preview = (() => {
         if (!path || files[path] === undefined) {
           return '<style>/* KARSA: file "' + normalizePath(href) + '" tidak ditemukan */</style>';
         }
-        return '<style>\n' + files[path] + '\n</style>';
+        // data-karsa-css menandai sumber agar bisa di-hot-swap tanpa reload (#10).
+        // Escape </style> agar konten CSS tak menutup tag lebih awal.
+        const cssText = String(files[path]).replace(/<\/style>/gi, '<\\/style>');
+        return '<style data-karsa-css="' + path + '">\n' + cssText + '\n</style>';
       }
     );
 
@@ -708,6 +719,42 @@ const Preview = (() => {
 
   function resetPreviewEntry() { currentPreviewEntry = null; }
 
+  // Apakah file CSS ter-link via <link rel=stylesheet> di halaman entry aktif?
+  // (Hanya yang ter-link yang punya <style data-karsa-css> untuk di-hot-swap.)
+  function cssLinkedInEntry(project, cssPath) {
+    const entry = currentPreviewEntry || webPreviewEntryPath(project.files) || 'index.html';
+    const html = project.files[entry] || '';
+    let linked = false;
+    html.replace(/<link\b[^>]*href=["']([^"']+)["'][^>]*>/gi, (tag, href) => {
+      if (/stylesheet/i.test(tag) && isLocalRef(href)) {
+        const p = resolveProjectFileRef(project.files, entry, href);
+        if (p === cssPath) linked = true;
+      }
+      return tag;
+    });
+    return linked;
+  }
+
+  // #10 Hot-swap CSS tanpa reload iframe (anti-kedip, pertahankan state UI).
+  // Return true HANYA bila semua perubahan adalah CSS yang ter-link di entry &
+  // preview sudah termuat untuk proyek ini; selain itu pemanggil reload penuh.
+  function hotSwapCss(files) {
+    const project = State.getCurrentProject();
+    if (!project) return false;
+    if (previewEngine === 'snack' || usesSnackEngine(project)) return false;
+    if (project.id !== lastPreviewProjectId) return false; // belum pernah dimuat
+    const frame = $('#preview-frame');
+    if (!frame || !frame.contentWindow) return false;
+    const cssFiles = (files || []).filter((f) => fileExt(f.path) === 'css');
+    if (!cssFiles.length || cssFiles.length !== (files || []).length) return false;
+    if (!cssFiles.every((f) => cssLinkedInEntry(project, f.path))) return false;
+    cssFiles.forEach((f) => {
+      const css = project.files[f.path] !== undefined ? project.files[f.path] : f.code;
+      frame.contentWindow.postMessage({ __karsa_css: { path: f.path, css: css } }, '*');
+    });
+    return true;
+  }
+
   let lastPreviewProjectId = null;
 
   function refresh() {
@@ -995,5 +1042,6 @@ const Preview = (() => {
   return {
     refresh, refreshHome, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
     runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect, resetPreviewEntry,
+    hotSwapCss,
   };
 })();
