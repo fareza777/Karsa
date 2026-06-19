@@ -16,6 +16,24 @@ const AI = (() => {
   const MAX_AWAM_PHASES = 1; // satu tahap per pesan — tidak ada "percantik" otomatis tanpa diminta
   const THINK_ABORT_MS = 55000; // M3 sering stuck di redacted_thinking — beralih ke mode cepat
   const STREAM_IDLE_MS = 45000; // tak ada byte masuk selama ini → stream dianggap macet
+  const MAX_NET_RETRIES = 2; // percobaan ulang koneksi (jaringan/429/5xx) sebelum menyerah
+
+  // Jeda yang bisa dibatalkan via AbortSignal — untuk backoff retry.
+  function sleepAbortable(ms, signal) {
+    return new Promise((resolve, reject) => {
+      if (signal && signal.aborted) { reject(new DOMException('Aborted', 'AbortError')); return; }
+      const t = setTimeout(resolve, ms);
+      if (signal) signal.addEventListener('abort', () => {
+        clearTimeout(t);
+        reject(new DOMException('Aborted', 'AbortError'));
+      }, { once: true });
+    });
+  }
+
+  // Backoff eksponensial + jitter: ~1s, ~2s.
+  function backoffDelay(attempt) {
+    return Math.round((1000 * Math.pow(2, attempt - 1)) * (0.85 + Math.random() * 0.3));
+  }
 
   const ANTI_REASONING_PROMPT = [
     'MODE KERJA (otomatis — user awam tidak perlu mengetik ini, tapi kamu WAJIB patuh):',
@@ -1312,14 +1330,44 @@ const AI = (() => {
     let lastRenderAt = 0;
     let finishReason = null;
 
-    const response = await fetch(url, { method: 'POST', headers, body, signal });
-    if (!response.ok) {
-      let detail = 'HTTP ' + response.status;
+    // #6 Auto-retry koneksi: error jaringan / 429 / 5xx dicoba ulang dengan
+    // backoff (hormati Retry-After). Hanya pada fase KONEKSI — begitu byte
+    // mulai mengalir, penanganan beralih ke watchdog idle + lanjutan otomatis.
+    let response;
+    let attempt = 0;
+    for (;;) {
       try {
-        const errJson = await response.json();
-        detail = errJson.error?.message || errJson.error || detail;
-      } catch (e) { /* bukan JSON */ }
-      throw new Error(sanitizePublicError(typeof detail === 'string' ? detail : JSON.stringify(detail)));
+        response = await fetch(url, { method: 'POST', headers, body, signal });
+      } catch (netErr) {
+        if (netErr.name === 'AbortError') throw netErr;
+        if (attempt < MAX_NET_RETRIES) {
+          attempt++;
+          if (onPhase) onPhase('menghubungi', 0);
+          showToast('Koneksi tersendat — mencoba lagi (' + attempt + ')…', 'warn');
+          await sleepAbortable(backoffDelay(attempt), signal);
+          continue;
+        }
+        throw netErr;
+      }
+      if (!response.ok) {
+        const retryable = response.status === 429 || response.status >= 500;
+        if (retryable && attempt < MAX_NET_RETRIES) {
+          attempt++;
+          const ra = Number(response.headers.get('retry-after'));
+          const wait = Number.isFinite(ra) && ra > 0 ? ra * 1000 : backoffDelay(attempt);
+          try { if (response.body) await response.body.cancel(); } catch (_) { /* abaikan */ }
+          showToast('Server AI sibuk — mencoba lagi (' + attempt + ')…', 'warn');
+          await sleepAbortable(wait, signal);
+          continue;
+        }
+        let detail = 'HTTP ' + response.status;
+        try {
+          const errJson = await response.json();
+          detail = errJson.error?.message || errJson.error || detail;
+        } catch (e) { /* bukan JSON */ }
+        throw new Error(sanitizePublicError(typeof detail === 'string' ? detail : JSON.stringify(detail)));
+      }
+      break;
     }
 
     const reader = response.body.getReader();
