@@ -577,6 +577,14 @@ const AI = (() => {
     return historyByProject[id];
   }
 
+  // #C6 Textarea input auto-tinggi
+  function autogrowInput() {
+    const t = $('#ai-input');
+    if (!t) return;
+    t.style.height = 'auto';
+    t.style.height = Math.min(160, t.scrollHeight) + 'px';
+  }
+
   // --- Render chat ---
   function chatEl() { return $('#ai-chat'); }
 
@@ -1686,6 +1694,7 @@ const AI = (() => {
       : '');
 
     input.value = '';
+    autogrowInput();
     appendUserBubble(displayText, imageAtts);
     attachments = [];
     renderAttachments();
@@ -2045,6 +2054,8 @@ const AI = (() => {
         send();
       }
     });
+    // #C6 Textarea auto-tinggi mengikuti isi (maks ~160px).
+    $('#ai-input').addEventListener('input', autogrowInput);
 
     // Lampiran: tombol 📎 dan tempel (Ctrl+V) gambar langsung ke chat
     $('#ai-attach-btn').addEventListener('click', () => $('#ai-file-input').click());

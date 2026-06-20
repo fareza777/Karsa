@@ -143,6 +143,11 @@
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
+/* #C5 Tampilan daftar */
+.project-grid.list-view { grid-template-columns: 1fr; gap: 8px; }
+.project-grid.list-view .project-card { display: flex; align-items: center; }
+.project-grid.list-view .project-card .project-thumb,
+.project-grid.list-view .project-card .skeleton:first-child { width: 64px; height: 48px; flex-shrink: 0; }
 .project-card {
   background: var(--bg-2);
   border: 1px solid var(--border);
