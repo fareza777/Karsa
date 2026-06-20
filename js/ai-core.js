@@ -218,6 +218,26 @@
     return { resolved, unresolved };
   }
 
+  // Tangkap blok ```lang file=path yang fence-nya BELUM ditutup (truncation
+  // di tengah file — bentuk truncation paling umum). Tanpa ini partial-nya
+  // tak terlihat → lanjutan tak bisa menyasarnya & isi hilang.
+  function parseTrailingOpenBlock(text) {
+    if (!hasUnclosedCodeFence(text)) return null;
+    const idx = text.lastIndexOf('```');
+    if (idx === -1) return null;
+    const after = text.slice(idx + 3);
+    const nl = after.indexOf('\n');
+    if (nl === -1) return null;
+    const header = after.slice(0, nl);
+    if (/\bedit[=:]/i.test(header)) return null; // edit parsial tak bisa diresolusi
+    const m = header.match(/\bfile[=:]\s*["']?([^\s"'`]+)/i);
+    if (!m) return null;
+    const path = m[1].trim().replace(/^\.\//, '');
+    const code = after.slice(nl + 1).replace(/\n$/, '');
+    if (!isValidPath(path) || !code.trim()) return null;
+    return { path, code };
+  }
+
   // Parse blok ```lang file=path … ``` + resolusi blok edit terarah.
   function parseFileBlocks(text, filesMap) {
     const files = [];
@@ -242,6 +262,10 @@
       const res = resolveEdits(filesMap, b.path, b.edits);
       if (res.ok) unique[b.path] = res.code;
     });
+    // Blok terakhir yang terpotong (fence terbuka) → simpan partial-nya
+    // (hanya jika path itu belum punya versi lengkap dari blok tertutup).
+    const open = parseTrailingOpenBlock(text);
+    if (open && unique[open.path] === undefined) unique[open.path] = open.code;
     return Object.keys(unique).map((path) => ({ path, code: unique[path] }));
   }
 

@@ -36,7 +36,7 @@ function load(file) {
 }
 ['project.js', 'snack.js', 'playstore.js', 'templates.js', 'preview.js'].forEach(load);
 
-const { parseFileBlocks, isFileComplete, isResponseTruncated, mergeContinuedOutput } = AICore;
+const { parseFileBlocks, isFileComplete, isResponseTruncated, mergeContinuedOutput, editResolutionReport } = AICore;
 
 let problems = [];
 function check(cond, msg) { if (!cond) { problems.push(msg); console.log('   ✗ ' + msg); } else { console.log('   ✓ ' + msg); } }
@@ -195,6 +195,71 @@ console.log('\n=== 4) VALIDASI TEMPLATE BAWAAN (' + (sandbox.TEMPLATES || []).le
       check(Object.keys(files).length > 0, 'template "' + tpl.name + '" punya file');
     }
   });
+}
+
+// ============ 5) EDIT TERARAH (SEARCH/REPLACE) END-TO-END ============
+console.log('\n=== 5) EDIT TERARAH (SEARCH/REPLACE) ===');
+{
+  const baseFiles = { 'index.html': '<body>\n  <button onclick="x()">Hubungi Kami</button>\n  <p>Footer</p>\n</body>' };
+  const aiEdit = [
+    '```html edit=index.html',
+    '<<<<<<< SEARCH',
+    '  <button onclick="x()">Hubungi Kami</button>',
+    '=======',
+    '  <button onclick="x()">Pesan via WhatsApp</button>',
+    '>>>>>>> REPLACE',
+    '```',
+  ].join('\n');
+  const out = parseFileBlocks(aiEdit, baseFiles);
+  check(out.length === 1 && /Pesan via WhatsApp/.test(out[0].code) && !/Hubungi Kami/.test(out[0].code), 'edit terarah diterapkan ke file UTUH (bukan timpa tail)');
+  check(/<p>Footer<\/p>/.test(out[0].code), 'bagian lain file tetap utuh');
+  const ambFiles = { 'app.js': 'let a; x = 1;\nlet b; x = 1;\n' };
+  const ambEdit = '```js edit=app.js\n<<<<<<< SEARCH\nx = 1;\n=======\nx = 2;\n>>>>>>> REPLACE\n```';
+  const rep = editResolutionReport(ambEdit, ambFiles);
+  check(rep.unresolved.length === 1 && rep.unresolved[0].reason === 'ambiguous', 'edit ambigu ditolak (anti tebak lokasi)');
+  check(parseFileBlocks(ambEdit, ambFiles).length === 0, 'edit ambigu tidak menghasilkan file (aman)');
+}
+
+// ============ 6) PROYEK MULTI-FILE + TRUNCATION BERANTAI ============
+console.log('\n=== 6) MULTI-FILE: truncation di file kedua ===');
+{
+  const part1 = [
+    '```html file=index.html',
+    '<!DOCTYPE html><html><head><link rel="stylesheet" href="css/style.css"></head>',
+    '<body><h1>Toko</h1><script src="js/app.js"></script></body></html>',
+    '```',
+    '```css file=css/style.css',
+    'body{margin:0}.btn{color:#fff;background:#7c5cff;padding:10px;border-radius:8px;display:inline-block}',
+    '.card{border:1px solid #ddd;padding:16px;border-radius:12px;margin:8px;box-shadow:0 2px 8px rgba(0,0,0,.',
+  ].join('\n');
+  check(isResponseTruncated(part1, 'length', {}), 'multi-file: terdeteksi terpotong di css');
+  const files1 = parseFileBlocks(part1, {});
+  const idx1 = files1.find((f) => f.path === 'index.html');
+  check(idx1 && isFileComplete(idx1.code, 'index.html'), 'index.html (file pertama) sudah lengkap & bisa diterapkan');
+  const cont = '```css file=css/style.css\nbox-shadow:0 2px 8px rgba(0,0,0,.1)}\n```';
+  const merged = mergeContinuedOutput(part1, cont, {});
+  const cssFinal = parseFileBlocks(merged, {}).find((f) => f.path === 'css/style.css');
+  check(cssFinal && isFileComplete(cssFinal.code, 'css/style.css'), 'css/style.css lengkap setelah lanjut');
+  check(/\.btn\{/.test(cssFinal.code) && /rgba\(0,0,0,\.1\)\}/.test(cssFinal.code), 'isi awal CSS + sambungan tergabung');
+}
+
+// ============ 7) KESIAPAN PUBLISH ============
+console.log('\n=== 7) KESIAPAN PUBLISH ===');
+{
+  function publishProblems(files) {
+    const issues = [];
+    const entry = files['index.html'];
+    if (!entry || !isFileComplete(entry, 'index.html')) issues.push('index.html belum lengkap');
+    const bundle = sandbox.Preview.buildBundle({ name: 'x', files });
+    if (/KARSA: file .* tidak ditemukan/.test(bundle)) issues.push('ada aset hilang');
+    return issues;
+  }
+  const good = { 'index.html': '<!DOCTYPE html><html><head><link rel="stylesheet" href="css/s.css"></head><body><h1>Hi</h1></body></html>', 'css/s.css': 'body{margin:0}' };
+  check(publishProblems(good).length === 0, 'proyek lengkap → siap publish');
+  const brokenRef = { 'index.html': '<!DOCTYPE html><html><head><link rel="stylesheet" href="css/hilang.css"></head><body><h1>Hi</h1></body></html>' };
+  check(publishProblems(brokenRef).some((p) => /aset hilang/.test(p)), 'aset hilang → diblokir sebelum publish');
+  const truncated = { 'index.html': '<!DOCTYPE html><html><head><title>' + 'x'.repeat(300) + '</title><body><div class="a"><h1>Hal' };
+  check(publishProblems(truncated).some((p) => /belum lengkap/.test(p)), 'index.html terpotong → diblokir sebelum publish');
 }
 
 console.log('\n========================================');

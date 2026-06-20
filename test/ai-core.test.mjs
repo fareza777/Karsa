@@ -171,6 +171,33 @@ describe('edit terarah (SEARCH/REPLACE)', () => {
   });
 });
 
+describe('blok terpotong fence-terbuka (truncation umum)', () => {
+  it('menangkap file dgn fence belum tertutup sbg incomplete', () => {
+    const t = 'oke\n```css file=css/style.css\n.btn{color:red}\n.card{box-shadow:0 0 8px rgba(0,0,0,.';
+    const files = parseFileBlocks(t, {});
+    const css = files.find((f) => f.path === 'css/style.css');
+    expect(css).toBeTruthy();
+    expect(isFileComplete(css.code, 'css/style.css')).toBe(false);
+  });
+  it('multi-file: file pertama lengkap, kedua terpotong terbuka', () => {
+    const t = '```html file=index.html\n<html><body>ok</body></html>\n```\n```css file=s.css\n.a{co';
+    const files = parseFileBlocks(t, {});
+    expect(files.find((f) => f.path === 'index.html')).toBeTruthy();
+    expect(files.find((f) => f.path === 's.css')).toBeTruthy();
+    expect(isFileComplete(files.find((f) => f.path === 'index.html').code, 'index.html')).toBe(true);
+    expect(isFileComplete(files.find((f) => f.path === 's.css').code, 's.css')).toBe(false);
+  });
+  it('lanjutan menyambung partial fence-terbuka tanpa kehilangan awal', () => {
+    const prev = '```css file=s.css\n.btn{color:red}\n.card{box-shadow:0 0 8px rgba(0,0,0,.';
+    const cont = '```css file=s.css\nbox-shadow:0 0 8px rgba(0,0,0,.1)}\n```';
+    const merged = mergeContinuedOutput(prev, cont, {});
+    const css = parseFileBlocks(merged, {}).find((f) => f.path === 's.css');
+    expect(css.code).toContain('.btn{color:red}');
+    expect(css.code).toContain('rgba(0,0,0,.1)}');
+    expect(isFileComplete(css.code, 's.css')).toBe(true);
+  });
+});
+
 describe('mergeContinuedOutput', () => {
   it('menyambung file yang terpotong (bukan menimpa)', () => {
     const prev = '```html file=index.html\n<html><body>' + 'A'.repeat(300) + '<div class="th\n```';
