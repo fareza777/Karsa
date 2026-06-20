@@ -4,7 +4,6 @@
   "private": true,
   "description": "KARSA — pembuat aplikasi berbasis browser (vibecoding)",
   "scripts": {
-    "build": "node scripts/stamp-version.mjs",
     "stamp": "node scripts/stamp-version.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
