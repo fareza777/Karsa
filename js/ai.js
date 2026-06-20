@@ -507,10 +507,33 @@ const AI = (() => {
     return false;
   }
 
+  // #A6 Ambil file yang disebut user via @path (fokus konteks → hemat token).
+  function extractMentions(prompt, files) {
+    const out = [];
+    const re = /@([\w./-]+\.\w+)/g;
+    let m;
+    while ((m = re.exec(prompt || '')) !== null) {
+      const p = m[1].replace(/^\.?\//, '');
+      if (files[p] !== undefined && !out.includes(p)) out.push(p);
+    }
+    return out;
+  }
+
   function buildProjectContext(prompt) {
     const project = State.getCurrentProject();
     if (!project) return 'Belum ada proyek terbuka.';
     const files = project.files || {};
+    // Bila user menyebut file tertentu dgn @path, fokuskan konteks ke file itu.
+    const mentioned = extractMentions(prompt, files);
+    if (mentioned.length) {
+      let ctx = 'FILE PROYEK "' + project.name + '" (fokus pada file yang kamu sebut):\n';
+      mentioned.forEach((path) => {
+        let content = files[path] || '';
+        if (content.length > MAX_FILE_CHARS) content = content.slice(0, MAX_FILE_CHARS) + '\n/* …dipotong… */';
+        ctx += '\n--- ' + path + ' ---\n' + content + '\n';
+      });
+      return ctx;
+    }
     const slim = isIterationRequest(prompt || '', project);
     let paths = sortedProjectPaths(files);
     if (slim) {
