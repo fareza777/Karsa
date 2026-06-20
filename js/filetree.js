@@ -261,5 +261,48 @@ const FileTree = (() => {
     collapsedFolders = new Set();
   }
 
-  return { render, setActive, reset, newFilePrompt, newFolderPrompt };
+  // #C3 Cari teks di semua file proyek → daftar hasil yang bisa diklik.
+  function findInFilesDialog() {
+    const project = State.getCurrentProject();
+    if (!project) { showToast('Buka proyek dulu.', 'warn'); return; }
+    const input = el('input', { type: 'text', class: 'find-input', placeholder: 'Cari teks di semua file…', spellcheck: 'false' });
+    const results = el('div', { class: 'find-results' });
+    const summary = el('div', { class: 'find-summary muted', text: 'Ketik untuk mencari.' });
+
+    const run = debounce(() => {
+      const q = input.value.trim();
+      results.innerHTML = '';
+      if (q.length < 2) { summary.textContent = 'Ketik minimal 2 karakter.'; return; }
+      const ql = q.toLowerCase();
+      let total = 0; let fileCount = 0;
+      Object.keys(project.files).sort().forEach((path) => {
+        const content = project.files[path];
+        if (typeof content !== 'string' || /^data:/.test(content)) return;
+        const lines = content.split('\n');
+        let hitInFile = 0;
+        lines.forEach((line, i) => {
+          if (total >= 200 || hitInFile >= 20) return;
+          if (line.toLowerCase().includes(ql)) {
+            total++; hitInFile++;
+            const row = el('button', {
+              class: 'find-row',
+              onclick: () => { closeModal(); Tabs.open(path); if (typeof Editor !== 'undefined' && Editor.gotoLine) Editor.gotoLine(i + 1); },
+            }, [
+              el('span', { class: 'find-row-path', text: path + ':' + (i + 1) }),
+              el('span', { class: 'find-row-snip', text: line.trim().slice(0, 120) }),
+            ]);
+            results.appendChild(row);
+          }
+        });
+        if (hitInFile) fileCount++;
+      });
+      summary.textContent = total ? (total + ' hasil di ' + fileCount + ' file' + (total >= 200 ? ' (dibatasi 200)' : '')) : 'Tidak ada hasil.';
+    }, 200);
+
+    input.addEventListener('input', run);
+    showModal({ title: '🔎 Cari di semua file', wide: true, body: el('div', {}, [input, summary, results]) });
+    setTimeout(() => input.focus(), 50);
+  }
+
+  return { render, setActive, reset, newFilePrompt, newFolderPrompt, findInFilesDialog };
 })();

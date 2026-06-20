@@ -20,6 +20,7 @@ const Palette = (() => {
         { icon: 'folder-plus', label: 'Folder baru', run: () => FileTree.newFolderPrompt() },
         { icon: 'play', label: 'Jalankan / muat ulang preview', hint: 'run', run: () => Preview.refresh() },
         { icon: 'wand', label: 'Rapikan kode (Prettier)', hint: 'format', run: () => Editor.formatCurrentFile() },
+        { icon: 'terminal', label: 'Cari di semua file', hint: 'find in files', run: () => FileTree.findInFilesDialog() },
         { icon: 'camera', label: 'Screenshot preview', run: () => Preview.screenshot('full') },
         { icon: 'history', label: 'Riwayat versi', hint: 'checkpoint', run: () => $('#btn-history').click() },
         { icon: 'link', label: 'Bagikan tautan proyek', run: () => $('#btn-share').click() },

@@ -239,8 +239,17 @@ const Editor = (() => {
     });
   }
 
+  // #C3 Lompat ke baris (dipakai hasil cari di semua file)
+  function gotoLine(line) {
+    if (!cm) return;
+    const ln = Math.max(0, (line || 1) - 1);
+    cm.setCursor({ line: ln, ch: 0 });
+    cm.scrollIntoView({ line: ln, ch: 0 }, 120);
+    cm.focus();
+  }
+
   return {
     init, openFile, closeFile, handleRename, resetForProject,
-    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh,
+    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh, gotoLine,
   };
 })();
