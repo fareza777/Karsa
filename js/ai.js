@@ -1371,7 +1371,14 @@ const AI = (() => {
       }
       return { path: f.path, code: code };
     });
-    merged.forEach((f) => State.setFile(f.path, f.code));
+    // #A3 Apply atomik: bila ada yang gagal di tengah, kembalikan ke checkpoint.
+    try {
+      merged.forEach((f) => State.setFile(f.path, f.code));
+    } catch (err) {
+      if (undoId) State.restoreCheckpoint(undoId);
+      showToast('Gagal menerapkan — perubahan dibatalkan (proyek aman).', 'error');
+      return false;
+    }
     FileTree.render();
     const htmlApplied = valid.find((f) => f.path === 'preview/index.html')
       || valid.find((f) => f.path === 'index.html')
