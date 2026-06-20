@@ -12,6 +12,7 @@ const Tabs = (() => {
         class: 'tab' + (path === activeTab ? ' active' : ''),
         title: path,
         onclick: () => activate(path),
+        onauxclick: (e) => { if (e.button === 1) { e.preventDefault(); close(path); } }, // #B2 klik tengah = tutup
       }, [
         fileBadge(path),
         el('span', { class: 'tab-name', text: baseName(path) }),

@@ -212,7 +212,7 @@ const App = (() => {
         text: 'Belum ada checkpoint. KARSA otomatis menyimpan snapshot setiap kali kamu menerapkan file dari AI — jadi selalu bisa kembali bila hasilnya tak sesuai.',
       }));
     } else {
-      body.appendChild(el('p', { class: 'modal-desc', text: 'Pulihkan proyek ke kondisi sebelumnya (5 checkpoint terakhir disimpan):' }));
+      body.appendChild(el('p', { class: 'modal-desc', text: 'Pulihkan proyek ke kondisi sebelumnya (hingga 15 versi terakhir disimpan):' }));
       checkpoints.forEach((cp) => {
         body.appendChild(el('div', { class: 'history-item' }, [
           el('div', { class: 'history-item-info' }, [

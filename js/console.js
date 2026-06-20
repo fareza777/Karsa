@@ -101,6 +101,10 @@ const ConsolePanel = (() => {
       const data = event.data;
       if (!data || data.__karsa !== true) return;
       append(data.level, (data.args || []).join(' '));
+      // #B6 Munculkan overlay error di atas preview (bukan cuma di console panel)
+      if (data.level === 'error' && typeof Preview !== 'undefined' && Preview.showErrorBanner) {
+        Preview.showErrorBanner((data.args || []).join(' '));
+      }
     });
     $('#btn-clear-console').addEventListener('click', (e) => { e.stopPropagation(); clear(); });
     $('#btn-toggle-console').addEventListener('click', (e) => { e.stopPropagation(); toggle(); });

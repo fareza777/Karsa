@@ -525,6 +525,34 @@ const Preview = (() => {
     return diag.ok;
   }
 
+  // #B6 Banner error runtime di atas preview + tombol perbaiki via AI.
+  let errorBannerMsg = '';
+  function showErrorBanner(msg) {
+    const stage = $('#preview-stage');
+    if (!stage) return;
+    errorBannerMsg = String(msg || '').slice(0, 300);
+    let bar = $('#preview-error-banner');
+    if (!bar) {
+      bar = el('div', { id: 'preview-error-banner', class: 'preview-error-banner', role: 'alert' });
+      stage.appendChild(bar);
+    }
+    bar.innerHTML = '';
+    bar.appendChild(el('span', { class: 'peb-icon', text: '⚠' }));
+    bar.appendChild(el('span', { class: 'peb-msg', text: errorBannerMsg }));
+    bar.appendChild(el('button', {
+      class: 'peb-fix', text: '🔧 Perbaiki dengan AI',
+      onclick: () => { if (typeof AI !== 'undefined' && AI.prefillError) AI.prefillError(errorBannerMsg); },
+    }));
+    bar.appendChild(el('button', {
+      class: 'peb-close', text: '✕', title: 'Tutup', 'aria-label': 'Tutup',
+      onclick: () => bar.remove(),
+    }));
+  }
+  function clearErrorBanner() {
+    const bar = $('#preview-error-banner');
+    if (bar) bar.remove();
+  }
+
   function hidePreviewStatus() {
     const el = $('#preview-status');
     if (el) {
@@ -796,6 +824,7 @@ const Preview = (() => {
       setEngine('web');
     }
     ConsolePanel.clear();
+    clearErrorBanner(); // #B6 error lama hilang saat preview dimuat ulang
     const frame = $('#preview-frame');
     const snackMode = usesSnackEngine(project);
     updateEngineTabs();
@@ -1093,6 +1122,6 @@ const Preview = (() => {
   return {
     refresh, refreshHome, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
     runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect, resetPreviewEntry,
-    hotSwapCss, rotateDevice,
+    hotSwapCss, rotateDevice, showErrorBanner, clearErrorBanner,
   };
 })();
