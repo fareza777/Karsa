@@ -1043,17 +1043,51 @@ const AI = (() => {
   function renderFileDiff(container, oldText, newText) {
     const parts = window.Diff.diffLines(oldText || '', newText || '');
     let added = 0; let removed = 0;
-    parts.forEach((part) => {
-      const cls = part.added ? 'add' : (part.removed ? 'del' : 'ctx');
+    const CTX = 3; // baris konteks di sekitar perubahan; sisanya dilipat
+    const addLine = (cls, sign, line) => {
+      container.appendChild(el('div', { class: 'diff-line ' + cls }, [
+        el('span', { class: 'diff-sign', text: sign }),
+        el('span', { class: 'diff-text', text: line }),
+      ]));
+    };
+    parts.forEach((part, idx) => {
       if (part.added) added += part.count || 0;
       if (part.removed) removed += part.count || 0;
-      const sign = part.added ? '+' : (part.removed ? '−' : ' ');
-      part.value.replace(/\n$/, '').split('\n').forEach((line) => {
-        container.appendChild(el('div', { class: 'diff-line ' + cls }, [
-          el('span', { class: 'diff-sign', text: sign }),
-          el('span', { class: 'diff-text', text: line }),
-        ]));
-      });
+      if (part.added || part.removed) {
+        const cls = part.added ? 'add' : 'del';
+        const sign = part.added ? '+' : '−';
+        part.value.replace(/\n$/, '').split('\n').forEach((line) => addLine(cls, sign, line));
+        return;
+      }
+      // #B4 Konteks tak berubah: tampilkan beberapa baris pinggir, lipat tengahnya.
+      const lines = part.value.replace(/\n$/, '').split('\n');
+      const isFirst = idx === 0;
+      const isLast = idx === parts.length - 1;
+      if (lines.length <= CTX * 2 + 1) {
+        lines.forEach((line) => addLine('ctx', ' ', line));
+        return;
+      }
+      const head = isFirst ? [] : lines.slice(0, CTX);
+      const tail = isLast ? [] : lines.slice(-CTX);
+      head.forEach((line) => addLine('ctx', ' ', line));
+      const hidden = lines.length - head.length - tail.length;
+      if (hidden > 0) {
+        const fold = el('div', { class: 'diff-line diff-fold', text: '⋯ ' + hidden + ' baris tak berubah' });
+        const expand = () => {
+          const frag = document.createDocumentFragment();
+          lines.slice(head.length, lines.length - tail.length).forEach((line) => {
+            const row = el('div', { class: 'diff-line ctx' }, [
+              el('span', { class: 'diff-sign', text: ' ' }),
+              el('span', { class: 'diff-text', text: line }),
+            ]);
+            frag.appendChild(row);
+          });
+          fold.replaceWith(frag);
+        };
+        fold.addEventListener('click', expand);
+        container.appendChild(fold);
+      }
+      tail.forEach((line) => addLine('ctx', ' ', line));
     });
     return { added, removed };
   }
@@ -1897,11 +1931,21 @@ const AI = (() => {
   }
 
   // #6 Perbaiki error runtime dari console: kirim ke AI untuk diperbaiki
+  let lastPrefilledError = '';
   function prefillError(errorText) {
     switchTab('ai');
     const input = $('#ai-input');
+    // #A5 Dedupe: jangan tumpuk error yang sama persis.
+    if (lastPrefilledError === errorText && input.value.includes(errorText)) {
+      showToast('Error itu sudah disiapkan di kotak chat — klik Kirim. 🔧', 'info');
+      input.focus();
+      return;
+    }
+    lastPrefilledError = errorText;
     input.value = 'Preview menampilkan error ini:\n\n' + errorText +
-      '\n\nTemukan penyebabnya dan perbaiki kodenya. Tulis ulang file yang perlu diubah secara utuh.';
+      '\n\nCari penyebabnya dan perbaiki HANYA bagian yang salah. Bila file besar & sudah ada, ' +
+      'gunakan edit terarah (```lang edit=path dengan blok SEARCH/REPLACE); jangan tulis ulang ' +
+      'seluruh file dan jangan ubah desain yang sudah benar.';
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
     showToast('Error dikirim ke AI — klik Kirim untuk minta perbaikan. 🔧', 'info');

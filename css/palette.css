@@ -123,6 +123,17 @@
 .diff-line.add { background: rgba(16, 185, 129, .12); color: #6ee7b7; }
 .diff-line.del { background: rgba(244, 63, 94, .12); color: #fda4af; }
 .diff-line.ctx { color: var(--muted); }
+/* #B4 Baris konteks terlipat — klik untuk buka */
+.diff-fold {
+  justify-content: center;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 11px;
+  opacity: .8;
+  padding: 3px 6px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.diff-fold:hover { opacity: 1; }
 
 /* --- Asset manager (#14) --- */
 .asset-code-hint {
