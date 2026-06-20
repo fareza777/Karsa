@@ -207,7 +207,28 @@ const Dashboard = (() => {
     showToast('Proyek diekspor sebagai JSON.', 'ok');
   }
 
+  // #A7 Validasi & sanitasi file impor (cegah path aneh / proyek raksasa).
+  const MAX_IMPORT_BYTES = 12 * 1024 * 1024; // 12 MB
+  const MAX_IMPORT_FILES = 400;
+  function sanitizeImportFiles(files) {
+    const out = {};
+    let total = 0; let count = 0;
+    Object.keys(files || {}).forEach((rawPath) => {
+      if (count >= MAX_IMPORT_FILES) return;
+      const path = String(rawPath).replace(/^\.?\/+/, '').replace(/\\/g, '/');
+      // tolak path keluar folder / absolut / kosong
+      if (!path || path.includes('..') || path.startsWith('/') || path.length > 200) return;
+      const content = typeof files[rawPath] === 'string' ? files[rawPath] : '';
+      total += content.length;
+      if (total > MAX_IMPORT_BYTES) return;
+      out[path] = content;
+      count++;
+    });
+    return { files: out, count, total };
+  }
+
   function importProjectJson(file) {
+    if (file && file.size > MAX_IMPORT_BYTES) { showToast('File terlalu besar (maks 12 MB).', 'error'); return; }
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -216,7 +237,12 @@ const Dashboard = (() => {
           showToast('File bukan ekspor proyek KARSA yang valid.', 'error');
           return;
         }
-        const project = State.createProject(data.name || 'Proyek Impor', data.files, {
+        const clean = sanitizeImportFiles(data.files);
+        if (!clean.count) { showToast('Tidak ada file valid dalam impor.', 'error'); return; }
+        if (Object.keys(data.files).length !== clean.count) {
+          showToast('Sebagian file dilewati (path tidak aman / batas ukuran).', 'warn');
+        }
+        const project = State.createProject(data.name || 'Proyek Impor', clean.files, {
           projectType: data.projectType || 'web',
         });
         if (Array.isArray(data.folders)) State.updateProject(project.id, { folders: data.folders });

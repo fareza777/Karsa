@@ -1,5 +1,5 @@
 /* ===== KARSA — Service Worker (offline shell) ===== */
-const CACHE = 'karsa-v3';
+const CACHE = 'karsa-v4';
 
 // Aset inti yang dipracache agar app bisa dibuka offline
 const CORE = [
@@ -69,7 +69,20 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
+// #A6 Batasi ukuran cache runtime supaya tak menumpuk tanpa batas.
+const MAX_CACHE_ENTRIES = 120;
+function trimCache(cache) {
+  cache.keys().then((keys) => {
+    if (keys.length <= MAX_CACHE_ENTRIES) return;
+    // Hapus entri terlama (urutan insersi) hingga di bawah batas.
+    const excess = keys.length - MAX_CACHE_ENTRIES;
+    for (let i = 0; i < excess; i++) cache.delete(keys[i]);
+  }).catch(() => {});
+}
+
 function cachePut(req, res) {
   if (!res || res.status !== 200 || res.type === 'opaque') return;
-  caches.open(CACHE).then((cache) => cache.put(req, res)).catch(() => {});
+  caches.open(CACHE).then((cache) => {
+    cache.put(req, res).then(() => trimCache(cache)).catch(() => {});
+  }).catch(() => {});
 }
