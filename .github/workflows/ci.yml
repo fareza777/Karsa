@@ -19,3 +19,5 @@ jobs:
         run: npm run check
       - name: Unit tests
         run: npm test
+      - name: E2E workflow (web/mobile/playstore)
+        run: npm run e2e

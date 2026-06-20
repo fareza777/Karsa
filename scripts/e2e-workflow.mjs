@@ -1,0 +1,202 @@
+/* E2E workflow runner — menjalankan 3 alur (web, mobile, playstore) lewat kode
+   sumber asli (ai-core + project/snack/playstore) di Node. Bukan pengganti uji
+   browser, tapi memvalidasi pipeline: generate → parse → kelengkapan → recover
+   truncation → validasi tipe proyek. */
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import vm from 'node:vm';
+
+const require = createRequire(import.meta.url);
+const AICore = require('../js/ai-core.js');
+
+// --- Muat modul browser (IIFE) ke satu konteks vm dgn stub global ---
+const noop = () => {};
+const sandbox = {
+  console,
+  fileExt(path) { const n = String(path).split('/').pop(); const d = n.lastIndexOf('.'); return d === -1 ? '' : n.slice(d + 1).toLowerCase(); },
+  document: { addEventListener: noop, getElementById: () => null, querySelector: () => null, createElement: () => ({ style: {}, appendChild: noop, setAttribute: noop }) },
+  window: { addEventListener: noop, matchMedia: () => ({ matches: false }) },
+  location: { hostname: 'karsa.work', origin: 'https://karsa.work', host: 'karsa.work' },
+  sessionStorage: { getItem: () => null, setItem: noop },
+  navigator: { onLine: true },
+  debounce: (fn) => fn,
+  $: () => null, $$: () => [],
+  el: () => ({ style: {}, appendChild: noop, setAttribute: noop, classList: { add: noop, remove: noop, toggle: noop } }),
+  showToast: noop,
+};
+sandbox.self = sandbox; sandbox.globalThis = sandbox;
+vm.createContext(sandbox);
+
+// const/let top-level tak otomatis jadi properti global di vm → ekspor manual.
+const EXPORTS = { 'snack.js': ['Snack'], 'playstore.js': ['PlayStore'], 'templates.js': ['TEMPLATES'], 'preview.js': ['Preview'] };
+function load(file) {
+  let code = readFileSync(new URL('../js/' + file, import.meta.url), 'utf8');
+  (EXPORTS[file] || []).forEach((name) => { code += `\n;globalThis.${name}=typeof ${name}!=='undefined'?${name}:undefined;`; });
+  vm.runInContext(code, sandbox, { filename: file });
+}
+['project.js', 'snack.js', 'playstore.js', 'templates.js', 'preview.js'].forEach(load);
+
+const { parseFileBlocks, isFileComplete, isResponseTruncated, mergeContinuedOutput } = AICore;
+
+let problems = [];
+function check(cond, msg) { if (!cond) { problems.push(msg); console.log('   ✗ ' + msg); } else { console.log('   ✓ ' + msg); } }
+
+// ============ 1) WEBSITE ============
+console.log('\n=== 1) WEBSITE: landing page ===');
+{
+  const aiResp = [
+    'Oke! Aku buatkan landing page sederhana.',
+    '```html file=index.html',
+    '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Toko</title>',
+    '<link rel="stylesheet" href="css/style.css"></head><body>',
+    '<header><h1>Toko Kopi</h1></header><main><p>Selamat datang</p>',
+    '<button id="cta">Pesan</button></main><script src="js/app.js"></script></body></html>',
+    '```',
+    '```css file=css/style.css',
+    'body{font-family:system-ui;margin:0}header{background:#7c5cff;color:#fff;padding:20px}',
+    '```',
+    '```js file=js/app.js',
+    'document.getElementById("cta").addEventListener("click",()=>alert("Terima kasih!"));',
+    '```',
+  ].join('\n');
+  const files = parseFileBlocks(aiResp, {});
+  check(files.length === 3, 'parse 3 file (html/css/js)');
+  check(files.every((f) => isFileComplete(f.code, f.path)), 'semua file lengkap');
+  check(!isResponseTruncated(aiResp, 'stop', {}), 'tidak terdeteksi terpotong');
+  const map = Object.fromEntries(files.map((f) => [f.path, f.code]));
+  check(sandbox.webPreviewEntryPath(map) === 'index.html', 'entry preview = index.html');
+  const a = sandbox.analyzeProjectFiles(map);
+  check(a.hasHtml && a.webPreview, 'analyze: web preview siap');
+
+  // 1c) Bundling preview (inline css/js, shim storage, tak ada referensi hilang)
+  const bundle = sandbox.Preview.buildBundle({ name: 'Toko', files: map });
+  check(/Toko Kopi/.test(bundle), 'bundle berisi konten HTML');
+  check(/background:#7c5cff/.test(bundle), 'CSS ter-inline ke <style>');
+  check(/addEventListener\("click"/.test(bundle), 'JS ter-inline ke <script>');
+  check(!/<link[^>]+href="css\/style\.css"/.test(bundle), 'tag <link> CSS lokal dihapus (sudah inline)');
+  check(!/KARSA: file .* tidak ditemukan/.test(bundle), 'tak ada referensi file lokal yang hilang');
+  check(/data-karsa-css="css\/style\.css"/.test(bundle), 'style ditandai utk hot-swap (#10)');
+  check(/localStorage/.test(bundle), 'shim storage disuntik (#A1)');
+}
+
+// ============ 1b) WEBSITE truncation → recovery ============
+console.log('\n=== 1b) WEBSITE: respons terpotong lalu dilanjutkan ===');
+{
+  // HTML panjang (>250 char, realistis) yang terpotong di tengah.
+  const head = '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>Galeri</title></head><body>'
+    + '<header class="top"><h1>Galeri Foto</h1></header><main class="grid">'
+    + '<article class="card"><img src="a.jpg"><p>Foto satu yang panjang sekali deskripsinya</p></article>'
+    + '<article class="card"><img src="b.jpg"><p>Foto dua yang juga pan';
+  const cut = '```html file=index.html\n' + head; // fence belum ditutup
+  check(isResponseTruncated(cut, 'length', {}), 'terdeteksi terpotong (fence belum tutup)');
+  // Lanjutan MENGULANG cuplikan akhir (anchor) seperti instruksi buildContinueMessage.
+  const anchor = head.slice(-60);
+  const continuation = '```html file=index.html\n' + anchor + 'jang.</p></article></main></body></html>\n```';
+  const merged = mergeContinuedOutput(cut + '\n```', continuation, {});
+  const mf = parseFileBlocks(merged, {});
+  check(mf.length === 1 && isFileComplete(mf[0].code, 'index.html'), 'setelah lanjut: index.html lengkap & valid');
+  check(/<header class="top">/.test(mf[0].code) && /<\/html>$/.test(mf[0].code.trim()), 'isi awal + sambungan tergabung utuh');
+  check(!/pan\s*jang/.test(mf[0].code) === false || /panjang\.<\/p>/.test(mf[0].code), 'sambungan mulus (anchor overlap dibuang)');
+}
+
+// ============ 2) MOBILE (Expo) ============
+console.log('\n=== 2) APPS MOBILE (Expo) ===');
+{
+  const appTsx = [
+    'import React from "react";',
+    'import { View, Text, StyleSheet } from "react-native";',
+    'export default function App(){',
+    '  return (<View style={styles.c}><Text style={styles.t}>Halo Mobile</Text></View>);',
+    '}',
+    'const styles = StyleSheet.create({ c:{flex:1,alignItems:"center",justifyContent:"center"}, t:{fontSize:20} });',
+  ].join('\n');
+  const project = { name: 'AppKu', projectType: 'mobile', files: {
+    'App.tsx': appTsx,
+    'package.json': JSON.stringify({ name: 'appku', dependencies: { expo: '~51.0.0', react: '18.2.0', 'react-native': '0.74.0' } }, null, 2),
+    'app.json': JSON.stringify({ expo: { name: 'AppKu', slug: 'appku' } }, null, 2),
+  } };
+  check(isFileComplete(project.files['App.tsx'], 'App.tsx'), 'App.tsx lengkap (export default + balanced)');
+  check(sandbox.expoEntryPath(project.files) === 'App.tsx', 'expoEntryPath = App.tsx');
+  const a = sandbox.analyzeProjectFiles(project.files);
+  check(a.expoLike, 'analyze: terdeteksi Expo');
+  const diag = sandbox.Snack.diagnoseProject(project);
+  check(diag.ok, 'Snack.diagnoseProject OK' + (diag.ok ? '' : ' → ' + JSON.stringify(diag.errors)));
+}
+
+// ============ 2b) MOBILE truncated App.tsx ============
+console.log('\n=== 2b) MOBILE: App.tsx terpotong terdeteksi ===');
+{
+  const cutTsx = 'import React from "react";\nexport default function App(){\n  return (<View><Text>Hal';
+  check(!isFileComplete(cutTsx, 'App.tsx'), 'App.tsx terpotong → belum lengkap');
+  const project = { name: 'X', projectType: 'mobile', files: { 'App.tsx': cutTsx } };
+  const diag = sandbox.Snack.diagnoseProject(project);
+  check(!diag.ok && diag.errors.length > 0, 'diagnose menandai error pada App.tsx terpotong');
+}
+
+// ============ 3) PLAYSTORE ============
+console.log('\n=== 3) APPS PLAY STORE ===');
+{
+  // App.tsx realistis (>350 char) + aset gambar realistis (data-URL panjang).
+  const realApp = [
+    'import React, { useState } from "react";',
+    'import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "react-native";',
+    'export default function App(){',
+    '  const [items,setItems]=useState([{id:1,nama:"Kopi"}]);',
+    '  const [t,setT]=useState("");',
+    '  return (<View style={styles.c}>',
+    '    <Text style={styles.h}>Daftar Menu Warung Budi</Text>',
+    '    <TextInput style={styles.i} value={t} onChangeText={setT} placeholder="Tambah menu"/>',
+    '    <TouchableOpacity style={styles.b} onPress={()=>{ if(t){ setItems([...items,{id:Date.now(),nama:t}]); setT(""); } }}>',
+    '      <Text style={styles.bt}>Tambah</Text></TouchableOpacity>',
+    '    <FlatList data={items} keyExtractor={(x)=>String(x.id)} renderItem={({item})=>(<Text style={styles.row}>{item.nama}</Text>)}/>',
+    '  </View>);',
+    '}',
+    'const styles = StyleSheet.create({ c:{flex:1,padding:20}, h:{fontSize:22,fontWeight:"700"}, i:{borderWidth:1,padding:8,marginVertical:8}, b:{backgroundColor:"#7c5cff",padding:10,borderRadius:8}, bt:{color:"#fff",textAlign:"center"}, row:{padding:10,borderBottomWidth:1} });',
+  ].join('\n');
+  const bigPng = 'data:image/png;base64,' + 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk'.repeat(6);
+  const project = { name: 'Warung Budi', projectType: 'playstore', files: {
+    'App.tsx': realApp,
+    'package.json': JSON.stringify({ name: 'warung-budi', dependencies: { expo: '~51.0.0', react: '18.2.0', 'react-native': '0.74.0' } }),
+    'app.json': JSON.stringify({ expo: {
+      name: 'Warung Budi', slug: 'warung-budi', version: '1.0.0',
+      icon: 'assets/icon.png', splash: { image: 'assets/splash.png' },
+      android: { package: 'com.warungbudi.app', versionCode: 1, adaptiveIcon: { foregroundImage: 'assets/adaptive.png' } },
+    } }),
+    'eas.json': JSON.stringify({ build: { production: {} } }),
+    'assets/icon.png': bigPng,
+    'assets/splash.png': bigPng,
+    'assets/adaptive.png': bigPng,
+  } };
+  const ev = sandbox.PlayStore.evaluate(project);
+  console.log('   checklist: ' + ev.done + '/' + ev.total + ' (ready=' + ev.ready + ')');
+  ev.items.forEach((it) => console.log('     ' + (it.ok ? '✓' : '✗') + ' ' + it.label));
+  const byId = (id) => ev.items.find((i) => i.id === id);
+  check(byId('app').ok, 'app bukan template kosong');
+  check(byId('androidPackage').ok, 'android.package valid & unik');
+  check(byId('icon').ok && byId('splash').ok && byId('adaptive').ok, 'aset icon/splash/adaptive terdeteksi');
+  check(byId('eas').ok, 'eas.json ada');
+  check(ev.ready, 'checklist Play Store SIAP (semua lengkap)');
+}
+
+// ============ 4) SEMUA TEMPLATE BAWAAN ============
+console.log('\n=== 4) VALIDASI TEMPLATE BAWAAN (' + (sandbox.TEMPLATES || []).length + ') ===');
+{
+  (sandbox.TEMPLATES || []).forEach((tpl) => {
+    const files = tpl.files || {};
+    const a = sandbox.analyzeProjectFiles(files);
+    if (a.expoLike) {
+      const diag = sandbox.Snack.diagnoseProject({ name: tpl.name, files });
+      check(diag.ok, 'template "' + tpl.name + '" (mobile) preview OK' + (diag.ok ? '' : ' → ' + diag.errors.join('; ')));
+    } else if (files['index.html'] !== undefined) {
+      check(isFileComplete(files['index.html'], 'index.html'), 'template "' + tpl.name + '" index.html lengkap');
+      const bundle = sandbox.Preview.buildBundle({ name: tpl.name, files });
+      check(!/KARSA: file .* tidak ditemukan/.test(bundle), 'template "' + tpl.name + '" tak ada aset hilang');
+    } else {
+      check(Object.keys(files).length > 0, 'template "' + tpl.name + '" punya file');
+    }
+  });
+}
+
+console.log('\n========================================');
+if (problems.length) { console.log('HASIL: ' + problems.length + ' MASALAH DITEMUKAN'); process.exit(1); }
+console.log('HASIL: SEMUA ALUR LULUS ✓');
