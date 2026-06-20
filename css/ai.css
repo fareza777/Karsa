@@ -511,6 +511,15 @@ body.is-superuser #btn-ai-settings {
   border-radius: var(--radius-sm);
   background: rgba(124, 92, 255, .1);
 }
+/* #B7 Chip saran langkah berikutnya */
+.ai-nextsteps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ai-nextstep {
+  font-size: 12px; padding: 5px 10px; border-radius: 99px;
+  border: 1px solid var(--border); background: var(--bg-2); color: var(--text);
+  transition: border-color var(--transition), background var(--transition);
+}
+.ai-nextstep:hover { border-color: var(--accent); background: var(--bg-hover); }
+
 /* #B7 Daftar markdown di balasan AI + salin balasan */
 .ai-md-list { margin: 6px 0 6px 18px; font-size: 13px; line-height: 1.6; }
 .ai-md-list li { margin: 2px 0; }

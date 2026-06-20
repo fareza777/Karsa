@@ -790,6 +790,47 @@ const AI = (() => {
     return card;
   }
 
+  // #B1 Buat ulang balasan terakhir (hapus pertukaran terakhir, kirim ulang prompt).
+  function regenerateLast() {
+    if (busy) return;
+    const history = getHistory();
+    let lastUser = null;
+    for (let i = history.length - 1; i >= 0; i--) { if (history[i].role === 'user') { lastUser = history[i].content; break; } }
+    if (!lastUser) return;
+    while (history.length && history[history.length - 1].role !== 'user') history.pop();
+    if (history.length && history[history.length - 1].role === 'user') history.pop();
+    saveHistory();
+    renderedProjectId = null;
+    renderHistoryForCurrentProject();
+    $('#ai-input').value = String(lastUser).split('\n📎')[0];
+    send();
+  }
+  function addRegenButton(bubble) {
+    if ($('.ai-regen', bubble)) return;
+    bubble.appendChild(el('button', {
+      class: 'ai-regen ai-retry-btn', text: '🔄 Buat ulang',
+      title: 'Hasilkan ulang balasan ini', onclick: () => regenerateLast(),
+    }));
+  }
+
+  // #B7 Chip saran langkah berikutnya setelah balasan berisi file.
+  const NEXT_STEPS = [
+    '✨ Percantik tampilannya',
+    '🌙 Tambahkan mode gelap',
+    '📱 Pastikan rapi di HP',
+    '➕ Tambah satu fitur lagi',
+  ];
+  function addNextStepChips(bubble) {
+    if ($('.ai-nextsteps', bubble)) return;
+    const row = el('div', { class: 'ai-nextsteps' }, NEXT_STEPS.map((s) =>
+      el('button', { class: 'ai-nextstep', text: s, onclick: () => {
+        $('#ai-input').value = s.replace(/^\S+\s/, '');
+        $('#ai-input').focus();
+      } })
+    ));
+    bubble.appendChild(row);
+  }
+
   // #B7 Tombol salin seluruh balasan AI (pojok gelembung).
   function addResponseCopy(bubble) {
     if (!bubble || $('.ai-copy-response', bubble)) return;
@@ -1841,6 +1882,8 @@ const AI = (() => {
       saveHistory();
       Plan.recordAiUse();
       tryAutoApply(bubble, visible, truncated);
+      addRegenButton(bubble); // #B1
+      if (parsedFiles.length && !truncated) addNextStepChips(bubble); // #B7
     } catch (err) {
       if (err.name === 'AbortError' && accumulatedVisible.trim()) {
         renderAssistantHtml(bubble, accumulatedVisible);
