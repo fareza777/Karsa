@@ -831,12 +831,31 @@ const AI = (() => {
     bubble.appendChild(row);
   }
 
+  // #B3 Bacakan balasan AI (speech synthesis); prosa saja, lewati blok kode.
+  function proseForSpeech(visible) {
+    return (visible || '').replace(/```[\s\S]*?```/g, ' (blok kode) ').replace(/[`*#>_]/g, '').slice(0, 4000);
+  }
+  function addSpeakButton(bubble) {
+    if (!('speechSynthesis' in window) || $('.ai-speak', bubble)) return;
+    const btn = el('button', { class: 'ai-speak copy-btn', title: 'Bacakan balasan', 'aria-label': 'Bacakan balasan', text: '🔊' });
+    btn.addEventListener('click', () => {
+      if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); btn.textContent = '🔊'; return; }
+      const u = new SpeechSynthesisUtterance(proseForSpeech(bubble.dataset.aiVisible || ''));
+      u.lang = 'id-ID';
+      u.onend = () => { btn.textContent = '🔊'; };
+      btn.textContent = '⏹';
+      window.speechSynthesis.speak(u);
+    });
+    bubble.appendChild(btn);
+  }
+
   // #B7 Tombol salin seluruh balasan AI (pojok gelembung).
   function addResponseCopy(bubble) {
     if (!bubble || $('.ai-copy-response', bubble)) return;
     const btn = makeCopyButton(() => bubble.dataset.aiVisible || '', { class: 'ai-copy-response' });
     btn.title = 'Salin seluruh balasan';
     bubble.appendChild(btn);
+    addSpeakButton(bubble);
   }
 
   function appendAssistantBubble(fullText, fromHistory) {

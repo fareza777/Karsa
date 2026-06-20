@@ -188,6 +188,33 @@ const App = (() => {
     input.select();
   }
 
+  // #B2 Pasang KARSA sebagai aplikasi (PWA) — tombol muncul saat browser siap.
+  function setupInstallPrompt() {
+    let deferred = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferred = e;
+      let btn = document.getElementById('btn-install-pwa');
+      if (!btn) {
+        btn = el('button', { id: 'btn-install-pwa', class: 'btn btn-ghost btn-sm', text: '⬇ Pasang aplikasi', title: 'Pasang KARSA sebagai aplikasi' });
+        btn.addEventListener('click', async () => {
+          if (!deferred) return;
+          deferred.prompt();
+          try { await deferred.userChoice; } catch (e2) { /* abaikan */ }
+          deferred = null; btn.remove();
+        });
+        const host = document.querySelector('.dash-header-right') || document.body;
+        host.insertBefore(btn, host.firstChild);
+      }
+      btn.classList.remove('hidden');
+    });
+    window.addEventListener('appinstalled', () => {
+      const btn = document.getElementById('btn-install-pwa');
+      if (btn) btn.remove();
+      showToast('KARSA terpasang sebagai aplikasi! 🎉', 'ok');
+    });
+  }
+
   function importFromHash() {
     const match = location.hash.match(/^#k=(.+)$/);
     if (!match) return false;
@@ -491,6 +518,7 @@ const App = (() => {
     Editor.init();
     setupResizers();
     bindEvents();
+    setupInstallPrompt();
     showDashboard();
     const imported = importFromHash();
     // #B8 Lanjut kerja: buka proyek terakhir bila tak ada impor dari tautan.
