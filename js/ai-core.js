@@ -138,8 +138,11 @@
     const b = (cont || '').replace(/^\n+/, '');
     if (!a) return b;
     if (!b.trim()) return a;
+    // File ditulis ulang utuh: lanjutan mengulang awal prior. Pakai b HANYA jika
+    // tak lebih pendek dari prior — kalau lanjutannya sendiri terpotong lebih
+    // awal, jangan buang isi prior yang lebih panjang.
     const head = a.slice(0, Math.min(80, a.length)).trim();
-    if (head && b.trimStart().startsWith(head)) return b;
+    if (head && b.trimStart().startsWith(head)) return b.length >= a.length ? b : a;
     const max = Math.min(a.length, b.length, 4000);
     for (let len = max; len >= 12; len--) {
       if (a.slice(a.length - len) === b.slice(0, len)) return a + b.slice(len);

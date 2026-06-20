@@ -29,6 +29,10 @@ describe('stitchCode', () => {
   it('mengembalikan lanjutan saat prior kosong', () => {
     expect(stitchCode('', 'xyz')).toBe('xyz');
   });
+  it('tak buang isi saat tulis-ulang lebih pendek (terpotong lagi)', () => {
+    const shorter = full.slice(0, 100); // tulis ulang dari awal tapi terpotong lebih dini
+    expect(stitchCode(full, shorter)).toBe(full);
+  });
 });
 
 describe('braceBalance', () => {
