@@ -91,6 +91,31 @@
     return (((text || '').match(/```/g) || []).length % 2) !== 0;
   }
 
+  // #A3 Estimasi token kasar (≈3.6 char/token; kode lebih padat dari prosa).
+  // Untuk budgeting/peringatan — bukan tokenizer presisi.
+  function estimateTokens(text) {
+    if (!text) return 0;
+    return Math.ceil(String(text).length / 3.6);
+  }
+
+  // Total estimasi token untuk array pesan {role, content:string|parts[]}.
+  function estimateMessagesTokens(msgs) {
+    if (!Array.isArray(msgs)) return 0;
+    let n = 0;
+    for (const m of msgs) {
+      const c = m && m.content;
+      if (typeof c === 'string') n += estimateTokens(c);
+      else if (Array.isArray(c)) {
+        for (const part of c) {
+          if (part && part.type === 'text' && typeof part.text === 'string') n += estimateTokens(part.text);
+          else if (part && part.type === 'image_url') n += 800; // perkiraan kasar token gambar
+        }
+      }
+      n += 4; // overhead per pesan
+    }
+    return n;
+  }
+
   function extractProse(text) {
     const idx = (text || '').indexOf('```');
     return idx === -1 ? (text || '').trim() : text.slice(0, idx).trim();
@@ -261,6 +286,6 @@
     fileExt, isValidPath, braceBalance, isFileComplete, hasUnclosedCodeFence,
     extractProse, rebuildWithFiles, stitchCode, parseEditBlocks, matchFlexible,
     resolveEdits, editResolutionReport, parseFileBlocks, mergeContinuedOutput,
-    isResponseTruncated,
+    isResponseTruncated, estimateTokens, estimateMessagesTokens,
   };
 });

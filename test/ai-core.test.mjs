@@ -191,6 +191,19 @@ describe('mergeContinuedOutput', () => {
   });
 });
 
+describe('estimateTokens', () => {
+  it('0 untuk kosong', () => {
+    expect(AICore.estimateTokens('')).toBe(0);
+  });
+  it('proporsional dgn panjang', () => {
+    expect(AICore.estimateTokens('x'.repeat(360))).toBe(100);
+  });
+  it('estimateMessagesTokens menjumlah teks + overhead', () => {
+    const n = AICore.estimateMessagesTokens([{ role: 'user', content: 'x'.repeat(36) }]);
+    expect(n).toBe(10 + 4);
+  });
+});
+
 describe('isResponseTruncated', () => {
   it('fence terbuka = terpotong', () => {
     expect(isResponseTruncated('teks ```html file=a.html\n<p>', null, {})).toBe(true);

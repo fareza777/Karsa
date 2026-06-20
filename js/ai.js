@@ -1551,7 +1551,8 @@ const AI = (() => {
 
       const baseMessages = trimMessagesForApi(messages);
       if (messagesTextTotal(messages) > API_TEXT_BUDGET) {
-        showToast('Riwayat chat panjang — dirapikan otomatis.', 'info');
+        const tok = KarsaAICore.estimateMessagesTokens(messages);
+        showToast('Konteks panjang (≈' + (tok / 1000).toFixed(0) + 'k token) — dirapikan otomatis.', 'info');
       }
 
       let continueRound = 0;
@@ -1684,9 +1685,11 @@ const AI = (() => {
       }
       const elapsed = Math.round((Date.now() - startedAt) / 1000);
       const phaseNote = '';
+      const approxTokens = KarsaAICore.estimateTokens(visible);
+      const tokenNote = approxTokens > 0 ? ' · ≈' + (approxTokens >= 1000 ? (approxTokens / 1000).toFixed(1) + 'k' : approxTokens) + ' token' : '';
       bubble.appendChild(el('div', {
         class: 'ai-meta',
-        text: '⚡ ' + elapsed + ' dtk · ' + BRAND_AI + phaseNote + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (totalContinueRounds ? ' · ↻ ' + totalContinueRounds + 'x lanjut' : ''),
+        text: '⚡ ' + elapsed + ' dtk · ' + BRAND_AI + phaseNote + tokenNote + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (totalContinueRounds ? ' · ↻ ' + totalContinueRounds + 'x lanjut' : ''),
       }));
       history.push({ role: 'assistant', content: visible });
       saveHistory();
