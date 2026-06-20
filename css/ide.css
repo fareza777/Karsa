@@ -659,6 +659,10 @@ body.resizing * { user-select: none !important; }
   padding: 1px 7px;
   border-radius: 99px;
 }
+/* #C3 Handle resize tinggi console */
+.console-resizer { height: 6px; cursor: row-resize; background: transparent; flex-shrink: 0; }
+.console-resizer:hover, .console-resizer.dragging { background: var(--accent); opacity: .6; }
+.console-panel.collapsed .console-resizer { display: none; }
 .console-log {
   overflow-y: auto;
   background: var(--console-bg);
