@@ -5,6 +5,7 @@
   "description": "KARSA — pembuat aplikasi berbasis browser (vibecoding)",
   "scripts": {
     "stamp": "node scripts/stamp-version.mjs",
+    "e2e": "node scripts/e2e-workflow.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "node scripts/check-syntax.mjs"
