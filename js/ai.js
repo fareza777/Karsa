@@ -751,12 +751,21 @@ const AI = (() => {
       el('span', { class: 'ai-code-meta', text: isWriting ? 'menulis… ' + lineCount + ' baris' : (isEdit ? 'edit terarah' : lineCount + ' baris') }),
       isWriting ? el('span', { class: 'ai-spinner' }) : el('span', { class: 'ai-code-caret', text: '▾' }),
     ]);
+    // #B3 Label bahasa di header
+    const lang = isEdit ? 'edit' : (fileExt(title) || 'txt');
+    head.insertBefore(el('span', { class: 'ai-code-lang', text: lang }), head.querySelector('.ai-code-meta'));
     card.appendChild(head);
     if (!isWriting) {
       card.appendChild(makeCopyButton(() => code, { class: 'ai-code-copy' }));
       const codeEl = el('code');
       highlightInto(codeEl, code, title);
-      const body = el('pre', { class: 'ai-code-body hidden' }, [codeEl]);
+      // #B3 Gutter nomor baris (sejajar, font & line-height sama via CSS)
+      const n = code ? code.split('\n').length : 1;
+      let nums = '';
+      for (let i = 1; i <= n; i++) nums += i + '\n';
+      const gutter = el('span', { class: 'ai-code-gutter', 'aria-hidden': 'true', text: nums });
+      const rows = el('div', { class: 'ai-code-rows' }, [gutter, codeEl]);
+      const body = el('pre', { class: 'ai-code-body hidden' }, [rows]);
       card.appendChild(body);
       head.addEventListener('click', () => {
         body.classList.toggle('hidden');
