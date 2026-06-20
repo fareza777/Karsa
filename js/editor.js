@@ -239,6 +239,13 @@ const Editor = (() => {
     });
   }
 
+  // #C4 Teks terpilih di editor (untuk aksi cepat AI)
+  function getSelection() {
+    if (cm) return cm.getSelection() || '';
+    if (fallback) return fallback.value.substring(fallback.selectionStart, fallback.selectionEnd) || '';
+    return '';
+  }
+
   // #C3 Lompat ke baris (dipakai hasil cari di semua file)
   function gotoLine(line) {
     if (!cm) return;
@@ -250,6 +257,6 @@ const Editor = (() => {
 
   return {
     init, openFile, closeFile, handleRename, resetForProject,
-    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh, gotoLine,
+    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh, gotoLine, getSelection,
   };
 })();

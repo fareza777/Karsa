@@ -2018,6 +2018,23 @@ const AI = (() => {
     showToast('Elemen ' + label + ' siap diubah — ketik perubahanmu lalu Kirim.', 'ok');
   }
 
+  // #C4 Aksi cepat AI pada teks yang dipilih di editor.
+  function quickAction(kind) {
+    const sel = (typeof Editor !== 'undefined' && Editor.getSelection) ? Editor.getSelection().trim() : '';
+    if (!sel) { showToast('Pilih dulu sebagian kode di editor.', 'warn'); return; }
+    const path = (typeof Editor !== 'undefined' && Editor.getCurrentPath) ? Editor.getCurrentPath() : '';
+    const ref = path ? ' (dari @' + path + ')' : '';
+    const fence = '\n\n```\n' + sel.slice(0, 4000) + '\n```';
+    const prompts = {
+      explain: 'Jelaskan secara singkat & sederhana apa yang dilakukan kode ini' + ref + ':' + fence + '\n\n(Hanya penjelasan, jangan ubah file.)',
+      comment: 'Tambahkan komentar yang jelas pada kode ini' + ref + ', lalu keluarkan versi yang sudah dikomentari sebagai edit terarah (```lang edit=' + (path || 'path') + ').' + fence,
+      refactor: 'Refactor kode ini agar lebih rapi & mudah dibaca tanpa mengubah perilaku' + ref + '. Keluarkan sebagai edit terarah (SEARCH/REPLACE).' + fence,
+      fix: 'Cari bug pada kode ini' + ref + ' dan perbaiki. Keluarkan sebagai edit terarah (SEARCH/REPLACE), jangan tulis ulang seluruh file.' + fence,
+    };
+    switchTab('ai');
+    sendPrompt(prompts[kind] || prompts.explain);
+  }
+
   // #6 Perbaiki error runtime dari console: kirim ke AI untuk diperbaiki
   let lastPrefilledError = '';
   function prefillError(errorText) {
@@ -2053,7 +2070,7 @@ const AI = (() => {
 
   return {
     init, switchTab, attachImageDataUrl, sendPrompt, requestWebPreview, requestSnackRefresh,
-    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes, prefillFromInspect, prefillError,
+    setAutoApply, openSettings: settingsDialog, refreshApplyBoxes, prefillFromInspect, prefillError, quickAction,
   };
 })();
 
