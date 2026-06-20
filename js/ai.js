@@ -110,6 +110,7 @@ const AI = (() => {
   let busy = false;
   let abortCtrl = null;
   let liveAbortReason = 'user';
+  let liveWritingFile = ''; // #B6 file yang sedang ditulis (untuk status streaming)
 
   function sanitizePublicError(msg) {
     if (!msg || typeof msg !== 'string') return 'Terjadi kesalahan. Coba lagi.';
@@ -1486,6 +1487,13 @@ const AI = (() => {
               if (onPhase) onPhase(phase, rawText.length);
               const now = Date.now();
               if (visible.trim()) {
+                // #B6 Tampilkan file yang sedang ditulis di status.
+                const open = visible.match(/```[\w-]*[ \t]+(?:file|edit)[=:]\s*["']?([^\s"'`\n]+)/gi);
+                if (open && open.length) {
+                  const lastTag = open[open.length - 1];
+                  const mm = lastTag.match(/(?:file|edit)[=:]\s*["']?([^\s"'`\n]+)/i);
+                  liveWritingFile = mm ? mm[1].replace(/^\.\//, '') : '';
+                }
                 if (now - lastRenderAt > 180) {
                   lastRenderAt = now;
                   renderAssistantHtml(bubble, visible, true);
@@ -1582,12 +1590,15 @@ const AI = (() => {
     const startedAt = Date.now();
     let phase = 'menghubungi';
     const histLimit = isMobileProject(project) ? 6 : MAX_HISTORY;
+    liveWritingFile = '';
     const ticker = setInterval(() => {
       const secs = Math.round((Date.now() - startedAt) / 1000);
+      const writing = (phase === 'menulis' || phase === 'melanjutkan') && liveWritingFile
+        ? ' ' + liveWritingFile : '';
       const label = phase === 'menghubungi' ? 'menghubungi KARSA AI'
         : phase === 'berpikir' ? 'AI sedang berpikir 💭'
-        : phase === 'melanjutkan' ? 'melanjutkan tulis otomatis ✍'
-        : 'AI sedang menulis ✍';
+        : phase === 'melanjutkan' ? 'melanjutkan tulis' + writing + ' ✍'
+        : 'menulis' + writing + ' ✍';
       $('#ai-status').textContent = label + '… ' + secs + ' dtk';
     }, 1000);
 
