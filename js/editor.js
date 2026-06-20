@@ -239,6 +239,18 @@ const Editor = (() => {
     });
   }
 
+  // #C5 Sisipkan teks pada posisi kursor
+  function insertAtCursor(text) {
+    if (cm) { cm.replaceSelection(text); cm.focus(); return true; }
+    if (fallback) {
+      const s = fallback.selectionStart, e = fallback.selectionEnd;
+      fallback.value = fallback.value.slice(0, s) + text + fallback.value.slice(e);
+      fallback.dispatchEvent(new Event('input'));
+      return true;
+    }
+    return false;
+  }
+
   // #C4 Teks terpilih di editor (untuk aksi cepat AI)
   function getSelection() {
     if (cm) return cm.getSelection() || '';
@@ -257,6 +269,6 @@ const Editor = (() => {
 
   return {
     init, openFile, closeFile, handleRename, resetForProject,
-    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh, gotoLine, getSelection,
+    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh, gotoLine, getSelection, insertAtCursor,
   };
 })();

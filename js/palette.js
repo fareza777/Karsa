@@ -25,6 +25,7 @@ const Palette = (() => {
         { icon: 'wand', label: 'AI: Refactor kode terpilih', hint: 'selection', run: () => AI.quickAction('refactor') },
         { icon: 'sparkles', label: 'AI: Perbaiki bug kode terpilih', hint: 'selection', run: () => AI.quickAction('fix') },
         { icon: 'pencil', label: 'AI: Beri komentar kode terpilih', hint: 'selection', run: () => AI.quickAction('comment') },
+        { icon: 'plus', label: 'Sisipkan komponen', hint: 'snippet', run: () => App.snippetsDialog() },
         { icon: 'camera', label: 'Screenshot preview', run: () => Preview.screenshot('full') },
         { icon: 'history', label: 'Riwayat versi', hint: 'checkpoint', run: () => $('#btn-history').click() },
         { icon: 'link', label: 'Bagikan tautan proyek', run: () => $('#btn-share').click() },
