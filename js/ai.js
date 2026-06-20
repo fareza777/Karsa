@@ -1150,10 +1150,27 @@ const AI = (() => {
     const chips = el('div', { class: 'ai-file-chips' }, allFiles.map((f) => {
       const ok = isFileComplete(f.code, f.path);
       const isNew = project.files[f.path] === undefined;
-      return el('span', { class: 'ai-file-chip' + (ok ? '' : ' incomplete') }, [
+      const chip = el('span', { class: 'ai-file-chip' + (ok ? '' : ' incomplete') }, [
         el('span', { class: isNew ? 'chip-new' : 'chip-edit', text: ok ? (isNew ? '＋' : '✎') : '⚠' }),
         el('span', { text: f.path + (ok ? '' : ' (potong)') }),
       ]);
+      // #B5 Terapkan satu file langsung dari chip-nya.
+      if (ok) {
+        const already = projectFileMatches(f.path, f.code);
+        const one = el('button', {
+          class: 'ai-chip-apply',
+          title: already ? f.path + ' sudah sama' : 'Terapkan ' + f.path + ' saja',
+          'aria-label': 'Terapkan ' + f.path + ' saja',
+          text: already ? '✓' : '⚡',
+          disabled: already,
+          onclick: (e) => {
+            e.stopPropagation();
+            if (applyFiles([f])) { one.textContent = '✓'; one.disabled = true; refreshApplyBox(bubble); }
+          },
+        });
+        chip.appendChild(one);
+      }
+      return chip;
     }));
 
     const applyBtn = el('button', {
