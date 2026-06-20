@@ -4,7 +4,8 @@ const CloudSync = (() => {
   const DELETED_KEY = 'karsa.deleted_projects.v1';
   const TOMBSTONE_MS = 90 * 24 * 60 * 60 * 1000;
   let pushing = false;
-  let status = 'hidden'; // hidden | syncing | saved | error
+  let pendingPush = false; // #A4 ada perubahan yang menunggu saat offline
+  let status = 'hidden'; // hidden | syncing | saved | error | offline
 
   function loadDeletedMap() {
     try {
@@ -86,6 +87,9 @@ const CloudSync = (() => {
       } else if (next === 'error') {
         badge.textContent = 'Gagal sync';
         badge.title = 'Sinkron cloud gagal — coba lagi dari menu akun';
+      } else if (next === 'offline') {
+        badge.textContent = 'Offline';
+        badge.title = 'Tidak ada koneksi — perubahan disimpan & akan disinkronkan saat online';
       }
     });
   }
@@ -190,10 +194,17 @@ const CloudSync = (() => {
       }
 
       await pruneOrphanCloudProjects(localIds);
+      pendingPush = false;
       setStatus('saved');
     } catch (err) {
       console.warn('KARSA cloud sync push:', err);
-      setStatus('error');
+      // #A4 Bila sebenarnya offline, antrekan ulang daripada tampil "gagal".
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+        pendingPush = true;
+        setStatus('offline');
+      } else {
+        setStatus('error');
+      }
     } finally {
       pushing = false;
     }
@@ -302,7 +313,24 @@ const CloudSync = (() => {
   }
 
   function onLocalChange() {
-    if (canSync()) pushDebounced();
+    if (!canSync()) return;
+    // #A4 Saat offline, jangan coba push (gagal diam); antrekan & flush nanti.
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      pendingPush = true;
+      setStatus('offline');
+      return;
+    }
+    pushDebounced();
+  }
+
+  // #A4 Flush antrian saat koneksi kembali; tandai offline saat putus.
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', () => {
+      if (pendingPush && canSync()) { pendingPush = false; pushAll(); }
+    });
+    window.addEventListener('offline', () => {
+      if (canSync()) setStatus('offline');
+    });
   }
 
   function onAuthChange() {
