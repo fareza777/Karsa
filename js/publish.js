@@ -312,10 +312,29 @@ const Publish = (() => {
     ]));
     bodyKids.push(qrBox);
     if (data.dns) {
+      const statusLine = el('p', { class: 'modal-hint muted', text: '' });
+      const checkBtn = el('button', {
+        class: 'btn btn-ghost btn-sm', text: '🔌 Cek status domain',
+        onclick: async () => {
+          const dom = data.customDomain || (data.customUrl || '').replace(/^https?:\/\//, '').split('/')[0];
+          if (!dom) return;
+          setButtonLoading(checkBtn, true, 'Mengecek…');
+          try {
+            const r = await fetch('/api/domain?host=' + encodeURIComponent(dom));
+            const d = await r.json();
+            statusLine.textContent = d.slug
+              ? '✓ Domain terdaftar di KARSA → "' + d.slug + '". Bila belum terbuka, tunggu propagasi DNS.'
+              : '⚠ Domain belum terhubung di KARSA. Pastikan DNS sudah diarahkan & domain ditambah di Vercel.';
+          } catch (e) {
+            statusLine.textContent = '⚠ Gagal mengecek status (coba lagi).';
+          } finally { setButtonLoading(checkBtn, false); }
+        },
+      });
       bodyKids.push(el('div', { class: 'publish-dns-box' }, [
         el('strong', { text: 'DNS untuk domain kamu' }),
         el('p', { html: 'Tipe: <b>' + escapeHtml(data.dns.type) + '</b> → <code>' + escapeHtml(data.dns.value) + '</code>' }),
         el('p', { class: 'modal-hint muted', text: 'Tambahkan domain di Vercel → Settings → Domains. Propagasi DNS 5 menit–48 jam.' }),
+        checkBtn, statusLine,
       ]));
     }
 
