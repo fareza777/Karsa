@@ -278,9 +278,14 @@ const Publish = (() => {
       el('p', { text: 'Bagikan salah satu tautan di bawah:' }),
     ];
     urls.forEach((u) => {
+      const input = el('input', { type: 'text', value: u.url, readonly: 'readonly', class: 'publish-live-url' });
       bodyKids.push(el('div', { class: 'publish-url-block' }, [
         el('label', { class: 'publish-url-label', text: u.label }),
-        el('input', { type: 'text', value: u.url, readonly: 'readonly', class: 'publish-live-url' }),
+        el('div', { class: 'publish-url-row', style: 'display:flex;gap:6px;align-items:center' }, [
+          input,
+          makeCopyButton(() => u.url, { class: 'publish-url-copy' }),
+          el('a', { class: 'icon-btn', href: u.url, target: '_blank', rel: 'noopener', title: 'Buka', 'aria-label': 'Buka ' + u.label, text: '↗' }),
+        ]),
       ]));
     });
 
