@@ -23,6 +23,7 @@ const App = (() => {
     $('#project-name-input').value = project.name;
 
     FileTree.render();
+    renderEmptyRecent(); // #C10
     // #A1/#B8 Pulihkan tab terakhir; jika tak ada, buka entry default.
     if (!Tabs.restoreSession()) {
       const webEntry = webPreviewEntryPath(project.files);
@@ -186,6 +187,22 @@ const App = (() => {
       ],
     });
     input.select();
+  }
+
+  // #C10 Empty state editor: aksi cepat + file proyek untuk dibuka.
+  function renderEmptyRecent() {
+    const box = document.getElementById('empty-recent');
+    if (!box) return;
+    const project = State.getCurrentProject();
+    box.innerHTML = '';
+    if (!project) return;
+    const paths = Object.keys(project.files).slice(0, 6);
+    paths.forEach((p) => {
+      const b = el('button', { class: 'empty-recent-file', onclick: () => Tabs.open(p) }, [
+        fileBadge(p), el('span', { text: p }),
+      ]);
+      box.appendChild(b);
+    });
   }
 
   // #B2 Pasang KARSA sebagai aplikasi (PWA) — tombol muncul saat browser siap.
@@ -463,6 +480,9 @@ const App = (() => {
 
     // Sidebar
     $('#btn-new-file').addEventListener('click', () => FileTree.newFilePrompt());
+    // #C10 Aksi cepat empty-state editor
+    const eAi = $('#empty-open-ai'); if (eAi) eAi.addEventListener('click', () => AI.switchTab('ai'));
+    const eNf = $('#empty-new-file'); if (eNf) eNf.addEventListener('click', () => FileTree.newFilePrompt());
     $('#btn-new-folder').addEventListener('click', () => FileTree.newFolderPrompt());
     const assetsBtn = $('#btn-assets');
     if (assetsBtn && typeof Assets !== 'undefined') assetsBtn.addEventListener('click', () => Assets.uploadDialog());

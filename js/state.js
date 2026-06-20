@@ -175,6 +175,21 @@ const State = (() => {
     return checkpoint.id;
   }
 
+  // #B9 Kembalikan SATU file ke versi di checkpoint terbaru yang memuatnya.
+  function revertFile(path) {
+    const project = getCurrentProject();
+    if (!project) return false;
+    const cps = project.checkpoints || [];
+    for (let i = cps.length - 1; i >= 0; i--) {
+      if (cps[i].files && cps[i].files[path] !== undefined && cps[i].files[path] !== project.files[path]) {
+        addCheckpoint('Sebelum kembalikan ' + path);
+        setFile(path, cps[i].files[path]);
+        return true;
+      }
+    }
+    return false;
+  }
+
   function listCheckpoints() {
     const project = getCurrentProject();
     if (!project) return [];
@@ -195,6 +210,6 @@ const State = (() => {
     getProjects, getSettings, getCurrentProject, setCurrentProject, hydrate,
     updateSettings, createProject, updateProject, deleteProject, duplicateProject,
     setFile, deleteFile, renameFile, deleteFolder, addFolder,
-    addCheckpoint, restoreCheckpoint, listCheckpoints, replaceProjects, purgeDeletedProjects,
+    addCheckpoint, restoreCheckpoint, listCheckpoints, revertFile, replaceProjects, purgeDeletedProjects,
   };
 })();

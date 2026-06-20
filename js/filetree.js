@@ -124,6 +124,16 @@ const FileTree = (() => {
       { label: 'Ganti nama', icon: 'pencil', onClick: () => renameFilePrompt(path) },
       { label: 'Duplikat', icon: 'copy', onClick: () => duplicateFile(path) },
       { label: 'Unduh file', icon: 'download', onClick: () => downloadFile(path) },
+      { label: 'Kembalikan ke versi tersimpan', icon: 'history', onClick: () => {
+        if (State.revertFile(path)) {
+          render(); Tabs.open(path);
+          if (typeof Editor !== 'undefined') Editor.openFile(path);
+          if (typeof Preview !== 'undefined') Preview.refresh();
+          showToast('"' + path + '" dikembalikan ke versi sebelumnya.', 'ok');
+        } else {
+          showToast('Tak ada versi sebelumnya untuk file ini.', 'warn');
+        }
+      } },
       'sep',
       { label: 'Hapus', icon: 'trash', danger: true, onClick: () => deleteFilePrompt(path) },
     ]);

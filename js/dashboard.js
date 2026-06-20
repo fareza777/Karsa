@@ -10,6 +10,7 @@ const Dashboard = (() => {
   let projectQuery = '';
   let projectSort = 'recent';
   let projectFilter = 'all';
+  let projectView = (() => { try { return localStorage.getItem('karsa.projectView') || 'grid'; } catch (e) { return 'grid'; } })(); // #C5
   const FILTERS = [
     { id: 'all', label: 'Semua' },
     { id: 'live', label: '🟢 Live' },
@@ -56,6 +57,21 @@ const Dashboard = (() => {
     });
     $('#project-search').addEventListener('input', (e) => { projectQuery = e.target.value.trim().toLowerCase(); renderProjects(); });
     $('#project-sort').addEventListener('change', (e) => { projectSort = e.target.value; renderProjects(); });
+    // #C5 Toggle tampilan grid/daftar (disimpan)
+    const viewBtn = $('#project-view-toggle');
+    if (viewBtn) {
+      const apply = () => {
+        const list = projectView === 'list';
+        $('#project-grid').classList.toggle('list-view', list);
+        viewBtn.textContent = list ? '☰' : '▦';
+      };
+      apply();
+      viewBtn.addEventListener('click', () => {
+        projectView = projectView === 'list' ? 'grid' : 'list';
+        try { localStorage.setItem('karsa.projectView', projectView); } catch (e) { /* abaikan */ }
+        apply();
+      });
+    }
   }
 
   function projectCard(project) {
