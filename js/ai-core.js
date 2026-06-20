@@ -73,6 +73,13 @@
       if (/const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
       if (/[{(,=]\s*$/.test(c)) return false;
       if ((ext === 'tsx' || ext === 'jsx' || ext === 'ts') && !/export\s+default\b/.test(c)) return false;
+      // #A10 Cek sintaks nyata utk JS polos (bukan modul/JSX): tangkap kode
+      // brace-seimbang tapi rusak (mis. terpotong di tengah ekspresi). Di-guard
+      // dari import/export/await yang sah tapi melempar di dalam new Function().
+      if ((ext === 'js' || ext === 'mjs' || ext === 'cjs')
+        && !/\b(import|export)\b/.test(c) && !/(^|[^.\w])await\b/.test(c)) {
+        try { new Function(c); } catch (e) { if (e instanceof SyntaxError) return false; }
+      }
     }
     if (ext === 'json') {
       try { JSON.parse(c); } catch (e) { return false; }

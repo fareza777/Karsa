@@ -66,6 +66,15 @@ describe('isFileComplete', () => {
   it('JSON tak valid = belum lengkap', () => {
     expect(isFileComplete('{"a":1', 'data.json')).toBe(false);
   });
+  it('JS valid = lengkap', () => {
+    expect(isFileComplete('function f(){ return [1,2]; }\nf();', 'app.js')).toBe(true);
+  });
+  it('#A10 JS brace-seimbang tapi sintaks rusak = belum lengkap', () => {
+    expect(isFileComplete('function f(){ return 1 2 3 }', 'app.js')).toBe(false);
+  });
+  it('#A10 JS dgn import dilewati (tak false-negative)', () => {
+    expect(isFileComplete('import x from "y";\nconsole.log(x);', 'app.js')).toBe(true);
+  });
 });
 
 describe('edit terarah (SEARCH/REPLACE)', () => {

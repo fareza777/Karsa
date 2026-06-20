@@ -1,6 +1,6 @@
 /* ===== KARSA AI — proxy serverless ke provider LLM (API key aman di server) ===== */
 
-import { trackAiUsage } from '../lib/analytics.js';
+import { trackAiUsage, trackChatOutcome } from '../lib/analytics.js';
 import { getAiConfig, resolveChatModel, buildModelCandidates } from '../lib/ai-config.js';
 import { checkChatLimits } from '../lib/ratelimit.js';
 
@@ -157,6 +157,7 @@ export default async function handler(req, res) {
 
   let upstream = null;
   let lastErr = '';
+  let usedFallback = false;
   for (let i = 0; i < candidates.length; i++) {
     const m = candidates[i];
     let resp;
@@ -170,7 +171,7 @@ export default async function handler(req, res) {
       lastErr = err.message;
       continue; // error jaringan → coba model berikutnya
     }
-    if (resp.ok) { upstream = resp; break; }
+    if (resp.ok) { upstream = resp; usedFallback = i > 0; break; }
     const retryable = resp.status === 429 || resp.status >= 500;
     const detail = await resp.text().catch(() => '');
     lastErr = 'HTTP ' + resp.status;
@@ -198,6 +199,7 @@ export default async function handler(req, res) {
   const decoder = new TextDecoder();
   let sseBuffer = '';
   let outputChars = 0;
+  let finishReason = null;
   let usage = { prompt_tokens: 0, completion_tokens: 0 };
   try {
     for (;;) {
@@ -219,6 +221,7 @@ export default async function handler(req, res) {
             usage.prompt_tokens = json.usage.prompt_tokens || usage.prompt_tokens;
             usage.completion_tokens = json.usage.completion_tokens || usage.completion_tokens;
           }
+          if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
           const delta = json.choices?.[0]?.delta?.content;
           if (typeof delta === 'string') outputChars += delta.length;
         } catch (_) { /* chunk parsial */ }
@@ -233,6 +236,7 @@ export default async function handler(req, res) {
       promptChars: inputChars,
       completionChars: outputChars,
     }).catch(() => {});
+    trackChatOutcome({ truncated: finishReason === 'length', fallback: usedFallback }).catch(() => {});
     res.end();
   }
 }
