@@ -36,6 +36,8 @@ const Dashboard = (() => {
     if (projectSort === 'name') arr.sort((a, b) => a.name.localeCompare(b.name, 'id'));
     else if (projectSort === 'files') arr.sort((a, b) => Object.keys(b.files).length - Object.keys(a.files).length);
     else arr.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    // #B6 Favorit selalu di atas
+    arr.sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
     return arr;
   }
 
@@ -109,6 +111,17 @@ const Dashboard = (() => {
             el('span', { text: formatRelativeTime(project.updatedAt) }),
           ]),
         ]),
+        el('button', {
+          class: 'icon-btn-sm project-fav-btn' + (project.favorite ? ' active' : ''),
+          text: project.favorite ? '★' : '☆',
+          title: project.favorite ? 'Lepas dari favorit' : 'Jadikan favorit',
+          'aria-label': 'Favorit',
+          onclick: (e) => {
+            e.stopPropagation();
+            State.updateProject(project.id, { favorite: !project.favorite });
+            renderProjects();
+          },
+        }),
         el('button', {
           class: 'icon-btn-sm project-menu-btn',
           text: '⋯',
@@ -422,15 +435,41 @@ const Dashboard = (() => {
     ]);
   }
 
+  // #B4 Pratinjau template berukuran penuh sebelum dipakai.
+  function templatePreview(tpl) {
+    const frame = el('iframe', { class: 'template-preview-frame', sandbox: 'allow-scripts', title: tpl.name });
+    try { frame.srcdoc = Preview.buildBundle({ files: tpl.files, name: tpl.name }); } catch (e) { /* abaikan */ }
+    showModal({
+      title: '👁 Pratinjau: ' + tpl.name,
+      wide: true,
+      body: el('div', {}, [
+        el('p', { class: 'modal-desc', text: tpl.desc }),
+        el('div', { class: 'template-preview-wrap' }, [frame]),
+      ]),
+      actions: [
+        { label: 'Tutup' },
+        { label: '✨ Gunakan template ini', primary: true, onClick: () => { closeModal(); newProjectDialog(tpl.id); } },
+      ],
+    });
+  }
+
   function renderTemplates() {
     const strip = $('#template-strip');
     strip.innerHTML = '';
     TEMPLATES.forEach((tpl) => {
+      const thumb = templateThumb(tpl);
+      // tombol pratinjau (muncul di hover) — tak ikut membuka dialog buat.
+      if (tpl.files && tpl.files['index.html'] !== undefined) {
+        thumb.appendChild(el('button', {
+          class: 'template-preview-btn', text: '👁 Pratinjau', title: 'Lihat dulu',
+          onclick: (e) => { e.stopPropagation(); templatePreview(tpl); },
+        }));
+      }
       strip.appendChild(el('button', {
         class: 'template-card template-card-thumb',
         onclick: () => newProjectDialog(tpl.id),
       }, [
-        templateThumb(tpl),
+        thumb,
         el('h3', { text: tpl.name }),
         el('p', { text: tpl.desc }),
       ]));

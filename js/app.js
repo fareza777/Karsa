@@ -343,7 +343,7 @@ const App = (() => {
     const sidebar = $('#sidebar');
     const previewPane = $('.preview-pane');
 
-    const bindResizer = (resizer, onMove) => {
+    const bindResizer = (resizer, onMove, cursor) => {
       if (!resizer) return;
       resizer.addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -352,7 +352,7 @@ const App = (() => {
         try { resizer.setPointerCapture(e.pointerId); } catch (err) { /* abaikan */ }
         resizer.classList.add('dragging');
         document.body.classList.add('resizing');
-        document.body.style.cursor = 'col-resize';
+        document.body.style.cursor = cursor || 'col-resize';
 
         const move = (ev) => onMove(ev);
         const stop = () => {
@@ -380,6 +380,17 @@ const App = (() => {
       const w = Math.max(280, Math.min(window.innerWidth - 360, window.innerWidth - e.clientX));
       previewPane.style.width = w + 'px';
     });
+
+    // #C3 Tinggi console bisa di-drag
+    const cpanel = $('#console-panel');
+    const clog = $('#console-log');
+    bindResizer($('#console-resizer'), (e) => {
+      if (!cpanel || !clog) return;
+      if (cpanel.classList.contains('collapsed')) return;
+      const rect = cpanel.getBoundingClientRect();
+      const h = Math.max(60, Math.min(window.innerHeight * 0.6, rect.bottom - e.clientY - 64));
+      clog.style.height = h + 'px';
+    }, 'row-resize');
   }
 
   // --- Event global ---
