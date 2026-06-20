@@ -31,6 +31,17 @@ export default async function handler(req, res) {
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
+  // #A2 Header keamanan untuk situs publish (konten dari pengguna):
+  // - frame-ancestors 'self' → cegah clickjacking/embed di situs lain
+  // - blokir http campuran (upgrade) & batasi sumber ke https/data/inline
+  //   ('unsafe-inline'/'eval' tetap diizinkan krn app statis menaruh JS/CSS inline)
+  // - object-src 'none' & base-uri 'self' → kurangi vektor injeksi
+  res.setHeader('Content-Security-Policy',
+    "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; " +
+    "object-src 'none'; base-uri 'self'; frame-ancestors 'self'; upgrade-insecure-requests");
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   if (req.method === 'HEAD') {
     res.status(200).end();
     return;
