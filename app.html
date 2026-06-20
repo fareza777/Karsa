@@ -69,6 +69,8 @@
   <link rel="stylesheet" href="css/palette.css?v=20260620a">
 </head>
 <body>
+  <!-- #B6 Skip-link untuk navigasi keyboard / pembaca layar -->
+  <a href="#main-content" class="skip-link">Lewati ke konten</a>
 
   <!-- ============ SPRITE IKON (Lucide-style, stroke 2) ============ -->
   <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
@@ -313,7 +315,7 @@
 
       <div class="resizer" id="resizer-left"></div>
 
-      <section class="editor-pane">
+      <section class="editor-pane" id="main-content" role="main" aria-label="Editor kode">
         <div id="tabbar" class="tabbar"></div>
         <div id="editor-host" class="editor-host">
           <div id="editor-empty" class="editor-empty">
