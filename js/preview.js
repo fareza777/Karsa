@@ -355,6 +355,32 @@ const Preview = (() => {
     return src && !/^(https?:)?\/\//i.test(src) && !src.startsWith('data:');
   }
 
+  // #A1 Data localStorage preview yang dipersist parent (per proyek, di sessionStorage).
+  function previewStorageSeed(projectId) {
+    try { return sessionStorage.getItem('karsa.pv.' + projectId) || '{}'; }
+    catch (e) { return '{}'; }
+  }
+
+  // Skrip shim storage yang disuntik PALING AWAL di <head> preview.
+  function buildStorageShim(project) {
+    const seedSafe = previewStorageSeed(project.id).replace(/</g, '\\u003c');
+    const js = '(function(){'
+      + 'var PID=' + JSON.stringify(project.id) + ';'
+      + 'function avail(n){try{var s=window[n];s.setItem("__k","1");s.removeItem("__k");return true;}catch(e){return false;}}'
+      + 'function mk(seed,persist){var m=seed||{};var t=null;'
+      + 'function flush(){if(!persist)return;clearTimeout(t);t=setTimeout(function(){try{parent.postMessage({__karsa_pvstore:{id:PID,data:JSON.stringify(m)}},"*");}catch(e){}},150);}'
+      + 'var api={getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null;},'
+      + 'setItem:function(k,v){m[String(k)]=String(v);flush();},'
+      + 'removeItem:function(k){delete m[String(k)];flush();},'
+      + 'clear:function(){Object.keys(m).forEach(function(k){delete m[k];});flush();},'
+      + 'key:function(i){return Object.keys(m)[i]||null;}};'
+      + 'Object.defineProperty(api,"length",{get:function(){return Object.keys(m).length;}});return api;}'
+      + 'if(!avail("localStorage")){try{Object.defineProperty(window,"localStorage",{configurable:true,value:mk(' + seedSafe + ',true)});}catch(e){}}'
+      + 'if(!avail("sessionStorage")){try{Object.defineProperty(window,"sessionStorage",{configurable:true,value:mk({},false)});}catch(e){}}'
+      + '})();';
+    return '<script>' + js.replace(/<\/script/gi, '<\\/script') + '<\/script>';
+  }
+
   function normalizePath(src) {
     return src.replace(/^\.\//, '').replace(/^\//, '');
   }
@@ -445,7 +471,10 @@ const Preview = (() => {
       '.bottom-nav,.bottom-nav-bar,.tab-bar,.tabbar,.navbar-bottom,.bottom-tabs,.tabs-bottom,[class*="bottom-nav"],[class*="tabbar"]{position:fixed!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:100%!important;z-index:9999!important;flex-shrink:0!important}' +
       '</style>';
     const isMobileProj = project && (project.projectType === 'mobile' || project.projectType === 'playstore');
-    const headInject = CONSOLE_BRIDGE + KARSA_PREVIEW_FIT + (isMobileProj ? KARSA_MOBILE_SHELL : '');
+    // #A1 Shim storage: iframe sandbox (srcdoc, opaque origin) bikin localStorage
+    // melempar SecurityError → app yang menyimpan data crash. Sediakan localStorage/
+    // sessionStorage in-memory (di-seed & dipersist via parent) supaya app jalan.
+    const headInject = buildStorageShim(project) + CONSOLE_BRIDGE + KARSA_PREVIEW_FIT + (isMobileProj ? KARSA_MOBILE_SHELL : '');
     if (/<head[^>]*>/i.test(html)) {
       html = html.replace(/<head[^>]*>/i, (m) => m + '\n' + headInject);
     } else {
@@ -1008,6 +1037,11 @@ const Preview = (() => {
   window.addEventListener('message', (event) => {
     const data = event.data;
     if (!data) return;
+    if (data.__karsa_pvstore && data.__karsa_pvstore.id) {
+      // #A1 Persist data localStorage preview (per proyek) agar bertahan saat reload editor.
+      try { sessionStorage.setItem('karsa.pv.' + data.__karsa_pvstore.id, String(data.__karsa_pvstore.data || '{}')); } catch (e) { /* kuota — abaikan */ }
+      return;
+    }
     if (typeof data.__karsa_shot_done === 'string') {
       clearTimeout(shotWaitTimer);
       if (data.tag === 'thumb') saveThumb(data.__karsa_shot_done);

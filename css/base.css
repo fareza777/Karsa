@@ -163,3 +163,15 @@ input, textarea {
   animation: shimmer 1.3s ease-in-out infinite;
 }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+/* #B1 Aksesibilitas: hormati "kurangi gerak" di seluruh IDE (spinner, shimmer,
+   float, confetti, transisi). Hanya menjinakkan, bukan menghapus fungsi. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .confetti-root { display: none !important; }
+}
