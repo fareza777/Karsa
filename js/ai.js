@@ -692,14 +692,29 @@ const AI = (() => {
         const isWriting = !!streaming && i === parts.length - 1;
         container.appendChild(buildCodeCard(part, isWriting));
       } else if (part.trim()) {
+        const inline = (s) => escapeHtml(s)
+          .replace(/`([^`]+)`/g, '<code>$1</code>')
+          .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
         part.split(/\n{2,}/).forEach((para) => {
           if (!para.trim()) return;
+          const lines = para.split('\n');
+          // #B7 Daftar berbutir / bernomor
+          const isUl = lines.every((l) => /^\s*[-*]\s+/.test(l));
+          const isOl = lines.every((l) => /^\s*\d+[.)]\s+/.test(l));
+          if ((isUl || isOl) && lines.length) {
+            const list = el(isOl ? 'ol' : 'ul', { class: 'ai-md-list' });
+            lines.forEach((l) => {
+              const li = el('li');
+              li.innerHTML = inline(l.replace(/^\s*(?:[-*]|\d+[.)])\s+/, ''));
+              list.appendChild(li);
+            });
+            container.appendChild(list);
+            return;
+          }
           const p = el('p');
-          let html = escapeHtml(para.trim())
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
-            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+          let html = inline(para.trim());
           if (/^#{1,4}\s/.test(para.trim())) {
-            html = '<strong>' + html.replace(/^#{1,4}\s+/, '') + '</strong>';
+            html = '<strong>' + inline(para.trim().replace(/^#{1,4}\s+/, '')) + '</strong>';
           }
           p.innerHTML = html;
           container.appendChild(p);
@@ -775,6 +790,14 @@ const AI = (() => {
     return card;
   }
 
+  // #B7 Tombol salin seluruh balasan AI (pojok gelembung).
+  function addResponseCopy(bubble) {
+    if (!bubble || $('.ai-copy-response', bubble)) return;
+    const btn = makeCopyButton(() => bubble.dataset.aiVisible || '', { class: 'ai-copy-response' });
+    btn.title = 'Salin seluruh balasan';
+    bubble.appendChild(btn);
+  }
+
   function appendAssistantBubble(fullText, fromHistory) {
     const bubble = el('div', { class: 'ai-msg ai-msg-assistant' });
     chatEl().appendChild(bubble);
@@ -782,6 +805,7 @@ const AI = (() => {
     bubble.dataset.aiVisible = visible;
     renderAssistantHtml(bubble, visible);
     attachApplyBox(bubble, visible, !fromHistory);
+    addResponseCopy(bubble);
     scrollChat();
     return bubble;
   }
@@ -1779,6 +1803,7 @@ const AI = (() => {
       const visible = accumulatedVisible;
       const truncated = isResponseTruncated(visible, finishReason);
       attachApplyBox(bubble, visible, true, { truncated });
+      addResponseCopy(bubble); // #B7
       const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
       if (truncated) {
         appendContinueButton(bubble, visible);

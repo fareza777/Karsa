@@ -511,6 +511,13 @@ body.is-superuser #btn-ai-settings {
   border-radius: var(--radius-sm);
   background: rgba(124, 92, 255, .1);
 }
+/* #B7 Daftar markdown di balasan AI + salin balasan */
+.ai-md-list { margin: 6px 0 6px 18px; font-size: 13px; line-height: 1.6; }
+.ai-md-list li { margin: 2px 0; }
+.ai-msg-assistant { position: relative; }
+.ai-copy-response { position: absolute; top: 6px; right: 6px; opacity: .35; transition: opacity var(--transition); }
+.ai-msg-assistant:hover .ai-copy-response { opacity: 1; }
+
 .ai-welcome-group-title {
   text-align: left;
   font-size: 11px;
