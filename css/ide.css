@@ -695,6 +695,8 @@ body.resizing * { user-select: none !important; }
 }
 .console-entry.level-warn { color: var(--warn); }
 .console-entry.level-error { color: var(--danger); }
+/* #B4 Filter hanya error */
+.console-log.errors-only .console-entry:not(.level-error) { display: none; }
 .console-entry.level-info { color: var(--accent-2); }
 .console-empty-msg { padding: 8px 14px; color: var(--muted); font-style: italic; }
 

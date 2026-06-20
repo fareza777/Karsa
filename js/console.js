@@ -106,6 +106,14 @@ const ConsolePanel = (() => {
         Preview.showErrorBanner((data.args || []).join(' '));
       }
     });
+    // #B4 Filter "hanya error" — toggle kelas pada #console-log (sembunyikan non-error via CSS)
+    $('#btn-filter-console').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const logEl = $('#console-log');
+      const on = logEl.classList.toggle('errors-only');
+      e.currentTarget.classList.toggle('active', on);
+      if (on) show();
+    });
     $('#btn-clear-console').addEventListener('click', (e) => { e.stopPropagation(); clear(); });
     $('#btn-toggle-console').addEventListener('click', (e) => { e.stopPropagation(); toggle(); });
     $('#console-head').addEventListener('click', toggle);
