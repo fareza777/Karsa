@@ -866,6 +866,7 @@ const Preview = (() => {
     tablet: [768, 1024, 0],
   };
   let currentDevice = 'desktop';
+  let landscape = false; // #B2 orientasi device frame
 
   // #8 Merek ponsel → posisi punch-hole kamera + tombol samping
   let phoneBrand = 'generic';
@@ -878,13 +879,27 @@ const Preview = (() => {
 
   function setDevice(device) {
     currentDevice = device;
+    if (!DEVICE_DIMS[device]) landscape = false; // desktop tak punya orientasi
     const wrap = $('#preview-frame-wrap');
     const cls = DEVICE_DIMS[device] ? 'device-' + device : 'device-desktop';
-    wrap.className = 'preview-frame-wrap ' + cls;
+    wrap.className = 'preview-frame-wrap ' + cls + (landscape ? ' landscape' : '');
     $$('.device-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.device === device);
     });
+    const rot = $('#btn-rotate-device');
+    if (rot) rot.classList.toggle('hidden', !DEVICE_DIMS[device]);
     applyPhoneBrand();
+    fitDevice();
+  }
+
+  // #B2 Putar device frame potret↔lanskap
+  function rotateDevice() {
+    if (!DEVICE_DIMS[currentDevice]) return;
+    landscape = !landscape;
+    const wrap = $('#preview-frame-wrap');
+    wrap.classList.toggle('landscape', landscape);
+    const rot = $('#btn-rotate-device');
+    if (rot) rot.classList.toggle('active', landscape);
     fitDevice();
   }
 
@@ -910,13 +925,15 @@ const Preview = (() => {
       wrap.style.height = '';
       return;
     }
-    wrap.style.width = dims[0] + 'px';
-    wrap.style.height = dims[1] + 'px';
+    const w = landscape ? dims[1] : dims[0];
+    const h = landscape ? dims[0] : dims[1];
+    wrap.style.width = w + 'px';
+    wrap.style.height = h + 'px';
     const rect = stage.getBoundingClientRect();
     const scale = Math.min(
       1,
-      (rect.width - 20) / (dims[0] + dims[2]),
-      (rect.height - 20) / (dims[1] + dims[2])
+      (rect.width - 20) / (w + dims[2]),
+      (rect.height - 20) / (h + dims[2])
     );
     // zoom lebih tajam daripada transform:scale (subpixel blur di Chrome/Edge)
     const snapped = scale < 1 ? Math.max(0.5, Math.round(scale * 20) / 20) : 1;
@@ -1076,6 +1093,6 @@ const Preview = (() => {
   return {
     refresh, refreshHome, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
     runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect, resetPreviewEntry,
-    hotSwapCss,
+    hotSwapCss, rotateDevice,
   };
 })();

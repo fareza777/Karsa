@@ -414,9 +414,12 @@ const App = (() => {
       State.updateProject(project.id, { name });
     });
 
-    $$('.device-btn').forEach((btn) =>
-      btn.addEventListener('click', () => Preview.setDevice(btn.dataset.device))
-    );
+    $$('.device-btn').forEach((btn) => {
+      if (!btn.dataset.device) return; // tombol putar ditangani terpisah
+      btn.addEventListener('click', () => Preview.setDevice(btn.dataset.device));
+    });
+    const rotateBtn = $('#btn-rotate-device');
+    if (rotateBtn) rotateBtn.addEventListener('click', () => Preview.rotateDevice());
     $$('.preview-engine-btn').forEach((btn) =>
       btn.addEventListener('click', () => {
         Preview.setEngine(btn.dataset.engine);
