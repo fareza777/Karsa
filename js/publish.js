@@ -436,8 +436,9 @@ const Publish = (() => {
             const ok = await checkSlug(slug, statusEl);
             if (!ok) return true;
             const customDomain = domainInput.value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+            const pbtn = $('.modal-foot .btn-primary'); // #B9 status loading tombol
+            setButtonLoading(pbtn, true, 'Mempublish…');
             try {
-              showToast('Mempublish…', 'info');
               const data = await doPublish(slug, project, customDomain || null, prev.customDomain || null);
               State.updateProject(project.id, {
                 publish: {
@@ -454,6 +455,7 @@ const Publish = (() => {
               showSuccessModal(data);
               Dashboard.render();
             } catch (err) {
+              setButtonLoading(pbtn, false);
               showToast(String(err.message || err), 'error');
               return true;
             }
