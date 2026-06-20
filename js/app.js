@@ -212,7 +212,7 @@ const App = (() => {
         text: 'Belum ada checkpoint. KARSA otomatis menyimpan snapshot setiap kali kamu menerapkan file dari AI — jadi selalu bisa kembali bila hasilnya tak sesuai.',
       }));
     } else {
-      body.appendChild(el('p', { class: 'modal-desc', text: 'Pulihkan proyek ke kondisi sebelumnya (5 checkpoint terakhir disimpan):' }));
+      body.appendChild(el('p', { class: 'modal-desc', text: 'Pulihkan proyek ke kondisi sebelumnya (hingga 15 versi terakhir disimpan):' }));
       checkpoints.forEach((cp) => {
         body.appendChild(el('div', { class: 'history-item' }, [
           el('div', { class: 'history-item-info' }, [
@@ -489,7 +489,30 @@ const App = (() => {
     importFromHash();
   }
 
-  return { init, openProject, showDashboard, exportZipCurrent };
+  // #C5 Pustaka komponen siap-pakai (sisipkan ke file aktif di posisi kursor)
+  const SNIPPETS = [
+    { name: 'Navbar', code: '<nav class="navbar">\n  <a class="brand" href="#">Logo</a>\n  <div class="nav-links">\n    <a href="#">Beranda</a><a href="#">Tentang</a><a href="#">Kontak</a>\n  </div>\n</nav>\n' },
+    { name: 'Hero', code: '<section class="hero">\n  <h1>Judul Besar yang Menarik</h1>\n  <p>Subjudul singkat yang menjelaskan nilai produkmu.</p>\n  <a class="btn-primary" href="#">Mulai Sekarang</a>\n</section>\n' },
+    { name: 'Kartu', code: '<div class="card">\n  <h3>Judul Kartu</h3>\n  <p>Deskripsi singkat isi kartu.</p>\n  <a href="#">Selengkapnya →</a>\n</div>\n' },
+    { name: 'Tombol', code: '<button class="btn-primary">Klik Saya</button>\n' },
+    { name: 'Form Kontak', code: '<form class="contact-form" onsubmit="event.preventDefault()">\n  <input type="text" placeholder="Nama" required>\n  <input type="email" placeholder="Email" required>\n  <textarea placeholder="Pesan"></textarea>\n  <button type="submit" class="btn-primary">Kirim</button>\n</form>\n' },
+    { name: 'Grid Fitur', code: '<section class="features">\n  <div class="feature"><h4>⚡ Cepat</h4><p>Penjelasan singkat.</p></div>\n  <div class="feature"><h4>🔒 Aman</h4><p>Penjelasan singkat.</p></div>\n  <div class="feature"><h4>💡 Mudah</h4><p>Penjelasan singkat.</p></div>\n</section>\n' },
+    { name: 'Footer', code: '<footer class="footer">\n  <p>© 2026 Nama Bisnis. Semua hak dilindungi.</p>\n</footer>\n' },
+  ];
+  function snippetsDialog() {
+    if (!State.getCurrentProject()) { showToast('Buka proyek dulu.', 'warn'); return; }
+    if (!Editor.getCurrentPath()) { showToast('Buka file dulu untuk menyisipkan komponen.', 'warn'); return; }
+    const grid = el('div', { class: 'snippet-grid' }, SNIPPETS.map((s) =>
+      el('button', { class: 'snippet-item', onclick: () => {
+        if (Editor.insertAtCursor(s.code)) { closeModal(); showToast('Komponen "' + s.name + '" disisipkan.', 'ok'); }
+      } }, [el('span', { class: 'snippet-name', text: s.name })])
+    ));
+    showModal({ title: '🧩 Sisipkan Komponen', body: el('div', {}, [
+      el('p', { class: 'modal-desc', text: 'Klik untuk menyisipkan blok HTML di posisi kursor file aktif.' }), grid,
+    ]) });
+  }
+
+  return { init, openProject, showDashboard, exportZipCurrent, snippetsDialog };
 })();
 
 document.addEventListener('DOMContentLoaded', App.init);

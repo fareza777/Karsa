@@ -28,7 +28,36 @@ const Editor = (() => {
     State.setFile(currentPath, content);
     showSaved();
     Preview.refreshDebounced();
+    lintDebounced(content, currentPath);
   }
+
+  // #A1 Lint ringan: validasi sintaks file aktif (tanpa addon CDN) → indikator status.
+  function lintNow(content, path) {
+    const elx = document.getElementById('status-lint');
+    if (!elx) return;
+    const ext = fileExt(path);
+    let problem = '';
+    const c = (content || '').trim();
+    if (!c) { elx.textContent = ''; return; }
+    const core = typeof KarsaAICore !== 'undefined' ? KarsaAICore : null;
+    if (ext === 'json') {
+      try { JSON.parse(c); } catch (e) { problem = 'JSON tidak valid'; }
+    } else if (ext === 'css' && core && !core.braceBalance(c)) {
+      problem = 'kurung { } tidak seimbang';
+    } else if ((ext === 'js' || ext === 'mjs' || ext === 'cjs') && !/\b(import|export)\b/.test(c) && !/(^|[^.\w])await\b/.test(c)) {
+      try { new Function(c); } catch (e) { if (e instanceof SyntaxError) problem = e.message.replace(/^.*?:\s*/, '').slice(0, 60); }
+    }
+    if (problem) {
+      elx.textContent = '⚠ ' + problem;
+      elx.className = 'status-lint has-error';
+      elx.title = 'Masalah sintaks: ' + problem;
+    } else {
+      elx.textContent = '✓';
+      elx.className = 'status-lint ok';
+      elx.title = 'Sintaks valid';
+    }
+  }
+  const lintDebounced = debounce(lintNow, 600);
 
   function init() {
     const host = $('#editor-host');
@@ -92,6 +121,7 @@ const Editor = (() => {
       fallback.focus();
     }
     suppressChange = false;
+    lintNow(project.files[path], path); // #A1
   }
 
   function closeFile(path) {
@@ -209,8 +239,36 @@ const Editor = (() => {
     });
   }
 
+  // #C5 Sisipkan teks pada posisi kursor
+  function insertAtCursor(text) {
+    if (cm) { cm.replaceSelection(text); cm.focus(); return true; }
+    if (fallback) {
+      const s = fallback.selectionStart, e = fallback.selectionEnd;
+      fallback.value = fallback.value.slice(0, s) + text + fallback.value.slice(e);
+      fallback.dispatchEvent(new Event('input'));
+      return true;
+    }
+    return false;
+  }
+
+  // #C4 Teks terpilih di editor (untuk aksi cepat AI)
+  function getSelection() {
+    if (cm) return cm.getSelection() || '';
+    if (fallback) return fallback.value.substring(fallback.selectionStart, fallback.selectionEnd) || '';
+    return '';
+  }
+
+  // #C3 Lompat ke baris (dipakai hasil cari di semua file)
+  function gotoLine(line) {
+    if (!cm) return;
+    const ln = Math.max(0, (line || 1) - 1);
+    cm.setCursor({ line: ln, ch: 0 });
+    cm.scrollIntoView({ line: ln, ch: 0 }, 120);
+    cm.focus();
+  }
+
   return {
     init, openFile, closeFile, handleRename, resetForProject,
-    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh,
+    setTheme, changeFontSize, getCurrentPath, formatCurrentFile, refresh, gotoLine, getSelection, insertAtCursor,
   };
 })();

@@ -216,6 +216,23 @@ body.resizing * { user-select: none !important; }
   flex-shrink: 0;
   min-height: 36px;
 }
+/* #B6 Banner error runtime di atas preview */
+.preview-error-banner {
+  position: absolute;
+  left: 10px; right: 10px; bottom: 10px;
+  z-index: 50;
+  display: flex; align-items: center; gap: 10px;
+  background: color-mix(in srgb, var(--danger) 16%, var(--bg-3));
+  border: 1px solid var(--danger);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  box-shadow: var(--shadow);
+}
+.preview-error-banner .peb-msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-code); }
+.preview-error-banner .peb-fix { background: var(--danger); color: #fff; border-radius: 7px; padding: 5px 10px; font-weight: 600; flex-shrink: 0; }
+.preview-error-banner .peb-close { color: var(--muted); flex-shrink: 0; }
 .tabbar::-webkit-scrollbar { height: 3px; }
 .tab {
   position: relative;
@@ -352,6 +369,10 @@ body.resizing * { user-select: none !important; }
 }
 .statusbar-spacer { flex: 1; }
 .status-save { color: var(--ok); }
+/* #A1 Indikator lint */
+.status-lint { font-size: 11px; padding: 0 4px; }
+.status-lint.ok { color: var(--ok); opacity: .7; }
+.status-lint.has-error { color: var(--warn); font-family: var(--font-code); }
 
 /* --- Preview pane --- */
 .preview-pane {
@@ -674,6 +695,8 @@ body.resizing * { user-select: none !important; }
 }
 .console-entry.level-warn { color: var(--warn); }
 .console-entry.level-error { color: var(--danger); }
+/* #B4 Filter hanya error */
+.console-log.errors-only .console-entry:not(.level-error) { display: none; }
 .console-entry.level-info { color: var(--accent-2); }
 .console-empty-msg { padding: 8px 14px; color: var(--muted); font-style: italic; }
 

@@ -101,6 +101,18 @@ const ConsolePanel = (() => {
       const data = event.data;
       if (!data || data.__karsa !== true) return;
       append(data.level, (data.args || []).join(' '));
+      // #B6 Munculkan overlay error di atas preview (bukan cuma di console panel)
+      if (data.level === 'error' && typeof Preview !== 'undefined' && Preview.showErrorBanner) {
+        Preview.showErrorBanner((data.args || []).join(' '));
+      }
+    });
+    // #B4 Filter "hanya error" — toggle kelas pada #console-log (sembunyikan non-error via CSS)
+    $('#btn-filter-console').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const logEl = $('#console-log');
+      const on = logEl.classList.toggle('errors-only');
+      e.currentTarget.classList.toggle('active', on);
+      if (on) show();
     });
     $('#btn-clear-console').addEventListener('click', (e) => { e.stopPropagation(); clear(); });
     $('#btn-toggle-console').addEventListener('click', (e) => { e.stopPropagation(); toggle(); });

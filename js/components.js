@@ -43,6 +43,26 @@ function setGlobalBusy(on) {
   if (bar) bar.classList.toggle('active', _globalBusyCount > 0);
 }
 
+// #B9 Status loading per-tombol: nonaktifkan + spinner selama proses async.
+function setButtonLoading(btn, loading, loadingText) {
+  if (!btn) return;
+  if (loading) {
+    if (btn.dataset.loading === '1') return;
+    btn.dataset.loading = '1';
+    btn.dataset.prevHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.classList.add('is-loading');
+    btn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>' + (loadingText || 'Memproses…');
+  } else {
+    if (btn.dataset.loading !== '1') return;
+    btn.disabled = false;
+    btn.classList.remove('is-loading');
+    if (btn.dataset.prevHtml !== undefined) btn.innerHTML = btn.dataset.prevHtml;
+    delete btn.dataset.loading;
+    delete btn.dataset.prevHtml;
+  }
+}
+
 function closeModal() {
   const overlay = $('.modal-overlay');
   if (overlay) {

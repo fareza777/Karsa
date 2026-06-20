@@ -37,7 +37,7 @@
   --bg-hover: #e3e8f4;
   --border: #dbe1ef;
   --text: #1a2233;
-  --muted: #64708a;
+  --muted: #566179; /* #B5 kontras lebih baik di latar terang (WCAG AA) */
   --editor-bg: #ffffff;
   --console-bg: #f7f8fc;
   --shadow: 0 8px 30px rgba(30, 40, 80, .12);
@@ -75,6 +75,31 @@ body {
   transition: top var(--transition);
 }
 .skip-link:focus { top: 12px; }
+
+/* #B8 Aman dari notch / home-bar di HP (viewport-fit=cover) */
+@supports (padding: env(safe-area-inset-top)) {
+  .ide-topbar, .dash-topbar { padding-left: max(12px, env(safe-area-inset-left)); padding-right: max(12px, env(safe-area-inset-right)); }
+  .mobile-nav { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* #B10 Transisi halus muncul (modal, kartu) — dijinakkan oleh reduced-motion global */
+@keyframes karsaFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.modal-overlay { animation: karsaFadeIn .16s ease; }
+.modal { animation: karsaFadeIn .2s ease; }
+
+/* #B9 Spinner tombol saat proses async */
+.btn-spinner {
+  display: inline-block;
+  width: 13px; height: 13px;
+  margin-right: 6px;
+  vertical-align: -2px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: karsaSpin .6s linear infinite;
+}
+.is-loading { opacity: .85; cursor: progress; }
+@keyframes karsaSpin { to { transform: rotate(360deg); } }
 
 button {
   font-family: inherit;

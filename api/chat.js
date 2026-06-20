@@ -201,10 +201,19 @@ export default async function handler(req, res) {
   let outputChars = 0;
   let finishReason = null;
   let usage = { prompt_tokens: 0, completion_tokens: 0 };
+  let gotFirstByte = false;
+  // #A7 Heartbeat: kirim komentar SSE (": ping") tiap 10 dtk sebelum byte
+  // pertama dari model — cegah proxy/CDN memutus koneksi saat M3 "berpikir".
+  // Baris diawali ":" diabaikan parser klien, jadi aman.
+  const heartbeat = setInterval(() => {
+    if (gotFirstByte) return;
+    try { res.write(': ping\n\n'); if (typeof res.flush === 'function') res.flush(); } catch (e) { /* abaikan */ }
+  }, 10000);
   try {
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
+      gotFirstByte = true;
       res.write(Buffer.from(value));
       if (typeof res.flush === 'function') res.flush();
       sseBuffer += decoder.decode(value, { stream: true });
@@ -230,6 +239,7 @@ export default async function handler(req, res) {
   } catch (err) {
     res.write('data: ' + JSON.stringify({ error: 'Stream terputus: ' + err.message }) + '\n\n');
   } finally {
+    clearInterval(heartbeat);
     trackAiUsage({
       promptTokens: usage.prompt_tokens,
       completionTokens: usage.completion_tokens,

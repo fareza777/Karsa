@@ -13,9 +13,26 @@ const State = (() => {
   function getProjects() { return projects; }
   function getSettings() { return settings; }
 
+  // #A10 Skema proyek + migrasi maju (aman untuk proyek lama)
+  const SCHEMA_VERSION = 1;
+  function migrateProject(p) {
+    if (!p || typeof p !== 'object') return p;
+    const v = p.schemaVersion || 0;
+    if (v >= SCHEMA_VERSION) return p;
+    // v0 → v1: pastikan field dasar ada (folders, projectType, timestamps).
+    if (!Array.isArray(p.folders)) p.folders = [];
+    if (!p.projectType) p.projectType = 'web';
+    if (!p.createdAt) p.createdAt = Date.now();
+    if (!p.updatedAt) p.updatedAt = p.createdAt;
+    p.schemaVersion = SCHEMA_VERSION;
+    return p;
+  }
+
   // Isi proyek dari storage async (IndexedDB) saat boot — dipanggil App.init
   function hydrate(list) {
-    projects = Array.isArray(list) ? list.filter((p) => p && p.id && p.files) : [];
+    projects = Array.isArray(list)
+      ? list.filter((p) => p && p.id && p.files).map(migrateProject)
+      : [];
   }
 
   function getCurrentProject() {
@@ -34,6 +51,7 @@ const State = (() => {
     opts = opts || {};
     const project = {
       id: uid(),
+      schemaVersion: SCHEMA_VERSION,
       name: name || 'Proyek Tanpa Nama',
       projectType: opts.projectType || 'web',
       files: { ...files },

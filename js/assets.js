@@ -52,8 +52,14 @@ const Assets = (() => {
         canvas.width = Math.round(img.width * ratio);
         canvas.height = Math.round(img.height * ratio);
         canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        const type = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-        callback(canvas.toDataURL(type, 0.85));
+        // #A6 WebP jauh lebih kecil (alpha didukung) → proyek/IndexedDB lebih ringan.
+        // Fallback ke png/jpeg bila WebP tak didukung browser.
+        const fallbackType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        let out = canvas.toDataURL('image/webp', 0.82);
+        if (out.indexOf('data:image/webp') !== 0) out = canvas.toDataURL(fallbackType, 0.85);
+        // Pakai yang lebih kecil antara WebP & asli (untuk gambar kecil kadang asli lebih ringan).
+        if (reader.result && reader.result.length < out.length && ratio === 1) out = reader.result;
+        callback(out);
       };
       img.onerror = () => showToast('Gagal membaca gambar.', 'error');
       img.src = reader.result;
