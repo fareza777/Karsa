@@ -470,6 +470,8 @@ const App = (() => {
     const settings = State.getSettings();
     applyTheme(settings.theme);
     $('#auto-run-toggle').checked = settings.autoRun;
+    // #B4 Tampilkan skeleton selama proyek dimuat dari IndexedDB
+    if (typeof Dashboard !== 'undefined' && Dashboard.renderSkeletons) Dashboard.renderSkeletons(4);
     // Muat proyek dari IndexedDB (kuota besar) + migrasi dari localStorage lama
     try { State.hydrate(await Storage.initProjects()); } catch (e) { /* fallback sudah di Storage */ }
     Auth.bindTriggers();

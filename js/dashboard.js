@@ -105,6 +105,22 @@ const Dashboard = (() => {
     return card;
   }
 
+  // #B4 Skeleton kartu proyek saat memuat dari IndexedDB (cegah grid kosong/lompat)
+  function renderSkeletons(n) {
+    const grid = $('#project-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    for (let i = 0; i < (n || 4); i++) {
+      grid.appendChild(el('div', { class: 'project-card project-card-skeleton' }, [
+        el('div', { class: 'skeleton', style: 'height:120px;border-radius:10px' }),
+        el('div', { class: 'project-card-bottom' }, [
+          el('div', { class: 'skeleton', style: 'height:14px;width:60%;margin:10px 0 6px' }),
+          el('div', { class: 'skeleton', style: 'height:10px;width:35%' }),
+        ]),
+      ]));
+    }
+  }
+
   function renderProjects() {
     const all = State.getProjects();
     const grid = $('#project-grid');
@@ -492,5 +508,5 @@ const Dashboard = (() => {
     });
   }
 
-  return { render, newProjectDialog, importProjectJson, importProjectZip, importDialog, importProjectFolder };
+  return { render, renderSkeletons, newProjectDialog, importProjectJson, importProjectZip, importDialog, importProjectFolder };
 })();
