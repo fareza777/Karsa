@@ -24,12 +24,44 @@ const FileTree = (() => {
     return root;
   }
 
+  // #B9 Pindahkan file ke folder lain via drag-and-drop.
+  function moveFile(path, targetFolder) {
+    const project = State.getCurrentProject();
+    if (!project) return;
+    const base = path.split('/').pop();
+    const dest = targetFolder ? targetFolder.replace(/\/$/, '') + '/' + base : base;
+    if (dest === path) return;
+    if (project.files[dest] !== undefined) { showToast('Sudah ada "' + base + '" di tujuan.', 'warn'); return; }
+    const wasActive = activePath === path;
+    if (State.renameFile(path, dest)) {
+      if (wasActive && typeof Tabs !== 'undefined') Tabs.open(dest);
+      render();
+      if (typeof Preview !== 'undefined') Preview.refresh();
+      showToast('Dipindahkan ke ' + (targetFolder || 'root') + '.', 'ok');
+    }
+  }
+
+  function makeDropTarget(node, targetFolder) {
+    node.addEventListener('dragover', (e) => {
+      if (!e.dataTransfer || !e.dataTransfer.types.includes('text/karsa-path')) return;
+      e.preventDefault();
+      node.classList.add('drag-over');
+    });
+    node.addEventListener('dragleave', () => node.classList.remove('drag-over'));
+    node.addEventListener('drop', (e) => {
+      node.classList.remove('drag-over');
+      const path = e.dataTransfer.getData('text/karsa-path');
+      if (path) { e.preventDefault(); e.stopPropagation(); moveFile(path, targetFolder); }
+    });
+  }
+
   function render() {
     const project = State.getCurrentProject();
     const container = $('#file-tree');
     container.innerHTML = '';
     if (!project) return;
     renderNode(buildTree(project), container, '');
+    makeDropTarget(container, ''); // drop ke area kosong = pindah ke root
   }
 
   function renderNode(node, container, prefix) {
@@ -53,6 +85,7 @@ const FileTree = (() => {
         iconSvg(isCollapsed ? 'folder' : 'folder-open') || el('span', { class: 'file-icon', text: '📁' }),
         el('span', { class: 'tree-folder-label', text: name }),
       ]);
+      makeDropTarget(header, folderPath); // #B9 jatuhkan file ke folder ini
       container.appendChild(header);
 
       if (!isCollapsed) {
@@ -63,9 +96,10 @@ const FileTree = (() => {
     });
 
     node.files.forEach((file) => {
-      container.appendChild(el('button', {
+      const item = el('button', {
         class: 'tree-item' + (file.path === activePath ? ' active' : ''),
         title: file.path,
+        draggable: 'true', // #B9
         onclick: () => Tabs.open(file.path),
         oncontextmenu: (e) => {
           e.preventDefault();
@@ -74,7 +108,14 @@ const FileTree = (() => {
       }, [
         fileBadge(file.path),
         el('span', { text: file.name }),
-      ]));
+      ]);
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/karsa-path', file.path);
+        e.dataTransfer.effectAllowed = 'move';
+        item.classList.add('dragging');
+      });
+      item.addEventListener('dragend', () => item.classList.remove('dragging'));
+      container.appendChild(item);
     });
   }
 
