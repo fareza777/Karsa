@@ -43,6 +43,15 @@ const CloudSync = (() => {
     return (list || []).filter((p) => p && p.id && !isDeleted(p.id));
   }
 
+  // #A7 Bandingkan isi file dua proyek (deteksi konflik sebelum overwrite).
+  function sameFiles(a, b) {
+    const ka = Object.keys(a || {});
+    const kb = Object.keys(b || {});
+    if (ka.length !== kb.length) return false;
+    for (const k of ka) { if (a[k] !== b[k]) return false; }
+    return true;
+  }
+
   function canSync() {
     return typeof Auth !== 'undefined' && Auth.isLoggedIn() && Auth.getClient();
   }
@@ -210,6 +219,7 @@ const CloudSync = (() => {
       const map = new Map(filterDeletedProjects(State.getProjects()).map((p) => [p.id, p]));
       let changed = map.size !== State.getProjects().length;
       const staleOnCloud = [];
+      let conflicts = 0;
 
       (data || []).forEach((row) => {
         const cloud = row.data;
@@ -225,10 +235,27 @@ const CloudSync = (() => {
         const cloudTs = new Date(row.updated_at).getTime() || cloud.updatedAt || 0;
         const localTs = local?.updatedAt || 0;
         if (!local || cloudTs >= localTs) {
+          // #A7 Konflik: versi cloud menang TAPI isi lokal berbeda → jangan buang.
+          // Simpan snapshot lokal sebagai checkpoint di proyek cloud agar bisa dipulihkan.
+          if (local && !sameFiles(local.files, cloud.files)) {
+            const cps = (cloud.checkpoints || []).slice(-14);
+            cps.push({
+              id: 'conflict-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+              label: 'Versi perangkat ini sebelum sync (' + new Date().toLocaleString('id-ID') + ')',
+              at: Date.now(),
+              files: { ...local.files },
+            });
+            cloud.checkpoints = cps;
+            conflicts++;
+          }
           map.set(cloud.id, cloud);
           changed = true;
         }
       });
+
+      if (conflicts > 0) {
+        showToast(conflicts + ' proyek diperbarui dari cloud — versi lamamu disimpan sebagai checkpoint.', 'info');
+      }
 
       if (staleOnCloud.length) {
         await Promise.all(staleOnCloud.map((id) => deleteProjectRemote(id)));
