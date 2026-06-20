@@ -70,8 +70,40 @@ const Publish = (() => {
     }
   }
 
+  // #A7 Validasi ringan sebelum publish: jangan kirim situs yang jelas rusak.
+  function validateBeforePublish(project, html) {
+    const issues = [];
+    const entry = project.files['index.html'];
+    if (!entry || !entry.trim()) issues.push('Tidak ada index.html.');
+    if (typeof KarsaAICore !== 'undefined' && entry && !KarsaAICore.isFileComplete(entry, 'index.html')) {
+      issues.push('index.html tampak belum lengkap/terpotong.');
+    }
+    if (html && /KARSA: file ".*" tidak ditemukan/.test(html)) {
+      issues.push('Ada referensi file (CSS/JS) yang tidak ditemukan.');
+    }
+    return issues;
+  }
+
   async function doPublish(slug, project, customDomain, previousDomain) {
     const html = Preview.buildBundle(project);
+    const problems = validateBeforePublish(project, html);
+    if (problems.length) {
+      const proceed = await new Promise((resolve) => {
+        showModal({
+          title: '⚠ Situs mungkin belum siap',
+          body: el('div', {}, [
+            el('p', { class: 'modal-desc', text: 'Sebelum dipublish, ada yang perlu diperiksa:' }),
+            el('ul', { style: 'margin:8px 0 0 18px;font-size:13px;line-height:1.6' },
+              problems.map((p) => el('li', { text: p }))),
+          ]),
+          actions: [
+            { label: 'Batal', onClick: () => resolve(false) },
+            { label: 'Tetap publish', primary: true, onClick: () => resolve(true) },
+          ],
+        });
+      });
+      if (!proceed) throw new Error('Dibatalkan — perbaiki dulu lalu publish lagi.');
+    }
     const body = { slug, html, name: project.name };
     if (customDomain) body.customDomain = customDomain;
     if (previousDomain) body.previousDomain = previousDomain;
