@@ -369,6 +369,10 @@ body.resizing * { user-select: none !important; }
 }
 .statusbar-spacer { flex: 1; }
 .status-save { color: var(--ok); }
+/* #A1 Indikator lint */
+.status-lint { font-size: 11px; padding: 0 4px; }
+.status-lint.ok { color: var(--ok); opacity: .7; }
+.status-lint.has-error { color: var(--warn); font-family: var(--font-code); }
 
 /* --- Preview pane --- */
 .preview-pane {

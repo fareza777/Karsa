@@ -28,7 +28,36 @@ const Editor = (() => {
     State.setFile(currentPath, content);
     showSaved();
     Preview.refreshDebounced();
+    lintDebounced(content, currentPath);
   }
+
+  // #A1 Lint ringan: validasi sintaks file aktif (tanpa addon CDN) → indikator status.
+  function lintNow(content, path) {
+    const elx = document.getElementById('status-lint');
+    if (!elx) return;
+    const ext = fileExt(path);
+    let problem = '';
+    const c = (content || '').trim();
+    if (!c) { elx.textContent = ''; return; }
+    const core = typeof KarsaAICore !== 'undefined' ? KarsaAICore : null;
+    if (ext === 'json') {
+      try { JSON.parse(c); } catch (e) { problem = 'JSON tidak valid'; }
+    } else if (ext === 'css' && core && !core.braceBalance(c)) {
+      problem = 'kurung { } tidak seimbang';
+    } else if ((ext === 'js' || ext === 'mjs' || ext === 'cjs') && !/\b(import|export)\b/.test(c) && !/(^|[^.\w])await\b/.test(c)) {
+      try { new Function(c); } catch (e) { if (e instanceof SyntaxError) problem = e.message.replace(/^.*?:\s*/, '').slice(0, 60); }
+    }
+    if (problem) {
+      elx.textContent = '⚠ ' + problem;
+      elx.className = 'status-lint has-error';
+      elx.title = 'Masalah sintaks: ' + problem;
+    } else {
+      elx.textContent = '✓';
+      elx.className = 'status-lint ok';
+      elx.title = 'Sintaks valid';
+    }
+  }
+  const lintDebounced = debounce(lintNow, 600);
 
   function init() {
     const host = $('#editor-host');
@@ -92,6 +121,7 @@ const Editor = (() => {
       fallback.focus();
     }
     suppressChange = false;
+    lintNow(project.files[path], path); // #A1
   }
 
   function closeFile(path) {
