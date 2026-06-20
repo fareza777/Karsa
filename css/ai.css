@@ -487,6 +487,14 @@ body.is-superuser #btn-ai-settings {
   border-radius: var(--radius-sm);
   background: rgba(124, 92, 255, .1);
 }
+.ai-welcome-group-title {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 12px 2px 6px;
+  opacity: .85;
+}
 .ai-examples { display: flex; flex-direction: column; gap: 6px; }
 .ai-example {
   text-align: left;

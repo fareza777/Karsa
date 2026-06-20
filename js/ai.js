@@ -561,24 +561,44 @@ const AI = (() => {
     chat.scrollTop = chat.scrollHeight;
   }
 
+  // #B7 Galeri ide berkelompok untuk pengguna baru
+  const WELCOME_GROUPS = [
+    { title: '🛠 Alat & Bisnis', items: [
+      '🧾 Buatkan aplikasi kasir (POS) sederhana dengan keranjang & total',
+      '💰 Buatkan pencatat keuangan harian dengan grafik batang',
+      '📋 Buatkan to-do list dengan kategori dan progres',
+    ] },
+    { title: '🎮 Seru & Kreatif', items: [
+      '🎮 Buat game tebak angka 1-100 dengan skor',
+      '🎨 Buatkan editor foto: upload, filter, dan unduh',
+      '🎵 Buatkan soundboard tombol efek suara',
+    ] },
+    { title: '🌐 Web & Profil', items: [
+      '🏪 Buatkan landing page toko online yang menarik',
+      '👤 Buatkan website portofolio pribadi modern',
+      '📅 Buatkan halaman undangan acara dengan hitung mundur',
+    ] },
+  ];
+
+  function fillExample(text) {
+    const input = $('#ai-input');
+    input.value = text.replace(/^\S+\s/, '');
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+
   function renderWelcome() {
-    const examples = [
-      '🪙 Buatkan aplikasi pencatat keuangan harian dengan grafik batang',
-      '🎨 Percantik tampilannya: tema gelap modern dengan aksen neon',
-      '🎮 Buat game tebak angka 1-100 yang seru dengan skor',
-    ];
     const box = el('div', { class: 'ai-welcome' }, [
       el('div', { class: 'ai-welcome-icon', text: '✨' }),
       el('h3', { text: 'Vibecoding dengan KARSA AI' }),
-      el('p', { text: 'Cukup bilang apa yang kamu mau — misalnya "buatkan website editor foto". Setelah AI selesai, klik ⚡ Terapkan (atau centang Auto-terapkan) untuk lihat di editor & preview.' }),
-      el('div', { class: 'ai-examples' }, examples.map((ex) =>
-        el('button', {
-          class: 'ai-example',
-          text: ex,
-          onclick: () => { $('#ai-input').value = ex.replace(/^\S+\s/, ''); $('#ai-input').focus(); },
-        })
-      )),
+      el('p', { text: 'Cukup bilang apa yang kamu mau. Setelah AI selesai, klik ⚡ Terapkan (atau centang Auto-terapkan) untuk lihat di editor & preview. Pilih salah satu ide untuk mulai:' }),
     ]);
+    WELCOME_GROUPS.forEach((group) => {
+      box.appendChild(el('div', { class: 'ai-welcome-group-title', text: group.title }));
+      box.appendChild(el('div', { class: 'ai-examples' }, group.items.map((ex) =>
+        el('button', { class: 'ai-example', text: ex, onclick: () => fillExample(ex) })
+      )));
+    });
     chatEl().appendChild(box);
   }
 

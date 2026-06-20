@@ -543,14 +543,35 @@ body.resizing * { user-select: none !important; }
   flex: none;
 }
 .preview-frame-wrap.device-phone {
+  /* #B3 Bingkai HP realistis: ukuran tetap, bezel, notch */
+  position: relative;
+  width: 390px;
+  height: 800px;
+  max-height: calc(100vh - 130px);
   margin: 10px auto auto;
   transform-origin: top center;
-  border-radius: 26px;
-  border: 6px solid #2a2f3e;
-  box-shadow: var(--shadow);
+  border-radius: 40px;
+  border: 10px solid #14161d;
+  background: #14161d;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .45), inset 0 0 0 2px #2a2f3e;
   overflow: hidden;
   flex: none;
 }
+/* Notch */
+.preview-frame-wrap.device-phone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130px;
+  height: 22px;
+  background: #14161d;
+  border-radius: 0 0 14px 14px;
+  z-index: 10;
+  pointer-events: none;
+}
+.preview-frame-wrap.device-phone #preview-frame { border-radius: 30px; }
 .preview-engine-bar {
   display: flex;
   background: var(--bg-3);
