@@ -7,7 +7,7 @@
     "stamp": "node scripts/stamp-version.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "node --check js/ai-core.js && node --check js/ai.js"
+    "check": "node scripts/check-syntax.mjs"
   },
   "devDependencies": {
     "vitest": "^2.1.9"
