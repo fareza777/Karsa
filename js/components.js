@@ -16,6 +16,8 @@ function showToast(message, type) {
 
 // Ledakan confetti kecil untuk momen sukses (mis. file AI diterapkan)
 function confettiBurst() {
+  // #B1 Hormati preferensi gerak berkurang — lewati animasi meriah.
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const colors = ['#7c5cff', '#22d3ee', '#f43f5e', '#f59e0b', '#34d399'];
   const root = el('div', { class: 'confetti-root' });
   for (let i = 0; i < 28; i++) {

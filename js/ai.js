@@ -110,6 +110,7 @@ const AI = (() => {
   let busy = false;
   let abortCtrl = null;
   let liveAbortReason = 'user';
+  let liveWritingFile = ''; // #B6 file yang sedang ditulis (untuk status streaming)
 
   function sanitizePublicError(msg) {
     if (!msg || typeof msg !== 'string') return 'Terjadi kesalahan. Coba lagi.';
@@ -561,24 +562,44 @@ const AI = (() => {
     chat.scrollTop = chat.scrollHeight;
   }
 
+  // #B7 Galeri ide berkelompok untuk pengguna baru
+  const WELCOME_GROUPS = [
+    { title: '🛠 Alat & Bisnis', items: [
+      '🧾 Buatkan aplikasi kasir (POS) sederhana dengan keranjang & total',
+      '💰 Buatkan pencatat keuangan harian dengan grafik batang',
+      '📋 Buatkan to-do list dengan kategori dan progres',
+    ] },
+    { title: '🎮 Seru & Kreatif', items: [
+      '🎮 Buat game tebak angka 1-100 dengan skor',
+      '🎨 Buatkan editor foto: upload, filter, dan unduh',
+      '🎵 Buatkan soundboard tombol efek suara',
+    ] },
+    { title: '🌐 Web & Profil', items: [
+      '🏪 Buatkan landing page toko online yang menarik',
+      '👤 Buatkan website portofolio pribadi modern',
+      '📅 Buatkan halaman undangan acara dengan hitung mundur',
+    ] },
+  ];
+
+  function fillExample(text) {
+    const input = $('#ai-input');
+    input.value = text.replace(/^\S+\s/, '');
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }
+
   function renderWelcome() {
-    const examples = [
-      '🪙 Buatkan aplikasi pencatat keuangan harian dengan grafik batang',
-      '🎨 Percantik tampilannya: tema gelap modern dengan aksen neon',
-      '🎮 Buat game tebak angka 1-100 yang seru dengan skor',
-    ];
     const box = el('div', { class: 'ai-welcome' }, [
       el('div', { class: 'ai-welcome-icon', text: '✨' }),
       el('h3', { text: 'Vibecoding dengan KARSA AI' }),
-      el('p', { text: 'Cukup bilang apa yang kamu mau — misalnya "buatkan website editor foto". Setelah AI selesai, klik ⚡ Terapkan (atau centang Auto-terapkan) untuk lihat di editor & preview.' }),
-      el('div', { class: 'ai-examples' }, examples.map((ex) =>
-        el('button', {
-          class: 'ai-example',
-          text: ex,
-          onclick: () => { $('#ai-input').value = ex.replace(/^\S+\s/, ''); $('#ai-input').focus(); },
-        })
-      )),
+      el('p', { text: 'Cukup bilang apa yang kamu mau. Setelah AI selesai, klik ⚡ Terapkan (atau centang Auto-terapkan) untuk lihat di editor & preview. Pilih salah satu ide untuk mulai:' }),
     ]);
+    WELCOME_GROUPS.forEach((group) => {
+      box.appendChild(el('div', { class: 'ai-welcome-group-title', text: group.title }));
+      box.appendChild(el('div', { class: 'ai-examples' }, group.items.map((ex) =>
+        el('button', { class: 'ai-example', text: ex, onclick: () => fillExample(ex) })
+      )));
+    });
     chatEl().appendChild(box);
   }
 
@@ -1043,17 +1064,51 @@ const AI = (() => {
   function renderFileDiff(container, oldText, newText) {
     const parts = window.Diff.diffLines(oldText || '', newText || '');
     let added = 0; let removed = 0;
-    parts.forEach((part) => {
-      const cls = part.added ? 'add' : (part.removed ? 'del' : 'ctx');
+    const CTX = 3; // baris konteks di sekitar perubahan; sisanya dilipat
+    const addLine = (cls, sign, line) => {
+      container.appendChild(el('div', { class: 'diff-line ' + cls }, [
+        el('span', { class: 'diff-sign', text: sign }),
+        el('span', { class: 'diff-text', text: line }),
+      ]));
+    };
+    parts.forEach((part, idx) => {
       if (part.added) added += part.count || 0;
       if (part.removed) removed += part.count || 0;
-      const sign = part.added ? '+' : (part.removed ? '−' : ' ');
-      part.value.replace(/\n$/, '').split('\n').forEach((line) => {
-        container.appendChild(el('div', { class: 'diff-line ' + cls }, [
-          el('span', { class: 'diff-sign', text: sign }),
-          el('span', { class: 'diff-text', text: line }),
-        ]));
-      });
+      if (part.added || part.removed) {
+        const cls = part.added ? 'add' : 'del';
+        const sign = part.added ? '+' : '−';
+        part.value.replace(/\n$/, '').split('\n').forEach((line) => addLine(cls, sign, line));
+        return;
+      }
+      // #B4 Konteks tak berubah: tampilkan beberapa baris pinggir, lipat tengahnya.
+      const lines = part.value.replace(/\n$/, '').split('\n');
+      const isFirst = idx === 0;
+      const isLast = idx === parts.length - 1;
+      if (lines.length <= CTX * 2 + 1) {
+        lines.forEach((line) => addLine('ctx', ' ', line));
+        return;
+      }
+      const head = isFirst ? [] : lines.slice(0, CTX);
+      const tail = isLast ? [] : lines.slice(-CTX);
+      head.forEach((line) => addLine('ctx', ' ', line));
+      const hidden = lines.length - head.length - tail.length;
+      if (hidden > 0) {
+        const fold = el('div', { class: 'diff-line diff-fold', text: '⋯ ' + hidden + ' baris tak berubah' });
+        const expand = () => {
+          const frag = document.createDocumentFragment();
+          lines.slice(head.length, lines.length - tail.length).forEach((line) => {
+            const row = el('div', { class: 'diff-line ctx' }, [
+              el('span', { class: 'diff-sign', text: ' ' }),
+              el('span', { class: 'diff-text', text: line }),
+            ]);
+            frag.appendChild(row);
+          });
+          fold.replaceWith(frag);
+        };
+        fold.addEventListener('click', expand);
+        container.appendChild(fold);
+      }
+      tail.forEach((line) => addLine('ctx', ' ', line));
     });
     return { added, removed };
   }
@@ -1150,10 +1205,27 @@ const AI = (() => {
     const chips = el('div', { class: 'ai-file-chips' }, allFiles.map((f) => {
       const ok = isFileComplete(f.code, f.path);
       const isNew = project.files[f.path] === undefined;
-      return el('span', { class: 'ai-file-chip' + (ok ? '' : ' incomplete') }, [
+      const chip = el('span', { class: 'ai-file-chip' + (ok ? '' : ' incomplete') }, [
         el('span', { class: isNew ? 'chip-new' : 'chip-edit', text: ok ? (isNew ? '＋' : '✎') : '⚠' }),
         el('span', { text: f.path + (ok ? '' : ' (potong)') }),
       ]);
+      // #B5 Terapkan satu file langsung dari chip-nya.
+      if (ok) {
+        const already = projectFileMatches(f.path, f.code);
+        const one = el('button', {
+          class: 'ai-chip-apply',
+          title: already ? f.path + ' sudah sama' : 'Terapkan ' + f.path + ' saja',
+          'aria-label': 'Terapkan ' + f.path + ' saja',
+          text: already ? '✓' : '⚡',
+          disabled: already,
+          onclick: (e) => {
+            e.stopPropagation();
+            if (applyFiles([f])) { one.textContent = '✓'; one.disabled = true; refreshApplyBox(bubble); }
+          },
+        });
+        chip.appendChild(one);
+      }
+      return chip;
     }));
 
     const applyBtn = el('button', {
@@ -1415,6 +1487,13 @@ const AI = (() => {
               if (onPhase) onPhase(phase, rawText.length);
               const now = Date.now();
               if (visible.trim()) {
+                // #B6 Tampilkan file yang sedang ditulis di status.
+                const open = visible.match(/```[\w-]*[ \t]+(?:file|edit)[=:]\s*["']?([^\s"'`\n]+)/gi);
+                if (open && open.length) {
+                  const lastTag = open[open.length - 1];
+                  const mm = lastTag.match(/(?:file|edit)[=:]\s*["']?([^\s"'`\n]+)/i);
+                  liveWritingFile = mm ? mm[1].replace(/^\.\//, '') : '';
+                }
                 if (now - lastRenderAt > 180) {
                   lastRenderAt = now;
                   renderAssistantHtml(bubble, visible, true);
@@ -1511,12 +1590,15 @@ const AI = (() => {
     const startedAt = Date.now();
     let phase = 'menghubungi';
     const histLimit = isMobileProject(project) ? 6 : MAX_HISTORY;
+    liveWritingFile = '';
     const ticker = setInterval(() => {
       const secs = Math.round((Date.now() - startedAt) / 1000);
+      const writing = (phase === 'menulis' || phase === 'melanjutkan') && liveWritingFile
+        ? ' ' + liveWritingFile : '';
       const label = phase === 'menghubungi' ? 'menghubungi KARSA AI'
         : phase === 'berpikir' ? 'AI sedang berpikir 💭'
-        : phase === 'melanjutkan' ? 'melanjutkan tulis otomatis ✍'
-        : 'AI sedang menulis ✍';
+        : phase === 'melanjutkan' ? 'melanjutkan tulis' + writing + ' ✍'
+        : 'menulis' + writing + ' ✍';
       $('#ai-status').textContent = label + '… ' + secs + ' dtk';
     }, 1000);
 
@@ -1551,7 +1633,8 @@ const AI = (() => {
 
       const baseMessages = trimMessagesForApi(messages);
       if (messagesTextTotal(messages) > API_TEXT_BUDGET) {
-        showToast('Riwayat chat panjang — dirapikan otomatis.', 'info');
+        const tok = KarsaAICore.estimateMessagesTokens(messages);
+        showToast('Konteks panjang (≈' + (tok / 1000).toFixed(0) + 'k token) — dirapikan otomatis.', 'info');
       }
 
       let continueRound = 0;
@@ -1684,9 +1767,11 @@ const AI = (() => {
       }
       const elapsed = Math.round((Date.now() - startedAt) / 1000);
       const phaseNote = '';
+      const approxTokens = KarsaAICore.estimateTokens(visible);
+      const tokenNote = approxTokens > 0 ? ' · ≈' + (approxTokens >= 1000 ? (approxTokens / 1000).toFixed(1) + 'k' : approxTokens) + ' token' : '';
       bubble.appendChild(el('div', {
         class: 'ai-meta',
-        text: '⚡ ' + elapsed + ' dtk · ' + BRAND_AI + phaseNote + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (totalContinueRounds ? ' · ↻ ' + totalContinueRounds + 'x lanjut' : ''),
+        text: '⚡ ' + elapsed + ' dtk · ' + BRAND_AI + phaseNote + tokenNote + (imageAtts.length ? ' · 🖼 ' + imageAtts.length + ' gambar' : '') + (totalContinueRounds ? ' · ↻ ' + totalContinueRounds + 'x lanjut' : ''),
       }));
       history.push({ role: 'assistant', content: visible });
       saveHistory();
@@ -1877,11 +1962,21 @@ const AI = (() => {
   }
 
   // #6 Perbaiki error runtime dari console: kirim ke AI untuk diperbaiki
+  let lastPrefilledError = '';
   function prefillError(errorText) {
     switchTab('ai');
     const input = $('#ai-input');
+    // #A5 Dedupe: jangan tumpuk error yang sama persis.
+    if (lastPrefilledError === errorText && input.value.includes(errorText)) {
+      showToast('Error itu sudah disiapkan di kotak chat — klik Kirim. 🔧', 'info');
+      input.focus();
+      return;
+    }
+    lastPrefilledError = errorText;
     input.value = 'Preview menampilkan error ini:\n\n' + errorText +
-      '\n\nTemukan penyebabnya dan perbaiki kodenya. Tulis ulang file yang perlu diubah secara utuh.';
+      '\n\nCari penyebabnya dan perbaiki HANYA bagian yang salah. Bila file besar & sudah ada, ' +
+      'gunakan edit terarah (```lang edit=path dengan blok SEARCH/REPLACE); jangan tulis ulang ' +
+      'seluruh file dan jangan ubah desain yang sudah benar.';
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
     showToast('Error dikirim ke AI — klik Kirim untuk minta perbaikan. 🔧', 'info');

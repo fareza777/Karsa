@@ -42,6 +42,7 @@ const App = (() => {
 
   // --- Tema ---
   function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
     document.body.dataset.theme = theme;
     const iconHtml = '<svg class="icon"><use href="#i-' + (theme === 'dark' ? 'moon' : 'sun') + '"/></svg>';
     $('#dash-theme-toggle').innerHTML = iconHtml;

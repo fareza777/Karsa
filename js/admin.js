@@ -11,6 +11,8 @@
     ['Token masuk', 'tokens_in', 'admin-card--token-in', '↓', false],
     ['Token keluar', 'tokens_out', 'admin-card--token-out', '↑', false],
     ['Publish', 'publishes', 'admin-card--publish', '⬡', false],
+    ['AI terpotong', 'ai_truncated', 'admin-card--ai', '✂', false],
+    ['Fallback model', 'ai_fallback', 'admin-card--ai', '↻', false],
   ];
 
   const DB_METRICS = [

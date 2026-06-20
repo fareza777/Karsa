@@ -6,6 +6,7 @@ import {
 } from '../lib/domains.js';
 import { isSuperuserEmail } from '../lib/superuser.js';
 import { trackPublish } from '../lib/analytics.js';
+import { originAllowed, clientIp, rateLimitOnce } from '../lib/ratelimit.js';
 
 const MAX_HTML = 1.5 * 1024 * 1024;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
@@ -69,6 +70,18 @@ export default async function handler(req, res) {
 
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Gunakan GET (cek slug) atau POST (publish).' });
+    return;
+  }
+
+  // #A6 Lindungi aksi tulis: hanya dari origin app, batasi laju per-IP.
+  if (!originAllowed(req)) {
+    res.status(403).json({ error: 'Permintaan ditolak: origin tidak diizinkan.' });
+    return;
+  }
+  const rl = await rateLimitOnce('publish', clientIp(req), 12, 60);
+  if (!rl.allowed) {
+    if (rl.resetSec) res.setHeader('Retry-After', String(Math.max(1, Math.ceil(rl.resetSec))));
+    res.status(429).json({ error: 'Terlalu sering publish. Tunggu sebentar lalu coba lagi.' });
     return;
   }
 

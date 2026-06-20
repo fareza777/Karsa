@@ -100,7 +100,13 @@ KARSA_ALLOWED_ORIGINS=        # origin tambahan yang diizinkan (pisah koma)
 npm install
 npm test        # unit test engine AI + rate-limit (Vitest)
 npm run check   # syntax check
+npm run stamp   # cache-busting: stamp ?v= aset js/css dgn hash commit/timestamp
 ```
+
+> Jalankan `npm run stamp` sebelum deploy (atau set sebagai build command Vercel:
+> `node scripts/stamp-version.mjs` dengan output directory `.`) agar browser
+> selalu mengambil JS/CSS terbaru. Saat ada `VERCEL_GIT_COMMIT_SHA`, versi diambil
+> dari hash commit.
 
 CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) menjalankan keduanya
 di tiap push & pull request.

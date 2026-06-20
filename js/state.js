@@ -136,14 +136,31 @@ const State = (() => {
     updateProject(project.id, { folders });
   }
 
-  // --- Checkpoint: snapshot file proyek (maks 5 per proyek) ---
+  // --- Checkpoint: snapshot file proyek (riwayat versi, maks 15 per proyek) ---
+  // #A8 Tanda-tangan ringan utk dedupe (hindari snapshot identik beruntun).
+  function filesSignature(files) {
+    const keys = Object.keys(files).sort();
+    return keys.map((k) => k + ':' + (files[k] ? files[k].length : 0)).join('|');
+  }
+
   function addCheckpoint(label) {
     const project = getCurrentProject();
     if (!project) return;
-    const checkpoint = { id: uid(), label, at: Date.now(), files: { ...project.files } };
-    const list = [...(project.checkpoints || []), checkpoint].slice(-5);
-    updateProject(project.id, { checkpoints: list });
+    const list = project.checkpoints || [];
+    const sig = filesSignature(project.files);
+    const last = list[list.length - 1];
+    // Lewati bila isi file tak berubah sejak checkpoint terakhir.
+    if (last && last.sig === sig) return last.id;
+    const checkpoint = { id: uid(), label, at: Date.now(), sig, files: { ...project.files } };
+    const next = [...list, checkpoint].slice(-15);
+    updateProject(project.id, { checkpoints: next });
     return checkpoint.id;
+  }
+
+  function listCheckpoints() {
+    const project = getCurrentProject();
+    if (!project) return [];
+    return (project.checkpoints || []).map((c) => ({ id: c.id, label: c.label, at: c.at }));
   }
 
   function restoreCheckpoint(checkpointId) {
@@ -160,6 +177,6 @@ const State = (() => {
     getProjects, getSettings, getCurrentProject, setCurrentProject, hydrate,
     updateSettings, createProject, updateProject, deleteProject, duplicateProject,
     setFile, deleteFile, renameFile, deleteFolder, addFolder,
-    addCheckpoint, restoreCheckpoint, replaceProjects, purgeDeletedProjects,
+    addCheckpoint, restoreCheckpoint, listCheckpoints, replaceProjects, purgeDeletedProjects,
   };
 })();

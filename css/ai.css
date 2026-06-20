@@ -430,6 +430,18 @@ body.is-superuser #btn-ai-settings {
 .ai-file-chip .chip-new { color: var(--ok); font-weight: 700; }
 .ai-file-chip .chip-edit { color: var(--warn); font-weight: 700; }
 .ai-file-chip.incomplete { border-color: rgba(245, 158, 11, .45); opacity: .85; }
+/* #B5 Tombol terapkan per-file di chip */
+.ai-chip-apply {
+  margin-left: 2px;
+  padding: 0 4px;
+  border-radius: 99px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--accent);
+  transition: background var(--transition), color var(--transition);
+}
+.ai-chip-apply:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.ai-chip-apply:disabled { color: var(--ok); cursor: default; }
 .ai-truncated-warn {
   margin-top: 10px;
   padding: 10px 12px;
@@ -474,6 +486,14 @@ body.is-superuser #btn-ai-settings {
   padding: 6px 10px;
   border-radius: var(--radius-sm);
   background: rgba(124, 92, 255, .1);
+}
+.ai-welcome-group-title {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 12px 2px 6px;
+  opacity: .85;
 }
 .ai-examples { display: flex; flex-direction: column; gap: 6px; }
 .ai-example {

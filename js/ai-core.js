@@ -73,6 +73,13 @@
       if (/const\s+\w+\s*=\s*\[\s*$/.test(c)) return false;
       if (/[{(,=]\s*$/.test(c)) return false;
       if ((ext === 'tsx' || ext === 'jsx' || ext === 'ts') && !/export\s+default\b/.test(c)) return false;
+      // #A10 Cek sintaks nyata utk JS polos (bukan modul/JSX): tangkap kode
+      // brace-seimbang tapi rusak (mis. terpotong di tengah ekspresi). Di-guard
+      // dari import/export/await yang sah tapi melempar di dalam new Function().
+      if ((ext === 'js' || ext === 'mjs' || ext === 'cjs')
+        && !/\b(import|export)\b/.test(c) && !/(^|[^.\w])await\b/.test(c)) {
+        try { new Function(c); } catch (e) { if (e instanceof SyntaxError) return false; }
+      }
     }
     if (ext === 'json') {
       try { JSON.parse(c); } catch (e) { return false; }
@@ -82,6 +89,31 @@
 
   function hasUnclosedCodeFence(text) {
     return (((text || '').match(/```/g) || []).length % 2) !== 0;
+  }
+
+  // #A3 Estimasi token kasar (≈3.6 char/token; kode lebih padat dari prosa).
+  // Untuk budgeting/peringatan — bukan tokenizer presisi.
+  function estimateTokens(text) {
+    if (!text) return 0;
+    return Math.ceil(String(text).length / 3.6);
+  }
+
+  // Total estimasi token untuk array pesan {role, content:string|parts[]}.
+  function estimateMessagesTokens(msgs) {
+    if (!Array.isArray(msgs)) return 0;
+    let n = 0;
+    for (const m of msgs) {
+      const c = m && m.content;
+      if (typeof c === 'string') n += estimateTokens(c);
+      else if (Array.isArray(c)) {
+        for (const part of c) {
+          if (part && part.type === 'text' && typeof part.text === 'string') n += estimateTokens(part.text);
+          else if (part && part.type === 'image_url') n += 800; // perkiraan kasar token gambar
+        }
+      }
+      n += 4; // overhead per pesan
+    }
+    return n;
   }
 
   function extractProse(text) {
@@ -254,6 +286,6 @@
     fileExt, isValidPath, braceBalance, isFileComplete, hasUnclosedCodeFence,
     extractProse, rebuildWithFiles, stitchCode, parseEditBlocks, matchFlexible,
     resolveEdits, editResolutionReport, parseFileBlocks, mergeContinuedOutput,
-    isResponseTruncated,
+    isResponseTruncated, estimateTokens, estimateMessagesTokens,
   };
 });
