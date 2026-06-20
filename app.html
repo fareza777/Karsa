@@ -322,7 +322,12 @@
         <div id="editor-host" class="editor-host">
           <div id="editor-empty" class="editor-empty">
             <div class="empty-icon">✦</div>
-            <p>Pilih file di panel kiri untuk mulai menulis kode.</p>
+            <p>Pilih file di panel kiri, atau mulai cepat:</p>
+            <div class="editor-empty-actions">
+              <button id="empty-open-ai" class="btn btn-primary btn-sm"><svg class="icon"><use href="#i-sparkles"/></svg> Minta AI buatkan</button>
+              <button id="empty-new-file" class="btn btn-ghost btn-sm"><svg class="icon"><use href="#i-file-plus"/></svg> File baru</button>
+            </div>
+            <div id="empty-recent" class="editor-empty-recent"></div>
           </div>
         </div>
         <div class="statusbar">

@@ -330,6 +330,11 @@ body.resizing * { user-select: none !important; }
   font-size: 14px;
 }
 .editor-empty .empty-icon { font-size: 36px; opacity: .5; }
+/* #C10 Aksi cepat + file di empty state */
+.editor-empty-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.editor-empty-recent { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; max-width: 280px; width: 100%; }
+.empty-recent-file { display: flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 7px; font-family: var(--font-code); font-size: 12px; color: var(--text); }
+.empty-recent-file:hover { background: var(--bg-hover); }
 
 /* Progress bar gradien global (AI/publish bekerja) */
 .global-progress {
