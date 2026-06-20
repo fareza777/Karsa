@@ -1,10 +1,21 @@
 /* ===== KARSA — event analitik dari klien (login, signup) ===== */
 
 import { trackLogin, trackSignup } from '../lib/analytics.js';
+import { originAllowed, clientIp, rateLimitOnce } from '../lib/ratelimit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'POST saja.' });
+    return;
+  }
+  // #A3 Cegah spam statistik: hanya origin app + batasi laju per-IP.
+  if (!originAllowed(req)) {
+    res.status(403).json({ error: 'Origin tidak diizinkan.' });
+    return;
+  }
+  const rl = await rateLimitOnce('analytics', clientIp(req), 30, 60);
+  if (!rl.allowed) {
+    res.status(429).json({ error: 'Terlalu banyak event.' });
     return;
   }
   const { event, userId } = req.body || {};

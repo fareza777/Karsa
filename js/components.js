@@ -45,7 +45,11 @@ function setGlobalBusy(on) {
 
 function closeModal() {
   const overlay = $('.modal-overlay');
-  if (overlay) overlay.remove();
+  if (overlay) {
+    const restore = overlay._restoreFocus; // #B5 kembalikan fokus ke pemicu
+    overlay.remove();
+    if (restore && document.contains(restore)) { try { restore.focus(); } catch (e) { /* abaikan */ } }
+  }
 }
 
 // Modal generik. options: { title, wide, body: Node, actions: [{label, primary, danger, onClick}] }
@@ -62,10 +66,14 @@ function showModal(options) {
     })
   );
 
-  const modal = el('div', { class: 'modal' + (options.wide ? ' modal-wide' : '') }, [
+  const titleId = 'modal-title-' + Math.random().toString(36).slice(2, 8);
+  const modal = el('div', {
+    class: 'modal' + (options.wide ? ' modal-wide' : ''),
+    role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': titleId,
+  }, [
     el('div', { class: 'modal-head' }, [
-      el('span', { class: 'modal-title', text: options.title }),
-      el('button', { class: 'icon-btn', text: '✕', onclick: closeModal }),
+      el('span', { class: 'modal-title', id: titleId, text: options.title }),
+      el('button', { class: 'icon-btn', text: '✕', title: 'Tutup', 'aria-label': 'Tutup', onclick: closeModal }),
     ]),
     el('div', { class: 'modal-body' }, [options.body]),
     actions.length ? el('div', { class: 'modal-foot' }, actions) : null,
@@ -73,8 +81,22 @@ function showModal(options) {
 
   const overlay = el('div', { class: 'modal-overlay' }, [modal]);
   overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) closeModal(); });
+  // #B5 Kembalikan fokus ke elemen pemicu saat modal ditutup.
+  const prevFocus = document.activeElement;
+  overlay._restoreFocus = prevFocus && prevFocus.focus ? prevFocus : null;
+  // #B5 Perangkap fokus (Tab/Shift+Tab) di dalam modal + Esc tutup.
+  overlay.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+    if (e.key !== 'Tab') return;
+    const f = $$('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])', modal)
+      .filter((n) => n.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0]; const last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
   $('#modal-root').appendChild(overlay);
-  const firstInput = $('input', modal);
+  const firstInput = $('input, textarea, button.btn-primary', modal) || $('button', modal);
   if (firstInput) firstInput.focus();
   return overlay;
 }

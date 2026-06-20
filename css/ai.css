@@ -351,6 +351,30 @@ body.is-superuser #btn-ai-settings {
   border-radius: 0;
   max-height: 260px;
 }
+/* #B3 Label bahasa + gutter nomor baris */
+.ai-code-lang {
+  font-family: var(--font-code);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.ai-code-rows { display: flex; align-items: flex-start; }
+.ai-code-gutter {
+  flex: 0 0 auto;
+  text-align: right;
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  opacity: .5;
+  user-select: none;
+  white-space: pre;
+}
+.ai-code-rows code { flex: 1 1 auto; white-space: pre; }
 /* Syntax highlighting (CodeMirror runMode) di dalam kartu kode AI */
 .ai-code-body code.cm-s-material-darker { color: #c5cae9; }
 .ai-code-body .cm-keyword { color: #c792ea; }

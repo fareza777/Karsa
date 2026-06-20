@@ -507,10 +507,33 @@ const AI = (() => {
     return false;
   }
 
+  // #A6 Ambil file yang disebut user via @path (fokus konteks → hemat token).
+  function extractMentions(prompt, files) {
+    const out = [];
+    const re = /@([\w./-]+\.\w+)/g;
+    let m;
+    while ((m = re.exec(prompt || '')) !== null) {
+      const p = m[1].replace(/^\.?\//, '');
+      if (files[p] !== undefined && !out.includes(p)) out.push(p);
+    }
+    return out;
+  }
+
   function buildProjectContext(prompt) {
     const project = State.getCurrentProject();
     if (!project) return 'Belum ada proyek terbuka.';
     const files = project.files || {};
+    // Bila user menyebut file tertentu dgn @path, fokuskan konteks ke file itu.
+    const mentioned = extractMentions(prompt, files);
+    if (mentioned.length) {
+      let ctx = 'FILE PROYEK "' + project.name + '" (fokus pada file yang kamu sebut):\n';
+      mentioned.forEach((path) => {
+        let content = files[path] || '';
+        if (content.length > MAX_FILE_CHARS) content = content.slice(0, MAX_FILE_CHARS) + '\n/* …dipotong… */';
+        ctx += '\n--- ' + path + ' ---\n' + content + '\n';
+      });
+      return ctx;
+    }
     const slim = isIterationRequest(prompt || '', project);
     let paths = sortedProjectPaths(files);
     if (slim) {
@@ -728,12 +751,21 @@ const AI = (() => {
       el('span', { class: 'ai-code-meta', text: isWriting ? 'menulis… ' + lineCount + ' baris' : (isEdit ? 'edit terarah' : lineCount + ' baris') }),
       isWriting ? el('span', { class: 'ai-spinner' }) : el('span', { class: 'ai-code-caret', text: '▾' }),
     ]);
+    // #B3 Label bahasa di header
+    const lang = isEdit ? 'edit' : (fileExt(title) || 'txt');
+    head.insertBefore(el('span', { class: 'ai-code-lang', text: lang }), head.querySelector('.ai-code-meta'));
     card.appendChild(head);
     if (!isWriting) {
       card.appendChild(makeCopyButton(() => code, { class: 'ai-code-copy' }));
       const codeEl = el('code');
       highlightInto(codeEl, code, title);
-      const body = el('pre', { class: 'ai-code-body hidden' }, [codeEl]);
+      // #B3 Gutter nomor baris (sejajar, font & line-height sama via CSS)
+      const n = code ? code.split('\n').length : 1;
+      let nums = '';
+      for (let i = 1; i <= n; i++) nums += i + '\n';
+      const gutter = el('span', { class: 'ai-code-gutter', 'aria-hidden': 'true', text: nums });
+      const rows = el('div', { class: 'ai-code-rows' }, [gutter, codeEl]);
+      const body = el('pre', { class: 'ai-code-body hidden' }, [rows]);
       card.appendChild(body);
       head.addEventListener('click', () => {
         body.classList.toggle('hidden');

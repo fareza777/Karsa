@@ -414,9 +414,12 @@ const App = (() => {
       State.updateProject(project.id, { name });
     });
 
-    $$('.device-btn').forEach((btn) =>
-      btn.addEventListener('click', () => Preview.setDevice(btn.dataset.device))
-    );
+    $$('.device-btn').forEach((btn) => {
+      if (!btn.dataset.device) return; // tombol putar ditangani terpisah
+      btn.addEventListener('click', () => Preview.setDevice(btn.dataset.device));
+    });
+    const rotateBtn = $('#btn-rotate-device');
+    if (rotateBtn) rotateBtn.addEventListener('click', () => Preview.rotateDevice());
     $$('.preview-engine-btn').forEach((btn) =>
       btn.addEventListener('click', () => {
         Preview.setEngine(btn.dataset.engine);
@@ -467,6 +470,8 @@ const App = (() => {
     const settings = State.getSettings();
     applyTheme(settings.theme);
     $('#auto-run-toggle').checked = settings.autoRun;
+    // #B4 Tampilkan skeleton selama proyek dimuat dari IndexedDB
+    if (typeof Dashboard !== 'undefined' && Dashboard.renderSkeletons) Dashboard.renderSkeletons(4);
     // Muat proyek dari IndexedDB (kuota besar) + migrasi dari localStorage lama
     try { State.hydrate(await Storage.initProjects()); } catch (e) { /* fallback sudah di Storage */ }
     Auth.bindTriggers();

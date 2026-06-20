@@ -1,5 +1,5 @@
 /* ===== KARSA — Service Worker (offline shell) ===== */
-const CACHE = 'karsa-v2';
+const CACHE = 'karsa-v3';
 
 // Aset inti yang dipracache agar app bisa dibuka offline
 const CORE = [
@@ -19,8 +19,15 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE)
       .then((cache) => cache.addAll(CORE).catch(() => { /* sebagian boleh gagal */ }))
-      .then(() => self.skipWaiting())
+    // Catatan: TIDAK skipWaiting otomatis — app yang memutuskan kapan update
+    // diterapkan (lewat tombol "Muat ulang"), agar tab terbuka tak tiba-tiba
+    // berganti aset di tengah kerja.
   );
+});
+
+// App mengirim pesan SKIP_WAITING saat user klik "Muat ulang versi baru".
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

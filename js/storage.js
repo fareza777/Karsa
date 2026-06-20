@@ -107,13 +107,32 @@ const Storage = (() => {
       }
     }
     // IndexedDB: tulis async (fire-and-forget); kuota jauh lebih besar.
-    idbSet(PROJECTS_REC, projects).catch((err) => {
-      console.error('KARSA: gagal menyimpan ke IndexedDB', err);
-      if (typeof showToast === 'function') {
-        showToast('Gagal menyimpan proyek — penyimpanan perangkat mungkin penuh.', 'error');
-      }
-    });
+    idbSet(PROJECTS_REC, projects)
+      .then(() => maybeWarnQuota())
+      .catch((err) => {
+        console.error('KARSA: gagal menyimpan ke IndexedDB', err);
+        if (typeof showToast === 'function') {
+          showToast('Gagal menyimpan proyek — penyimpanan perangkat mungkin penuh.', 'error');
+        }
+      });
     return true;
+  }
+
+  // #A8 Pantau kuota penyimpanan; peringatkan sekali per sesi saat >85% terpakai.
+  let quotaWarned = false;
+  function maybeWarnQuota() {
+    if (quotaWarned || !navigator.storage || !navigator.storage.estimate) return;
+    navigator.storage.estimate().then((est) => {
+      if (!est || !est.quota) return;
+      const ratio = est.usage / est.quota;
+      if (ratio > 0.85) {
+        quotaWarned = true;
+        const mb = (est.usage / 1048576).toFixed(0);
+        if (typeof showToast === 'function') {
+          showToast('Penyimpanan hampir penuh (' + mb + ' MB). Hapus proyek lama atau ekspor dulu.', 'warn');
+        }
+      }
+    }).catch(() => {});
   }
 
   // Perkiraan ukuran semua proyek (byte) — untuk peringatan impor besar.
