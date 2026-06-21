@@ -181,8 +181,12 @@ console.log('\n=== 3) APPS PLAY STORE ===');
 // ============ 4) SEMUA TEMPLATE BAWAAN ============
 console.log('\n=== 4) VALIDASI TEMPLATE BAWAAN (' + (sandbox.TEMPLATES || []).length + ') ===');
 {
+  const codeExt = ['html', 'css', 'js', 'jsx', 'ts', 'tsx', 'json'];
   (sandbox.TEMPLATES || []).forEach((tpl) => {
     const files = tpl.files || {};
+    // Setiap file kode di template WAJIB lengkap (cegah regresi saat template diedit).
+    const incomplete = Object.keys(files).filter((p) => codeExt.includes(sandbox.fileExt(p)) && !isFileComplete(files[p], p));
+    check(incomplete.length === 0, 'template "' + tpl.name + '" semua file lengkap' + (incomplete.length ? ' → ' + incomplete.join(', ') : ''));
     const a = sandbox.analyzeProjectFiles(files);
     if (a.expoLike) {
       const diag = sandbox.Snack.diagnoseProject({ name: tpl.name, files });
