@@ -538,18 +538,21 @@ const App = (() => {
     if (typeof Dashboard !== 'undefined' && Dashboard.renderSkeletons) Dashboard.renderSkeletons(4);
     // Muat proyek dari IndexedDB (kuota besar) + migrasi dari localStorage lama
     try { State.hydrate(await Storage.initProjects()); } catch (e) { /* fallback sudah di Storage */ }
-    Auth.bindTriggers();
-    await Auth.init();
-    if (typeof CloudSync !== 'undefined') await CloudSync.purgeLocalTombstones();
-    await Plan.loadConfig();
-    await Plan.syncProFromCloud();
-    Plan.updateAiBadge();
+    // Langkah daring bersifat best-effort: kegagalan jaringan (Auth/Plan/Cloud)
+    // TAK BOLEH menggagalkan boot IDE. Tanpa ini satu hiccup jaringan = layar mati.
+    try { Auth.bindTriggers(); } catch (e) { /* abaikan */ }
+    try { await Auth.init(); } catch (e) { /* lanjut anonim */ }
+    try { if (typeof CloudSync !== 'undefined') await CloudSync.purgeLocalTombstones(); } catch (e) { /* abaikan */ }
+    try { await Plan.loadConfig(); } catch (e) { /* pakai default */ }
+    try { await Plan.syncProFromCloud(); } catch (e) { /* abaikan */ }
+    try { Plan.updateAiBadge(); } catch (e) { /* abaikan */ }
 
+    // Inti UI: WAJIB jalan apa pun kondisi jaringan/penyimpanan.
     ConsolePanel.init();
     Editor.init();
     setupResizers();
     bindEvents();
-    setupInstallPrompt();
+    try { setupInstallPrompt(); } catch (e) { /* abaikan */ }
     showDashboard();
     const imported = importFromHash();
     // #B8 Lanjut kerja: buka proyek terakhir bila tak ada impor dari tautan.
@@ -587,4 +590,10 @@ const App = (() => {
   return { init, openProject, showDashboard, exportZipCurrent, snippetsDialog };
 })();
 
-document.addEventListener('DOMContentLoaded', App.init);
+document.addEventListener('DOMContentLoaded', function () {
+  Promise.resolve().then(App.init).catch(function (e) {
+    // Jaring terakhir: jangan biarkan layar mati tanpa kabar.
+    try { if (typeof showToast === 'function') showToast('Gagal memulai sebagian. Coba muat ulang halaman.', 'err'); } catch (_) { /* abaikan */ }
+    try { console.error('[KARSA] init gagal:', e); } catch (_) { /* abaikan */ }
+  });
+});
