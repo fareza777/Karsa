@@ -9,6 +9,12 @@ const Plan = (() => {
   let config = { freeAiDaily: FREE_AI_DAILY, billingEnabled: false, lemonCheckoutBase: null, superuserConfigured: false };
   let superuserActive = false;
 
+  // Parse JSON aman: respons error sering bukan JSON (502/504 dari gateway) →
+  // hindari "Unexpected token <" bocor ke user; kembalikan {} agar pesan HTTP rapi.
+  async function parseJsonSafe(res) {
+    try { const t = await res.text(); return t ? JSON.parse(t) : {}; } catch (e) { return {}; }
+  }
+
   function readSuperuserStorage() {
     try {
       return localStorage.getItem(SUPER_KEY) === '1';
@@ -200,7 +206,7 @@ const Plan = (() => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: String(code || '').trim() }),
     });
-    const data = await res.json();
+    const data = await parseJsonSafe(res);
     if (!res.ok) throw new Error(data.error || 'Kode tidak valid');
     setPro(true);
     try { localStorage.setItem('karsa.pro.code', String(code || '').trim()); } catch (e) { /* abaikan */ }
@@ -216,7 +222,7 @@ const Plan = (() => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ licenseKey: String(licenseKey || '').trim(), userId: user.id }),
     });
-    const data = await res.json();
+    const data = await parseJsonSafe(res);
     if (!res.ok) throw new Error(data.error || 'License tidak valid');
     setPro(true);
     updateAiBadge();
