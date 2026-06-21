@@ -341,6 +341,11 @@ const Preview = (() => {
       parent.postMessage({ __karsa_css_applied: { path: data.__karsa_css.path, ok: ok } }, '*');
       return;
     }
+    if (data.__karsa_restore_scroll) {
+      var rs = data.__karsa_restore_scroll;
+      requestAnimationFrame(function () { try { window.scrollTo(rs.x || 0, rs.y || 0); } catch (e) {} });
+      return;
+    }
     if (typeof data.__karsa_eval !== 'string') return;
     try {
       var hasil = (0, eval)(data.__karsa_eval);
@@ -349,6 +354,15 @@ const Preview = (() => {
       kirim('error', [format(err)]);
     }
   });
+  // Lapor posisi scroll (throttle) → parent memulihkannya seusai reload halaman sama.
+  var __kScrollT = null;
+  window.addEventListener('scroll', function () {
+    if (__kScrollT) return;
+    __kScrollT = setTimeout(function () {
+      __kScrollT = null;
+      try { parent.postMessage({ __karsa_scroll: { x: window.scrollX || 0, y: window.scrollY || 0 } }, '*'); } catch (e) {}
+    }, 200);
+  }, { passive: true });
 })();<\/script>`;
 
   function isLocalRef(src) {
@@ -756,10 +770,24 @@ const Preview = (() => {
 
   // Halaman aktif di preview (untuk situs multi-halaman). null = entry default.
   let currentPreviewEntry = null;
+  // Posisi scroll terakhir yang dilaporkan iframe { projectId, entry, x, y }.
+  let previewScroll = null;
 
   function loadLocalPreview(frame, project) {
     frame.removeAttribute('src');
     if (currentPreviewEntry && project.files[currentPreviewEntry] === undefined) currentPreviewEntry = null;
+    // Pulihkan scroll HANYA bila ini reload halaman yang sama (edit→reload),
+    // bukan ganti halaman/proyek → terasa mulus, tak lompat ke atas.
+    const entryKey = currentPreviewEntry || '__default';
+    const restore = (previewScroll && previewScroll.projectId === project.id && previewScroll.entry === entryKey)
+      ? { x: previewScroll.x, y: previewScroll.y } : null;
+    if (restore && (restore.x || restore.y)) {
+      const onLoad = () => {
+        frame.removeEventListener('load', onLoad);
+        try { frame.contentWindow.postMessage({ __karsa_restore_scroll: restore }, '*'); } catch (e) { /* abaikan */ }
+      };
+      frame.addEventListener('load', onLoad);
+    }
     frame.srcdoc = buildBundle(project, currentPreviewEntry);
   }
 
@@ -1120,6 +1148,12 @@ const Preview = (() => {
     if (data.__karsa_pvstore && data.__karsa_pvstore.id) {
       // #A1 Persist data localStorage preview (per proyek) agar bertahan saat reload editor.
       try { sessionStorage.setItem('karsa.pv.' + data.__karsa_pvstore.id, String(data.__karsa_pvstore.data || '{}')); } catch (e) { /* kuota — abaikan */ }
+      return;
+    }
+    if (data.__karsa_scroll) {
+      // Catat posisi scroll preview → dipulihkan setelah reload halaman yang sama.
+      const proj = State.getCurrentProject();
+      if (proj) previewScroll = { projectId: proj.id, entry: currentPreviewEntry || '__default', x: data.__karsa_scroll.x || 0, y: data.__karsa_scroll.y || 0 };
       return;
     }
     if (typeof data.__karsa_shot_done === 'string') {
