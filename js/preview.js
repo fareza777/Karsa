@@ -740,11 +740,18 @@ const Preview = (() => {
 
   // Anti-kedip: tampilkan overlay bertema selama iframe memuat ulang
   let loadingFailsafe = null;
+  let loadingShowTimer = null;
   function setPreviewLoading(active) {
     const wrap = $('#preview-frame-wrap');
-    wrap.classList.toggle('loading', active);
     clearTimeout(loadingFailsafe);
-    if (active) loadingFailsafe = setTimeout(() => wrap.classList.remove('loading'), 4000);
+    clearTimeout(loadingShowTimer);
+    if (active) {
+      // Tunda tampil spinner ~180ms → reload cepat selesai duluan & tak berkedip.
+      loadingShowTimer = setTimeout(() => wrap.classList.add('loading'), 180);
+      loadingFailsafe = setTimeout(() => wrap.classList.remove('loading'), 4000);
+    } else {
+      wrap.classList.remove('loading');
+    }
   }
 
   // Halaman aktif di preview (untuk situs multi-halaman). null = entry default.
