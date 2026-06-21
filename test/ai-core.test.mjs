@@ -7,6 +7,7 @@ const AICore = require('../js/ai-core.js');
 const {
   stitchCode, parseFileBlocks, parseEditBlocks, resolveEdits, editResolutionReport,
   isFileComplete, mergeContinuedOutput, isResponseTruncated, braceBalance,
+  parseTrailingOpenEdit,
 } = AICore;
 
 describe('stitchCode', () => {
@@ -199,6 +200,23 @@ describe('blok terpotong fence-terbuka (truncation umum)', () => {
     expect(css.code).toContain('.btn{color:red}');
     expect(css.code).toContain('rgba(0,0,0,.1)}');
     expect(isFileComplete(css.code, 's.css')).toBe(true);
+  });
+});
+
+describe('parseTrailingOpenEdit (blok edit terpotong saat iterasi)', () => {
+  it('menangkap path dari blok edit fence-terbuka', () => {
+    const t = ['ubah tombol', '```html edit=index.html', '<<<<<<< SEARCH', '  <button>Hubungi</button>', '=======', '  <button>Order seka'].join('\n');
+    expect(parseTrailingOpenEdit(t)).toEqual({ path: 'index.html' });
+  });
+  it('null saat blok edit sudah tertutup', () => {
+    expect(parseTrailingOpenEdit('```html edit=a.html\n<<<<<<< SEARCH\nx\n=======\ny\n>>>>>>> REPLACE\n```')).toBe(null);
+  });
+  it('null saat yang terbuka blok FILE (bukan edit)', () => {
+    expect(parseTrailingOpenEdit('```html file=a.html\n<p>belum selesai')).toBe(null);
+  });
+  it('isResponseTruncated tetap mendeteksi edit terpotong', () => {
+    const t = '```html edit=index.html\n<<<<<<< SEARCH\nfoo';
+    expect(isResponseTruncated(t, null, { 'index.html': 'foo bar' })).toBe(true);
   });
 });
 

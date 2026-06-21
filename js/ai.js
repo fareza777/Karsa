@@ -997,21 +997,46 @@ const AI = (() => {
   function buildContinueMessage(accumulatedVisible) {
     const files = parseFileBlocks(accumulatedVisible);
     const incomplete = files.filter((f) => !isFileComplete(f.code, f.path));
-    if (!incomplete.length) return null;
-    const f = incomplete[incomplete.length - 1];
-    const lang = fileExt(f.path) || 'txt';
-    // Beri ANCHOR: minta model mengulang persis cuplikan akhir lalu teruskan.
-    // stitchCode akan membuang tumpang-tindihnya → sambungan mulus, anti-rusak.
-    const anchor = f.code.slice(-200);
+    if (incomplete.length) {
+      const f = incomplete[incomplete.length - 1];
+      const lang = fileExt(f.path) || 'txt';
+      // Beri ANCHOR: minta model mengulang persis cuplikan akhir lalu teruskan.
+      // stitchCode akan membuang tumpang-tindihnya → sambungan mulus, anti-rusak.
+      const anchor = f.code.slice(-200);
+      return [
+        '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
+        '[Langsung tulis sisa kode — jangan berpikir panjang. Jangan ulang file dari awal.]',
+        'File "' + f.path + '" belum lengkap. Lanjutkan dari titik putus sampai file VALID & tertutup.',
+        'Keluarkan SATU blok ```' + lang + ' file=' + f.path + '.',
+        'WAJIB: mulai blok dengan MENGULANG PERSIS cuplikan akhir di bawah ini, lalu teruskan kodenya.',
+        'Jangan tulis ulang file dari awal. Jangan tambah penjelasan di luar blok.',
+        'Cuplikan akhir yang sudah ada (ulangi persis di awal blok, lalu lanjutkan):',
+        anchor,
+      ].join('\n');
+    }
+    // Tak ada FILE tak lengkap, tapi fence masih terbuka → blok terpotong yang
+    // tak terlihat sbg file (paling sering: blok EDIT SEARCH/REPLACE saat iterasi).
+    if (!KarsaAICore.hasUnclosedCodeFence(accumulatedVisible)) return null;
+    const openEdit = KarsaAICore.parseTrailingOpenEdit(accumulatedVisible);
+    if (openEdit) {
+      // Edit terarah terpotong tak bisa disambung andal (semantik posisi) →
+      // minta tulis ULANG file itu UTUH (file=path), bukan blok edit.
+      const lang = fileExt(openEdit.path) || 'txt';
+      return [
+        '[KARSA — lanjutan otomatis: blok edit terpotong sebelum selesai]',
+        'Perubahan untuk "' + openEdit.path + '" terputus di tengah.',
+        'Tulis ULANG file "' + openEdit.path + '" SECARA UTUH dalam SATU blok ```' + lang + ' file=' + openEdit.path + ', dengan perubahan yang diminta sudah diterapkan.',
+        'JANGAN pakai blok edit/SEARCH/REPLACE. Jangan tulis file lain. Jangan tambah penjelasan di luar blok.',
+      ].join('\n');
+    }
+    // Fence terbuka lain (prosa/blok tak dikenal) → lanjutkan dari titik putus.
+    const tail = accumulatedVisible.slice(-240);
     return [
       '[KARSA — lanjutan otomatis: respons sebelumnya terpotong]',
-      '[Langsung tulis sisa kode — jangan berpikir panjang. Jangan ulang file dari awal.]',
-      'File "' + f.path + '" belum lengkap. Lanjutkan dari titik putus sampai file VALID & tertutup.',
-      'Keluarkan SATU blok ```' + lang + ' file=' + f.path + '.',
-      'WAJIB: mulai blok dengan MENGULANG PERSIS cuplikan akhir di bawah ini, lalu teruskan kodenya.',
-      'Jangan tulis ulang file dari awal. Jangan tambah penjelasan di luar blok.',
-      'Cuplikan akhir yang sudah ada (ulangi persis di awal blok, lalu lanjutkan):',
-      anchor,
+      'Lanjutkan PERSIS dari titik putus sampai blok ditutup dengan ```. Jangan ulang dari awal, jangan tambah penjelasan.',
+      'WAJIB: mulai dengan MENGULANG PERSIS cuplikan akhir di bawah, lalu teruskan.',
+      'Cuplikan akhir:',
+      tail,
     ].join('\n');
   }
 

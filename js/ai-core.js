@@ -221,6 +221,23 @@
     return { resolved, unresolved };
   }
 
+  // Tangkap blok ```lang edit=path yang fence-nya BELUM ditutup (blok edit
+  // SEARCH/REPLACE terpotong di tengah). Tak bisa diresolusi jadi file, tapi
+  // path-nya dipakai untuk meminta model menulis ULANG file itu utuh.
+  function parseTrailingOpenEdit(text) {
+    if (!hasUnclosedCodeFence(text)) return null;
+    const idx = text.lastIndexOf('```');
+    if (idx === -1) return null;
+    const after = text.slice(idx + 3);
+    const nl = after.indexOf('\n');
+    const header = nl === -1 ? after : after.slice(0, nl);
+    const m = header.match(/\bedit[=:]\s*["']?([^\s"'`]+)/i);
+    if (!m) return null;
+    const path = m[1].trim().replace(/^\.\//, '');
+    if (!isValidPath(path)) return null;
+    return { path };
+  }
+
   // Tangkap blok ```lang file=path yang fence-nya BELUM ditutup (truncation
   // di tengah file — bentuk truncation paling umum). Tanpa ini partial-nya
   // tak terlihat → lanjutan tak bisa menyasarnya & isi hilang.
@@ -312,7 +329,7 @@
   return {
     fileExt, isValidPath, braceBalance, isFileComplete, hasUnclosedCodeFence,
     extractProse, rebuildWithFiles, stitchCode, parseEditBlocks, matchFlexible,
-    resolveEdits, editResolutionReport, parseFileBlocks, mergeContinuedOutput,
-    isResponseTruncated, estimateTokens, estimateMessagesTokens,
+    resolveEdits, editResolutionReport, parseFileBlocks, parseTrailingOpenEdit,
+    mergeContinuedOutput, isResponseTruncated, estimateTokens, estimateMessagesTokens,
   };
 });
