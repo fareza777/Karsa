@@ -920,7 +920,8 @@ const Preview = (() => {
   // scroll & state form terjaga = mulus seperti Replit). Selain itu reload penuh.
   let editDirtyNonCss = false;
   let changedCss = new Set();
-  const flushEdit = debounce(() => {
+  let editTimer = null;
+  function doFlushEdit() {
     const project = State.getCurrentProject();
     const dirtyNonCss = editDirtyNonCss;
     const cssList = [...changedCss];
@@ -935,11 +936,16 @@ const Preview = (() => {
       return; // ter-swap mulus tanpa reload
     }
     refresh();
-  }, 250);
+  }
   function onFileEdited(path) {
     if (path && fileExt(path) === 'css') changedCss.add(path);
     else editDirtyNonCss = true;
-    flushEdit();
+    // Debounce adaptif: edit CSS-saja → hot-swap nyaris instan (90ms, murah &
+    // non-destruktif); edit HTML/JS → tahan lebih lama (280ms) agar tak reload
+    // tiap ketukan saat mengetik.
+    const cssOnly = !editDirtyNonCss && changedCss.size > 0;
+    clearTimeout(editTimer);
+    editTimer = setTimeout(doFlushEdit, cssOnly ? 90 : 280);
   }
 
   function openInNewTab() {
