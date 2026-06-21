@@ -21,3 +21,5 @@ jobs:
         run: npm test
       - name: E2E workflow (web/mobile/playstore)
         run: npm run e2e
+      - name: Smoke (halaman + aset balas 200)
+        run: npm run smoke
