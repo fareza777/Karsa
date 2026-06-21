@@ -155,6 +155,12 @@ export default async function handler(req, res) {
     ...(m.includes('M3') ? { reasoning_effort: 'low' } : {}),
   });
 
+  // Batalkan permintaan ke LLM bila klien pergi (tab ditutup / tombol Stop /
+  // navigasi). Tanpa ini server tetap membaca stream sampai habis → token
+  // output terbuang (biaya nyata) untuk byte yang tak diterima siapa pun.
+  const ac = new AbortController();
+  res.on('close', () => { if (!res.writableEnded) { try { ac.abort(); } catch (_) { /* abaikan */ } } });
+
   let upstream = null;
   let lastErr = '';
   let usedFallback = false;
@@ -166,9 +172,11 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
         body: makeBody(m),
+        signal: ac.signal,
       });
     } catch (err) {
       lastErr = err.message;
+      if (ac.signal.aborted) return; // klien pergi — tak perlu coba model lain
       continue; // error jaringan → coba model berikutnya
     }
     if (resp.ok) { upstream = resp; usedFallback = i > 0; break; }
@@ -214,8 +222,14 @@ export default async function handler(req, res) {
       const { done, value } = await reader.read();
       if (done) break;
       gotFirstByte = true;
-      res.write(Buffer.from(value));
-      if (typeof res.flush === 'function') res.flush();
+      try {
+        res.write(Buffer.from(value));
+        if (typeof res.flush === 'function') res.flush();
+      } catch (e) {
+        // Klien pergi → soket tertutup. Hentikan & batalkan upstream.
+        try { ac.abort(); } catch (_) { /* abaikan */ }
+        break;
+      }
       sseBuffer += decoder.decode(value, { stream: true });
       let nl;
       while ((nl = sseBuffer.indexOf('\n')) !== -1) {
@@ -237,7 +251,10 @@ export default async function handler(req, res) {
       }
     }
   } catch (err) {
-    res.write('data: ' + JSON.stringify({ error: 'Stream terputus: ' + err.message }) + '\n\n');
+    // Abort karena klien pergi bukan error sungguhan — jangan coba tulis lagi.
+    if (!ac.signal.aborted && !res.writableEnded) {
+      try { res.write('data: ' + JSON.stringify({ error: 'Stream terputus: ' + err.message }) + '\n\n'); } catch (_) { /* soket tertutup */ }
+    }
   } finally {
     clearInterval(heartbeat);
     trackAiUsage({
@@ -247,6 +264,6 @@ export default async function handler(req, res) {
       completionChars: outputChars,
     }).catch(() => {});
     trackChatOutcome({ truncated: finishReason === 'length', fallback: usedFallback }).catch(() => {});
-    res.end();
+    try { res.end(); } catch (_) { /* soket mungkin sudah tertutup */ }
   }
 }
