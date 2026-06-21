@@ -27,7 +27,7 @@ const Editor = (() => {
     if (suppressChange || !currentPath) return;
     State.setFile(currentPath, content);
     showSaved();
-    Preview.refreshDebounced();
+    Preview.onFileEdited(currentPath); // hot-reload CSS instan; selain itu reload penuh
     lintDebounced(content, currentPath);
   }
 

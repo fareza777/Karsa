@@ -880,6 +880,33 @@ const Preview = (() => {
     if (State.getSettings().autoRun) refresh();
   }, 650);
 
+  // Hot-reload pintar untuk edit di editor: kalau yang berubah HANYA file CSS
+  // yang ter-link di entry → swap instan via postMessage (tanpa reload iframe,
+  // scroll & state form terjaga = mulus seperti Replit). Selain itu reload penuh.
+  let editDirtyNonCss = false;
+  let changedCss = new Set();
+  const flushEdit = debounce(() => {
+    const project = State.getCurrentProject();
+    const dirtyNonCss = editDirtyNonCss;
+    const cssList = [...changedCss];
+    editDirtyNonCss = false;
+    changedCss = new Set();
+    if (!project || !State.getSettings().autoRun) return;
+    if (!dirtyNonCss && cssList.length
+      && previewEngine !== 'snack' && !usesSnackEngine(project)
+      && project.id === lastPreviewProjectId
+      && cssList.every((p) => cssLinkedInEntry(project, p))
+      && hotSwapCss(cssList.map((p) => ({ path: p, code: project.files[p] })))) {
+      return; // ter-swap mulus tanpa reload
+    }
+    refresh();
+  }, 250);
+  function onFileEdited(path) {
+    if (path && fileExt(path) === 'css') changedCss.add(path);
+    else editDirtyNonCss = true;
+    flushEdit();
+  }
+
   function openInNewTab() {
     const project = State.getCurrentProject();
     if (!project) return;
@@ -1120,7 +1147,7 @@ const Preview = (() => {
   }
 
   return {
-    refresh, refreshHome, refreshDebounced, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
+    refresh, refreshHome, refreshDebounced, onFileEdited, openInNewTab, setDevice, setEngine, pickPreviewEngine, buildBundle,
     runInPreview, screenshot, updatePreviewHint, openSnackTab, resetAutoFix, toggleInspect, resetPreviewEntry,
     hotSwapCss, rotateDevice, showErrorBanner, clearErrorBanner,
   };
