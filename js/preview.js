@@ -849,6 +849,15 @@ const Preview = (() => {
 
   let lastPreviewProjectId = null;
 
+  // Atur sandbox iframe sesuai mode. Hanya ubah atribut bila perlu (ganti
+  // sandbox memicu reload, jadi jangan set ulang nilai yang sama).
+  const SANDBOX_WEB = 'allow-scripts allow-modals allow-forms allow-popups';
+  const SANDBOX_SNACK = 'allow-scripts allow-same-origin allow-popups allow-forms allow-modals allow-popups-to-escape-sandbox';
+  function setFrameSandbox(frame, snackMode) {
+    const want = snackMode ? SANDBOX_SNACK : SANDBOX_WEB;
+    if (frame.getAttribute('sandbox') !== want) frame.setAttribute('sandbox', want);
+  }
+
   function refresh() {
     const project = State.getCurrentProject();
     if (!project) return;
@@ -864,6 +873,12 @@ const Preview = (() => {
     const snackMode = usesSnackEngine(project);
     updateEngineTabs();
     setPreviewLoading(true);
+
+    // Sandbox per-mode: embed Snack (expo.dev, tepercaya) BUTUH allow-same-origin
+    // agar embed.js + iframe runtime-nya jalan — tanpa ini preview mobile sering
+    // tak muncul. Preview web (kode pengguna, tak tepercaya) tetap ketat tanpa
+    // same-origin (pakai shim storage). Set SEBELUM srcdoc agar berlaku saat muat.
+    setFrameSandbox(frame, snackMode);
 
     if (snackMode) {
       frame.removeAttribute('src');

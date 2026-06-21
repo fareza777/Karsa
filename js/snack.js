@@ -41,7 +41,9 @@ const Snack = (() => {
     if (!/export\s+default/.test(code)) {
       errors.push('App.tsx belum ada export default.');
     }
-    if (!/\breturn\b/.test(code)) {
+    // Komponen arrow ber-implicit-return (() => <View/> atau () => (...)) sah &
+    // umum di output AI → jangan salah-vonis "belum ada return".
+    if (!/\breturn\b/.test(code) && !/=>\s*[(<]/.test(code)) {
       errors.push('App.tsx belum punya return (layar UI) — file terpotong. Klik «Lanjutkan tulis» di chat atau kirim ulang permintaan.');
     }
     if (!braceBalance(code)) {

@@ -133,6 +133,15 @@ console.log('\n=== 2b) MOBILE: App.tsx terpotong terdeteksi ===');
   check(!diag.ok && diag.errors.length > 0, 'diagnose menandai error pada App.tsx terpotong');
 }
 
+// ============ 2c) MOBILE: komponen arrow implicit-return TIDAK salah-vonis ============
+console.log('\n=== 2c) MOBILE: arrow component (implicit return) valid ===');
+{
+  const arrowApp = 'import React from "react";\nimport { View, Text } from "react-native";\nconst App = () => (\n  <View><Text>Halo dari KARSA mobile preview</Text></View>\n);\nexport default App;';
+  const project = { name: 'Arrow', projectType: 'mobile', files: { 'App.tsx': arrowApp, 'package.json': JSON.stringify({ dependencies: { expo: '~51' } }) } };
+  const diag = sandbox.Snack.diagnoseProject(project);
+  check(diag.ok, 'arrow component diagnose OK (tak salah-vonis "belum ada return")' + (diag.ok ? '' : ' → ' + JSON.stringify(diag.errors)));
+}
+
 // ============ 3) PLAYSTORE ============
 console.log('\n=== 3) APPS PLAY STORE ===');
 {
