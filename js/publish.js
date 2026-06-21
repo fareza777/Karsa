@@ -120,8 +120,12 @@ const Publish = (() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Publish gagal (HTTP ' + res.status + ')');
+      // Respons error sering bukan JSON (mis. halaman 502/504 dari gateway).
+      // Baca teks dulu lalu parse aman → pesan HTTP jelas, bukan "Unexpected token <".
+      const raw = await res.text();
+      let data = {};
+      try { data = raw ? JSON.parse(raw) : {}; } catch (e) { data = {}; }
+      if (!res.ok) throw new Error(data.error || ('Publish gagal (HTTP ' + res.status + ')'));
       return data;
     } finally {
       if (typeof setGlobalBusy === 'function') setGlobalBusy(false);
