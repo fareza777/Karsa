@@ -142,6 +142,33 @@ console.log('\n=== 2c) MOBILE: arrow component (implicit return) valid ===');
   check(diag.ok, 'arrow component diagnose OK (tak salah-vonis "belum ada return")' + (diag.ok ? '' : ' → ' + JSON.stringify(diag.errors)));
 }
 
+// ============ 2d) EXPO: import npm WAJIB terdaftar di package.json deps ============
+console.log('\n=== 2d) EXPO: import npm cocok dgn package.json (cegah "Unable to resolve module") ===');
+{
+  const builtin = new Set(['react', 'react-native']);
+  (sandbox.TEMPLATES || []).forEach((tpl) => {
+    const files = tpl.files || {};
+    if (!sandbox.analyzeProjectFiles(files).expoLike) return;
+    const entry = sandbox.expoEntryPath(files);
+    let pkg = {};
+    try { pkg = JSON.parse(files['package.json'] || '{}'); } catch (e) { /* ditangani diagnose */ }
+    const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+    const missing = [];
+    // pindai semua file kode RN, bukan hanya entry
+    Object.keys(files).filter((p) => /\.(tsx?|jsx?)$/i.test(p)).forEach((p) => {
+      const re = /from\s+['"]([^'"]+)['"]/g; let m;
+      while ((m = re.exec(files[p])) !== null) {
+        const mod = m[1];
+        if (mod.startsWith('.') || mod.startsWith('/')) continue; // relatif
+        const name = mod.startsWith('@') ? mod.split('/').slice(0, 2).join('/') : mod.split('/')[0];
+        if (builtin.has(name)) continue;
+        if (!deps[name] && !missing.includes(name)) missing.push(name);
+      }
+    });
+    check(missing.length === 0, 'template "' + tpl.name + '" semua import npm ada di package.json' + (missing.length ? ' → HILANG: ' + missing.join(', ') : ''));
+  });
+}
+
 // ============ 3) PLAYSTORE ============
 console.log('\n=== 3) APPS PLAY STORE ===');
 {

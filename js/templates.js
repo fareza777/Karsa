@@ -992,6 +992,7 @@ LAYANAN.forEach((l) => {
           expo: '~52.0.0',
           react: '18.3.1',
           'react-native': '0.76.3',
+          'expo-status-bar': '~2.0.0',
         },
       }, null, 2),
       'app.json': JSON.stringify({
@@ -1051,7 +1052,7 @@ const styles = StyleSheet.create({
         version: '1.0.0',
         main: 'expo/AppEntry.js',
         scripts: { start: 'expo start', android: 'expo run:android' },
-        dependencies: { expo: '~52.0.0', react: '18.3.1', 'react-native': '0.76.3' },
+        dependencies: { expo: '~52.0.0', react: '18.3.1', 'react-native': '0.76.3', 'expo-status-bar': '~2.0.0' },
       }, null, 2),
       'app.json': JSON.stringify({
         expo: {

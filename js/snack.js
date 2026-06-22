@@ -69,6 +69,24 @@ const Snack = (() => {
         const j = JSON.parse(pkg);
         const deps = { ...(j.dependencies || {}), ...(j.devDependencies || {}) };
         if (!deps.expo) warnings.push('package.json tidak mencantumkan expo.');
+        // Import paket npm yang tak ada di package.json → Snack gagal "Unable to
+        // resolve module". Beri pesan jelas + actionable, bukan error kriptik.
+        const BUILTIN = new Set(['react', 'react-native', 'expo']);
+        const npm = new Set();
+        Object.keys(files).filter((p) => /\.(tsx?|jsx?)$/i.test(p) && !SKIP.test(p)).forEach((p) => {
+          const r = /from\s+['"]([^'"]+)['"]/g; let im;
+          while ((im = r.exec(files[p])) !== null) {
+            const mod = im[1];
+            if (mod.startsWith('.') || mod.startsWith('/')) continue;
+            const name = mod.startsWith('@') ? mod.split('/').slice(0, 2).join('/') : mod.split('/')[0];
+            if (!BUILTIN.has(name)) npm.add(name);
+          }
+        });
+        const missing = [...npm].filter((n) => !deps[n]);
+        if (missing.length) {
+          errors.push('Paket belum terdaftar di package.json: ' + missing.join(', ')
+            + '. Tambahkan ke "dependencies" (mis. "' + missing[0] + '": "*") agar preview bisa memuatnya.');
+        }
       } catch (e) {
         errors.push('package.json rusak (JSON tidak valid).');
       }
