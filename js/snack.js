@@ -69,24 +69,10 @@ const Snack = (() => {
         const j = JSON.parse(pkg);
         const deps = { ...(j.dependencies || {}), ...(j.devDependencies || {}) };
         if (!deps.expo) warnings.push('package.json tidak mencantumkan expo.');
-        // Import paket npm yang tak ada di package.json → Snack gagal "Unable to
-        // resolve module". Beri pesan jelas + actionable, bukan error kriptik.
-        const BUILTIN = new Set(['react', 'react-native', 'expo']);
-        const npm = new Set();
-        Object.keys(files).filter((p) => /\.(tsx?|jsx?)$/i.test(p) && !SKIP.test(p)).forEach((p) => {
-          const r = /from\s+['"]([^'"]+)['"]/g; let im;
-          while ((im = r.exec(files[p])) !== null) {
-            const mod = im[1];
-            if (mod.startsWith('.') || mod.startsWith('/')) continue;
-            const name = mod.startsWith('@') ? mod.split('/').slice(0, 2).join('/') : mod.split('/')[0];
-            if (!BUILTIN.has(name)) npm.add(name);
-          }
-        });
-        const missing = [...npm].filter((n) => !deps[n]);
-        if (missing.length) {
-          errors.push('Paket belum terdaftar di package.json: ' + missing.join(', ')
-            + '. Tambahkan ke "dependencies" (mis. "' + missing[0] + '": "*") agar preview bisa memuatnya.');
-        }
+        // Import npm yang tak ada di package.json → akan AUTO-ditambahkan saat
+        // build Snack (lihat ensureDeps). Cukup beri info, jangan blokir preview.
+        const missing = missingNpmDeps(files, deps);
+        if (missing.length) warnings.push('Paket ' + missing.join(', ') + ' otomatis ditambahkan untuk preview.');
       } catch (e) {
         errors.push('package.json rusak (JSON tidak valid).');
       }
@@ -118,6 +104,55 @@ const Snack = (() => {
   });
 })();<\/script>`;
 
+  // Modul yang TAK perlu dideklarasi (disediakan runtime Snack/Expo).
+  const BUILTIN_MODULES = new Set(['react', 'react-native', 'expo']);
+  // Versi yang diketahui cocok dgn Expo SDK 52; sisanya '*' (Snack memilih).
+  const KNOWN_DEP_VERSIONS = {
+    'expo-status-bar': '~2.0.0',
+    'expo-constants': '~17.0.0',
+    'expo-linking': '~7.0.0',
+    'expo-font': '~13.0.0',
+    'expo-haptics': '~14.0.0',
+    'expo-image': '~2.0.0',
+    'expo-router': '~4.0.0',
+    '@react-native-async-storage/async-storage': '1.23.1',
+  };
+
+  // Nama paket npm dari sebuah specifier import ('@scope/x/y'→'@scope/x', 'a/b'→'a').
+  function pkgNameOf(mod) {
+    return mod.startsWith('@') ? mod.split('/').slice(0, 2).join('/') : mod.split('/')[0];
+  }
+
+  // Semua paket npm yang di-import file RN tapi belum ada di deps.
+  function missingNpmDeps(files, deps) {
+    const npm = new Set();
+    Object.keys(files).filter((p) => /\.(tsx?|jsx?)$/i.test(p) && !SKIP.test(p)).forEach((p) => {
+      const r = /from\s+['"]([^'"]+)['"]/g; let m;
+      while ((m = r.exec(files[p])) !== null) {
+        const mod = m[1];
+        if (mod.startsWith('.') || mod.startsWith('/')) continue;
+        const name = pkgNameOf(mod);
+        if (!BUILTIN_MODULES.has(name)) npm.add(name);
+      }
+    });
+    return [...npm].filter((n) => !deps[n]);
+  }
+
+  // Sisipkan paket yang di-import tapi hilang ke package.json yang dikirim ke
+  // Snack → preview "tinggal jalan" walau proyek lama / app buatan AI lupa deps.
+  function ensureDeps(files, snackFiles) {
+    let pkg = {};
+    try { pkg = JSON.parse(files['package.json'] || '{}'); } catch (e) { pkg = {}; }
+    if (!pkg || typeof pkg !== 'object') pkg = {};
+    pkg.dependencies = pkg.dependencies || {};
+    const known = { ...pkg.dependencies, ...(pkg.devDependencies || {}) };
+    const missing = missingNpmDeps(files, known);
+    if (!missing.length && files['package.json']) return;
+    missing.forEach((name) => { pkg.dependencies[name] = KNOWN_DEP_VERSIONS[name] || '*'; });
+    if (!pkg.dependencies.expo) pkg.dependencies.expo = '*';
+    snackFiles['package.json'] = { type: 'CODE', contents: JSON.stringify(pkg, null, 2) };
+  }
+
   function buildSnackFiles(project) {
     const files = project.files;
     const entry = expoEntryPath(files);
@@ -144,6 +179,7 @@ const Snack = (() => {
     if (!snackFiles[entry]) {
       snackFiles[entry] = { type: 'CODE', contents: files[entry] };
     }
+    ensureDeps(files, snackFiles); // auto-lengkapi dependency yang di-import
     return snackFiles;
   }
 
