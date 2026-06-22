@@ -206,6 +206,7 @@ const MOBILE_AI_PROMPT = [
   '7. Mobile-first, aman di layar 360–412px lebar.',
   '7b. DILARANG membungkus UI dalam div.phone-frame / mockup HP — KARSA sudah punya bingkai ponsel di panel preview.',
   '8. Maksimal 2 file per respons. File besar (App.tsx, screen) — satu file per respons. Jangan keluarkan 5+ file sekaligus.',
+  '8b. JAGA TIAP FILE < ~150 baris agar tidak terpotong. Aplikasi dengan banyak fitur: PECAH ke screens/*.tsx & components/*.tsx, lalu impor dari App.tsx. App.tsx ramping (navigasi + susun screen). JANGAN tulis satu App.tsx raksasa berisi semua layar — itu pasti terpotong.',
   '9. Jangan tulis ulang package.json / app.json jika tidak berubah.',
   '10. Jika respons terpotong, sistem akan minta lanjutan otomatis — pastikan setiap file yang dikeluarkan valid & lengkap.',
   '11. Penalaran internal dilarang panjang — langsung tulis App.tsx / screen. Lihat MODE KERJA di prompt sistem.',

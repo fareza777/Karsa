@@ -1055,6 +1055,34 @@ const AI = (() => {
     bubble.appendChild(btn);
   }
 
+  // Saat lanjutan tak maju lagi (file terlalu besar untuk satu respons), klik
+  // "Lanjutkan" lagi sia-sia. Tawarkan jalan keluar: minta AI PECAH file
+  // terbesar yang belum lengkap jadi beberapa berkas kecil yang muat.
+  function appendSplitSuggestion(bubble, visible) {
+    if (bubble.dataset.aiVisible !== visible) bubble.dataset.aiVisible = visible;
+    $$('.ai-continue-btn', bubble).forEach((b) => b.remove());
+    let target = '';
+    try {
+      const incomplete = parseFileBlocks(visible).filter((f) => !isFileComplete(f.code, f.path));
+      if (incomplete.length) target = incomplete.sort((a, b) => b.code.length - a.code.length)[0].path;
+    } catch (e) { /* abaikan */ }
+    const warn = el('div', { class: 'ai-truncated-warn' }, [
+      el('div', { text: '⚠ File' + (target ? ' "' + target + '"' : '') + ' terlalu besar untuk diselesaikan sekaligus — melanjutkan terus tidak menambah kemajuan.' }),
+      el('button', {
+        class: 'ai-retry-btn',
+        text: '✂️ Pecah jadi beberapa file kecil',
+        onclick: () => {
+          $('#ai-input').value = (target
+            ? 'File "' + target + '" terlalu besar dan selalu terpotong. Pecah jadi beberapa file kecil'
+            : 'Kode terlalu besar dan selalu terpotong. Pecah jadi beberapa file kecil')
+            + ' (mis. per layar/komponen ke folder screens/ atau components/), masing-masing < 150 baris, lalu impor dari file utama. Tulis SATU file per balasan sampai selesai.';
+          send();
+        },
+      }),
+    ]);
+    bubble.appendChild(warn);
+  }
+
   // Lanjutkan file yang terpotong DI GELEMBUNG YANG SAMA — menyambung ke kode
   // yang sudah ada (bukan membuat respons baru yang menimpa). Ini yang membuat
   // "Lanjutkan tulis" tidak lagi merusak preview.
@@ -1086,6 +1114,7 @@ const AI = (() => {
 
     try {
       let continueRound = 0;
+      let stalled = false;
       let lastMergeFp = mergeFingerprint(accumulatedVisible);
       for (;;) {
         const contMsg = buildContinueMessage(accumulatedVisible);
@@ -1098,11 +1127,11 @@ const AI = (() => {
           messages: apiMessages, modelUsed, useDirect,
           signal: abortCtrl.signal, bubble, onPhase: () => {},
         });
-        if (!result.visible.trim()) break;
+        if (!result.visible.trim()) { stalled = true; break; }
         const before = accumulatedVisible;
         accumulatedVisible = mergeContinuedOutput(accumulatedVisible, result.visible);
         const fp = mergeFingerprint(accumulatedVisible);
-        if (fp === lastMergeFp || accumulatedVisible === before) break; // tak ada kemajuan
+        if (fp === lastMergeFp || accumulatedVisible === before) { stalled = true; break; } // tak ada kemajuan
         lastMergeFp = fp;
         renderAssistantHtml(bubble, accumulatedVisible);
         storeMergedFiles(bubble, accumulatedVisible);
@@ -1118,7 +1147,12 @@ const AI = (() => {
         if (history[i].role === 'assistant') { history[i].content = accumulatedVisible; break; }
       }
       saveHistory();
-      if (truncated) {
+      if (truncated && stalled) {
+        // Lanjutan tak menambah kemajuan → file terlalu besar untuk satu respons.
+        // Jangan suruh klik tombol yang sama (sia-sia) — tawarkan PECAH file.
+        appendSplitSuggestion(bubble, accumulatedVisible);
+        showToast('File terlalu besar untuk diselesaikan sekaligus. Coba pecah jadi beberapa layar (tombol di bawah balasan).', 'warn');
+      } else if (truncated) {
         appendContinueButton(bubble, accumulatedVisible);
         showToast('Masih ada sisa — klik "Lanjutkan tulis" sekali lagi.', 'warn');
       } else {
