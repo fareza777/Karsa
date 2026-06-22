@@ -1416,11 +1416,14 @@ const AI = (() => {
       text: !files.length
         ? '⚡ File belum lengkap'
         : (!pending.length
-          ? '↻ Terapkan ulang (' + files.length + ' file)'
+          ? '✓ Sudah diterapkan — klik untuk muat ulang preview'
           : (files.length === allFiles.length
             ? '⚡ Terapkan ke Proyek (' + pending.length + ' file)'
             : '⚡ Terapkan (' + pending.length + '/' + allFiles.length + ' file siap)')),
-      disabled: !files.length || !pending.length,
+      // Hanya nonaktif bila TAK ada file lengkap. Saat semua sudah diterapkan,
+      // tombol tetap bisa diklik (terap ulang idempoten + muat ulang preview) →
+      // hilangkan kebingungan "tombol mati padahal AI bilang sudah selesai".
+      disabled: !files.length,
       onclick: () => {
         const toApply = pending.length ? pending : files;
         if (!toApply.length) return;
