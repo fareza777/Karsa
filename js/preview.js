@@ -505,6 +505,8 @@ const Preview = (() => {
     'Preview mobile belum bisa tampil. Tulis ulang App.tsx secara UTUH sampai valid: export default, return JSX lengkap, StyleSheet.create ditutup. Satu file saja.';
   const MAX_AUTO_FIX = 2;
   const fixAttemptsByProject = {};
+  // Proyek yang sudah dibuatkan tampilan web otomatis (cegah pemicuan berulang).
+  const webPreviewAutoReq = {};
 
   function resetAutoFix(projectId) {
     if (projectId) fixAttemptsByProject[projectId] = 0;
@@ -883,6 +885,21 @@ const Preview = (() => {
     if (snackMode) {
       frame.removeAttribute('src');
       const diag = Snack.diagnoseProject(project);
+      // OTOMATIS untuk pengguna awam: app mobile "berat" (pakai paket native)
+      // sering macet di Snack-web. Tanpa perlu prompt teknis, KARSA langsung
+      // membuatkan tampilan web (sekali per proyek) → muncul andal di tab Web.
+      if (diag.ok && Snack.snackWebRisky(project) && !hasUsableWebPreview(project.files)
+        && !webPreviewAutoReq[project.id] && !isAiBusy()
+        && typeof AI !== 'undefined' && AI.requestWebPreview) {
+        webPreviewAutoReq[project.id] = true;
+        showPreviewStatus({
+          title: 'Menyiapkan tampilan…',
+          body: 'Aplikasi ini cukup kompleks untuk preview HP langsung. KARSA sedang membuat tampilan web otomatis — sebentar ya, tak perlu lakukan apa pun.',
+          spinning: true,
+        });
+        AI.requestWebPreview();
+        return; // jangan muat Snack yang akan macet
+      }
       frame.srcdoc = Snack.buildEmbedPage(project);
       if (diag.ok) {
         hidePreviewStatus();

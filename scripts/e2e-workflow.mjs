@@ -140,6 +140,11 @@ console.log('\n=== 2c) MOBILE: arrow component (implicit return) valid ===');
   const project = { name: 'Arrow', projectType: 'mobile', files: { 'App.tsx': arrowApp, 'package.json': JSON.stringify({ dependencies: { expo: '~51' } }) } };
   const diag = sandbox.Snack.diagnoseProject(project);
   check(diag.ok, 'arrow component diagnose OK (tak salah-vonis "belum ada return")' + (diag.ok ? '' : ' → ' + JSON.stringify(diag.errors)));
+  // Deteksi "berat": app dgn paket native → risky (picu tampilan web otomatis);
+  // app dgn react-native bawaan saja → tidak.
+  const heavy = { files: { 'App.tsx': 'import AsyncStorage from "@react-native-async-storage/async-storage";\nimport { View, Text } from "react-native";\nexport default function App(){return (<View><Text>monitor tinggi badan anak yg panjang</Text></View>);}' } };
+  check(sandbox.Snack.snackWebRisky(heavy) === true, 'app pakai async-storage → terdeteksi berat (auto tampilan web)');
+  check(sandbox.Snack.snackWebRisky(project) === false, 'app react-native bawaan → tidak berat');
 }
 
 // ============ 2d) EXPO: import npm WAJIB terdaftar di package.json deps ============

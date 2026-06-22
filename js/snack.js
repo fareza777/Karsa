@@ -265,6 +265,14 @@ const Snack = (() => {
     return !!buildSnackFiles(project);
   }
 
+  // App "berat" untuk Snack-web: meng-import paket npm di luar bawaan
+  // (react/react-native/expo). Paket native (async-storage, dll) sering bikin
+  // Snack-web di dalam iframe lambat/macet → lebih baik tampilkan versi web.
+  function snackWebRisky(project) {
+    const files = (project && project.files) || {};
+    return missingNpmDeps(files, {}).length > 0;
+  }
+
   function openExternal(project, platform) {
     const url = buildOpenUrl(project, platform || 'mydevice');
     if (!url) {
@@ -277,5 +285,5 @@ const Snack = (() => {
     showToast('Snack dibuka di tab baru — scan QR untuk Expo Go di HP. 📱', 'ok');
   }
 
-  return { buildSnackFiles, buildOpenUrl, buildEmbedPage, canPreview, openExternal, diagnoseProject };
+  return { buildSnackFiles, buildOpenUrl, buildEmbedPage, canPreview, snackWebRisky, openExternal, diagnoseProject };
 })();
