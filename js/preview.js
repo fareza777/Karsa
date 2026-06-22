@@ -507,6 +507,9 @@ const Preview = (() => {
   const fixAttemptsByProject = {};
   // Proyek yang sudah dibuatkan tampilan web otomatis (cegah pemicuan berulang).
   const webPreviewAutoReq = {};
+  // Verifikasi hot-swap CSS: berapa ack yang ditunggu + timer jaring reload.
+  let hotSwapAckPending = 0;
+  let hotSwapFallbackTimer = null;
 
   function resetAutoFix(projectId) {
     if (projectId) fixAttemptsByProject[projectId] = 0;
@@ -842,6 +845,12 @@ const Preview = (() => {
     const cssFiles = (files || []).filter((f) => fileExt(f.path) === 'css');
     if (!cssFiles.length || cssFiles.length !== (files || []).length) return false;
     if (!cssFiles.every((f) => cssLinkedInEntry(project, f.path))) return false;
+    // Hitung berapa swap yang harus diakui iframe; jika ada yang TAK ketemu
+    // <style>-nya (ok=false) atau iframe diam → reload penuh sbg jaring agar
+    // perubahan PASTI terlihat (cegah "CSS di-apply tapi tampilan tak berubah").
+    hotSwapAckPending = cssFiles.length;
+    clearTimeout(hotSwapFallbackTimer);
+    hotSwapFallbackTimer = setTimeout(() => { if (hotSwapAckPending > 0) refresh(); }, 300);
     cssFiles.forEach((f) => {
       const css = project.files[f.path] !== undefined ? project.files[f.path] : f.code;
       frame.contentWindow.postMessage({ __karsa_css: { path: f.path, css: css } }, '*');
@@ -1186,6 +1195,15 @@ const Preview = (() => {
     if (data.__karsa_pvstore && data.__karsa_pvstore.id) {
       // #A1 Persist data localStorage preview (per proyek) agar bertahan saat reload editor.
       try { sessionStorage.setItem('karsa.pv.' + data.__karsa_pvstore.id, String(data.__karsa_pvstore.data || '{}')); } catch (e) { /* kuota — abaikan */ }
+      return;
+    }
+    if (data.__karsa_css_applied) {
+      // Hot-swap sukses (style ketemu) → kurangi pending; bila ada yg gagal
+      // (ok=false), biarkan timer jaring reload penuh agar perubahan terlihat.
+      if (data.__karsa_css_applied.ok && hotSwapAckPending > 0) {
+        hotSwapAckPending -= 1;
+        if (hotSwapAckPending === 0) clearTimeout(hotSwapFallbackTimer);
+      }
       return;
     }
     if (data.__karsa_scroll) {
