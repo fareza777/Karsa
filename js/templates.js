@@ -992,7 +992,6 @@ LAYANAN.forEach((l) => {
           expo: '~52.0.0',
           react: '18.3.1',
           'react-native': '0.76.3',
-          'expo-status-bar': '~2.0.0',
         },
       }, null, 2),
       'app.json': JSON.stringify({
@@ -1007,15 +1006,14 @@ LAYANAN.forEach((l) => {
           android: { adaptiveIcon: { backgroundColor: '#6366f1' } },
         },
       }, null, 2),
-      'App.tsx': `import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+      'App.tsx': `import { StatusBar, StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Halo, Mobile! 👋</Text>
       <Text style={styles.sub}>Edit App.tsx lalu lihat preview Snack.</Text>
-      <StatusBar style="auto" />
+      <StatusBar barStyle="dark-content" />
     </View>
   );
 }
@@ -1052,7 +1050,7 @@ const styles = StyleSheet.create({
         version: '1.0.0',
         main: 'expo/AppEntry.js',
         scripts: { start: 'expo start', android: 'expo run:android' },
-        dependencies: { expo: '~52.0.0', react: '18.3.1', 'react-native': '0.76.3', 'expo-status-bar': '~2.0.0' },
+        dependencies: { expo: '~52.0.0', react: '18.3.1', 'react-native': '0.76.3' },
       }, null, 2),
       'app.json': JSON.stringify({
         expo: {
@@ -1075,8 +1073,7 @@ const styles = StyleSheet.create({
         build: { production: { android: { buildType: 'app-bundle' } } },
         submit: { production: {} },
       }, null, 2),
-      'App.tsx': `import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+      'App.tsx': `import { StatusBar, StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
   return (
@@ -1084,7 +1081,7 @@ export default function App() {
       <Text style={styles.emoji}>🏪</Text>
       <Text style={styles.title}>Siap Play Store</Text>
       <Text style={styles.sub}>Edit app ini, lalu buka checklist 🏪 di KARSA.</Text>
-      <StatusBar style="auto" />
+      <StatusBar barStyle="dark-content" />
     </View>
   );
 }

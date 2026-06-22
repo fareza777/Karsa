@@ -189,10 +189,33 @@ const Snack = (() => {
     const filesParam = encodeURIComponent(JSON.stringify(snackFiles));
     if (filesParam.length > 140000) return null;
     const plat = platform || 'web';
+    let pkg = {};
+    try { pkg = JSON.parse((snackFiles['package.json'] && snackFiles['package.json'].contents) || '{}'); } catch (e) { pkg = {}; }
+    const depStr = snackDepsString(pkg);
+    const sdkVer = snackSdkVersion(pkg);
     return (
       'https://snack.expo.dev?platform=' + plat +
-      '&preview=true&supportedPlatforms=web,mydevice,ios,android&theme=light&files=' + filesParam
+      '&preview=true&supportedPlatforms=web,mydevice,ios,android&theme=light' +
+      (depStr ? '&dependencies=' + encodeURIComponent(depStr) : '') +
+      (sdkVer ? '&sdkVersion=' + encodeURIComponent(sdkVer) : '') +
+      '&files=' + filesParam
     );
+  }
+
+  // Daftar dependency + versi SDK untuk embed. Embed Snack MENGABAIKAN file
+  // package.json untuk resolusi — deps harus lewat atribut data-snack-dependencies
+  // (format "name@version,..."). react/react-native/expo disediakan SDK → dilewati.
+  const SDK_PROVIDED = new Set(['react', 'react-native', 'react-dom', 'expo']);
+  function snackDepsString(pkg) {
+    const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+    return Object.keys(deps)
+      .filter((n) => !SDK_PROVIDED.has(n))
+      .map((n) => n + '@' + (deps[n] || '*'))
+      .join(',');
+  }
+  function snackSdkVersion(pkg) {
+    const m = String((pkg.dependencies && pkg.dependencies.expo) || '').match(/(\d+)/);
+    return m ? m[1] + '.0.0' : '';
   }
 
   function buildEmbedPage(project) {
@@ -205,11 +228,18 @@ const Snack = (() => {
       return buildWaitingPage();
     }
     const filesAttr = encodeURIComponent(JSON.stringify(snackFiles));
+    let pkg = {};
+    try { pkg = JSON.parse((snackFiles['package.json'] && snackFiles['package.json'].contents) || '{}'); } catch (e) { pkg = {}; }
+    const depStr = snackDepsString(pkg);
+    const sdkVer = snackSdkVersion(pkg);
     return '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">' +
       '<meta name="viewport" content="width=device-width,initial-scale=1">' +
       '<style>html,body{margin:0;height:100%;background:#fafafa}</style></head><body>' +
       SNACK_ERROR_BRIDGE +
-      '<div data-snack-files="' + filesAttr + '" data-snack-platform="web" data-snack-preview="true" ' +
+      '<div data-snack-files="' + filesAttr + '"' +
+      (depStr ? ' data-snack-dependencies="' + depStr + '"' : '') +
+      (sdkVer ? ' data-snack-sdkVersion="' + sdkVer + '"' : '') +
+      ' data-snack-platform="web" data-snack-preview="true" ' +
       'data-snack-theme="light" data-snack-supportedplatforms="web,mydevice" ' +
       'style="height:100%;width:100%;overflow:hidden"></div>' +
       '<script async src="https://snack.expo.dev/embed.js"><\/script></body></html>';
