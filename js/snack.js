@@ -187,7 +187,10 @@ const Snack = (() => {
     const snackFiles = buildSnackFiles(project);
     if (!snackFiles) return null;
     const filesParam = encodeURIComponent(JSON.stringify(snackFiles));
-    if (filesParam.length > 140000) return null;
+    // Snack eksternal menaruh seluruh file di URL → header besar. Server menolak
+    // (HTTP 431) jika kepanjangan. Batasi konservatif; proyek besar pakai preview
+    // di dalam KARSA (embed via atribut, tanpa batas URL ini).
+    if (filesParam.length > 8000) return null;
     const plat = platform || 'web';
     let pkg = {};
     try { pkg = JSON.parse((snackFiles['package.json'] && snackFiles['package.json'].contents) || '{}'); } catch (e) { pkg = {}; }
@@ -265,7 +268,9 @@ const Snack = (() => {
   function openExternal(project, platform) {
     const url = buildOpenUrl(project, platform || 'mydevice');
     if (!url) {
-      showToast('Proyek terlalu besar untuk Snack — coba kurangi file atau ekspor ZIP.', 'warn');
+      // Proyek terlalu besar untuk URL Snack (akan kena HTTP 431). Preview di
+      // dalam KARSA tetap jalan — arahkan ke sana, bukan buka tab yang rusak.
+      showToast('Proyek terlalu besar untuk dibuka di tab Snack. Pakai preview di panel kanan KARSA (tab App.tsx), atau ekspor ZIP untuk jalankan lokal.', 'warn');
       return;
     }
     window.open(url, '_blank');
