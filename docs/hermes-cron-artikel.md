@@ -25,9 +25,9 @@ Buat **1 artikel SEO baru** per run cron, dalam Bahasa Indonesia, terintegrasi k
 |---------|-------|
 | Frekuensi | **3 artikel per minggu** |
 | Hari | **Senin, Rabu, Jumat** |
-| Jam | **07:00 WIB** |
-| Cron (WIB) | `0 7 * * 1,3,5` |
-| Cron (UTC) | `0 0 * * 1,3,5` |
+| Jam | **10:00 WIB** |
+| Cron (WIB) | `0 10 * * 1,3,5` |
+| Cron (UTC) | `0 3 * * 1,3,5` |
 | Output per run | Tepat **1 artikel baru** |
 
 ### Guard: jangan double publish
