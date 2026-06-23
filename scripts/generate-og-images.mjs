@@ -1,7 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ARTICLE_PATHS, SEO_ROUTES, SITE } from './seo-routes.mjs';
+import sharp from 'sharp';
+import { ARTICLE_PATHS, HUB_PATHS, SEO_ROUTES } from './seo-routes.mjs';
 
 function escapeXml(value) {
   return String(value)
@@ -66,37 +67,46 @@ ${titleNodes}
 `;
 }
 
-export function generateOgImages(targetDir = join(process.cwd(), 'og')) {
+async function writeSvgPng(svg, svgPath, pngPath) {
+  writeFileSync(svgPath, svg, 'utf8');
+  await sharp(Buffer.from(svg)).png({ compressionLevel: 9 }).toFile(pngPath);
+}
+
+export async function generateOgImages(targetDir = join(process.cwd(), 'og')) {
   mkdirSync(targetDir, { recursive: true });
   const written = [];
 
   for (const path of ARTICLE_PATHS) {
     const route = SEO_ROUTES[path];
     const slug = path.split('/').pop();
-    const file = join(targetDir, `${slug}.svg`);
-    writeFileSync(
-      file,
-      renderOgSvg({
-        title: route.ogTitle,
-        subtitle: route.category,
-        slug,
-      }),
-      'utf8'
-    );
-    written.push(file);
+    const svg = renderOgSvg({ title: route.ogTitle, subtitle: route.category, slug });
+    const svgPath = join(targetDir, `${slug}.svg`);
+    const pngPath = join(targetDir, `${slug}.png`);
+    await writeSvgPng(svg, svgPath, pngPath);
+    written.push(svgPath, pngPath);
   }
 
-  const homeOg = join(process.cwd(), 'og.svg');
-  writeFileSync(
-    homeOg,
-    renderOgSvg({
-      title: 'Dari ide, jadi aplikasi',
-      subtitle: 'Pembuat aplikasi & website dengan AI — Bahasa Indonesia',
-      slug: 'home',
-    }),
-    'utf8'
-  );
-  written.push(homeOg);
+  for (const path of HUB_PATHS) {
+    const route = SEO_ROUTES[path];
+    const slug = path.replace(/^\//, '');
+    const svg = renderOgSvg({ title: route.ogTitle, subtitle: 'Panduan KARSA', slug });
+    const svgPath = join(targetDir, `${slug}.svg`);
+    const pngPath = join(targetDir, `${slug}.png`);
+    await writeSvgPng(svg, svgPath, pngPath);
+    written.push(svgPath, pngPath);
+  }
+
+  const homeRoute = SEO_ROUTES['/'];
+  const homeSvg = renderOgSvg({
+    title: 'Dari ide, jadi aplikasi',
+    subtitle: 'Pembuat aplikasi & website dengan AI — Bahasa Indonesia',
+    slug: 'home',
+  });
+  const rootSvg = join(process.cwd(), 'og.svg');
+  const homePng = join(targetDir, 'home.png');
+  await writeSvgPng(homeSvg, rootSvg, homePng);
+  writeFileSync(join(targetDir, 'home.svg'), homeSvg, 'utf8');
+  written.push(rootSvg, homePng, join(targetDir, 'home.svg'));
 
   return written;
 }
@@ -105,6 +115,6 @@ const isCliEntry =
   process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (isCliEntry) {
-  const files = generateOgImages();
-  console.log(`✓ ${files.length} OG SVG images generated`);
+  const files = await generateOgImages();
+  console.log(`✓ ${files.length} OG assets generated (SVG + PNG)`);
 }

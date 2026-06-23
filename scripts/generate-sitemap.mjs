@@ -1,10 +1,10 @@
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ARTICLE_PATHS, SEO_ROUTES, SITE } from './seo-routes.mjs';
+import { ARTICLE_PATHS, HUB_PATHS, SEO_ROUTES } from './seo-routes.mjs';
 
 function maxIsoDate(...dates) {
-  return dates.filter(Boolean).sort().at(-1) ?? '2026-06-01';
+  return dates.filter(Boolean).sort().at(-1) ?? '2026-06-23';
 }
 
 export function buildSitemapEntries() {
@@ -22,6 +22,16 @@ export function buildSitemapEntries() {
       priority: 1.0,
     },
   ];
+
+  for (const path of HUB_PATHS) {
+    const route = SEO_ROUTES[path];
+    entries.push({
+      loc: route.canonical,
+      lastmod: maxIsoDate(route.dateModified, latestArticleDate),
+      changefreq: 'weekly',
+      priority: 0.9,
+    });
+  }
 
   for (const path of ARTICLE_PATHS) {
     const route = SEO_ROUTES[path];

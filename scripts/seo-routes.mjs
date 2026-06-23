@@ -6,7 +6,15 @@ export const ARTICLE_PATHS = [
   '/artikel/pembuat-aplikasi-tanpa-coding',
   '/artikel/vibecoding-untuk-umkm',
   '/artikel/cara-publish-website-karsa',
+  '/artikel/apa-itu-vibecoding',
+  '/artikel/bikin-landing-page-dengan-ai',
 ];
+
+/** @type {string[]} */
+export const HUB_PATHS = ['/panduan'];
+
+/** @type {string[]} */
+export const INDEXABLE_PATHS = ['/', ...HUB_PATHS, ...ARTICLE_PATHS];
 
 /** @type {Record<string, object>} */
 export const SEO_ROUTES = {
@@ -20,9 +28,23 @@ export const SEO_ROUTES = {
       'pembuat aplikasi, vibecoding, no code Indonesia, bikin website UMKM, AI coding bahasa Indonesia, karsa, pembuat website gratis',
     ogTitle: 'KARSA — Dari Ide, Jadi Aplikasi',
     ogDescription: 'Pembuat aplikasi di browser untuk Indonesia. AI, preview langsung, publish satu klik.',
-    ogImage: `${SITE}/og.svg`,
+    ogImage: `${SITE}/og/home.png`,
     ogImageAlt: 'KARSA — pembuat aplikasi dan website dengan AI vibecoding bahasa Indonesia',
-    dateModified: '2026-06-01',
+    dateModified: '2026-06-23',
+  },
+  '/panduan': {
+    ogType: 'website',
+    title: 'Panduan KARSA — Artikel Vibecoding & No-Code Indonesia',
+    description:
+      'Kumpulan panduan KARSA: apa itu vibecoding, pembuat aplikasi tanpa coding, landing page UMKM, dan cara publish website ke internet.',
+    canonical: `${SITE}/panduan`,
+    keywords:
+      'panduan vibecoding, artikel no code Indonesia, tutorial KARSA, bikin website UMKM, pembuat aplikasi AI',
+    ogTitle: 'Panduan KARSA — Vibecoding & No-Code',
+    ogDescription: 'Artikel dan tutorial untuk mulai vibecoding, bangun landing page, dan publish dengan KARSA.',
+    ogImage: `${SITE}/og/panduan.png`,
+    ogImageAlt: 'Panduan vibecoding dan no-code dari KARSA',
+    dateModified: '2026-06-23',
   },
   '/artikel/pembuat-aplikasi-tanpa-coding': {
     ogType: 'article',
@@ -33,13 +55,15 @@ export const SEO_ROUTES = {
     keywords:
       'pembuat aplikasi tanpa coding, no code Indonesia, vibecoding pemula, bikin aplikasi tanpa programming, KARSA',
     headline: 'Pembuat aplikasi tanpa coding: panduan pemula di 2026',
+    cardTitle: 'Pembuat aplikasi tanpa coding untuk pemula',
+    cardExcerpt: 'Siapa cocok pakai vibecoding, batasannya apa, dan kapan perlu developer sungguhan.',
     ogTitle: 'Pembuat Aplikasi Tanpa Coding untuk Pemula',
     ogDescription:
       'Panduan vibecoding untuk pemula: siapa cocok pakai KARSA, batasan AI no-code, dan kapan perlu developer.',
-    ogImage: `${SITE}/og/pembuat-aplikasi-tanpa-coding.svg`,
+    ogImage: `${SITE}/og/pembuat-aplikasi-tanpa-coding.png`,
     ogImageAlt: 'Panduan pembuat aplikasi tanpa coding dengan KARSA',
     datePublished: '2026-03-15',
-    dateModified: '2026-06-01',
+    dateModified: '2026-06-23',
     category: 'Panduan',
     readMinutes: 8,
   },
@@ -52,13 +76,15 @@ export const SEO_ROUTES = {
     keywords:
       'vibecoding UMKM, katalog online UMKM, landing page warung, bikin website bisnis kecil, AI untuk UMKM Indonesia',
     headline: 'Vibecoding untuk UMKM: dari warung sampai katalog online',
+    cardTitle: 'Vibecoding untuk UMKM Indonesia',
+    cardExcerpt: 'Katalog online, form booking, dan landing page — tanpa bayar developer dari nol.',
     ogTitle: 'Vibecoding untuk UMKM Indonesia',
     ogDescription:
       'Katalog online, form booking, dan landing page promo untuk UMKM — tanpa bayar developer dari nol.',
-    ogImage: `${SITE}/og/vibecoding-untuk-umkm.svg`,
+    ogImage: `${SITE}/og/vibecoding-untuk-umkm.png`,
     ogImageAlt: 'Panduan vibecoding untuk UMKM Indonesia dengan KARSA',
     datePublished: '2026-04-02',
-    dateModified: '2026-06-01',
+    dateModified: '2026-06-23',
     category: 'UMKM',
     readMinutes: 6,
   },
@@ -71,31 +97,88 @@ export const SEO_ROUTES = {
     keywords:
       'cara publish website, subdomain gratis, custom domain KARSA, SEO website UMKM, publish karsa.work',
     headline: 'Cara publish website dari KARSA',
+    cardTitle: 'Cara publish website dari KARSA',
+    cardExcerpt: 'Subdomain gratis, custom domain, dan tips biar situs cepat diindeks Google.',
     ogTitle: 'Cara Publish Website dari KARSA',
     ogDescription:
       'Publish ke subdomain karsa.work atau domain sendiri, plus tips SEO dasar setelah go live.',
-    ogImage: `${SITE}/og/cara-publish-website-karsa.svg`,
+    ogImage: `${SITE}/og/cara-publish-website-karsa.png`,
     ogImageAlt: 'Panduan publish website dari KARSA ke internet',
     datePublished: '2026-05-10',
-    dateModified: '2026-06-01',
+    dateModified: '2026-06-23',
     category: 'Publish',
     readMinutes: 5,
+  },
+  '/artikel/apa-itu-vibecoding': {
+    ogType: 'article',
+    title: 'Apa Itu Vibecoding? Penjelasan untuk Pemula — KARSA',
+    description:
+      'Apa itu vibecoding, bedanya dengan coding biasa dan no-code, kapan cocok dipakai, dan cara mulai dengan KARSA di browser.',
+    canonical: `${SITE}/artikel/apa-itu-vibecoding`,
+    keywords:
+      'apa itu vibecoding, vibecoding adalah, AI coding Indonesia, prompt ke kode, KARSA vibecoding',
+    headline: 'Apa itu vibecoding? Penjelasan singkat untuk pemula',
+    cardTitle: 'Apa itu vibecoding?',
+    cardExcerpt: 'Definisi, perbedaan dengan coding & no-code, dan kapan vibecoding paling cocok.',
+    ogTitle: 'Apa Itu Vibecoding? Penjelasan untuk Pemula',
+    ogDescription:
+      'Pahami vibecoding: deskripsikan ide, AI tulis kode, kamu preview dan iterasi — tanpa install apa pun.',
+    ogImage: `${SITE}/og/apa-itu-vibecoding.png`,
+    ogImageAlt: 'Penjelasan vibecoding untuk pemula dengan KARSA',
+    datePublished: '2026-05-28',
+    dateModified: '2026-06-23',
+    category: 'Konsep',
+    readMinutes: 5,
+  },
+  '/artikel/bikin-landing-page-dengan-ai': {
+    ogType: 'article',
+    title: 'Cara Bikin Landing Page dengan AI Tanpa Coding — KARSA',
+    description:
+      'Cara bikin landing page dengan AI: struktur yang konversi, contoh prompt bahasa Indonesia, iterasi cepat, dan publish ke internet.',
+    canonical: `${SITE}/artikel/bikin-landing-page-dengan-ai`,
+    keywords:
+      'bikin landing page dengan AI, landing page UMKM, prompt landing page, website AI Indonesia, KARSA',
+    headline: 'Cara bikin landing page dengan AI tanpa coding',
+    cardTitle: 'Bikin landing page dengan AI',
+    cardExcerpt: 'Struktur halaman yang konversi, contoh prompt, dan publish satu klik.',
+    ogTitle: 'Cara Bikin Landing Page dengan AI',
+    ogDescription:
+      'Struktur landing page, contoh prompt, iterasi cepat di KARSA, lalu publish ke karsa.work.',
+    ogImage: `${SITE}/og/bikin-landing-page-dengan-ai.png`,
+    ogImageAlt: 'Panduan bikin landing page dengan AI menggunakan KARSA',
+    datePublished: '2026-06-15',
+    dateModified: '2026-06-23',
+    category: 'Tutorial',
+    readMinutes: 7,
   },
 };
 
 /** @type {Record<string, string[]>} */
 export const RELATED_ARTICLES = {
   '/artikel/pembuat-aplikasi-tanpa-coding': [
+    '/artikel/apa-itu-vibecoding',
     '/artikel/vibecoding-untuk-umkm',
-    '/artikel/cara-publish-website-karsa',
+    '/artikel/bikin-landing-page-dengan-ai',
   ],
   '/artikel/vibecoding-untuk-umkm': [
+    '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/pembuat-aplikasi-tanpa-coding',
     '/artikel/cara-publish-website-karsa',
   ],
   '/artikel/cara-publish-website-karsa': [
-    '/artikel/pembuat-aplikasi-tanpa-coding',
+    '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/vibecoding-untuk-umkm',
+    '/artikel/pembuat-aplikasi-tanpa-coding',
+  ],
+  '/artikel/apa-itu-vibecoding': [
+    '/artikel/pembuat-aplikasi-tanpa-coding',
+    '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/bikin-landing-page-dengan-ai': [
+    '/artikel/cara-publish-website-karsa',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/apa-itu-vibecoding',
   ],
 };
 
@@ -119,10 +202,19 @@ export function articleJsonLd(path) {
     mainEntityOfPage: { '@type': 'WebPage', '@id': route.canonical },
     inLanguage: 'id-ID',
     keywords: route.keywords,
+    articleSection: route.category,
   };
 }
 
 export function formatIdDate(isoDate) {
   const d = new Date(`${isoDate}T12:00:00`);
   return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+export function sortedArticlePaths() {
+  return [...ARTICLE_PATHS].sort(
+    (a, b) =>
+      new Date(SEO_ROUTES[b].datePublished).getTime() -
+      new Date(SEO_ROUTES[a].datePublished).getTime()
+  );
 }

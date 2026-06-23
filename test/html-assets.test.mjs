@@ -8,9 +8,12 @@ const HTML_FILES = [
   'app.html',
   'index.html',
   'admin.html',
+  'panduan.html',
   'artikel/pembuat-aplikasi-tanpa-coding.html',
   'artikel/vibecoding-untuk-umkm.html',
   'artikel/cara-publish-website-karsa.html',
+  'artikel/apa-itu-vibecoding.html',
+  'artikel/bikin-landing-page-dengan-ai.html',
 ];
 
 function localRefs(html) {

@@ -70,10 +70,14 @@ function localRefs(html) {
   return [...refs];
 }
 
-const ENTRIES = ['/', '/app', '/admin', '/artikel/cara-publish-website-karsa',
-  '/artikel/pembuat-aplikasi-tanpa-coding', '/artikel/vibecoding-untuk-umkm',
-  '/robots.txt', '/sitemap.xml', '/feed.xml', '/manifest.webmanifest',
-  '/og/pembuat-aplikasi-tanpa-coding.svg'];
+const ENTRIES = ['/', '/panduan', '/app', '/admin',
+  '/artikel/cara-publish-website-karsa',
+  '/artikel/pembuat-aplikasi-tanpa-coding',
+  '/artikel/vibecoding-untuk-umkm',
+  '/artikel/apa-itu-vibecoding',
+  '/artikel/bikin-landing-page-dengan-ai',
+  '/robots.txt', '/sitemap.xml', '/feed.xml', '/llms.txt', '/manifest.webmanifest',
+  '/og/pembuat-aplikasi-tanpa-coding.png'];
 
 async function run() {
   await new Promise((r) => server.listen(PORT, r));

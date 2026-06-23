@@ -5,8 +5,22 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Mon, 01 Jun 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Tue, 23 Jun 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Landing Page dengan AI Tanpa Coding — KARSA</title>
+      <link>https://karsa.work/artikel/bikin-landing-page-dengan-ai</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/bikin-landing-page-dengan-ai</guid>
+      <description>Cara bikin landing page dengan AI: struktur yang konversi, contoh prompt bahasa Indonesia, iterasi cepat, dan publish ke internet.</description>
+      <pubDate>Mon, 15 Jun 2026 01:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Apa Itu Vibecoding? Penjelasan untuk Pemula — KARSA</title>
+      <link>https://karsa.work/artikel/apa-itu-vibecoding</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/apa-itu-vibecoding</guid>
+      <description>Apa itu vibecoding, bedanya dengan coding biasa dan no-code, kapan cocok dipakai, dan cara mulai dengan KARSA di browser.</description>
+      <pubDate>Thu, 28 May 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Publish Website dari KARSA — Panduan</title>
       <link>https://karsa.work/artikel/cara-publish-website-karsa</link>

@@ -2,25 +2,43 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://karsa.work/</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://karsa.work/panduan</loc>
+    <lastmod>2026-06-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://karsa.work/artikel/pembuat-aplikasi-tanpa-coding</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://karsa.work/artikel/vibecoding-untuk-umkm</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://karsa.work/artikel/cara-publish-website-karsa</loc>
-    <lastmod>2026-06-01</lastmod>
+    <lastmod>2026-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://karsa.work/artikel/apa-itu-vibecoding</loc>
+    <lastmod>2026-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://karsa.work/artikel/bikin-landing-page-dengan-ai</loc>
+    <lastmod>2026-06-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

@@ -5,9 +5,12 @@
   "description": "KARSA — pembuat aplikasi berbasis browser (vibecoding)",
   "scripts": {
     "generate-og": "node scripts/generate-og-images.mjs",
+    "generate-articles": "node scripts/generate-articles.mjs",
+    "generate-panduan": "node scripts/generate-panduan.mjs",
     "generate-sitemap": "node scripts/generate-sitemap.mjs",
     "generate-feed": "node scripts/generate-feed.mjs",
-    "generate-seo": "node scripts/generate-og-images.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-feed.mjs",
+    "generate-llms": "node scripts/generate-llms.mjs",
+    "generate-seo": "node scripts/generate-og-images.mjs && node scripts/generate-articles.mjs && node scripts/generate-panduan.mjs && node scripts/generate-sitemap.mjs && node scripts/generate-feed.mjs && node scripts/generate-llms.mjs",
     "stamp": "node scripts/stamp-version.mjs",
     "build": "npm run generate-seo && npm run stamp",
     "e2e": "node scripts/e2e-workflow.mjs",
@@ -17,6 +20,7 @@
     "check": "node scripts/check-syntax.mjs"
   },
   "devDependencies": {
+    "sharp": "^0.34.2",
     "vitest": "^2.1.9"
   }
 }

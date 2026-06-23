@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   ARTICLE_PATHS,
+  HUB_PATHS,
   RELATED_ARTICLES,
   SEO_ROUTES,
   SITE,
@@ -12,14 +13,12 @@ import {
 const ROOT = join(import.meta.dirname, '..');
 
 function readHtml(relativePath) {
-  const filePath = relativePath === '/'
-    ? join(ROOT, 'index.html')
-    : join(ROOT, `${relativePath}.html`);
-  return readFileSync(filePath, 'utf8');
+  const rel = relativePath === '/' ? 'index.html' : `${relativePath.replace(/^\//, '')}.html`;
+  return readFileSync(join(ROOT, rel), 'utf8');
 }
 
 function articleFile(path) {
-  return join(ROOT, `${path}.html`);
+  return join(ROOT, `${path.replace(/^\//, '')}.html`);
 }
 
 describe('SEO routes', () => {
@@ -33,7 +32,21 @@ describe('SEO routes', () => {
     expect(html).toContain(route.ogImage);
     expect(html).toContain('"@type": "Organization"');
     expect(html).toContain('"@type": "WebSite"');
+    expect(html).toContain('"@type": "ItemList"');
     expect(html).toContain('feed.xml');
+    expect(html).toContain('/panduan');
+  });
+
+  it('/panduan hub page has collection schema', () => {
+    const route = SEO_ROUTES['/panduan'];
+    const html = readHtml('/panduan');
+    expect(html).toContain(`<title>${route.title}</title>`);
+    expect(html).toContain(route.canonical);
+    expect(html).toContain('"@type": "CollectionPage"');
+    expect(html).toContain('"@type": "ItemList"');
+    for (const path of ARTICLE_PATHS) {
+      expect(html).toContain(`href="${path}"`);
+    }
   });
 
   for (const path of ARTICLE_PATHS) {
@@ -46,11 +59,15 @@ describe('SEO routes', () => {
       expect(html).toContain(route.keywords);
       expect(html).toContain('property="og:type" content="article"');
       expect(html).toContain(route.ogImage);
+      expect(html).toContain('image/png');
       expect(html).toContain(`property="article:published_time" content="${route.datePublished}"`);
       expect(html).toContain(`property="article:modified_time" content="${route.dateModified}"`);
       expect(html).toContain('"@type": "BlogPosting"');
+      expect(html).toContain('"@type": "BreadcrumbList"');
+      expect(html).toContain('lp-breadcrumb');
       expect(html).toContain(`<time datetime="${route.datePublished}">`);
       expect(html).toContain(`<h1>${route.headline}</h1>`);
+      expect(html).toContain('href="/panduan"');
     });
 
     it(`${path} links to related articles`, () => {
@@ -60,9 +77,9 @@ describe('SEO routes', () => {
       }
     });
 
-    it(`${path} OG image exists on disk`, () => {
+    it(`${path} OG PNG exists on disk`, () => {
       const slug = path.split('/').pop();
-      expect(existsSync(join(ROOT, 'og', `${slug}.svg`))).toBe(true);
+      expect(existsSync(join(ROOT, 'og', `${slug}.png`))).toBe(true);
     });
   }
 
@@ -73,6 +90,18 @@ describe('SEO routes', () => {
       expect(json.headline).toBe(route.headline);
       expect(json.datePublished).toBe(route.datePublished);
       expect(json.mainEntityOfPage['@id']).toBe(route.canonical);
+      expect(json.image).toMatch(/\.png$/);
+    }
+  });
+
+  it('llms.txt lists all articles', () => {
+    const llms = readFileSync(join(ROOT, 'llms.txt'), 'utf8');
+    expect(llms).toContain(SITE);
+    for (const path of ARTICLE_PATHS) {
+      expect(llms).toContain(SEO_ROUTES[path].canonical);
+    }
+    for (const path of HUB_PATHS) {
+      expect(llms).toContain(SEO_ROUTES[path].canonical);
     }
   });
 });
