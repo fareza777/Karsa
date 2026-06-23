@@ -235,6 +235,10 @@ npm run generate-seo
 npm test
 ```
 
+> **Penting:** `npm run generate-seo` dijalankan **sebelum commit** (lokal/CI Hermes).
+> Vercel hanya menjalankan `stamp-version` saat deploy — tidak regenerate artikel.
+> Semua file hasil generate (`artikel/*.html`, `og/*.png`, `sitemap.xml`, dll.) **wajib di-commit**.
+
 `npm run generate-seo` menjalankan:
 - OG images (SVG + PNG)
 - Generate `artikel/*.html`
@@ -365,6 +369,7 @@ Semua harus ✅ sebelum run dianggap sukses:
 | `sharp` gagal install | `npm install sharp --force`, retry generate |
 | Git push rejected | `git pull --rebase origin main`, resolve conflict, push lagi |
 | Backlog habis | Aktifkan fase 2 auto-generate (bagian 4) |
+| Artikel 404 di live padahal sudah push | Cek Vercel deploy status — build mungkin gagal. Pastikan `artikel/{slug}.html` ada di commit. Redeploy dari dashboard Vercel jika perlu |
 
 ---
 
