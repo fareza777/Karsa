@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/stamp-version.mjs",
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
