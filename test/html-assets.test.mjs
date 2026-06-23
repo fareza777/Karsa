@@ -4,7 +4,14 @@ import { join, dirname } from 'node:path';
 
 // #A9 Smoke test integrasi: tiap referensi lokal js/css di HTML harus ada di disk,
 // dan ai-core.js wajib dimuat sebelum ai.js (urutan dependensi engine).
-const HTML_FILES = ['app.html', 'index.html', 'admin.html'];
+const HTML_FILES = [
+  'app.html',
+  'index.html',
+  'admin.html',
+  'artikel/pembuat-aplikasi-tanpa-coding.html',
+  'artikel/vibecoding-untuk-umkm.html',
+  'artikel/cara-publish-website-karsa.html',
+];
 
 function localRefs(html) {
   const refs = [];

@@ -72,7 +72,8 @@ function localRefs(html) {
 
 const ENTRIES = ['/', '/app', '/admin', '/artikel/cara-publish-website-karsa',
   '/artikel/pembuat-aplikasi-tanpa-coding', '/artikel/vibecoding-untuk-umkm',
-  '/robots.txt', '/sitemap.xml', '/manifest.webmanifest'];
+  '/robots.txt', '/sitemap.xml', '/feed.xml', '/manifest.webmanifest',
+  '/og/pembuat-aplikasi-tanpa-coding.svg'];
 
 async function run() {
   await new Promise((r) => server.listen(PORT, r));

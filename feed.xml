@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>KARSA — Panduan Vibecoding</title>
+    <link>https://karsa.work/</link>
+    <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
+    <language>id</language>
+    <lastBuildDate>Mon, 01 Jun 2026 01:00:00 GMT</lastBuildDate>
+    <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Publish Website dari KARSA — Panduan</title>
+      <link>https://karsa.work/artikel/cara-publish-website-karsa</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/cara-publish-website-karsa</guid>
+      <description>Cara publish situs dari KARSA ke subdomain karsa.work atau custom domain. Tips SEO dasar setelah go live.</description>
+      <pubDate>Sun, 10 May 2026 01:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Vibecoding untuk UMKM Indonesia — KARSA</title>
+      <link>https://karsa.work/artikel/vibecoding-untuk-umkm</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/vibecoding-untuk-umkm</guid>
+      <description>Cara UMKM pakai vibecoding: katalog online, form pesan, landing page promo, tanpa bayar developer dari nol. Contoh prompt bahasa Indonesia.</description>
+      <pubDate>Thu, 02 Apr 2026 01:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Pembuat Aplikasi Tanpa Coding untuk Pemula — KARSA</title>
+      <link>https://karsa.work/artikel/pembuat-aplikasi-tanpa-coding</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/pembuat-aplikasi-tanpa-coding</guid>
+      <description>Panduan pembuat aplikasi tanpa coding: apa itu vibecoding, siapa cocok pakai KARSA, batasan no-code AI, dan kapan perlu developer.</description>
+      <pubDate>Sun, 15 Mar 2026 01:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
