@@ -145,6 +145,11 @@ console.log('\n=== 2c) MOBILE: arrow component (implicit return) valid ===');
   const heavy = { files: { 'App.tsx': 'import AsyncStorage from "@react-native-async-storage/async-storage";\nimport { View, Text } from "react-native";\nexport default function App(){return (<View><Text>monitor tinggi badan anak yg panjang</Text></View>);}' } };
   check(sandbox.Snack.snackWebRisky(heavy) === true, 'app pakai async-storage → terdeteksi berat (auto tampilan web)');
   check(sandbox.Snack.snackWebRisky(project) === false, 'app react-native bawaan → tidak berat');
+  // #6 Embed mengirim dependency dgn VERSI ter-pin (bukan '*') utk paket umum.
+  const navApp = { files: { 'App.tsx': 'import { NavigationContainer } from "@react-navigation/native";\nimport { View, Text } from "react-native";\nexport default function App(){return (<View><Text>navigasi antar layar yang panjang</Text></View>);}', 'package.json': JSON.stringify({ dependencies: { expo: '~52.0.0', react: '18.3.1', 'react-native': '0.76.3' } }) } };
+  const navPage = sandbox.Snack.buildEmbedPage(navApp);
+  const navDep = (navPage.match(/data-snack-dependencies="([^"]*)"/) || [])[1] || '';
+  check(/@react-navigation\/native@\^?\d/.test(navDep), 'embed kirim @react-navigation/native dgn versi ter-pin' + (navDep ? ' (' + navDep + ')' : ''));
 }
 
 // ============ 2d) EXPO: import npm WAJIB terdaftar di package.json deps ============

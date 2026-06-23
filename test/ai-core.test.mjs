@@ -129,6 +129,21 @@ describe('edit terarah (SEARCH/REPLACE)', () => {
     expect(res.missing).toBe(1);
   });
 
+  it('#4 cocok walau beda gaya kutip (lurus vs lengkung)', () => {
+    const files = { 'app.js': 'const judul = ‘Halo Dunia’;\n' }; // kutip lengkung
+    const resp = ['```js edit=app.js', '<<<<<<< SEARCH', "const judul = 'Halo Dunia';", '=======', "const judul = 'Halo KARSA';", '>>>>>>> REPLACE', '```'].join('\n');
+    const res = resolveEdits(files, 'app.js', parseEditBlocks(resp)[0].edits);
+    expect(res.ok).toBe(true);
+    expect(res.code).toContain('Halo KARSA');
+  });
+
+  it('#4 flexible match tetap menolak bila ambigu', () => {
+    const files = { 'app.js': "x = 'a';\ny = 'a';\nx = 'a';\n" };
+    const resp = ['```js edit=app.js', '<<<<<<< SEARCH', "x = 'a';", '=======', "x = 'b';", '>>>>>>> REPLACE', '```'].join('\n');
+    const res = resolveEdits(files, 'app.js', parseEditBlocks(resp)[0].edits);
+    expect(res.ok).toBe(false); // muncul 2× → tak menebak
+  });
+
   it('#3 menolak SEARCH ambigu (muncul >1×)', () => {
     const ambResp = [
       '```js edit=app.js',

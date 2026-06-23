@@ -1103,7 +1103,8 @@ const AI = (() => {
 
     const history = getHistory();
     const useDirect = !!settings.apiKey;
-    const modelUsed = MODEL_FAST; // lanjutan: cepat & deterministik, hindari reasoning
+    let modelUsed = MODEL_FAST; // lanjutan: cepat & deterministik, hindari reasoning
+    let escalated = false; // #1 eskalasi sekali ke model pintar bila mentok
     abortCtrl = new AbortController();
     setBusy(true, 'Melanjutkan tulis…');
 
@@ -1127,11 +1128,23 @@ const AI = (() => {
           messages: apiMessages, modelUsed, useDirect,
           signal: abortCtrl.signal, bubble, onPhase: () => {},
         });
-        if (!result.visible.trim()) { stalled = true; break; }
+        const noOutput = !result.visible.trim();
         const before = accumulatedVisible;
-        accumulatedVisible = mergeContinuedOutput(accumulatedVisible, result.visible);
+        if (!noOutput) accumulatedVisible = mergeContinuedOutput(accumulatedVisible, result.visible);
         const fp = mergeFingerprint(accumulatedVisible);
-        if (fp === lastMergeFp || accumulatedVisible === before) { stalled = true; break; } // tak ada kemajuan
+        const noProgress = noOutput || fp === lastMergeFp || accumulatedVisible === before;
+        if (noProgress) {
+          // #1 Model cepat mentok → coba SEKALI dgn model lebih pintar (M3)
+          // sebelum menyerah; sering menuntaskan yang gagal di fast-model.
+          if (!escalated && modelUsed !== MODEL_SMART) {
+            escalated = true;
+            modelUsed = MODEL_SMART;
+            setBusy(true, 'Mencoba dengan model lebih teliti…');
+            continue;
+          }
+          stalled = true;
+          break;
+        }
         lastMergeFp = fp;
         renderAssistantHtml(bubble, accumulatedVisible);
         storeMergedFiles(bubble, accumulatedVisible);

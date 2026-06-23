@@ -168,14 +168,27 @@
     return blocks;
   }
 
+  // #4 Pencocokan luwes: toleran beda spasi/indentasi DAN beda gaya kutip
+  // (lurus ' " ` vs lengkung), dengan penjaga keunikan agar tak salah-ganti.
+  const Q_CLASS = '[\'"`‘’“”]';
   function matchFlexible(haystack, needle) {
     const trimmed = (needle || '').trim();
     if (!trimmed) return null;
-    const esc = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+    let esc = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+    esc = esc.replace(/['"`‘’“”]/g, Q_CLASS); // kutip apa pun dianggap setara
     try {
       const re = new RegExp(esc);
       const mm = re.exec(haystack);
-      if (mm) return { start: mm.index, end: mm.index + mm[0].length };
+      if (!mm) return null;
+      // Keunikan: bila pola cocok lebih dari sekali, JANGAN menebak lokasi.
+      const reg = new RegExp(esc, 'g');
+      let n = 0; let x;
+      while ((x = reg.exec(haystack)) !== null) {
+        n++;
+        if (x.index === reg.lastIndex) reg.lastIndex++;
+        if (n > 1) break;
+      }
+      return n === 1 ? { start: mm.index, end: mm.index + mm[0].length } : null;
     } catch (e) { /* regex gagal — abaikan */ }
     return null;
   }
