@@ -163,17 +163,32 @@
   text-transform: uppercase;
   letter-spacing: .5px;
 }
-.field input[type="text"] {
+.field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]) {
   width: 100%;
   padding: 10px 14px;
   background: var(--bg-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   font-size: 14px;
+  color: var(--text);
   outline: none;
   transition: border-color var(--transition);
 }
-.field input[type="text"]:focus { border-color: var(--accent); }
+.field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]):focus {
+  border-color: var(--accent);
+}
+.field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"])::placeholder {
+  color: var(--muted);
+  opacity: .75;
+}
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-3) inset;
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  transition: background-color 9999s ease-out;
+}
 .field-error { color: var(--danger); font-size: 12px; margin-top: 5px; min-height: 16px; }
 .modal-hint { font-size: 12px; margin-top: 10px; line-height: 1.45; }
 .modal-hint.muted { color: var(--muted); }
