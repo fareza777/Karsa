@@ -8,6 +8,11 @@ const App = (() => {
     Dashboard.render();
   }
 
+  function lastProjectStorageKey() {
+    const uid = typeof Auth !== 'undefined' && Auth.isLoggedIn() ? Auth.getUser().id : 'guest';
+    return `karsa.lastProject:${uid}`;
+  }
+
   function openProject(id) {
     State.setCurrentProject(id);
     const project = State.getCurrentProject();
@@ -32,7 +37,7 @@ const App = (() => {
         || Object.keys(project.files)[0];
       if (entry) Tabs.open(entry);
     }
-    try { localStorage.setItem('karsa.lastProject', id); } catch (e) { /* abaikan */ } // #B8
+    try { localStorage.setItem(lastProjectStorageKey(), id); } catch (e) { /* abaikan */ }
     const a = analyzeProjectFiles(project.files);
     const isMobileLike = project.projectType === 'mobile' || project.projectType === 'playstore';
     Preview.setEngine(Preview.pickPreviewEngine(project));
@@ -539,7 +544,12 @@ const App = (() => {
     // Muat proyek tamu dari IndexedDB; akun login di-hydrate ulang di Auth.init
     try {
       if (typeof Storage !== 'undefined' && Storage.setActiveUser) Storage.setActiveUser(null);
-      State.hydrate(await Storage.initProjects(null));
+      let guestList = await Storage.initProjects(null);
+      if (Storage.pruneGuestAgainstUserCaches) {
+        guestList = await Storage.pruneGuestAgainstUserCaches(guestList);
+        Storage.saveProjects(guestList);
+      }
+      State.hydrate(guestList);
     } catch (e) { /* fallback sudah di Storage */ }
     // Langkah daring bersifat best-effort: kegagalan jaringan (Auth/Plan/Cloud)
     // TAK BOLEH menggagalkan boot IDE. Tanpa ini satu hiccup jaringan = layar mati.
@@ -558,10 +568,10 @@ const App = (() => {
     try { setupInstallPrompt(); } catch (e) { /* abaikan */ }
     showDashboard();
     const imported = importFromHash();
-    // #B8 Lanjut kerja: buka proyek terakhir bila tak ada impor dari tautan.
-    if (!imported) {
+    // #B8 Lanjut kerja: buka proyek terakhir hanya saat login (hindari auto-masuk proyek tamu/akun lain).
+    if (!imported && typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
       try {
-        const last = localStorage.getItem('karsa.lastProject');
+        const last = localStorage.getItem(lastProjectStorageKey());
         if (last && State.getProjects().some((p) => p.id === last)) openProject(last);
       } catch (e) { /* abaikan */ }
     }

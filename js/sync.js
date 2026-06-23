@@ -347,7 +347,17 @@ const CloudSync = (() => {
       Storage.saveProjects(State.getProjects());
     }
     await switchLocalUser(null);
+    // Buang proyek milik akun yang logout dari cache tamu (sisa bug migrasi lama).
+    if (uid && typeof Storage !== 'undefined' && Storage.loadProjectsForUser) {
+      const prevIds = new Set((await Storage.loadProjectsForUser(uid)).map((p) => p.id));
+      const guest = State.getProjects().filter((p) => !prevIds.has(p.id));
+      if (guest.length !== State.getProjects().length) {
+        State.replaceProjects(guest);
+        Storage.saveProjects(guest);
+      }
+    }
     try { localStorage.removeItem(LAST_USER_KEY); } catch (e) { /* abaikan */ }
+    try { localStorage.removeItem(`karsa.lastProject:${uid}`); } catch (e) { /* abaikan */ }
     setStatus('hidden');
     if (typeof Dashboard !== 'undefined') Dashboard.render();
   }

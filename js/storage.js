@@ -185,8 +185,44 @@ const Storage = (() => {
     }
   }
 
+  async function loadProjectsForUser(userId) {
+    if (!userId) return [];
+    const rec = projectsRec(userId);
+    if (!idbSupported()) return [];
+    try {
+      const arr = await idbGet(rec);
+      return Array.isArray(arr) ? arr.filter(validProject) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async function pruneGuestAgainstUserCaches(currentGuest) {
+    if (!idbSupported()) return currentGuest;
+    try {
+      const db = await openDB();
+      const userKeys = await new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, 'readonly');
+        const req = tx.objectStore(STORE).getAllKeys();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+      const ownedIds = new Set();
+      for (const key of userKeys) {
+        if (typeof key !== 'string' || !key.startsWith('projects:u:')) continue;
+        const uid = key.slice('projects:u:'.length);
+        (await loadProjectsForUser(uid)).forEach((p) => ownedIds.add(p.id));
+      }
+      if (!ownedIds.size) return currentGuest;
+      return (currentGuest || []).filter((p) => p && p.id && !ownedIds.has(p.id));
+    } catch (e) {
+      return currentGuest;
+    }
+  }
+
   return {
-    loadProjects, initProjects, saveProjects, estimateProjectsBytes, loadSettings, saveSettings,
+    loadProjects, initProjects, loadProjectsForUser, pruneGuestAgainstUserCaches,
+    saveProjects, estimateProjectsBytes, loadSettings, saveSettings,
     idbSupported, setActiveUser, getActiveUserId,
   };
 })();
