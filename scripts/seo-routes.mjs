@@ -8,6 +8,7 @@ export const ARTICLE_PATHS = [
   '/artikel/cara-publish-website-karsa',
   '/artikel/apa-itu-vibecoding',
   '/artikel/bikin-landing-page-dengan-ai',
+  '/artikel/katalog-produk-online-umkm',
 ];
 
 /** @type {string[]} */
@@ -151,6 +152,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 7,
   },
+  '/artikel/katalog-produk-online-umkm': {
+    ogType: 'article',
+    title: 'Cara Bikin Katalog Produk Online untuk UMKM — KARSA',
+    description:
+      'Panduan bikin katalog produk online untuk UMKM: struktur halaman, foto, harga, tombol chat WhatsApp, dan contoh prompt KARSA bahasa Indonesia.',
+    canonical: `${SITE}/artikel/katalog-produk-online-umkm`,
+    keywords:
+      'katalog produk online UMKM, katalog online gratis, katalog WhatsApp, etalase digital UMKM, bikin katalog tanpa coding, KARSA',
+    headline: 'Katalog produk online untuk UMKM: dari foto WhatsApp jadi etalase digital',
+    cardTitle: 'Katalog produk online UMKM',
+    cardExcerpt: 'Struktur katalog, foto, harga, tombol WhatsApp — tanpa bayar developer.',
+    ogTitle: 'Katalog Produk Online untuk UMKM',
+    ogDescription:
+      'Ubah galeri foto WhatsApp jadi katalog online rapi dengan KARSA — prompt bahasa Indonesia, publish gratis.',
+    ogImage: `${SITE}/og/katalog-produk-online-umkm.png`,
+    ogImageAlt: 'Panduan bikin katalog produk online untuk UMKM dengan KARSA',
+    datePublished: '2026-06-23',
+    dateModified: '2026-06-23',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -179,6 +201,11 @@ export const RELATED_ARTICLES = {
     '/artikel/cara-publish-website-karsa',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/apa-itu-vibecoding',
+  ],
+  '/artikel/katalog-produk-online-umkm': [
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/cara-publish-website-karsa',
   ],
 };
 
