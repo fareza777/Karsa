@@ -78,13 +78,16 @@ const Auth = (() => {
     });
     const { data } = await client.auth.getSession();
     user = data.session?.user || null;
-    if (user && typeof CloudSync !== 'undefined') {
-      CloudSync.purgeLocalTombstones().then((purged) => {
-        if (purged && typeof Dashboard !== 'undefined') Dashboard.render();
-      });
-      CloudSync.pullAndMerge().then((merged) => {
-        if (merged && typeof Dashboard !== 'undefined') Dashboard.render();
-      });
+    if (user) {
+      if (typeof Storage !== 'undefined' && Storage.setActiveUser) {
+        Storage.setActiveUser(user.id);
+        try { localStorage.setItem('karsa.sync.last_user_id', user.id); } catch (e) { /* abaikan */ }
+        State.hydrate(await Storage.initProjects(user.id));
+      }
+      if (typeof CloudSync !== 'undefined') {
+        await CloudSync.purgeLocalTombstones();
+        await CloudSync.pullAndMerge();
+      }
     }
     if (user && typeof Plan !== 'undefined') {
       await Plan.syncProFromCloud();
@@ -92,9 +95,13 @@ const Auth = (() => {
     }
     if (user) trackLoginOnce(user.id);
     client.auth.onAuthStateChange(async (event, session) => {
+      const prevUserId = user?.id || null;
       user = session?.user || null;
       updateUI();
       if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && user) trackLoginOnce(user.id);
+      if (event === 'SIGNED_OUT' && typeof CloudSync !== 'undefined') {
+        await CloudSync.onLogout(prevUserId);
+      }
       if (event === 'SIGNED_IN' && typeof CloudSync !== 'undefined') {
         await CloudSync.onLogin();
       }

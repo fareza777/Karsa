@@ -7,9 +7,23 @@ const Storage = (() => {
   const SETTINGS_KEY = 'karsa.settings.v1';
   const DB_NAME = 'karsa-db';
   const STORE = 'kv';
-  const PROJECTS_REC = 'projects';
+  const PROJECTS_REC = 'projects';            // legacy (migrasi sekali)
+  const GUEST_REC = 'projects:guest';
 
   let dbPromise = null;
+  let activeUserId = null;
+
+  function projectsRec(userId) {
+    return userId ? `projects:u:${userId}` : GUEST_REC;
+  }
+
+  function setActiveUser(userId) {
+    activeUserId = userId || null;
+  }
+
+  function getActiveUserId() {
+    return activeUserId;
+  }
 
   function idbSupported() {
     try { return typeof indexedDB !== 'undefined' && indexedDB !== null; }
@@ -66,15 +80,24 @@ const Storage = (() => {
   }
 
   // Boot async: muat proyek dari IndexedDB; migrasi dari localStorage lama sekali jalan.
-  async function initProjects() {
+  async function initProjects(forUserId) {
+    if (forUserId !== undefined) setActiveUser(forUserId);
+    const rec = projectsRec(activeUserId);
     if (!idbSupported()) return loadProjectsLS();
     try {
-      let arr = await idbGet(PROJECTS_REC);
-      // Migrasi dari localStorage lama bila IDB belum ada / masih kosong tapi LS berisi
+      let arr = await idbGet(rec);
+      // Migrasi legacy global → guest (sekali)
+      if ((!Array.isArray(arr) || arr.length === 0) && rec === GUEST_REC) {
+        const legacy = await idbGet(PROJECTS_REC);
+        if (Array.isArray(legacy) && legacy.length) {
+          await idbSet(GUEST_REC, legacy);
+          arr = legacy;
+        }
+      }
       if (!Array.isArray(arr) || arr.length === 0) {
-        const ls = loadProjectsLS();
+        const ls = rec === GUEST_REC ? loadProjectsLS() : [];
         if (ls.length) {
-          await idbSet(PROJECTS_REC, ls);
+          await idbSet(rec, ls);
           try { localStorage.removeItem(PROJECTS_KEY); } catch (e) { /* abaikan */ }
           arr = ls;
         } else {
@@ -84,7 +107,7 @@ const Storage = (() => {
       return arr.filter(validProject);
     } catch (err) {
       console.error('KARSA: IndexedDB gagal — pakai localStorage', err);
-      return loadProjectsLS();
+      return rec === GUEST_REC ? loadProjectsLS() : [];
     }
   }
 
@@ -107,7 +130,7 @@ const Storage = (() => {
       }
     }
     // IndexedDB: tulis async (fire-and-forget); kuota jauh lebih besar.
-    idbSet(PROJECTS_REC, projects)
+    idbSet(projectsRec(activeUserId), projects)
       .then(() => maybeWarnQuota())
       .catch((err) => {
         console.error('KARSA: gagal menyimpan ke IndexedDB', err);
@@ -162,5 +185,8 @@ const Storage = (() => {
     }
   }
 
-  return { loadProjects, initProjects, saveProjects, estimateProjectsBytes, loadSettings, saveSettings, idbSupported };
+  return {
+    loadProjects, initProjects, saveProjects, estimateProjectsBytes, loadSettings, saveSettings,
+    idbSupported, setActiveUser, getActiveUserId,
+  };
 })();

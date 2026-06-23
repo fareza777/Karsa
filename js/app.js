@@ -536,8 +536,11 @@ const App = (() => {
     $('#auto-run-toggle').checked = settings.autoRun;
     // #B4 Tampilkan skeleton selama proyek dimuat dari IndexedDB
     if (typeof Dashboard !== 'undefined' && Dashboard.renderSkeletons) Dashboard.renderSkeletons(4);
-    // Muat proyek dari IndexedDB (kuota besar) + migrasi dari localStorage lama
-    try { State.hydrate(await Storage.initProjects()); } catch (e) { /* fallback sudah di Storage */ }
+    // Muat proyek tamu dari IndexedDB; akun login di-hydrate ulang di Auth.init
+    try {
+      if (typeof Storage !== 'undefined' && Storage.setActiveUser) Storage.setActiveUser(null);
+      State.hydrate(await Storage.initProjects(null));
+    } catch (e) { /* fallback sudah di Storage */ }
     // Langkah daring bersifat best-effort: kegagalan jaringan (Auth/Plan/Cloud)
     // TAK BOLEH menggagalkan boot IDE. Tanpa ini satu hiccup jaringan = layar mati.
     try { Auth.bindTriggers(); } catch (e) { /* abaikan */ }

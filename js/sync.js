@@ -2,14 +2,20 @@
 
 const CloudSync = (() => {
   const DELETED_KEY = 'karsa.deleted_projects.v1';
+  const LAST_USER_KEY = 'karsa.sync.last_user_id';
   const TOMBSTONE_MS = 90 * 24 * 60 * 60 * 1000;
   let pushing = false;
   let pendingPush = false; // #A4 ada perubahan yang menunggu saat offline
   let status = 'hidden'; // hidden | syncing | saved | error | offline
 
+  function deletedStorageKey() {
+    const uid = typeof Auth !== 'undefined' && Auth.getUser() ? Auth.getUser().id : null;
+    return uid ? `${DELETED_KEY}:${uid}` : `${DELETED_KEY}:guest`;
+  }
+
   function loadDeletedMap() {
     try {
-      const raw = localStorage.getItem(DELETED_KEY);
+      const raw = localStorage.getItem(deletedStorageKey());
       const parsed = raw ? JSON.parse(raw) : {};
       return typeof parsed === 'object' && parsed !== null ? parsed : {};
     } catch (e) {
@@ -24,7 +30,7 @@ const CloudSync = (() => {
       Object.entries(map).forEach(([id, at]) => {
         if (typeof at === 'number' && at >= cutoff) pruned[id] = at;
       });
-      localStorage.setItem(DELETED_KEY, JSON.stringify(pruned));
+      localStorage.setItem(deletedStorageKey(), JSON.stringify(pruned));
     } catch (e) { /* abaikan */ }
   }
 
@@ -302,7 +308,27 @@ const CloudSync = (() => {
     return false;
   }
 
+  async function switchLocalUser(userId) {
+    if (typeof Storage !== 'undefined' && Storage.setActiveUser) {
+      Storage.setActiveUser(userId);
+      const list = await Storage.initProjects(userId);
+      State.replaceProjects(list);
+      return list;
+    }
+    return State.getProjects();
+  }
+
   async function onLogin() {
+    const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
+    if (!user) return;
+
+    let lastId = null;
+    try { lastId = localStorage.getItem(LAST_USER_KEY); } catch (e) { /* abaikan */ }
+    if (lastId !== user.id) {
+      await switchLocalUser(user.id);
+    }
+    try { localStorage.setItem(LAST_USER_KEY, user.id); } catch (e) { /* abaikan */ }
+
     await purgeLocalTombstones();
     const merged = await pullAndMerge();
     if (merged) {
@@ -310,6 +336,20 @@ const CloudSync = (() => {
       showToast('Proyek disinkronkan dari cloud', 'ok');
     }
     await pushAll();
+  }
+
+  async function onLogout(userId) {
+    const uid = userId
+      || (typeof Auth !== 'undefined' && Auth.getUser() ? Auth.getUser().id : null)
+      || (typeof Storage !== 'undefined' ? Storage.getActiveUserId() : null);
+    if (uid && typeof Storage !== 'undefined') {
+      Storage.setActiveUser(uid);
+      Storage.saveProjects(State.getProjects());
+    }
+    await switchLocalUser(null);
+    try { localStorage.removeItem(LAST_USER_KEY); } catch (e) { /* abaikan */ }
+    setStatus('hidden');
+    if (typeof Dashboard !== 'undefined') Dashboard.render();
   }
 
   function onLocalChange() {
@@ -339,7 +379,7 @@ const CloudSync = (() => {
   }
 
   return {
-    pushAll, pullAndMerge, onLogin, onLocalChange, updateBadge, onAuthChange,
+    pushAll, pullAndMerge, onLogin, onLogout, onLocalChange, updateBadge, onAuthChange,
     markDeleted, deleteProjectRemote, isDeleted, filterDeletedProjects, purgeLocalTombstones,
   };
 })();
