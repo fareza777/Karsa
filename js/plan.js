@@ -214,24 +214,8 @@ const Plan = (() => {
     return data;
   }
 
-  async function verifyLicenseKey(licenseKey) {
-    const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
-    if (!user) throw new Error('Login dulu sebelum aktivasi license.');
-    const res = await fetch('/api/verify-license', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ licenseKey: String(licenseKey || '').trim(), userId: user.id }),
-    });
-    const data = await parseJsonSafe(res);
-    if (!res.ok) throw new Error(data.error || 'License tidak valid');
-    setPro(true);
-    updateAiBadge();
-    return data;
-  }
-
   function openProDialog() {
     const checkoutUrl = config.billingEnabled ? buildCheckoutUrl() : null;
-    const licenseInput = el('input', { type: 'text', placeholder: 'KARS-XXXX-XXXX-XXXX' });
     const codeInput = el('input', { type: 'text', placeholder: 'Kode aktivasi (opsional)' });
     const bodyKids = [
       el('p', { class: 'modal-desc', text: 'Pro = AI tanpa limit harian + publish tanpa watermark KARSA.' }),
@@ -257,12 +241,7 @@ const Plan = (() => {
         },
       }));
       bodyKids.push(el('p', { class: 'modal-hint muted', text: 'Setelah bayar, Pro aktif otomatis (±1 menit). Pastikan email checkout = email akun KARSA.' }));
-    }
-
-    bodyKids.push(
-      el('div', { class: 'field' }, [el('label', { text: 'License key (dari email Lemon)' }), licenseInput]),
-    );
-    if (!checkoutUrl) {
+    } else {
       bodyKids.push(el('div', { class: 'field' }, [el('label', { text: 'Kode aktivasi' }), codeInput]));
     }
 
@@ -283,24 +262,6 @@ const Plan = (() => {
           onClick: async () => {
             try {
               await verifyProCode(codeInput.value);
-              showToast('KARSA Pro aktif! ✦', 'ok');
-              closeModal();
-            } catch (err) {
-              showToast(String(err.message || err), 'error');
-              return true;
-            }
-          },
-        },
-        {
-          label: 'Aktifkan license',
-          primary: !!checkoutUrl,
-          onClick: async () => {
-            if (!licenseInput.value.trim()) {
-              showToast('Isi license key dulu.', 'warn');
-              return true;
-            }
-            try {
-              await verifyLicenseKey(licenseInput.value);
               showToast('KARSA Pro aktif! ✦', 'ok');
               closeModal();
             } catch (err) {
