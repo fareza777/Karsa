@@ -370,6 +370,7 @@ Semua harus ✅ sebelum run dianggap sukses:
 | Git push rejected | `git pull --rebase origin main`, resolve conflict, push lagi |
 | Backlog habis | Aktifkan fase 2 auto-generate (bagian 4) |
 | Artikel 404 di live padahal sudah push | Cek Vercel deploy status — build mungkin gagal. Pastikan `artikel/{slug}.html` ada di commit. Redeploy dari dashboard Vercel jika perlu |
+| Vercel: `No Output Directory named "public"` | Project Settings → Output Directory harus `.` (root), atau pastikan `vercel.json` punya `"outputDirectory": "."` |
 
 ---
 
