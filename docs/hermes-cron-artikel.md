@@ -235,9 +235,10 @@ npm run generate-seo
 npm test
 ```
 
-> **Penting:** `npm run generate-seo` dijalankan **sebelum commit** (lokal/CI Hermes).
-> Vercel hanya menjalankan `stamp-version` saat deploy — tidak regenerate artikel.
-> Semua file hasil generate (`artikel/*.html`, `og/*.png`, `sitemap.xml`, dll.) **wajib di-commit**.
+> **Penting — deploy:** `npm run generate-seo` dijalankan **sebelum commit** (lokal Hermes).
+> Vercel **tidak** menjalankan generate-seo — hanya serve file statis dari git.
+> Semua hasil generate (`artikel/*.html`, `og/*.png`, `sitemap.xml`, dll.) **wajib di-commit**.
+> **Jangan ubah** `vercel.json` (`outputDirectory` harus tetap `"."`, tanpa `buildCommand`).
 
 `npm run generate-seo` menjalankan:
 - OG images (SVG + PNG)
@@ -268,6 +269,18 @@ git push origin main
 ```
 
 Format commit: `feat(artikel): ...` — wajib prefix ini agar guard harian berfungsi.
+
+### Langkah 7 — Verifikasi live (wajib, tunggu ~60 detik setelah push)
+
+```bash
+curl -sI https://karsa.work/artikel/{slug}
+```
+
+- **HTTP 200** → deploy sukses, lanjut laporan
+- **HTTP 404** → deploy gagal/belum selesai. **Jangan** anggap run sukses.
+  - Cek Vercel Deployments (status Failed?)
+  - Laporkan ke user: *"Artikel di git OK, live belum — perlu redeploy Vercel"*
+  - **Jangan** buat artikel baru di run yang sama
 
 ---
 
@@ -355,6 +368,7 @@ Semua harus ✅ sebelum run dianggap sukses:
 - [ ] `sitemap.xml` bertambah 1 URL
 - [ ] `feed.xml` & `llms.txt` ter-update
 - [ ] Committed & pushed ke `main`
+- [ ] `curl` live URL → **HTTP 200**
 - [ ] Laporan terkirim ke user
 
 ---
@@ -370,11 +384,27 @@ Semua harus ✅ sebelum run dianggap sukses:
 | Git push rejected | `git pull --rebase origin main`, resolve conflict, push lagi |
 | Backlog habis | Aktifkan fase 2 auto-generate (bagian 4) |
 | Artikel 404 di live padahal sudah push | Cek Vercel deploy status — build mungkin gagal. Pastikan `artikel/{slug}.html` ada di commit. Redeploy dari dashboard Vercel jika perlu |
-| Vercel: `No Output Directory named "public"` | Project Settings → Output Directory harus `.` (root), atau pastikan `vercel.json` punya `"outputDirectory": "."` |
+| Vercel: `No Output Directory named "public"` | Jangan ubah ke `public`. Pastikan `vercel.json` punya `"outputDirectory": "."`. Redeploy |
+| Push OK tapi live 404 | Build Vercel gagal. Hermes **bukan** salah artikel — laporkan user untuk redeploy. Jangan ubah `vercel.json` |
 
 ---
 
-## 12. Override manual
+## 12. Catatan deploy (WAJIB dibaca — lesson learned)
+
+Kejadian gagal deploy Juni 2026 — **jangan diulang:**
+
+| ❌ Jangan | ✅ Yang benar |
+|----------|---------------|
+| Tambah `buildCommand: npm run build` di `vercel.json` | Generate SEO di Hermes **sebelum** commit |
+| Set `outputDirectory: "public"` | `outputDirectory: "."` (file di root repo) |
+| Anggap push git = artikel live | Verifikasi `curl -sI` → HTTP 200 setelah push |
+| Edit `vercel.json` tanpa instruksi user | Hanya edit `seo-routes.mjs` + `article-content.mjs` |
+
+**Hermes tidak bertanggung jawab fix Vercel** — cukup laporkan jika live 404 setelah push.
+
+---
+
+## 13. Override manual
 
 Jika user memberi topik spesifik, abaikan backlog dan pakai topik user:
 
@@ -384,4 +414,4 @@ Validasi tetap berlaku (slug unik, quality gate, test pass).
 
 ---
 
-*Terakhir diperbarui: 23 Juni 2026 — frekuensi 3×/minggu (Sen, Rab, Jum).*
+*Terakhir diperbarui: 23 Juni 2026 — frekuensi 3×/minggu (Sen, Rab, Jum), deploy fix `outputDirectory: "."`.*
