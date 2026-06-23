@@ -874,6 +874,12 @@ const AI = (() => {
     renderAssistantHtml(bubble, visible);
     attachApplyBox(bubble, visible, !fromHistory);
     addResponseCopy(bubble);
+    // #8 Lanjutan tahan-reload: respons terpotong yg dipulihkan dari riwayat
+    // tetap dapat tombol "Lanjutkan tulis" → bisa diteruskan walau halaman
+    // sudah di-refresh (isi sudah tersimpan di riwayat per-proyek).
+    if (fromHistory && visible && isResponseTruncated(visible, null)) {
+      appendContinueButton(bubble, visible);
+    }
     scrollChat();
     return bubble;
   }
