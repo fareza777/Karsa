@@ -505,8 +505,29 @@ const AI = (() => {
         '[WEB APP FUNGSIONAL: buat alat yang bisa dipakai di browser — bukan landing promosi atau mockup telepon.]',
       );
     }
+    // [JAGA STRUKTUR] Proteksi anti-"perintah sederhana bikin layout pecah":
+    // app yg SUDAH punya tata letak HP (app-shell + bottom-nav) → saat menambah/
+    // ubah FITUR (bukan buat-baru/redesign/layout-fit), JANGAN rombak struktur.
+    const curProj = State.getCurrentProject();
+    if (curProj && !isCreateLikePrompt(prompt) && !isLayoutFitRequest(prompt)
+      && !/redesign|rombak|ubah semua|ganti tema|percantik|desain ulang/i.test(prompt)
+      && hasMobileShellStructure(curProj)) {
+      parts.push(
+        '[JAGA STRUKTUR LAYOUT — WAJIB] App ini SUDAH punya tata letak HP yang benar (app-shell, header, bottom-nav/tabbar). Tambah/ubah HANYA fitur yang diminta lewat EDIT TERARAH (SEARCH/REPLACE). DILARANG menulis ulang struktur HTML layout; DILARANG mengubah CSS .app-shell/.bottom-nav/.tab-bar/.mnav/header atau memindah posisi nav. Bottom-nav WAJIB tetap horizontal & menempel di bawah (display:flex, posisi bawah). Jangan "merapikan" yang tak diminta.',
+      );
+    }
     parts.push(prompt);
     return parts.join('\n');
+  }
+
+  // App sudah punya kerangka tata letak HP (untuk proteksi struktur saat edit).
+  function hasMobileShellStructure(project) {
+    const files = (project && project.files) || {};
+    const blob = Object.keys(files)
+      .filter((p) => /\.(html|css)$/i.test(p))
+      .map((p) => files[p] || '')
+      .join('\n');
+    return /\b(app-shell|bottom-nav|tab-?bar|screen-body|mnav|nav-bottom)\b/i.test(blob);
   }
 
   function isIterationRequest(prompt, project) {
