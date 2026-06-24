@@ -552,6 +552,41 @@ const AI = (() => {
     return out;
   }
 
+  // File proyek yang disebut LITERAL di prompt (mis. dari teks error "preview/app.js").
+  function referencedFiles(prompt, files) {
+    if (!prompt) return [];
+    const hits = [];
+    Object.keys(files).forEach((p) => {
+      const base = p.split('/').pop();
+      if (prompt.includes(p) || (base && base.length > 4 && new RegExp('\\b' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(prompt))) {
+        hits.push(p);
+      }
+    });
+    return [...new Set(hits)];
+  }
+
+  // Nomor baris dari teks error: "baris 843", "line 843", ":843)".
+  function errorLineNo(prompt) {
+    const m = (prompt || '').match(/\bbaris\s*(\d+)|\bline\s*(\d+)|:(\d+)[:)]/i);
+    return m ? Number(m[1] || m[2] || m[3]) : 0;
+  }
+
+  // Kutip isi file untuk konteks error: utuh bila muat; bila besar & ada nomor
+  // baris, ambil JENDELA di sekitar baris itu agar AI lihat titik error persisnya.
+  function fileExcerptForError(content, line) {
+    if (!content) return '(kosong)';
+    if (content.length <= MAX_FILE_CHARS) return content;
+    if (line > 0) {
+      const lines = content.split('\n');
+      const from = Math.max(0, line - 45);
+      const to = Math.min(lines.length, line + 45);
+      const head = lines.slice(0, 20).join('\n');
+      const win = lines.slice(from, to).join('\n');
+      return head + '\n/* …dipotong… */\n[baris ' + (from + 1) + '–' + to + ' di sekitar error]\n' + win + '\n/* …sisa dipotong… */';
+    }
+    return content.slice(0, MAX_FILE_CHARS) + '\n/* …dipotong… */';
+  }
+
   function buildProjectContext(prompt) {
     const project = State.getCurrentProject();
     if (!project) return 'Belum ada proyek terbuka.';
@@ -564,6 +599,31 @@ const AI = (() => {
         let content = files[path] || '';
         if (content.length > MAX_FILE_CHARS) content = content.slice(0, MAX_FILE_CHARS) + '\n/* …dipotong… */';
         ctx += '\n--- ' + path + ' ---\n' + content + '\n';
+      });
+      return ctx;
+    }
+    // #A5b PERBAIKI ERROR runtime (mis. "Cannot read null.classList (baris 843)").
+    // Error JS butuh AI MELIHAT kode asli — sertakan SEMUA file kode web UTUH
+    // (JS cap besar) + sebut file yg disebut/baris error, supaya AI tak perlu
+    // minta paste. (Dulu JS dipotong di 18000 char → baris error tak terlihat.)
+    const isErrorFix = /\b(error|baris|line|typeerror|referenceerror|syntaxerror|undefined|cannot read|gagal|exception|uncaught|console)\b/i.test(prompt || '')
+      && Object.keys(files).some((p) => /\.js$/i.test(p));
+    if (isErrorFix) {
+      const ln = errorLineNo(prompt);
+      const named = referencedFiles(prompt, files);
+      const codePaths = sortedProjectPaths(files).filter((p) => /\.(html|css|js)$/i.test(p) && !/^node_modules/i.test(p));
+      let ctx = 'FILE PROYEK "' + project.name + '" (ada ERROR runtime — temukan & perbaiki di kode ini):\n';
+      if (named.length) ctx += '(File yang disebut: ' + named.join(', ') + (ln ? ', sekitar baris ' + ln : '') + ')\n';
+      let total = 0;
+      codePaths.forEach((path) => {
+        const cap = /\.js$/i.test(path) ? 42000 : MAX_FILE_CHARS;
+        let content = files[path] || '';
+        if (content.length > cap) {
+          content = named.includes(path) && ln ? fileExcerptForError(content, ln) : content.slice(0, cap) + '\n/* …dipotong… */';
+        }
+        if (total + content.length > 150000) return;
+        ctx += '\n--- ' + path + ' ---\n' + content + '\n';
+        total += content.length;
       });
       return ctx;
     }
@@ -2241,10 +2301,13 @@ const AI = (() => {
       return;
     }
     lastPrefilledError = errorText;
+    // Sebutkan file JS proyek agar AI tahu di mana mencari (dan KARSA otomatis
+    // menyertakan file itu UTUH di konteks) — bukan minta user paste.
+    const proj = State.getCurrentProject();
+    const jsFiles = proj ? Object.keys(proj.files || {}).filter((p) => /\.js$/i.test(p) && !/^node_modules/i.test(p)) : [];
     input.value = 'Preview menampilkan error ini:\n\n' + errorText +
-      '\n\nCari penyebabnya dan perbaiki HANYA bagian yang salah. Bila file besar & sudah ada, ' +
-      'gunakan edit terarah (```lang edit=path dengan blok SEARCH/REPLACE); jangan tulis ulang ' +
-      'seluruh file dan jangan ubah desain yang sudah benar.';
+      (jsFiles.length ? '\n\nError ini dari JavaScript — periksa file: ' + jsFiles.join(', ') + '. (Isi file sudah tersedia untukmu, jangan minta aku paste.)' : '') +
+      '\n\nCari penyebabnya dan perbaiki HANYA bagian yang salah. Penyebab umum "null classList/addEventListener" = querySelector/getElementById yang tak ketemu — beri penjaga (if cek null) atau perbaiki selector. Bila file besar, gunakan edit terarah (```lang edit=path dengan blok SEARCH/REPLACE); jangan tulis ulang seluruh file & jangan ubah desain yang sudah benar.';
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
     showToast('Error dikirim ke AI — klik Kirim untuk minta perbaikan. 🔧', 'info');
