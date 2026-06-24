@@ -36,9 +36,11 @@ Sebelum mulai, cek apakah hari ini sudah ada artikel:
 
 ```bash
 cd E:\agents\Karsa
-git pull origin main
+C:/Users/FAJAR/bin/py312.bat "C:\Users\FAJAR\AppData\Local\hermes\scripts\git_pull_hermes.py" --repo "E:\agents\Karsa" --quiet origin main
 git log --oneline --since="20 hours ago" --grep="feat(artikel)"
 ```
+
+> **Windows cron:** JANGAN pakai raw `git pull`/`git push` — GCM hang. Selalu pakai `git_pull_hermes.py` / `git_push_hermes.py` (token dari `~/.hermes/.env`).
 
 Jika ada hasil → **STOP**. Laporkan: *"Artikel hari ini sudah dipublish."*
 
@@ -57,6 +59,7 @@ Per 23 Juni 2026, artikel existing:
 | 3 | `cara-publish-website-karsa` | Cara publish website dari KARSA |
 | 4 | `apa-itu-vibecoding` | Apa itu vibecoding? |
 | 5 | `bikin-landing-page-dengan-ai` | Cara bikin landing page dengan AI |
+| 6 | `katalog-produk-online-umkm` | Katalog produk online untuk UMKM |
 
 **Jangan duplikat** slug, judul, atau keyword utama yang sudah dipakai.
 
@@ -70,7 +73,7 @@ Ambil **item pertama** yang belum ada di `ARTICLE_PATHS`. Tandai selesai setelah
 
 | Prioritas | Slug | Keyword utama | Kategori |
 |-----------|------|---------------|----------|
-| 1 | `katalog-produk-online-umkm` | katalog produk online UMKM | UMKM |
+| ~~1~~ | ~~`katalog-produk-online-umkm`~~ | *(published 23 Jun 2026)* | — |
 | 2 | `contoh-prompt-karsa-umkm` | contoh prompt KARSA | Tutorial |
 | 3 | `karsa-vs-website-builder` | KARSA vs Wix WordPress | Panduan |
 | 4 | `daftar-google-search-console` | daftar Google Search Console | Tutorial |
@@ -158,7 +161,7 @@ Gunakan kategori yang **paling jarang** muncul di 5 artikel terakhir. Prioritas:
 
 ```bash
 cd E:\agents\Karsa
-git pull origin main
+C:/Users/FAJAR/bin/py312.bat "C:\Users\FAJAR\AppData\Local\hermes\scripts\git_pull_hermes.py" --repo "E:\agents\Karsa" --quiet origin main
 ```
 
 ### Langkah 1 — Pilih topik
@@ -263,12 +266,15 @@ Jika satu saja gagal → **abort, jangan push**.
 ### Langkah 6 — Commit & push
 
 ```bash
+cd E:\agents\Karsa
 git add -A
 git commit -m "feat(artikel): {judul singkat artikel}"
-git push origin main
+C:/Users/FAJAR/bin/py312.bat "C:\Users\FAJAR\AppData\Local\hermes\scripts\git_push_hermes.py" --repo "E:\agents\Karsa" origin main
 ```
 
 Format commit: `feat(artikel): ...` — wajib prefix ini agar guard harian berfungsi.
+
+Jika push rejected: `git_pull_hermes.py --repo "E:\agents\Karsa" --rebase origin main`, resolve conflict, push lagi via `git_push_hermes.py`.
 
 ### Langkah 7 — Verifikasi live (wajib, tunggu ~60 detik setelah push)
 

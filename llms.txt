@@ -20,6 +20,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Apa itu vibecoding? Penjelasan singkat untuk pemula](https://karsa.work/artikel/apa-itu-vibecoding): Apa itu vibecoding, bedanya dengan coding biasa dan no-code, kapan cocok dipakai, dan cara mulai dengan KARSA di browser.
 - [Cara bikin landing page dengan AI tanpa coding](https://karsa.work/artikel/bikin-landing-page-dengan-ai): Cara bikin landing page dengan AI: struktur yang konversi, contoh prompt bahasa Indonesia, iterasi cepat, dan publish ke internet.
 - [Katalog produk online untuk UMKM: dari foto WhatsApp jadi etalase digital](https://karsa.work/artikel/katalog-produk-online-umkm): Panduan bikin katalog produk online untuk UMKM: struktur halaman, foto, harga, tombol chat WhatsApp, dan contoh prompt KARSA bahasa Indonesia.
+- [Contoh prompt KARSA untuk UMKM: tinggal salin, edit, jadi website](https://karsa.work/artikel/contoh-prompt-karsa-umkm): Kumpulan contoh prompt KARSA untuk UMKM: katalog, landing promo, form booking, dan toko online. Tinggal salin, ganti detail usahamu, lalu publish.
 
 ## Kontak
 

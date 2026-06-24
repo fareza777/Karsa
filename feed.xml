@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Tue, 23 Jun 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 24 Jun 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Contoh Prompt KARSA untuk UMKM yang Langsung Jadi Website — KARSA</title>
+      <link>https://karsa.work/artikel/contoh-prompt-karsa-umkm</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/contoh-prompt-karsa-umkm</guid>
+      <description>Kumpulan contoh prompt KARSA untuk UMKM: katalog, landing promo, form booking, dan toko online. Tinggal salin, ganti detail usahamu, lalu publish.</description>
+      <pubDate>Wed, 24 Jun 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Katalog Produk Online untuk UMKM — KARSA</title>
       <link>https://karsa.work/artikel/katalog-produk-online-umkm</link>

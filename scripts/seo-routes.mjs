@@ -9,6 +9,7 @@ export const ARTICLE_PATHS = [
   '/artikel/apa-itu-vibecoding',
   '/artikel/bikin-landing-page-dengan-ai',
   '/artikel/katalog-produk-online-umkm',
+  '/artikel/contoh-prompt-karsa-umkm',
 ];
 
 /** @type {string[]} */
@@ -173,6 +174,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/contoh-prompt-karsa-umkm': {
+    ogType: 'article',
+    title: 'Contoh Prompt KARSA untuk UMKM yang Langsung Jadi Website — KARSA',
+    description:
+      'Kumpulan contoh prompt KARSA untuk UMKM: katalog, landing promo, form booking, dan toko online. Tinggal salin, ganti detail usahamu, lalu publish.',
+    canonical: `${SITE}/artikel/contoh-prompt-karsa-umkm`,
+    keywords:
+      'contoh prompt KARSA, prompt UMKM Indonesia, prompt vibecoding, prompt bikin website, KARSA contoh prompt',
+    headline: 'Contoh prompt KARSA untuk UMKM: tinggal salin, edit, jadi website',
+    cardTitle: 'Contoh prompt KARSA untuk UMKM',
+    cardExcerpt: 'Lima prompt siap pakai untuk katalog, landing promo, form booking, toko online, dan testimoni.',
+    ogTitle: 'Contoh Prompt KARSA untuk UMKM',
+    ogDescription:
+      'Salin prompt bahasa Indonesia untuk katalog, landing, dan form UMKM — langsung jadi preview di KARSA.',
+    ogImage: `${SITE}/og/contoh-prompt-karsa-umkm.png`,
+    ogImageAlt: 'Contoh prompt KARSA bahasa Indonesia untuk UMKM',
+    datePublished: '2026-06-24',
+    dateModified: '2026-06-24',
+    category: 'Tutorial',
+    readMinutes: 7,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -206,6 +228,11 @@ export const RELATED_ARTICLES = {
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/cara-publish-website-karsa',
+  ],
+  '/artikel/contoh-prompt-karsa-umkm': [
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
   ],
 };
 
