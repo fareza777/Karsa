@@ -330,7 +330,10 @@ const AI = (() => {
 
   function isLayoutFitRequest(text) {
     const t = (text || '').toLowerCase();
-    return /pas\s*(1\s*)?(halaman|layar)|muat\s*(di\s*)?(1\s*)?(halaman|layar)|satu\s*layar|fit\s*(1\s*)?screen|seperti\s+(riwayat|profil|beranda|tumbuh|nutrisi)/i.test(t)
+    return /\b(satu|1)\s*(layar|halaman)\b/.test(t)                       // "1 layar", "satu halaman"
+      || /\bdalam\s+(1|satu)\s*(layar|halaman)/.test(t)                   // "dalam 1 layar"
+      || /pas\s*(1\s*)?(halaman|layar)|muat\s*(di\s*)?(1\s*)?(halaman|layar)|fit\s*(1\s*)?screen|1\s*screen|full\s*screen/.test(t)
+      || /(tanpa|jangan|gak?|nggak?|ga)\s*(usah\s*|pakai\s*)?scroll|biar\s*(muat|pas)|rapikan?\s+(di\s+)?hp|1\s*layar\s*hp/.test(t)
       || (/seperti/i.test(t) && /riwayat|profil|beranda|tumbuh|nutrisi/i.test(t));
   }
 
@@ -360,25 +363,31 @@ const AI = (() => {
   function buildLayoutFitHint(prompt, project) {
     if (!project || !isLayoutFitRequest(prompt)) return '';
     const t = (prompt || '').toLowerCase();
-    const refs = [];
-    ['riwayat', 'profil', 'profile', 'history'].forEach((k) => {
-      if (t.includes(k) && (/seperti|sama\s+(kayak|dengan)|like/i.test(t))) refs.push(k.replace('profile', 'profil').replace('history', 'riwayat'));
-    });
-    if (!refs.length) refs.push('riwayat', 'profil');
-    const uniqRefs = [...new Set(refs)].slice(0, 2);
     const cssPath = cssPathForProject(project.files || {});
     const css = cssPath ? (project.files[cssPath] || '') : '';
+    // Resep STRUKTURAL — berlaku untuk buat-baru MAUPUN rapikan: inilah inti
+    // "1 layar HP" yang reliabel (app mengisi layar, tabbar tetap, isi scroll).
     const lines = [
       '[LAYOUT SATU LAYAR HP — WAJIB PATUH]',
-      'Salin pola layout dari halaman REFERENSI (' + uniqRefs.join(', ') + ') ke halaman TARGET yang user sebut.',
-      'Struktur wajib: .app-shell{height:100dvh;display:flex;flex-direction:column} header/tabbar flex-shrink:0; .screen-body{flex:1;min-height:0;overflow-y:auto}.',
-      'DILARANG: mengecilkan font/padding global (:root, body, *); menghapus kartu/section; transform:scale; filter:blur; margin negatif besar; patch CSS partial — tulis file CSS UTUH.',
-      'Kerjakan 1 halaman target per respons. File CSS saja kecuali HTML struktur screen perlu disamakan.',
+      'Bangun/rapikan sebagai APP HP yang MENGISI layar penuh — bukan halaman web panjang:',
+      '- .app-shell { height:100dvh; display:flex; flex-direction:column; max-width:430px; margin:0 auto; }',
+      '- header app & bottom-nav/tabbar: flex-shrink:0 — tabbar SELALU terlihat di bawah, tak pernah terdorong keluar.',
+      '- area isi tengah (.screen-body / main): flex:1; min-height:0; overflow-y:auto — scroll HANYA di sini.',
+      'DILARANG: overflow:hidden pada html/body/#app tanpa area-isi yang bisa scroll; mengecilkan font/padding/:root global demi memaksa muat; transform:scale; filter:blur; margin negatif besar; menghapus kartu/section.',
+      'Jika konten lebih dari 1 layar, area isi BOLEH scroll di dalam dirinya — itu BENAR & rapi; jangan rusak tata letak demi tanpa-scroll total.',
+      'Tulis file CSS UTUH (bukan patch). Fokus 1 layout per respons.',
     ];
-    if (css && cssPath) {
+    // Kalau app SUDAH punya halaman yang rapi & user minta "seperti X", tiru polanya.
+    const refs = [];
+    ['riwayat', 'profil', 'beranda', 'tumbuh', 'nutrisi'].forEach((k) => {
+      if (extractScreenCssSnippet(css, k)) refs.push(k);
+    });
+    const uniqRefs = [...new Set(refs)].slice(0, 2);
+    if (uniqRefs.length && /seperti|sama\s+(kayak|dengan)|tiru|samakan|like/i.test(t)) {
+      lines.push('Tiru pola layout halaman yang sudah rapi (' + uniqRefs.join(', ') + ') — salin struktur flex/padding-nya, jangan tebak.');
       uniqRefs.forEach((ref) => {
         const snip = extractScreenCssSnippet(css, ref);
-        if (snip) lines.push('Contoh CSS referensi (' + ref + ') dari ' + cssPath + ':\n' + snip);
+        if (snip) lines.push('Contoh CSS (' + ref + ') dari ' + cssPath + ':\n' + snip);
       });
     }
     return lines.join('\n');
@@ -502,7 +511,10 @@ const AI = (() => {
 
   function isIterationRequest(prompt, project) {
     if (!project || !prompt) return false;
-    if (isNarrowChangeRequest(prompt) || isLayoutFitRequest(prompt)) return true;
+    if (isNarrowChangeRequest(prompt)) return true;
+    // "1 layar HP" pada app yang SUDAH ada = iterasi; tapi saat MEMBUAT app baru
+    // ("buatkan … dalam 1 layar") = scaffold (model pintar), bukan iterasi.
+    if (isLayoutFitRequest(prompt) && !isCreateLikePrompt(prompt)) return true;
     if (isMobileProject(project) && !isCreateLikePrompt(prompt) && !projectNeedsScaffold(project)) return true;
     return false;
   }
