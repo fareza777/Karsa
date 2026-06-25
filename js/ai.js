@@ -1946,6 +1946,7 @@ const AI = (() => {
       let continueRound = 0;
       let fastRetry = false;
       let lastMergeFp = '';
+      let stalled = false;
       accumulatedVisible = '';
       activeModel = modelUsed;
       liveAbortReason = 'user';
@@ -2034,6 +2035,7 @@ const AI = (() => {
 
           const mergeFp = mergeFingerprint(accumulatedVisible);
           if (continueRound > 0 && (mergeFp === lastMergeFp || accumulatedVisible === beforeMerge)) {
+            stalled = true; // lanjutan tak menambah kemajuan → file kebesaran
             break;
           }
           lastMergeFp = mergeFp;
@@ -2055,7 +2057,12 @@ const AI = (() => {
       attachApplyBox(bubble, visible, true, { truncated });
       addResponseCopy(bubble); // #B7
       const parsedFiles = parseFileBlocks(visible).filter((f) => isFileComplete(f.code, f.path));
-      if (truncated) {
+      if (truncated && stalled) {
+        // Lanjutan otomatis mentok (file terlalu besar untuk satu respons) →
+        // jangan suruh klik "Lanjutkan" yg sia-sia; tawarkan PECAH jadi file kecil.
+        appendSplitSuggestion(bubble, visible);
+        showToast('Bagian ini terlalu besar untuk sekali tulis. Klik "✂️ Pecah jadi beberapa file kecil" di bawah balasan.', 'warn');
+      } else if (truncated) {
         appendContinueButton(bubble, visible);
         showToast('Masih ada bagian yang belum selesai — klik "Lanjutkan tulis" atau kirim ulang permintaan yang sama.', 'warn');
       } else if (totalContinueRounds > 0) {
