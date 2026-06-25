@@ -58,6 +58,15 @@ function fileExt(path) {
   return dot === -1 ? '' : name.slice(dot + 1).toLowerCase();
 }
 
+// Pisah data-URL base64 → { mime, base64 } agar bisa diekspor jadi BINARY asli
+// (mis. assets/icon.png di ZIP, bukan teks data-URL yang rusak). null bila bukan.
+function parseDataUrl(str) {
+  if (typeof str !== 'string') return null;
+  const m = str.match(/^data:([^;,]+);base64,([\s\S]+)$/);
+  if (!m) return null;
+  return { mime: m[1], base64: m[2] };
+}
+
 const FILE_ICONS = {
   html: '🟧', htm: '🟧',
   css: '🟦',

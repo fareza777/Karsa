@@ -104,7 +104,14 @@ const App = (() => {
       return;
     }
     const zip = new JSZip();
-    Object.keys(project.files).forEach((path) => zip.file(path, project.files[path]));
+    Object.keys(project.files).forEach((path) => {
+      const content = project.files[path];
+      // Aset gambar disimpan sebagai data-URL → tulis BINARY asli ke ZIP
+      // (kalau tidak, assets/icon.png dst jadi file teks rusak & build gagal).
+      const data = parseDataUrl(content);
+      if (data) zip.file(path, data.base64, { base64: true });
+      else zip.file(path, content);
+    });
     const a = analyzeProjectFiles(project.files);
     if (a.hasHtml && !project.files['CARA-HOSTING.md']) {
       zip.file('CARA-HOSTING.md', CARA_HOSTING_MD);

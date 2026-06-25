@@ -14,7 +14,7 @@ beforeAll(() => {
   vm.createContext(sandbox);
   const names = ['fileExt', 'detectProjectTypeFromPrompt', 'templateIdForProjectType',
     'webPreviewEntryPath', 'hasUsableWebPreview', 'resolveProjectFileRef',
-    'analyzeProjectFiles', 'expoEntryPath'];
+    'analyzeProjectFiles', 'expoEntryPath', 'parseDataUrl'];
   for (const file of ['utils.js', 'project.js']) {
     let code = readFileSync(join(root, 'js', file), 'utf8');
     for (const n of names) code += `\n;globalThis.${n} = typeof ${n} !== 'undefined' ? ${n} : undefined;`;
@@ -77,6 +77,18 @@ describe('resolveProjectFileRef (resolusi aset relatif)', () => {
   });
   it('ref tak ada → null', () => {
     expect(P.resolveProjectFileRef(files, 'index.html', 'tidakada.css')).toBe(null);
+  });
+});
+
+describe('parseDataUrl (ekspor aset gambar jadi binary)', () => {
+  it('pisah mime + base64 dari data-URL png', () => {
+    const r = P.parseDataUrl('data:image/png;base64,iVBORw0KGgoAAAANS');
+    expect(r).toEqual({ mime: 'image/png', base64: 'iVBORw0KGgoAAAANS' });
+  });
+  it('null untuk teks biasa / non-base64', () => {
+    expect(P.parseDataUrl('<html></html>')).toBe(null);
+    expect(P.parseDataUrl('data:image/svg+xml,%3Csvg')).toBe(null); // bukan base64
+    expect(P.parseDataUrl(null)).toBe(null);
   });
 });
 
