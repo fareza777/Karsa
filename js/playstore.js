@@ -45,6 +45,22 @@ const PlayStore = (() => {
     return !pkg || /^com\.karsa\.(playstoreapp|todo|app)$/i.test(pkg);
   }
 
+  // Format applicationId Android yang sah: ≥2 segmen, huruf kecil, mulai huruf.
+  function validAndroidPackage(pkg) {
+    return typeof pkg === 'string' && /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(pkg);
+  }
+
+  // eas.json benar-benar siap rilis: profil production menghasilkan app-bundle (AAB).
+  function easReadyForPlayStore(files) {
+    const raw = files['eas.json'];
+    if (!raw) return false;
+    try {
+      const j = JSON.parse(raw);
+      const prod = j.build && j.build.production;
+      return !!(prod && prod.android && prod.android.buildType === 'app-bundle');
+    } catch (e) { return false; }
+  }
+
   function isGenericExpoName(expo) {
     if (!expo || !expo.name || !expo.slug) return true;
     return /^(aplikasi play store|karsa playstore app)$/i.test(expo.name.trim()) ||
@@ -75,15 +91,15 @@ const PlayStore = (() => {
     items.push({
       id: 'androidPackage',
       label: 'ID aplikasi Android (unik, contoh com.tokoanda.app)',
-      ok: !!(expo && expo.android && expo.android.package) && !isGenericPackage(expo.android.package),
-      hint: 'Isi expo.android.package di app.json — huruf kecil, unik, sesuai bisnis Anda',
+      ok: !!(expo && expo.android && validAndroidPackage(expo.android.package)) && !isGenericPackage(expo.android.package),
+      hint: 'Isi expo.android.package di app.json — format com.bisnis.app (huruf kecil, ≥2 bagian), unik',
     });
 
     items.push({
       id: 'version',
       label: 'Nomor versi rilis',
-      ok: !!(expo && expo.version && expo.android && expo.android.versionCode),
-      hint: 'Contoh: version "1.0.0" dan android.versionCode 1',
+      ok: !!(expo && expo.version && expo.android && Number.isInteger(expo.android.versionCode) && expo.android.versionCode >= 1),
+      hint: 'Contoh: version "1.0.0" dan android.versionCode 1 (bilangan bulat)',
     });
 
     items.push({
@@ -111,9 +127,9 @@ const PlayStore = (() => {
 
     items.push({
       id: 'eas',
-      label: 'Konfigurasi build (eas.json)',
-      ok: !!files['eas.json'],
-      hint: 'Klik "Setup otomatis" di bawah',
+      label: 'Konfigurasi build (eas.json → AAB)',
+      ok: easReadyForPlayStore(files),
+      hint: 'Klik "Setup otomatis + ikon" — eas.json harus punya profil production buildType "app-bundle"',
     });
 
     const done = items.filter((i) => i.ok).length;
@@ -311,7 +327,10 @@ const PlayStore = (() => {
     return analyzeProjectFiles(project.files).expoLike;
   }
 
-  return { evaluate, openChecklist, shouldShowButton, generateEasJson, ensurePlayStoreSetup, generateAppAssets };
+  return {
+    evaluate, openChecklist, shouldShowButton, generateEasJson, ensurePlayStoreSetup,
+    generateAppAssets, validAndroidPackage, easReadyForPlayStore,
+  };
 })();
 
 const PLAYSTORE_AI_PROMPT =

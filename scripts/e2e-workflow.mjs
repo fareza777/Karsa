@@ -208,7 +208,7 @@ console.log('\n=== 3) APPS PLAY STORE ===');
       icon: 'assets/icon.png', splash: { image: 'assets/splash.png' },
       android: { package: 'com.warungbudi.app', versionCode: 1, adaptiveIcon: { foregroundImage: 'assets/adaptive.png' } },
     } }),
-    'eas.json': JSON.stringify({ build: { production: {} } }),
+    'eas.json': JSON.stringify({ build: { production: { android: { buildType: 'app-bundle' } } } }),
     'assets/icon.png': bigPng,
     'assets/splash.png': bigPng,
     'assets/adaptive.png': bigPng,
