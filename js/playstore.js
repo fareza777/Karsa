@@ -121,6 +121,56 @@ const PlayStore = (() => {
     return { items, score, done, total: items.length, ready: done === items.length };
   }
 
+  // Inisial app utk ikon (1–2 huruf dari nama).
+  function appInitials(name) {
+    const words = String(name || 'App').trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return 'A';
+    if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+    return (words[0][0] + words[1][0]).toUpperCase();
+  }
+
+  // Render PNG (data-URL) via canvas. padding 0–0.5 = zona aman (utk adaptive).
+  function renderIconPng(text, size, padding, c1, c2) {
+    if (typeof document === 'undefined') return null;
+    const cv = document.createElement('canvas');
+    cv.width = size; cv.height = size;
+    const ctx = cv.getContext('2d');
+    if (!ctx) return null;
+    const g = ctx.createLinearGradient(0, 0, size, size);
+    g.addColorStop(0, c1 || '#7c5cff');
+    g.addColorStop(1, c2 || '#22d3ee');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const usable = size * (1 - (padding || 0) * 2);
+    ctx.font = '700 ' + Math.round(usable * 0.42) + 'px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+    ctx.fillText(text, size / 2, size / 2 + size * 0.02);
+    try { return cv.toDataURL('image/png'); } catch (e) { return null; }
+  }
+
+  // Buat aset Play Store ASLI (icon/adaptive/splash) bila belum ada gambar nyata.
+  // → checklist lolos & ZIP berisi PNG valid (siap EAS build). Return jumlah dibuat.
+  function generateAppAssets(project, opts) {
+    const files = project.files || {};
+    const init = appInitials(project.name);
+    const c1 = (opts && opts.c1) || '#7c5cff';
+    const c2 = (opts && opts.c2) || '#22d3ee';
+    const plan = [
+      { path: 'assets/icon.png', text: init, size: 1024, pad: 0 },
+      { path: 'assets/adaptive-icon.png', text: init, size: 1024, pad: 0.18 },
+      { path: 'assets/splash.png', text: init, size: 1024, pad: 0.28 },
+    ];
+    let made = 0;
+    plan.forEach((a) => {
+      if (hasRealImageAsset(files, a.path)) return; // jangan timpa gambar user
+      const png = renderIconPng(a.text, a.size, a.pad, c1, c2);
+      if (png) { State.setFile(a.path, png); made += 1; }
+    });
+    return made;
+  }
+
   function defaultAndroidPackage(project) {
     const slug = (project.name || 'app')
       .toLowerCase()
@@ -179,8 +229,14 @@ const PlayStore = (() => {
     if (!project.files['CARA-PLAY-STORE.md']) {
       State.setFile('CARA-PLAY-STORE.md', CARA_PLAY_STORE_MD);
     }
+    // Buat ikon/splash ASLI (PNG) bila belum ada → checklist lolos & ZIP siap build.
+    const made = generateAppAssets(State.getCurrentProject());
+    State.setFile('assets/README-assets.txt',
+      'Ikon & splash dibuat otomatis oleh KARSA (gradien + inisial nama app).\n' +
+      'Ganti dengan logo aslimu kapan saja (ukuran sama):\n' +
+      '- assets/icon.png (1024x1024)\n- assets/adaptive-icon.png (1024x1024)\n- assets/splash.png (1024x1024)\n');
     FileTree.render();
-    showToast('Konfigurasi Play Store dasar ditambahkan ke proyek.', 'ok');
+    showToast(made ? ('Konfigurasi + ' + made + ' ikon/splash dibuat otomatis — checklist mendekati siap build. 🏪') : 'Konfigurasi Play Store dasar ditambahkan ke proyek.', 'ok');
   }
 
   function openChecklist() {
@@ -214,7 +270,7 @@ const PlayStore = (() => {
       el('div', { class: 'playstore-actions' }, [
         el('button', {
           class: 'btn btn-ghost btn-sm',
-          text: '⚙ Setup otomatis',
+          text: '⚙ Setup otomatis + ikon',
           onclick: () => { ensurePlayStoreSetup(); closeModal(); openChecklist(); },
         }),
         el('button', {
@@ -255,7 +311,7 @@ const PlayStore = (() => {
     return analyzeProjectFiles(project.files).expoLike;
   }
 
-  return { evaluate, openChecklist, shouldShowButton, generateEasJson, ensurePlayStoreSetup };
+  return { evaluate, openChecklist, shouldShowButton, generateEasJson, ensurePlayStoreSetup, generateAppAssets };
 })();
 
 const PLAYSTORE_AI_PROMPT =
