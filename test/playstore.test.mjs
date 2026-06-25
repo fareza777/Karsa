@@ -103,3 +103,26 @@ describe('evaluate (kesiapan Play Store)', () => {
     expect(ev.items.find((i) => i.id === 'icon').ok).toBe(false);
   });
 });
+
+describe('generateStoreListing (draft Play Console)', () => {
+  it('string berisi nama app & bagian wajib', () => {
+    const md = PS.generateStoreListing(completeExpoProject());
+    expect(typeof md).toBe('string');
+    expect(md).toContain('Toko Maju');
+    expect(md).toContain('Deskripsi singkat');
+    expect(md).toContain('Deskripsi lengkap');
+    expect(md).toContain('Feature graphic');
+    expect(md).toContain('Kebijakan privasi');
+  });
+  it('judul dibatasi 30 karakter', () => {
+    const p = completeExpoProject();
+    p.name = 'Aplikasi Dengan Nama Yang Sangat Panjang Sekali';
+    const md = PS.generateStoreListing(p);
+    const lines = md.split('\n');
+    const line = lines[lines.findIndex((l) => l.includes('Judul aplikasi')) + 1];
+    expect(line.length).toBeLessThanOrEqual(30);
+  });
+  it('tak melempar saat project minim', () => {
+    expect(() => PS.generateStoreListing({ files: {} })).not.toThrow();
+  });
+});

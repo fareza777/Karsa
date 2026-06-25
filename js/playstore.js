@@ -187,6 +187,54 @@ const PlayStore = (() => {
     return made;
   }
 
+  // Draft "Store listing" Play Console (judul, deskripsi, kategori, rating,
+  // checklist screenshot) — pengguna tinggal sunting & tempel ke Play Console.
+  function generateStoreListing(project) {
+    const name = (project && project.name) || 'Aplikasi Saya';
+    const app = parseAppJson(project.files);
+    const tagline = (app && app.expo && app.expo.description) || ('Aplikasi ' + name + ' di Android');
+    const shortDesc = (name + ' — ' + tagline).slice(0, 80);
+    return [
+      '# Store Listing — ' + name,
+      'Salin-tempel ke Google Play Console → Store presence → Main store listing.',
+      '',
+      '## Judul aplikasi (maks 30 karakter)',
+      name.slice(0, 30),
+      '',
+      '## Deskripsi singkat (maks 80 karakter)',
+      shortDesc,
+      '',
+      '## Deskripsi lengkap (maks 4000 karakter)',
+      name + ' adalah aplikasi yang membantu kamu [jelaskan manfaat utama].',
+      '',
+      'Fitur utama:',
+      '• [Fitur 1]',
+      '• [Fitur 2]',
+      '• [Fitur 3]',
+      '',
+      'Gratis, ringan, dan mudah dipakai. Dibuat dengan KARSA.',
+      '',
+      '## Kategori',
+      'Pilih kategori paling sesuai (mis. Productivity, Business, Tools, Lifestyle).',
+      '',
+      '## Aset grafis WAJIB (siapkan sebelum publish)',
+      '| Aset | Ukuran | Status |',
+      '|------|--------|--------|',
+      '| Icon aplikasi | 512×512 PNG | ✓ ada di assets/ (1024, akan di-resize) |',
+      '| Feature graphic | 1024×500 PNG | ⬜ buat sendiri/Canva |',
+      '| Screenshot HP | min. 2, rasio 9:16 | ⬜ screenshot dari preview KARSA |',
+      '',
+      '## Kebijakan privasi (URL)',
+      'Wajib bila app mengumpulkan data. Bisa pakai generator gratis lalu host (mis. di KARSA Publish).',
+      '',
+      '## Rating konten',
+      'Isi kuesioner IARC di Play Console (biasanya "Untuk Semua Umur" bila tanpa konten sensitif).',
+      '',
+      '---',
+      'Tip: ambil screenshot dari panel preview KARSA (tombol 📷) untuk materi listing.',
+    ].join('\n');
+  }
+
   function defaultAndroidPackage(project) {
     const slug = (project.name || 'app')
       .toLowerCase()
@@ -244,6 +292,9 @@ const PlayStore = (() => {
     if (!project.files['eas.json']) State.setFile('eas.json', generateEasJson());
     if (!project.files['CARA-PLAY-STORE.md']) {
       State.setFile('CARA-PLAY-STORE.md', CARA_PLAY_STORE_MD);
+    }
+    if (!project.files['STORE-LISTING.md']) {
+      State.setFile('STORE-LISTING.md', generateStoreListing(State.getCurrentProject()));
     }
     // Buat ikon/splash ASLI (PNG) bila belum ada → checklist lolos & ZIP siap build.
     const made = generateAppAssets(State.getCurrentProject());
@@ -329,7 +380,7 @@ const PlayStore = (() => {
 
   return {
     evaluate, openChecklist, shouldShowButton, generateEasJson, ensurePlayStoreSetup,
-    generateAppAssets, validAndroidPackage, easReadyForPlayStore,
+    generateAppAssets, validAndroidPackage, easReadyForPlayStore, generateStoreListing,
   };
 })();
 
