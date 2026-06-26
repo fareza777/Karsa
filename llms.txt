@@ -21,6 +21,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Cara bikin landing page dengan AI tanpa coding](https://karsa.work/artikel/bikin-landing-page-dengan-ai): Cara bikin landing page dengan AI: struktur yang konversi, contoh prompt bahasa Indonesia, iterasi cepat, dan publish ke internet.
 - [Katalog produk online untuk UMKM: dari foto WhatsApp jadi etalase digital](https://karsa.work/artikel/katalog-produk-online-umkm): Panduan bikin katalog produk online untuk UMKM: struktur halaman, foto, harga, tombol chat WhatsApp, dan contoh prompt KARSA bahasa Indonesia.
 - [Contoh prompt KARSA untuk UMKM: tinggal salin, edit, jadi website](https://karsa.work/artikel/contoh-prompt-karsa-umkm): Kumpulan contoh prompt KARSA untuk UMKM: katalog, landing promo, form booking, dan toko online. Tinggal salin, ganti detail usahamu, lalu publish.
+- [KARSA vs Wix vs WordPress: mana yang tepat untuk kamu?](https://karsa.work/artikel/karsa-vs-website-builder): Perbandingan KARSA vs Wix vs WordPress: kemudahan pakai, biaya, fleksibilitas SEO, dan kapan masing-masing paling pas untuk UMKM dan kreator Indonesia.
 
 ## Kontak
 

@@ -147,4 +147,32 @@ export const ARTICLE_BODY = {
       <p>Untuk konten yang fokus ke UMKM, pelajari juga <a href="/artikel/katalog-produk-online-umkm">panduan katalog produk online</a> — struktur dan contoh prompt untuk etalase digital sudah dibahas lengkap di sana.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin salah satu prompt di atas, ganti detail usahamu, dan lihat preview dalam hitungan detik. Paket gratis sudah termasuk 30 prompt AI per hari — cukup untuk eksplorasi awal tanpa bayar. Kalau sudah yakin dengan alurnya, Pro membuka AI tanpa limit dan publish tanpa watermark. Pelajari juga <a href="/artikel/vibecoding-untuk-umkm">vibecoding untuk UMKM</a> untuk use case lain yang bisa kamu bangun dari prompt sederhana.</p>`,
+  'karsa-vs-website-builder': `
+      <p>Kalau kamu baru mulai bikin website untuk bisnis, pasti pernah bingung: pakai KARSA, Wix, atau WordPress? Ketiganya sama-sama menghasilkan website yang bisa dibuka di internet, tapi cara kerja, biaya, dan batasannya beda jauh. Artikel ini membandingkan ketiganya dari sudut UMKM dan kreator Indonesia supaya kamu tidak salah pilih di awal.</p>
+      <h2>Apa itu masing-masing platform?</h2>
+      <p><strong>WordPress</strong> adalah sistem manajemen konten (CMS) open source yang sudah ada sejak 2003. Kamu perlu sewa hosting, pasang domain, lalu install WordPress di server. Ribuan tema dan plugin tersedia untuk memperluas fungsi. WordPress menguasai lebih dari 40 persen website di dunia, tapi butuh kemauan belajar yang lumayan.</p>
+      <p><strong>Wix</strong> adalah website builder drag-and-drop asal Israel. Kamu daftar, pilih template, lalu susun halaman dengan menggeser-geser elemen visual. Tidak perlu coding, tapi kalau sudah salah pilih template di awal, ganti template berarti mulai dari nol.</p>
+      <p><strong>KARSA</strong> adalah <a href="/artikel/apa-itu-vibecoding">vibecoding</a> builder: kamu menulis prompt bahasa Indonesia, AI menghasilkan kode HTML, CSS, dan JavaScript sungguhan, lalu kamu preview langsung di browser. Hasilnya adalah file kode asli yang bisa diedit atau diekspor, bukan halaman terkunci di dalam platform.</p>
+      <h2>Tabel perbandingan singkat</h2>
+      <ul>
+        <li><strong>Cara bikin</strong> — KARSA pakai prompt AI, Wix drag-and-drop, WordPress install manual dan kelola hosting.</li>
+        <li><strong>Butuh coding?</strong> — KARSA opsional (bisa edit kode bila perlu), Wix tidak sama sekali, WordPress sangat disarankan untuk tema/plugin custom.</li>
+        <li><strong>Biaya awal</strong> — KARSA gratis 30 prompt/hari, Wix gratis dengan watermark Wix, WordPress gratis tapi hosting mulai Rp 150.000 per bulan.</li>
+        <li><strong>Kecepatan jadi</strong> — KARSA hitungan menit, Wix hitungan jam, WordPress hitungan hari sampai minggu.</li>
+        <li><strong>SEO dasar</strong> — KARSA otomatis (title, meta, schema, sitemap), Wix cukup lengkap, WordPress paling fleksibel tapi perlu setup plugin.</li>
+        <li><strong>Kepemilikan kode</strong> — KARSA bisa diekspor, Wix terkunci, WordPress milik kamu (asalkan host sendiri).</li>
+      </ul>
+      <h2>Biaya total yang jarang dihitung</h2>
+      <p>Wix sering dipromosikan gratis, tapi untuk pakai domain sendiri dan menghilangkan iklan Wix, kamu perlu paket Combo atau Unlimited mulai USD 11 per bulan. WordPress lebih murah di software, tapi hosting managed, tema premium, dan plugin SEO berbayar bisa menumpuk jadi USD 10–30 per bulan. KARSA punya paket gratis yang sudah termasuk subdomain <code>nama.karsa.work</code>, 30 prompt AI per hari, dan unlimited proyek. Paket Pro membuka AI tanpa limit dan publish tanpa watermark KARSA.</p>
+      <p>Untuk UMKM yang baru tumbuh, biaya bukan cuma uang. Waktu belajar dan waktu maintain juga mahal. WordPress menuntut update tema dan plugin rutin; Wix membatasi kontrol tapi juga meminimalkan kerja pemeliharaan. KARSA ada di tengah: kamu fokus ke iterasi ide dan desain, sementara infrastruktur otomatis dijaga.</p>
+      <h2>Kapan pilih yang mana?</h2>
+      <p><strong>Pilih WordPress</strong> kalau kamu butuh blog skala besar, toko online kompleks (WooCommerce), atau sudah nyaman dengan hosting, tema, dan plugin. Cocok untuk media, korporat, dan publisher besar.</p>
+      <p><strong>Pilih Wix</strong> kalau kamu mau halaman statis yang cantik dalam sehari, tidak akan sering ubah struktur, dan tidak keberatan dengan ekosistem Wix (domain, pembayaran, app internal Wix). Cocok untuk wedding invitation, portofolio sekali jadi, atau toko kecil dengan katalog statis.</p>
+      <p><strong>Pilih KARSA</strong> kalau kamu ingin prototipe cepat, prompt bahasa Indonesia, dan kode yang bisa kamu bawa. Cocok untuk <a href="/artikel/vibecoding-untuk-umkm">UMKM</a>, freelancer yang sering iterasi desain, founder startup yang mau landing page MVP dalam hitungan jam, atau siapa pun yang ingin AI membantu menulis kode tanpa kehilangan kontrol.</p>
+      <p>Kalau masih di fase eksplorasi, KARSA juga paling ramah untuk pemula. Tidak perlu pilih template dulu — cukup tulis ide, lihat preview, minta revisi, dan putuskan setelah melihat hasilnya.</p>
+      <h2>Contoh prompt KARSA untuk eksplorasi</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek baru, lalu coba prompt pembanding: <em>"landing page peluncuran buku fiksi ilmiah 'Rimba Nada', hero gelap dengan ilustrasi bintang, section sinopsis 3 paragraf, daftar 5 tokoh utama, testimoni pembaca, dan tombol preorder ke WhatsApp"</em>. Hasilnya langsung jadi di preview. Coba juga minta versi Wix-style atau WordPress-style: <em>"buat versi yang lebih editorial seperti layout majalah"</em>. Lihat bagaimana AI menafsirkan brief yang sama dengan gaya berbeda — biasanya ini membantu kamu memahami kekuatan dan batasan setiap pendekatan tanpa harus install apa pun.</p>
+      <p>Kuncinya: KARSA bukan untuk menggantikan Wix atau WordPress untuk semua kasus. Ini alat ketiga yang melengkapi toolbox, terutama saat kamu perlu kecepatan dan eksperimentasi.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, coba bandingkan tiga versi website dengan brief yang sama, lalu putuskan platform mana yang paling cocok untuk kebutuhan bisnismu. Untuk pemula yang baru pertama kali bikin website, pelajari juga <a href="/artikel/pembuat-aplikasi-tanpa-coding">panduan pembuat aplikasi tanpa coding</a> agar fondasi vibecoding-mu lebih kuat sebelum memutuskan platform.</p>`,
 };

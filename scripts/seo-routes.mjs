@@ -10,6 +10,7 @@ export const ARTICLE_PATHS = [
   '/artikel/bikin-landing-page-dengan-ai',
   '/artikel/katalog-produk-online-umkm',
   '/artikel/contoh-prompt-karsa-umkm',
+  '/artikel/karsa-vs-website-builder',
 ];
 
 /** @type {string[]} */
@@ -195,6 +196,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 7,
   },
+  '/artikel/karsa-vs-website-builder': {
+    ogType: 'article',
+    title: 'KARSA vs Wix vs WordPress: Pilih yang Tepat untuk Bisnis Kamu — KARSA',
+    description:
+      'Perbandingan KARSA vs Wix vs WordPress: kemudahan pakai, biaya, fleksibilitas SEO, dan kapan masing-masing paling pas untuk UMKM dan kreator Indonesia.',
+    canonical: `${SITE}/artikel/karsa-vs-website-builder`,
+    keywords:
+      'KARSA vs Wix WordPress, perbandingan website builder, Wix vs WordPress, pembuat website AI, KARSA WordPress Wix',
+    headline: 'KARSA vs Wix vs WordPress: mana yang tepat untuk kamu?',
+    cardTitle: 'KARSA vs Wix vs WordPress',
+    cardExcerpt: 'Bandingkan kemudahan, biaya, dan fleksibilitas SEO tiga platform website populer.',
+    ogTitle: 'KARSA vs Wix vs WordPress',
+    ogDescription:
+      'Tabel perbandingan tiga platform website populer — pilih yang paling pas untuk UMKM atau kreator Indonesia.',
+    ogImage: `${SITE}/og/karsa-vs-website-builder.png`,
+    ogImageAlt: 'Perbandingan KARSA, Wix, dan WordPress untuk UMKM Indonesia',
+    datePublished: '2026-06-26',
+    dateModified: '2026-06-26',
+    category: 'Panduan',
+    readMinutes: 7,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -233,6 +255,11 @@ export const RELATED_ARTICLES = {
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/katalog-produk-online-umkm',
     '/artikel/bikin-landing-page-dengan-ai',
+  ],
+  '/artikel/karsa-vs-website-builder': [
+    '/artikel/pembuat-aplikasi-tanpa-coding',
+    '/artikel/apa-itu-vibecoding',
+    '/artikel/vibecoding-untuk-umkm',
   ],
 };
 
