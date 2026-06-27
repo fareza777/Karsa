@@ -424,7 +424,7 @@ Tunggu build selesai di expo.dev → unduh file **.aab**.
 ## Langkah 3: Play Console
 
 1. Buat aplikasi baru di Play Console.
-2. Isi **Store listing**: judul, deskripsi singkat & panjang, screenshot HP (min. 2), icon, kategori.
+2. Isi **Store listing**: judul, deskripsi singkat & panjang, screenshot HP (min. 2), icon, kategori. Draft siap salin-tempel ada di file \`STORE-LISTING.md\`.
 3. **Kebijakan privasi**: sediakan URL (wajib jika app mengumpulkan data).
 4. **Konten aplikasi**: kuesioner rating usia.
 5. **Production** → **Create new release** → upload file **.aab**.
