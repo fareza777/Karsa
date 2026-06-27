@@ -505,10 +505,27 @@ const AI = (() => {
         '[WEB APP FUNGSIONAL: buat alat yang bisa dipakai di browser — bukan landing promosi atau mockup telepon.]',
       );
     }
+    const curProj = State.getCurrentProject();
+    // [MODE EDIT TERARAH] AKAR FIX: saat iterasi pada app yang SUDAH ADA, file
+    // besar TIDAK boleh ditulis-ulang utuh (output panjang sering terpotong →
+    // app rusak/polos). Sebut file + jumlah baris persis agar model patuh pakai
+    // SEARCH/REPLACE. Tak berlaku untuk buat-baru / redesign / layout-fit.
+    const bigFiles = curProj ? largeExistingFiles(curProj) : [];
+    const isRedesign = /redesign|rombak|ubah semua|ganti tema|percantik|desain ulang|dari awal|total/i.test(prompt);
+    if (curProj && bigFiles.length && !isCreateLikePrompt(prompt) && !isLayoutFitRequest(prompt) && !isRedesign) {
+      const list = bigFiles.slice(0, 4).map((f) => f.path + ' (' + f.lines + ' baris)').join(', ');
+      parts.push(
+        '[MODE EDIT TERARAH — WAJIB] File besar yang SUDAH ADA: ' + list + '. '
+        + 'Untuk perubahan ini DILARANG menulis ulang file itu secara UTUH — output panjang sering terpotong & bikin app rusak/polos. '
+        + 'WAJIB pakai blok edit SEARCH/REPLACE berformat persis:\n'
+        + '```lang edit=PATH\n<<<<<<< SEARCH\n(salin PERSIS beberapa baris lama yang unik dari file, termasuk indentasi)\n=======\n(versi baru)\n>>>>>>> REPLACE\n```\n'
+        + 'Boleh beberapa pasang SEARCH/REPLACE dalam satu blok. Ubah HANYA bagian yang relevan dengan permintaan; bagian lain JANGAN disentuh. '
+        + 'Untuk CSS boleh juga ```css file=PATH berisi HANYA selector baru/berubah diawali /* KARSA-OVERRIDE */ (KARSA gabungkan ke style lama).',
+      );
+    }
     // [JAGA STRUKTUR] Proteksi anti-"perintah sederhana bikin layout pecah":
     // app yg SUDAH punya tata letak HP (app-shell + bottom-nav) → saat menambah/
     // ubah FITUR (bukan buat-baru/redesign/layout-fit), JANGAN rombak struktur.
-    const curProj = State.getCurrentProject();
     if (curProj && !isCreateLikePrompt(prompt) && !isLayoutFitRequest(prompt)
       && !/redesign|rombak|ubah semua|ganti tema|percantik|desain ulang/i.test(prompt)
       && hasMobileShellStructure(curProj)) {
@@ -518,6 +535,20 @@ const AI = (() => {
     }
     parts.push(prompt);
     return parts.join('\n');
+  }
+
+  // File yang SUDAH ADA & besar → rewrite utuh berisiko terpotong. Dipakai untuk
+  // memaksa MODE EDIT TERARAH saat iterasi (akar masalah "perintah ke-2/3 hancur").
+  function largeExistingFiles(project) {
+    const files = (project && project.files) || {};
+    const out = [];
+    Object.keys(files).forEach((p) => {
+      const ext = fileExt(p);
+      const lines = (files[p] || '').split('\n').length;
+      const limit = ext === 'css' ? 150 : (/^(html|js|ts|jsx|tsx|mjs|cjs)$/.test(ext) ? 120 : Infinity);
+      if (lines > limit) out.push({ path: p, lines });
+    });
+    return out.sort((a, b) => b.lines - a.lines);
   }
 
   // App sudah punya kerangka tata letak HP (untuk proteksi struktur saat edit).
