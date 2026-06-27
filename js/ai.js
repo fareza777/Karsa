@@ -1059,6 +1059,38 @@ const AI = (() => {
     return issues;
   }
 
+  // Gabungan CSS yang BENAR-BENAR akan dipakai entry HTML (meniru Preview.buildBundle):
+  // inline <style> + setiap <link rel=stylesheet> yang RESOLVABLE ke file proyek.
+  // Link yang putus → tak menyumbang CSS → terdeteksi sbg "tanpa gaya".
+  function combinedPreviewCss(files, htmlPath) {
+    const html = files[htmlPath] || '';
+    let css = '';
+    (html.match(/<style[^>]*>([\s\S]*?)<\/style>/gi) || []).forEach((b) => { css += '\n' + b; });
+    const re = /<link\b[^>]*href=["']([^"']+)["'][^>]*>/gi;
+    let m;
+    while ((m = re.exec(html)) !== null) {
+      if (!/stylesheet/i.test(m[0])) continue;
+      const href = m[1];
+      if (/^(https?:)?\/\//i.test(href) || href.startsWith('data:')) continue;
+      const p = (typeof resolveProjectFileRef === 'function') ? resolveProjectFileRef(files, htmlPath, href) : null;
+      if (p && files[p] != null) css += '\n' + files[p];
+    }
+    return css;
+  }
+
+  // True bila menerapkan `merged` akan meruntuhkan styling app yang sudah benar.
+  function applyWouldCollapseStyling(project, merged) {
+    if (!project || !merged.some((f) => /\.(html|css)$/i.test(f.path))) return false;
+    if (typeof webPreviewEntryPath !== 'function') return false;
+    const resFiles = Object.assign({}, project.files);
+    merged.forEach((f) => { resFiles[f.path] = f.code; });
+    const entry = webPreviewEntryPath(resFiles) || webPreviewEntryPath(project.files);
+    if (!entry || project.files[entry] === undefined) return false;
+    const prevCov = KarsaAICore.styleCoverage(project.files[entry] || '', combinedPreviewCss(project.files, entry));
+    const newCov = KarsaAICore.styleCoverage(resFiles[entry] || '', combinedPreviewCss(resFiles, entry));
+    return KarsaAICore.stylingWouldCollapse(prevCov, newCov);
+  }
+
   function prepareFileForApply(path, newCode, project) {
     const old = project && project.files[path];
     if (old === undefined || fileExt(path) !== 'css') return newCode;
@@ -1604,7 +1636,6 @@ const AI = (() => {
       return { path: f.path, isNew: old === undefined, lines: newLines, delta: newLines - oldLines };
     });
 
-    const undoId = State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
     const merged = valid.map((f) => {
       let code = prepareFileForApply(f.path, f.code, project);
       if (fileExt(f.path) === 'css') {
@@ -1613,6 +1644,14 @@ const AI = (() => {
       }
       return { path: f.path, code: code };
     });
+    // #A12 Penjaga anti-"iterasi merusak tampilan": kalau app TADINYA bergaya lalu
+    // hasil apply jadi nyaris polos (link CSS putus / CSS terpotong / kelas bergeser),
+    // JANGAN timpa — pertahankan versi yang sudah benar & beri tahu user (ramah awam).
+    if (applyWouldCollapseStyling(project, merged)) {
+      showToast('Ditahan: perubahan ini akan membuat tampilan jadi polos (gaya hilang). App-mu dibiarkan utuh. Coba ulangi dengan permintaan lebih spesifik, mis. "ubah HANYA bagian kamera, jangan sentuh CSS lain".', 'error');
+      return false;
+    }
+    const undoId = State.addCheckpoint('Sebelum Terapkan AI (' + valid.length + ' file)');
     // #A3 Apply atomik: bila ada yang gagal di tengah, kembalikan ke checkpoint.
     try {
       merged.forEach((f) => State.setFile(f.path, f.code));

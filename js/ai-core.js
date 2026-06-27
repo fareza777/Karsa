@@ -339,10 +339,47 @@
     return files.some((f) => !isFileComplete(f.code, f.path));
   }
 
+  // --- Penjaga "styling collapse" : deteksi iterasi yang membuat app jadi
+  //     tanpa-gaya (link CSS putus, CSS terpotong kehilangan aturan, atau nama
+  //     kelas bergeser). Dipakai sebelum apply agar app yang sudah benar tak
+  //     ditimpa hasil rusak. Murni & teruji (tanpa DOM). ---
+  function extractHtmlClasses(html) {
+    const set = new Set();
+    const re = /class\s*=\s*["']([^"']*)["']/gi;
+    let m;
+    while ((m = re.exec(html || '')) !== null) {
+      m[1].split(/\s+/).forEach((c) => { if (c) set.add(c); });
+    }
+    return Array.from(set);
+  }
+  function countDefinedClasses(css, classes) {
+    if (!css) return 0;
+    let n = 0;
+    for (const c of classes) {
+      const esc = c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (new RegExp('\\.' + esc + '(?![\\w-])').test(css)) n++;
+    }
+    return n;
+  }
+  function styleCoverage(html, css) {
+    const classes = extractHtmlClasses(html);
+    if (!classes.length) return { used: 0, defined: 0, ratio: 1 };
+    const defined = countDefinedClasses(css, classes);
+    return { used: classes.length, defined, ratio: defined / classes.length };
+  }
+  // Catastrophic: app TADINYA bergaya (≥8 kelas, ≥40% terdefinisi) → SETELAH
+  // apply nyaris tanpa gaya (<15% terdefinisi). Ambang konservatif: redesign
+  // yang sah mendefinisikan ulang kelas barunya → rasio tetap tinggi → tak kena.
+  function stylingWouldCollapse(prevCov, newCov) {
+    if (!prevCov || !newCov) return false;
+    return prevCov.used >= 8 && prevCov.ratio >= 0.4 && newCov.used >= 8 && newCov.ratio < 0.15;
+  }
+
   return {
     fileExt, isValidPath, braceBalance, isFileComplete, hasUnclosedCodeFence,
     extractProse, rebuildWithFiles, stitchCode, parseEditBlocks, matchFlexible,
     resolveEdits, editResolutionReport, parseFileBlocks, parseTrailingOpenEdit,
     mergeContinuedOutput, isResponseTruncated, estimateTokens, estimateMessagesTokens,
+    extractHtmlClasses, countDefinedClasses, styleCoverage, stylingWouldCollapse,
   };
 });

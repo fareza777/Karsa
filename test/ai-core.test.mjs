@@ -7,7 +7,8 @@ const AICore = require('../js/ai-core.js');
 const {
   stitchCode, parseFileBlocks, parseEditBlocks, resolveEdits, editResolutionReport,
   isFileComplete, mergeContinuedOutput, isResponseTruncated, braceBalance,
-  parseTrailingOpenEdit,
+  parseTrailingOpenEdit, extractHtmlClasses, countDefinedClasses, styleCoverage,
+  stylingWouldCollapse,
 } = AICore;
 
 describe('stitchCode', () => {
@@ -42,6 +43,47 @@ describe('braceBalance', () => {
   });
   it('mendeteksi kurung tak seimbang', () => {
     expect(braceBalance('function f(){ return 1;')).toBe(false);
+  });
+});
+
+describe('penjaga styling-collapse (anti iterasi merusak tampilan)', () => {
+  const html =
+    '<div class="app-shell"><header class="app-header"><h1 class="brand">X</h1></header>' +
+    '<main class="screen-body"><section class="screen active"><div class="hello-card">' +
+    '<button class="cta-btn">Go</button></div></section></main>' +
+    '<nav class="bottom-nav"><a class="nav-item">A</a></nav></div>';
+  const goodCss =
+    '.app-shell{display:flex}.app-header{height:50px}.brand{font-weight:800}.screen-body{flex:1}' +
+    '.screen{padding:8px}.active{opacity:1}.hello-card{border-radius:12px}.cta-btn{background:#f00}' +
+    '.bottom-nav{position:fixed}.nav-item{color:#333}';
+
+  it('extractHtmlClasses mengambil semua kelas unik', () => {
+    expect(extractHtmlClasses(html)).toEqual(expect.arrayContaining(['app-shell', 'bottom-nav', 'nav-item', 'cta-btn']));
+  });
+  it('styleCoverage tinggi saat CSS mendefinisikan kelas', () => {
+    const cov = styleCoverage(html, goodCss);
+    expect(cov.used).toBeGreaterThanOrEqual(8);
+    expect(cov.ratio).toBeGreaterThan(0.8);
+  });
+  it('countDefinedClasses tak salah match prefix (.nav ≠ .nav-item)', () => {
+    expect(countDefinedClasses('.nav{}', ['nav-item'])).toBe(0);
+    expect(countDefinedClasses('.nav-item{}', ['nav-item'])).toBe(1);
+  });
+  it('collapse: CSS hilang/putus → ditahan', () => {
+    const prev = styleCoverage(html, goodCss);
+    const next = styleCoverage(html, '/* KARSA: file tidak ditemukan */');
+    expect(stylingWouldCollapse(prev, next)).toBe(true);
+  });
+  it('redesign sah (kelas baru tetap didefinisikan) → TIDAK ditahan', () => {
+    const newHtml = html.replace(/class="([^"]+)"/g, (m, c) => 'class="' + c.split(' ').map((x) => 'v2-' + x).join(' ') + '"');
+    const newCss = goodCss.replace(/\.([a-z-]+)\{/g, '.v2-$1{');
+    const prev = styleCoverage(html, goodCss);
+    const next = styleCoverage(newHtml, newCss);
+    expect(stylingWouldCollapse(prev, next)).toBe(false);
+  });
+  it('app kecil (sedikit kelas) → tak pernah memblokir', () => {
+    const small = '<div class="a"><div class="b"></div></div>';
+    expect(stylingWouldCollapse(styleCoverage(small, '.a{}.b{}'), styleCoverage(small, ''))).toBe(false);
   });
 });
 
