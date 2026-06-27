@@ -484,11 +484,45 @@ const Preview = (() => {
       'main,#content,.main-content,.app-content,.content,.screen-body,.app-main,.screen,.page,.tab-content,.scroll-area,.body-scroll{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch;padding-bottom:76px}' +
       '.bottom-nav,.bottom-nav-bar,.tab-bar,.tabbar,.navbar-bottom,.bottom-tabs,.tabs-bottom,[class*="bottom-nav"],[class*="tabbar"]{position:fixed!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;max-width:100%!important;z-index:9999!important;flex-shrink:0!important}' +
       '</style>';
+    // PENGAMAN HP lanjutan: CSS di atas hanya kena bila NAMA KELAS cocok. Banyak app
+    // dari AI memberi nama bebas (.nav, .footer-nav, .menu). Normalizer JS ini mencari
+    // bilah navigasi bawah secara struktural (apa pun namanya) lalu menyematkannya di
+    // bawah + memberi padding ke konten agar tak tertutup/ke­potong. Hanya proyek mobile.
+    const KARSA_MOBILE_FIT_JS = '<script>(function(){' +
+      'function find(){' +
+        'var vh=window.innerHeight||document.documentElement.clientHeight||800;' +
+        'var vw=window.innerWidth||document.documentElement.clientWidth||400;' +
+        'var c=document.querySelectorAll("nav,footer,[role=navigation],[role=tablist],[class*=nav],[class*=tab],[class*=bottom],[class*=menu],[class*=footer]");' +
+        'var best=null,bestTop=-1;' +
+        'for(var i=0;i<c.length;i++){var x=c[i];' +
+          'if(x.hasAttribute&&x.hasAttribute("data-karsa-nofit"))continue;' +
+          'var r=x.getBoundingClientRect();if(!r.height||r.height>vh*0.35)continue;' +
+          'if(r.width<vw*0.6)continue;' +
+          'var items=x.querySelectorAll("a,button,[role=button],[role=tab],li");' +
+          'if(items.length<2||items.length>7)continue;' +
+          'var cy=r.top+r.height/2;if(cy<vh*0.45)continue;' +  /* harus di paruh bawah */
+          'if(r.top>bestTop){bestTop=r.top;best=x;}' +
+        '}' +
+        'return best;' +
+      '}' +
+      'function fit(){try{' +
+        'var n=find();' +
+        'if(!n){document.body.style.paddingBottom="";return;}' +
+        'n.style.position="fixed";n.style.left="0";n.style.right="0";n.style.bottom="0";' +
+        'n.style.width="100%";n.style.maxWidth="100%";n.style.zIndex="9999";' +
+        'var h=n.getBoundingClientRect().height||60;' +
+        'document.body.style.paddingBottom=(h+8)+"px";' +
+      '}catch(e){}}' +
+      'function run(){fit();setTimeout(fit,150);setTimeout(fit,450);}' +
+      'if(document.readyState!=="loading")run();else document.addEventListener("DOMContentLoaded",run);' +
+      'window.addEventListener("resize",function(){clearTimeout(window.__kfitT);window.__kfitT=setTimeout(fit,120);});' +
+      'window.addEventListener("load",run);' +
+    '})();<\/script>';
     const isMobileProj = project && (project.projectType === 'mobile' || project.projectType === 'playstore');
     // #A1 Shim storage: iframe sandbox (srcdoc, opaque origin) bikin localStorage
     // melempar SecurityError → app yang menyimpan data crash. Sediakan localStorage/
     // sessionStorage in-memory (di-seed & dipersist via parent) supaya app jalan.
-    const headInject = buildStorageShim(project) + CONSOLE_BRIDGE + KARSA_PREVIEW_FIT + (isMobileProj ? KARSA_MOBILE_SHELL : '');
+    const headInject = buildStorageShim(project) + CONSOLE_BRIDGE + KARSA_PREVIEW_FIT + (isMobileProj ? KARSA_MOBILE_SHELL + KARSA_MOBILE_FIT_JS : '');
     if (/<head[^>]*>/i.test(html)) {
       html = html.replace(/<head[^>]*>/i, (m) => m + '\n' + headInject);
     } else {
