@@ -11,6 +11,7 @@ export const ARTICLE_PATHS = [
   '/artikel/katalog-produk-online-umkm',
   '/artikel/contoh-prompt-karsa-umkm',
   '/artikel/karsa-vs-website-builder',
+  '/artikel/daftar-google-search-console',
 ];
 
 /** @type {string[]} */
@@ -217,6 +218,27 @@ export const SEO_ROUTES = {
     category: 'Panduan',
     readMinutes: 7,
   },
+  '/artikel/daftar-google-search-console': {
+    ogType: 'article',
+    title: 'Cara Daftar Google Search Console untuk Website KARSA — Panduan',
+    description:
+      'Panduan daftar Google Search Console untuk website KARSA: syarat, verifikasi domain, submit sitemap, dan cara pantau performa halaman UMKM di Google.',
+    canonical: `${SITE}/artikel/daftar-google-search-console`,
+    keywords:
+      'daftar Google Search Console, verifikasi Search Console, submit sitemap Google, SEO website UMKM, KARSA',
+    headline: 'Cara daftar Google Search Console untuk website KARSA',
+    cardTitle: 'Daftar Google Search Console',
+    cardExcerpt: 'Syarat, verifikasi domain, submit sitemap, dan cara membaca laporan performa.',
+    ogTitle: 'Cara Daftar Google Search Console untuk Website KARSA',
+    ogDescription:
+      'Step-by-step daftar dan verifikasi Google Search Console untuk website KARSA — cocok untuk UMKM baru go live.',
+    ogImage: `${SITE}/og/daftar-google-search-console.png`,
+    ogImageAlt: 'Panduan daftar Google Search Console untuk website UMKM dengan KARSA',
+    datePublished: '2026-06-29',
+    dateModified: '2026-06-29',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -235,6 +257,7 @@ export const RELATED_ARTICLES = {
     '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/pembuat-aplikasi-tanpa-coding',
+    '/artikel/daftar-google-search-console',
   ],
   '/artikel/apa-itu-vibecoding': [
     '/artikel/pembuat-aplikasi-tanpa-coding',
@@ -260,6 +283,11 @@ export const RELATED_ARTICLES = {
     '/artikel/pembuat-aplikasi-tanpa-coding',
     '/artikel/apa-itu-vibecoding',
     '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/daftar-google-search-console': [
+    '/artikel/cara-publish-website-karsa',
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/karsa-vs-website-builder',
   ],
 };
 
