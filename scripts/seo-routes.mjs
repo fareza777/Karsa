@@ -12,6 +12,7 @@ export const ARTICLE_PATHS = [
   '/artikel/contoh-prompt-karsa-umkm',
   '/artikel/karsa-vs-website-builder',
   '/artikel/daftar-google-search-console',
+  '/artikel/website-warung-makan',
 ];
 
 /** @type {string[]} */
@@ -239,6 +240,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/website-warung-makan': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Warung Makan Sederhana dengan AI — KARSA',
+    description:
+      'Panduan bikin website warung makan sederhana: menu, foto, jam buka, alamat, dan tombol pesan via WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.',
+    canonical: `${SITE}/artikel/website-warung-makan`,
+    keywords:
+      'website warung makan, website UMKM kuliner, menu online warung, website resto sederhana, KARSA contoh warung',
+    headline: 'Website warung makan sederhana: dari pelanggan lewat jadi pelanggan balik',
+    cardTitle: 'Website warung makan sederhana',
+    cardExcerpt: 'Menu, foto, jam buka, alamat, tombol WhatsApp — warung kamu punya link permanen.',
+    ogTitle: 'Website Warung Makan Sederhana dengan AI',
+    ogDescription:
+      'Buat website warung makan dalam hitungan menit: menu, foto, alamat, dan tombol pesan via WhatsApp.',
+    ogImage: `${SITE}/og/website-warung-makan.png`,
+    ogImageAlt: 'Panduan bikin website warung makan sederhana dengan KARSA',
+    datePublished: '2026-07-01',
+    dateModified: '2026-07-01',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -288,6 +310,11 @@ export const RELATED_ARTICLES = {
     '/artikel/cara-publish-website-karsa',
     '/artikel/katalog-produk-online-umkm',
     '/artikel/karsa-vs-website-builder',
+  ],
+  '/artikel/website-warung-makan': [
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/katalog-produk-online-umkm',
   ],
 };
 

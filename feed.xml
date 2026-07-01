@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Mon, 29 Jun 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 01 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Website Warung Makan Sederhana dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/website-warung-makan</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/website-warung-makan</guid>
+      <description>Panduan bikin website warung makan sederhana: menu, foto, jam buka, alamat, dan tombol pesan via WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.</description>
+      <pubDate>Wed, 01 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Daftar Google Search Console untuk Website KARSA — Panduan</title>
       <link>https://karsa.work/artikel/daftar-google-search-console</link>
