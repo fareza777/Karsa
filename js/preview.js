@@ -471,8 +471,10 @@ const Preview = (() => {
 
     // Suntikkan jembatan console + perbaikan layout di dalam iframe (hindari double mockup HP)
     const KARSA_PREVIEW_FIT = '<style id="karsa-preview-fit">html,body{margin:0;padding:0;width:100%;min-height:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}' +
+      // 100dvh (BUKAN 100%): body tak punya height eksplisit, jadi 100% jatuh ke
+      // "auto" → shell menciut setinggi konten & bottom-nav melayang di tengah.
       '.phone-frame,.device-frame,.app-frame,.app-shell,.phone-mockup{width:100%!important;max-width:100%!important;' +
-      'min-height:100%!important;height:100%!important;margin:0!important;border-radius:0!important;' +
+      'min-height:100dvh!important;height:100dvh!important;margin:0!important;border-radius:0!important;' +
       'box-shadow:none!important;transform:none!important;border:none!important}' +
       'main,#content,.main-content,.app-content{flex:1;min-height:0;overflow-y:auto}' +
       '.bottom-nav,.bottom-nav-bar,.tab-bar{position:sticky;bottom:0;z-index:20;width:100%}</style>';

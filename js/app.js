@@ -558,6 +558,16 @@ const App = (() => {
       }
       State.hydrate(guestList);
     } catch (e) { /* fallback sudah di Storage */ }
+    // Inti UI DULU: tombol utama (hero "Buat dengan AI", proyek baru, dsb) harus
+    // hidup SEGERA — kalau menunggu langkah daring di bawah, di jaringan lambat
+    // seluruh UI mati berdetik-detik tanpa umpan balik (klik tak bereaksi).
+    ConsolePanel.init();
+    Editor.init();
+    setupResizers();
+    bindEvents();
+    try { setupInstallPrompt(); } catch (e) { /* abaikan */ }
+    showDashboard();
+
     // Langkah daring bersifat best-effort: kegagalan jaringan (Auth/Plan/Cloud)
     // TAK BOLEH menggagalkan boot IDE. Tanpa ini satu hiccup jaringan = layar mati.
     try { Auth.bindTriggers(); } catch (e) { /* abaikan */ }
@@ -566,14 +576,6 @@ const App = (() => {
     try { await Plan.loadConfig(); } catch (e) { /* pakai default */ }
     try { await Plan.syncProFromCloud(); } catch (e) { /* abaikan */ }
     try { Plan.updateAiBadge(); } catch (e) { /* abaikan */ }
-
-    // Inti UI: WAJIB jalan apa pun kondisi jaringan/penyimpanan.
-    ConsolePanel.init();
-    Editor.init();
-    setupResizers();
-    bindEvents();
-    try { setupInstallPrompt(); } catch (e) { /* abaikan */ }
-    showDashboard();
     const imported = importFromHash();
     // #B8 Lanjut kerja: buka proyek terakhir hanya saat login (hindari auto-masuk proyek tamu/akun lain).
     if (!imported && typeof Auth !== 'undefined' && Auth.isLoggedIn()) {
