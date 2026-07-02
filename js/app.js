@@ -310,7 +310,15 @@ const App = (() => {
       input.focus();
       return;
     }
-    const words = idea.replace(/["'`]/g, '').split(/\s+/).slice(0, 5).join(' ');
+    // Nama proyek dari INTI ide: buang kata perintah di depan ("buatkan aplikasi…")
+    // dan frasa tujuan di belakang ("… untuk di-upload ke play store") — nama ini
+    // dipakai juga utk app.json & android.package di setup Play Store.
+    const inti = idea.replace(/["'`]/g, '')
+      .replace(/^\s*(tolong\s+|coba\s+)?(buat(kan)?|bikin|desain(kan)?|generate)\s+(aplikasi|website|web|app|apk|game)?\s*/i, '')
+      .replace(/\s+(untuk|buat|biar|supaya|agar)\s+(di-?\s*)?(upload|unggah|rilis|publish|pasang).*$/i, '')
+      .replace(/\s+(ke|di)\s+(google\s+)?play\s*store.*$/i, '')
+      .trim();
+    const words = (inti || idea.replace(/["'`]/g, '')).split(/\s+/).slice(0, 5).join(' ');
     const name = words.charAt(0).toUpperCase() + words.slice(1);
     const projectType = detectProjectTypeFromPrompt(idea);
     const tpl = getTemplate(templateIdForProjectType(projectType));

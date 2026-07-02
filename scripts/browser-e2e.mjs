@@ -103,6 +103,38 @@ const R2 = ['Oke, tombol pindai kubuat hijau. 🌿', '',
   '.cta-btn{background:#16a34a;color:#fff;border:none;border-radius:12px;padding:12px 18px;font-weight:700}',
   '>>>>>>> REPLACE', '```', '', 'Ada lagi?'].join('\n');
 
+// Skenario Play Store: AI membangun app kasir Expo (App.tsx realistis >350 char).
+const R4 = ['Siap! Aku bangun app kasir warung untuk Play Store. 🏪', '',
+  '```tsx file=App.tsx',
+  'import React, { useState } from "react";',
+  'import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";',
+  '',
+  'export default function App() {',
+  '  const [items, setItems] = useState<{ nama: string; harga: number }[]>([]);',
+  '  const total = items.reduce((a, b) => a + b.harga, 0);',
+  '  return (',
+  '    <ScrollView style={styles.wrap}>',
+  '      <Text style={styles.judul}>Kasir Warung</Text>',
+  '      <Text style={styles.total}>Total: Rp {total.toLocaleString("id-ID")}</Text>',
+  '      <Pressable style={styles.tombol} onPress={() => setItems([...items, { nama: "Kopi", harga: 5000 }])}>',
+  '        <Text style={styles.tombolTeks}>+ Tambah Kopi (Rp 5.000)</Text>',
+  '      </Pressable>',
+  '      {items.map((it, i) => (',
+  '        <View key={i} style={styles.baris}><Text>{it.nama}</Text><Text>Rp {it.harga}</Text></View>',
+  '      ))}',
+  '    </ScrollView>',
+  '  );',
+  '}',
+  'const styles = StyleSheet.create({',
+  '  wrap: { flex: 1, padding: 20, backgroundColor: "#f8fafc" },',
+  '  judul: { fontSize: 24, fontWeight: "800", marginBottom: 8 },',
+  '  total: { fontSize: 18, color: "#16a34a", marginBottom: 12 },',
+  '  tombol: { backgroundColor: "#6366f1", padding: 14, borderRadius: 12, marginBottom: 12 },',
+  '  tombolTeks: { color: "#fff", textAlign: "center", fontWeight: "700" },',
+  '  baris: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 },',
+  '});',
+  '```', '', 'Mau kutambah daftar menu, diskon, atau riwayat transaksi?'].join('\n');
+
 // Iterasi 3: DESTRUKTIF — tulis-ulang CSS SEUKURAN file lama tapi kelasnya
 // bergeser semua (persis pola bug produksi: 442-baris rewrite yang meleset).
 // Terlalu besar utk dianggap patch → full replace → HARUS DITAHAN penjaga.
@@ -141,7 +173,7 @@ page.on('console', (m) => {
 await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, (r) => r.abort());
 
 let aiCall = 0;
-const RESPONSES = [R1, R2, R3];
+const RESPONSES = [R1, R2, R3, R4];
 await page.route('**/api/chat', async (route) => {
   const body = sse(RESPONSES[Math.min(aiCall, RESPONSES.length - 1)]);
   aiCall++;
@@ -252,7 +284,52 @@ const after3 = await frame3.evaluate(() => {
 ok(/ditahan/i.test(toastText), 'apply DITAHAN dengan pesan ramah (toast: ' + toastText.slice(0, 90) + '…)');
 ok(after3.btnBg === 'rgb(22, 163, 74)', 'app TETAP bergaya setelah percobaan destruktif (tombol masih hijau)');
 
-console.log('=== 6) KONSISTENSI AKHIR ===');
+console.log('=== 6) WORKFLOW PLAY STORE: ide → Expo → setup otomatis → siap upload ===');
+await page.click('#btn-home');
+await page.waitForTimeout(600);
+await dismissTour();
+await page.fill('#hero-prompt-input', 'buatkan aplikasi kasir warung untuk di-upload ke play store');
+await page.click('#hero-prompt-send');
+await page.waitForTimeout(1500);
+const psType = await page.evaluate(() => {
+  const p = State.getCurrentProject();
+  return p ? p.projectType : null;
+});
+ok(psType === 'playstore', 'prompt "play store" → proyek tipe playstore (deteksi otomatis: ' + psType + ')');
+await applyLatest();
+const psFiles0 = await page.evaluate(() => {
+  const p = State.getCurrentProject();
+  return { appTsx: (p.files['App.tsx'] || '').length, hasPkg: !!p.files['package.json'] };
+});
+ok(psFiles0.appTsx > 350 && psFiles0.hasPkg, 'App.tsx dari AI diterapkan (' + psFiles0.appTsx + ' char) + package.json ada');
+
+// 🏪 Checklist → Setup otomatis + ikon (canvas Chromium membuat PNG asli)
+await page.click('#btn-playstore');
+const setupBtn = page.locator('button', { hasText: 'Setup otomatis' }).last();
+await setupBtn.waitFor({ state: 'visible', timeout: 8000 });
+await setupBtn.click();
+await page.waitForTimeout(1500);
+const psState = await page.evaluate(() => {
+  const p = State.getCurrentProject();
+  const ev = PlayStore.evaluate(p);
+  return {
+    ready: ev.ready, score: ev.score,
+    gagal: ev.items.filter((i) => !i.ok).map((i) => i.id),
+    hasEas: !!p.files['eas.json'],
+    hasListing: !!p.files['STORE-LISTING.md'],
+    hasGuide: !!p.files['CARA-PLAY-STORE.md'],
+    iconPng: (p.files['assets/icon.png'] || '').startsWith('data:image/png;base64,'),
+    splashPng: (p.files['assets/splash.png'] || '').startsWith('data:image/png;base64,'),
+    pkg: (() => { try { return JSON.parse(p.files['app.json']).expo.android.package; } catch (e) { return null; } })(),
+  };
+});
+ok(psState.hasEas, 'eas.json dibuat (profil AAB)');
+ok(psState.hasListing && psState.hasGuide, 'STORE-LISTING.md + CARA-PLAY-STORE.md dibuat');
+ok(psState.iconPng && psState.splashPng, 'ikon & splash PNG ASLI dibuat otomatis (canvas)');
+ok(/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(psState.pkg || ''), 'android.package valid: ' + psState.pkg);
+ok(psState.ready === true && psState.score === 100, 'checklist Play Store SIAP 100% (gagal: ' + psState.gagal.join(',') + ')');
+
+console.log('=== 6b) KONSISTENSI AKHIR ===');
 ok(pageErrors.length === 0, 'nol error JS sepanjang seluruh alur' + (pageErrors.length ? ' — ' + pageErrors.join(' ; ').slice(0, 300) : ''));
 
 console.log('=== 7) TUR ONBOARDING (user baru, terisolasi) ===');

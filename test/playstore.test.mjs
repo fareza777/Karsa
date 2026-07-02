@@ -25,6 +25,7 @@ beforeAll(() => {
     vm.runInContext(code, sandbox, { filename: f });
   }
   PS = sandbox.PlayStore;
+  globalThis.__psSandbox = sandbox;
 });
 
 describe('validAndroidPackage', () => {
@@ -101,6 +102,35 @@ describe('evaluate (kesiapan Play Store)', () => {
   it('icon placeholder (teks) → icon gagal', () => {
     const ev = PS.evaluate(completeExpoProject({ 'assets/icon.png': '# placeholder ganti ini' }));
     expect(ev.items.find((i) => i.id === 'icon').ok).toBe(false);
+  });
+});
+
+describe('ensurePlayStoreSetup (setup otomatis mengganti nilai generik template)', () => {
+  it('name/slug/package generik template → diganti nama proyek user', () => {
+    const proj = {
+      name: 'Kasir Warung',
+      projectType: 'playstore',
+      files: {
+        'App.tsx': completeExpoProject().files['App.tsx'],
+        'package.json': JSON.stringify({ dependencies: { expo: '~52.0.0' } }),
+        'app.json': JSON.stringify({ expo: {
+          name: 'Aplikasi Play Store', slug: 'karsa-playstore-app', version: '1.0.0',
+          android: { package: 'com.karsa.playstoreapp' },
+        } }),
+      },
+    };
+    const sb = globalThis.__psSandbox;
+    sb.State.getCurrentProject = () => proj;
+    sb.State.setFile = (p, c) => { proj.files[p] = c; };
+    PS.ensurePlayStoreSetup();
+    const expo = JSON.parse(proj.files['app.json']).expo;
+    expect(expo.name).toBe('Kasir Warung');
+    expect(expo.slug).toBe('kasir-warung');
+    expect(expo.android.package).toBe('com.karsa.kasirwarung');
+    expect(PS.validAndroidPackage(expo.android.package)).toBe(true);
+    expect(proj.files['STORE-LISTING.md']).toContain('Kasir Warung');
+    sb.State.getCurrentProject = () => null;
+    sb.State.setFile = () => {};
   });
 });
 

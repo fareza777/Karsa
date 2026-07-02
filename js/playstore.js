@@ -260,7 +260,17 @@ const PlayStore = (() => {
     const app = parseAppJson(files) || { expo: {} };
     const expo = app.expo;
     if (!expo.android) expo.android = {};
-    if (!expo.android.package) expo.android.package = defaultAndroidPackage(project);
+    // Nilai GENERIK bawaan template juga diganti (bukan hanya yang kosong) —
+    // kalau tidak, "Setup otomatis" mentok: checklist name/package gagal terus
+    // dan user awam dipaksa edit app.json manual.
+    if (isGenericExpoName(expo)) {
+      expo.name = project.name || expo.name || 'Aplikasi Saya';
+      expo.slug = (project.name || 'aplikasi-saya').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'aplikasi-saya';
+    }
+    if (!expo.android.package || isGenericPackage(expo.android.package)) {
+      expo.android.package = defaultAndroidPackage(project);
+    }
     if (!expo.android.versionCode) expo.android.versionCode = 1;
     if (!expo.version) expo.version = '1.0.0';
     if (!expo.android.adaptiveIcon) {
