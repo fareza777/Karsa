@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Wed, 01 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 03 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Form Booking Online untuk UMKM dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/form-booking-online-umkm</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/form-booking-online-umkm</guid>
+      <description>Panduan bikin form booking online untuk UMKM: pilih layanan, tanggal, jam, kirim ke WhatsApp owner. Contoh prompt KARSA bahasa Indonesia untuk salon dan rental.</description>
+      <pubDate>Fri, 03 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Website Warung Makan Sederhana dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/website-warung-makan</link>

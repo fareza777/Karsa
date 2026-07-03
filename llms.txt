@@ -24,6 +24,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [KARSA vs Wix vs WordPress: mana yang tepat untuk kamu?](https://karsa.work/artikel/karsa-vs-website-builder): Perbandingan KARSA vs Wix vs WordPress: kemudahan pakai, biaya, fleksibilitas SEO, dan kapan masing-masing paling pas untuk UMKM dan kreator Indonesia.
 - [Cara daftar Google Search Console untuk website KARSA](https://karsa.work/artikel/daftar-google-search-console): Panduan daftar Google Search Console untuk website KARSA: syarat, verifikasi domain, submit sitemap, dan cara pantau performa halaman UMKM di Google.
 - [Website warung makan sederhana: dari pelanggan lewat jadi pelanggan balik](https://karsa.work/artikel/website-warung-makan): Panduan bikin website warung makan sederhana: menu, foto, jam buka, alamat, dan tombol pesan via WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.
+- [Form booking online untuk UMKM: dari chat berulang jadi link siap kirim](https://karsa.work/artikel/form-booking-online-umkm): Panduan bikin form booking online untuk UMKM: pilih layanan, tanggal, jam, kirim ke WhatsApp owner. Contoh prompt KARSA bahasa Indonesia untuk salon dan rental.
 
 ## Kontak
 

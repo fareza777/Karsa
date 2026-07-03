@@ -13,6 +13,7 @@ export const ARTICLE_PATHS = [
   '/artikel/karsa-vs-website-builder',
   '/artikel/daftar-google-search-console',
   '/artikel/website-warung-makan',
+  '/artikel/form-booking-online-umkm',
 ];
 
 /** @type {string[]} */
@@ -261,6 +262,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/form-booking-online-umkm': {
+    ogType: 'article',
+    title: 'Cara Bikin Form Booking Online untuk UMKM dengan AI — KARSA',
+    description:
+      'Panduan bikin form booking online untuk UMKM: pilih layanan, tanggal, jam, kirim ke WhatsApp owner. Contoh prompt KARSA bahasa Indonesia untuk salon dan rental.',
+    canonical: `${SITE}/artikel/form-booking-online-umkm`,
+    keywords:
+      'form booking online UMKM, form reservasi online, booking salon, form booking rental, form pemesanan jasa, KARSA',
+    headline: 'Form booking online untuk UMKM: dari chat berulang jadi link siap kirim',
+    cardTitle: 'Form booking online UMKM',
+    cardExcerpt: 'Pilih layanan, tanggal, jam — pelanggan isi sendiri, owner terima rapi di WhatsApp.',
+    ogTitle: 'Form Booking Online untuk UMKM',
+    ogDescription:
+      'Bikin form booking dalam hitungan menit: layanan, tanggal, jam, dan notifikasi WhatsApp otomatis ke owner.',
+    ogImage: `${SITE}/og/form-booking-online-umkm.png`,
+    ogImageAlt: 'Panduan bikin form booking online untuk UMKM dengan KARSA',
+    datePublished: '2026-07-03',
+    dateModified: '2026-07-03',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -315,6 +337,11 @@ export const RELATED_ARTICLES = {
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/katalog-produk-online-umkm',
+  ],
+  '/artikel/form-booking-online-umkm': [
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/contoh-prompt-karsa-umkm',
+    '/artikel/website-warung-makan',
   ],
 };
 
