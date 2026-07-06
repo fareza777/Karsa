@@ -257,4 +257,46 @@ export const ARTICLE_BODY = {
       <p>Untuk usaha yang baru buka, cara paling efektif adalah menempel QR code di meja dan menjelaskan ke pelanggan: <em>"Kak, kalau mau booking nanti bisa scan barcode ini aja, langsung masuk antrian kami, nggak perlu chat lagi"</em>. Dalam dua minggu, pola booking biasanya sudah bergeser dari chat manual ke form — dan waktu admin yang semula habis untuk klarifikasi bisa dialihkan ke pelayanan.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti nama usaha, daftar layanan, harga, dan nomor WhatsApp owner, lalu lihat preview-nya. Untuk variasi prompt yang lebih lengkap, pelajari juga <a href="/artikel/contoh-prompt-karsa-umkm">contoh prompt KARSA untuk UMKM</a> — lima prompt siap pakai di sana bisa kamu adaptasi untuk booking, katalog, dan landing promo. Kalau usaha kamu masih tahap awal dan bingung antara website, katalog, atau form dulu, cek juga <a href="/artikel/vibecoding-untuk-umkm">vibecoding untuk UMKM</a> untuk peta use case yang lebih luas.</p>`,
+'custom-domain-karsa': `
+      <p>Subdomain gratis dari KARSA seperti <code>tokoku.karsa.work</code> sudah cukup untuk mulai. Tapi kalau bisnismu sudah punya nama usaha tetap, domain sendiri — seperti <code>tokoku.com</code> — terasa jauh lebih profesional di kartu nama, kemasan produk, dan iklan berbayar. Artikel ini menjelaskan cara pasang custom domain di KARSA untuk UMKM: syarat, langkah DNS, jebakan umum, dan tips biar domain baru tetap cepat ditemukan Google.</p>
+      <h2>Kenapa UMKM perlu custom domain</h2>
+      <p>Domain sendiri adalah aset digital yang bertahan lama — tidak bergantung pada platform manapun. Kalau suatu saat kamu pindah builder, domain tetap di tanganmu. Pelanggan juga lebih mudah mengingat <code>tokoku.com</code> dibanding <code>tokoku.karsa.work</code>, apalagi dicetak di stiker, kemasan, atau iklan TV. Untuk SEO, domain singkat dengan kata kunci merek membantu click-through rate di Google: pelanggan lebih percaya klik link yang terlihat rapi.</p>
+      <p>Yang sering tidak disadari: domain sendiri melatih pelanggan mengetik langsung ke address bar. Setelah beberapa kali interaksi, mereka akan ketik <code>tokoibu.com</code> tanpa perlu search — loyalty yang tidak bisa dibangun oleh subdomain generik. Untuk bisnis lokal yang melayani repeat customer, efeknya terasa di bulan ketiga atau keempat.</p>
+      <h2>Syarat sebelum pasang custom domain di KARSA</h2>
+      <p>Pastikan tiga hal ini siap. Pertama, kamu sudah punya akun di platform registrasi domain — Niagahoster, Rumahweb, Cloudflare, Namecheap, Exabytes, atau registrar lain. Kalau belum, daftarkan dulu; biaya domain <code>.com</code> mulai sekitar Rp 150.000 per tahun, <code>.id</code> mulai Rp 250.000 per tahun.</p>
+      <ul>
+        <li><strong>Domain aktif</strong> — sudah dibayar minimal satu tahun dan tidak dalam masa redemption</li>
+        <li><strong>Akses panel DNS</strong> — bisa login ke registrar tempat kamu membeli domain</li>
+        <li><strong>Proyek KARSA sudah publish</strong> — minimal sudah live di subdomain gratis sebagai fallback</li>
+      </ul>
+      <h2>Contoh prompt untuk KARSA</h2>
+      <p>Buka <a href="/app">KARSA</a>, buka proyek yang ingin di-custom domain, lalu klik Publish. Di modal yang muncul, pilih opsi "Custom Domain" dan masukkan domain kamu, mis. <code>tokoibu.com</code>. KARSA akan menampilkan instruksi DNS yang perlu ditambahkan di panel registrar. Untuk memastikan domain diarahkan dengan benar, minta AI menambahkan catatan di footer:</p>
+      <p><em>"Tambahkan catatan di footer halaman: 'Situs ini adalah properti resmi Toko Ibu, domain tokoibu.com dikelola melalui KARSA'. Pakai font kecil warna abu-abu, posisi tengah."</em></p>
+      <p>Setelah preview muncul dan footer ter-update, publish ulang supaya live site ikut berubah. Cek juga apakah ada section tentang toko yang perlu menyebut domain baru — pelanggan yang menemukan subdomain lama tetap perlu diarahkan ke domain utama.</p>
+      <h2>Langkah pasang DNS</h2>
+      <p>Berikut alur umum yang berlaku untuk hampir semua registrar domain. Login ke panel domain kamu, buka menu DNS Management atau Zone Editor. KARSA meminta dua record: <strong>CNAME</strong> untuk subdomain <code>www</code> ke <code>host.karsa.work</code>, dan <strong>ALIAS atau ANAME</strong> (atau redirect 301) untuk root domain <code>tokoibu.com</code>.</p>
+      <ol style="margin:0 0 1.25em 1.25em">
+        <li>Buka panel DNS registrar domain kamu.</li>
+        <li>Tambahkan record CNAME: host <code>www</code>, target <code>host.karsa.work</code>.</li>
+        <li>Tambahkan record ALIAS/ANAME untuk root domain <code>@</code> ke <code>host.karsa.work</code> — atau redirect URL 301.</li>
+        <li>Simpan perubahan, tunggu propagasi 5 menit sampai 24 jam.</li>
+        <li>Kembali ke KARSA, klik "Verify" di modal custom domain.</li>
+      </ol>
+      <p>Setelah status berubah menjadi "Connected", domain baru siap dipakai. SSL otomatis diurus KARSA — pelanggan tidak melihat peringatan "not secure" di browser. Untuk memastikan semuanya bekerja, buka domain dari HP dan browser berbeda (Chrome di laptop, Safari di iPhone). Kalau di salah satu device masih error, biasanya propagasi DNS belum selesai di ISP tertentu — tunggu beberapa jam.</p>
+      <h2>Kesalahan umum saat pasang custom domain</h2>
+      <ul>
+        <li><strong>Lupa propagasi</strong> — DNS butuh waktu. Cek dengan <code>whatsmydns.net</code> untuk lihat apakah record sudah tersebar global.</li>
+        <li><strong>Record bentrok</strong> — kalau domain masih diarahkan ke website lain (mis. Blogspot), hapus dulu record lama.</li>
+        <li><strong>Typo di CNAME</strong> — satu karakter salah menyebabkan error. Selalu copy-paste dari instruksi KARSA.</li>
+        <li><strong>Lupa SSL</strong> — setelah domain terhubung, sertifikat HTTPS butuh waktu 10–30 menit untuk diterbitkan.</li>
+        <li><strong>Tidak redirect www</strong> — pastikan <code>www.tokoibu.com</code> dan <code>tokoibu.com</code> keduanya mengarah ke situs KARSA.</li>
+      </ul>
+      <p>Trik UMKM: setelah domain baru live, jangan hapus subdomain <code>karsa.work</code> langsung. Biarkan satu atau dua minggu supaya pelanggan lama yang masih ingat link subdomain tidak kecewa. Setelah yakin semua sudah pindah, baru deprecate subdomain lama.</p>
+      <h2>SEO setelah domain baru live</h2>
+      <p>Domain baru dimulai dari nol di mata Google — tidak ada backlink, tidak ada history. Langkah pertama setelah domain aktif: daftarkan ke <a href="/artikel/daftar-google-search-console">Google Search Console</a> dengan metode Domain (bukan URL Prefix) supaya data lebih lengkap. Submit sitemap dan request indexing untuk halaman utama.</p>
+      <p>Kalau sebelumnya UMKM sudah punya situs lama di domain lain (Blogspot, WordPress.com, dll.), pasang redirect 301 dari domain lama ke domain baru. Tanpa redirect, backlink yang sudah terkumpul hilang dan ranking lama ikut reset. Untuk detail publish dan SEO dasar, lihat juga <a href="/artikel/cara-publish-website-karsa">cara publish website dari KARSA</a>.</p>
+      <h2>Memilih registrar domain untuk UMKM Indonesia</h2>
+      <p>Registrar lokal seperti Niagahoster dan Rumahweb punya dukungan bahasa Indonesia dan menerima pembayaran via transfer bank, GoPay, atau e-wallet — lebih praktis untuk UMKM tanpa kartu kredit. Cloudflare menonjolkan harga modal dan WHOIS privacy gratis, tapi pembelian via dashboard bahasa Inggris. Namecheap dan Porkbun punya harga kompetitif tapi bayar pakai PayPal/kartu kredit. Untuk <code>.id</code>, daftarkan lewat PANDI atau registrar resmi. Domain <code>.id</code> memberi kesan lokal yang kuat dan kadang lebih dipercaya pelanggan Indonesia.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, klik Publish di proyek kamu, dan pilih opsi Custom Domain. Ikuti instruksi DNS, tambahkan record di panel registrar, tunggu propagasi, lalu klik Verify. Proses biasanya selesai kurang dari satu jam — setelah itu domain baru langsung live dengan SSL otomatis. Pelajari juga <a href="/artikel/karsa-vs-website-builder">perbandingan KARSA dengan Wix dan WordPress</a>, dan <a href="/artikel/vibecoding-untuk-umkm">vibecoding untuk UMKM</a> untuk use case lain yang bisa kamu bangun dengan domain baru.</p>`,
 };

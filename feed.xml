@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Fri, 03 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 06 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Pasang Custom Domain di KARSA — Panduan UMKM</title>
+      <link>https://karsa.work/artikel/custom-domain-karsa</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/custom-domain-karsa</guid>
+      <description>Panduan pasang custom domain di KARSA: syarat, catatan DNS, propagasi, dan tips biar situs UMKM tetap cepat diindeks Google.</description>
+      <pubDate>Mon, 06 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Form Booking Online untuk UMKM dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/form-booking-online-umkm</link>

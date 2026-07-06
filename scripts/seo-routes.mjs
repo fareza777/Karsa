@@ -14,6 +14,7 @@ export const ARTICLE_PATHS = [
   '/artikel/daftar-google-search-console',
   '/artikel/website-warung-makan',
   '/artikel/form-booking-online-umkm',
+  '/artikel/custom-domain-karsa',
 ];
 
 /** @type {string[]} */
@@ -283,6 +284,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/custom-domain-karsa': {
+    ogType: 'article',
+    title: 'Cara Pasang Custom Domain di KARSA — Panduan UMKM',
+    description:
+      'Panduan pasang custom domain di KARSA: syarat, catatan DNS, propagasi, dan tips biar situs UMKM tetap cepat diindeks Google.',
+    canonical: `${SITE}/artikel/custom-domain-karsa`,
+    keywords:
+      'custom domain KARSA, pasang domain sendiri, DNS CNAME karsa.work, domain UMKM, KARSA custom domain',
+    headline: 'Custom domain di KARSA: pakai nama domain sendiri untuk UMKM',
+    cardTitle: 'Custom domain KARSA',
+    cardExcerpt: 'Syarat, catatan DNS, dan tips biar situs UMKM pakai domain pribadi tampil profesional.',
+    ogTitle: 'Cara Pasang Custom Domain di KARSA',
+    ogDescription:
+      'Pakai domain sendiri untuk situs KARSA — syarat, langkah DNS, dan tips SEO UMKM Indonesia.',
+    ogImage: `${SITE}/og/custom-domain-karsa.png`,
+    ogImageAlt: 'Panduan pasang custom domain di KARSA untuk UMKM Indonesia',
+    datePublished: '2026-07-06',
+    dateModified: '2026-07-06',
+    category: 'Publish',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -342,6 +364,11 @@ export const RELATED_ARTICLES = {
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/contoh-prompt-karsa-umkm',
     '/artikel/website-warung-makan',
+  ],
+  '/artikel/custom-domain-karsa': [
+    '/artikel/cara-publish-website-karsa',
+    '/artikel/daftar-google-search-console',
+    '/artikel/karsa-vs-website-builder',
   ],
 };
 
