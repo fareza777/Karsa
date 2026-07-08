@@ -15,6 +15,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-warung-makan',
   '/artikel/form-booking-online-umkm',
   '/artikel/custom-domain-karsa',
+  '/artikel/prototype-aplikasi-startup',
 ];
 
 /** @type {string[]} */
@@ -305,6 +306,27 @@ export const SEO_ROUTES = {
     category: 'Publish',
     readMinutes: 6,
   },
+  '/artikel/prototype-aplikasi-startup': {
+    ogType: 'article',
+    title: 'Cara Bikin Prototype Aplikasi Startup dengan AI — KARSA',
+    description:
+      'Panduan bikin prototype aplikasi startup dengan vibecoding: contoh prompt KARSA, validasi ke pengguna, dan pitch ke investor tanpa keluar biaya besar.',
+    canonical: `${SITE}/artikel/prototype-aplikasi-startup`,
+    keywords:
+      'prototype aplikasi startup, MVP startup Indonesia, vibecoding startup, contoh prompt prototype, validasi ide startup, KARSA founder',
+    headline: 'Prototype aplikasi startup: dari ide jadi versi klik-able dalam satu sore',
+    cardTitle: 'Prototype aplikasi startup dengan AI',
+    cardExcerpt: 'Bikin prototype klik-able, validasi ke pengguna, pitch ke investor — tanpa keluar biaya besar.',
+    ogTitle: 'Prototype Aplikasi Startup dengan AI',
+    ogDescription:
+      'Vibecoding untuk founder: prototype aplikasi startup dalam satu sore, contoh prompt KARSA bahasa Indonesia.',
+    ogImage: `${SITE}/og/prototype-aplikasi-startup.png`,
+    ogImageAlt: 'Panduan bikin prototype aplikasi startup dengan KARSA vibecoding',
+    datePublished: '2026-07-08',
+    dateModified: '2026-07-08',
+    category: 'Panduan',
+    readMinutes: 7,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -369,6 +391,11 @@ export const RELATED_ARTICLES = {
     '/artikel/cara-publish-website-karsa',
     '/artikel/daftar-google-search-console',
     '/artikel/karsa-vs-website-builder',
+  ],
+  '/artikel/prototype-aplikasi-startup': [
+    '/artikel/apa-itu-vibecoding',
+    '/artikel/pembuat-aplikasi-tanpa-coding',
+    '/artikel/bikin-landing-page-dengan-ai',
   ],
 };
 
