@@ -27,6 +27,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Form booking online untuk UMKM: dari chat berulang jadi link siap kirim](https://karsa.work/artikel/form-booking-online-umkm): Panduan bikin form booking online untuk UMKM: pilih layanan, tanggal, jam, kirim ke WhatsApp owner. Contoh prompt KARSA bahasa Indonesia untuk salon dan rental.
 - [Custom domain di KARSA: pakai nama domain sendiri untuk UMKM](https://karsa.work/artikel/custom-domain-karsa): Panduan pasang custom domain di KARSA: syarat, catatan DNS, propagasi, dan tips biar situs UMKM tetap cepat diindeks Google.
 - [Prototype aplikasi startup: dari ide jadi versi klik-able dalam satu sore](https://karsa.work/artikel/prototype-aplikasi-startup): Panduan bikin prototype aplikasi startup dengan vibecoding: contoh prompt KARSA, validasi ke pengguna, dan pitch ke investor tanpa keluar biaya besar.
+- [SEO website UMKM: cara supaya bisnismu ketemu di Google](https://karsa.work/artikel/seo-website-umkm): Panduan SEO website UMKM untuk pemula: riset kata kunci, optimasi judul & meta, kecepatan situs, SEO lokal, sampai submit sitemap ke Google.
 
 ## Kontak
 

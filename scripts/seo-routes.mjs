@@ -16,6 +16,7 @@ export const ARTICLE_PATHS = [
   '/artikel/form-booking-online-umkm',
   '/artikel/custom-domain-karsa',
   '/artikel/prototype-aplikasi-startup',
+  '/artikel/seo-website-umkm',
 ];
 
 /** @type {string[]} */
@@ -327,6 +328,27 @@ export const SEO_ROUTES = {
     category: 'Panduan',
     readMinutes: 7,
   },
+  '/artikel/seo-website-umkm': {
+    ogType: 'article',
+    title: 'Panduan SEO Website UMKM untuk Pemula — KARSA',
+    description:
+      'Panduan SEO website UMKM untuk pemula: riset kata kunci, optimasi judul & meta, kecepatan situs, SEO lokal, sampai submit sitemap ke Google.',
+    canonical: `${SITE}/artikel/seo-website-umkm`,
+    keywords:
+      'SEO website UMKM, optimasi website UMKM, riset kata kunci UMKM, SEO lokal Indonesia, SEO untuk pemula, KARSA',
+    headline: 'SEO website UMKM: cara supaya bisnismu ketemu di Google',
+    cardTitle: 'SEO website UMKM untuk pemula',
+    cardExcerpt: 'Riset kata kunci, optimasi judul & meta, kecepatan situs, sampai submit sitemap ke Google.',
+    ogTitle: 'SEO Website UMKM untuk Pemula',
+    ogDescription:
+      'Supaya website UMKM muncul di Google: riset kata kunci, optimasi judul, kecepatan, dan submit sitemap.',
+    ogImage: `${SITE}/og/seo-website-umkm.png`,
+    ogImageAlt: 'Panduan SEO website UMKM untuk pemula dengan KARSA',
+    datePublished: '2026-07-10',
+    dateModified: '2026-07-10',
+    category: 'Tutorial',
+    readMinutes: 7,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -396,6 +418,11 @@ export const RELATED_ARTICLES = {
     '/artikel/apa-itu-vibecoding',
     '/artikel/pembuat-aplikasi-tanpa-coding',
     '/artikel/bikin-landing-page-dengan-ai',
+  ],
+  '/artikel/seo-website-umkm': [
+    '/artikel/daftar-google-search-console',
+    '/artikel/cara-publish-website-karsa',
+    '/artikel/vibecoding-untuk-umkm',
   ],
 };
 
