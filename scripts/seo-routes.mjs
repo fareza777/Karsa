@@ -17,6 +17,7 @@ export const ARTICLE_PATHS = [
   '/artikel/custom-domain-karsa',
   '/artikel/prototype-aplikasi-startup',
   '/artikel/seo-website-umkm',
+  '/artikel/prompt-landing-page-konversi',
 ];
 
 /** @type {string[]} */
@@ -349,6 +350,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 7,
   },
+  '/artikel/prompt-landing-page-konversi': {
+    ogType: 'article',
+    title: 'Prompt Landing Page Konversi Tinggi untuk UMKM — KARSA',
+    description:
+      'Kumpulan prompt landing page konversi untuk UMKM: struktur hero-hook-CTA terbukti menghasilkan klik, contoh prompt bahasa Indonesia, dan iterasi di KARSA.',
+    canonical: `${SITE}/artikel/prompt-landing-page-konversi`,
+    keywords:
+      'prompt landing page konversi, landing page UMKM, contoh prompt KARSA, prompt landing page, bikin landing page konversi, KARSA',
+    headline: 'Prompt landing page konversi: struktur hero-hook-CTA yang menghasilkan klik',
+    cardTitle: 'Prompt landing page konversi tinggi',
+    cardExcerpt: 'Struktur hero-hook-CTA, contoh prompt bahasa Indonesia, dan iterasi cepat di KARSA sampai klik datang.',
+    ogTitle: 'Prompt Landing Page Konversi Tinggi',
+    ogDescription:
+      'Buat landing page UMKM yang menghasilkan klik: struktur terbukti, contoh prompt bahasa Indonesia, dan iterasi cepat.',
+    ogImage: `${SITE}/og/prompt-landing-page-konversi.png`,
+    ogImageAlt: 'Panduan prompt landing page konversi tinggi untuk UMKM dengan KARSA',
+    datePublished: '2026-07-13',
+    dateModified: '2026-07-13',
+    category: 'Panduan',
+    readMinutes: 7,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -423,6 +445,11 @@ export const RELATED_ARTICLES = {
     '/artikel/daftar-google-search-console',
     '/artikel/cara-publish-website-karsa',
     '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/prompt-landing-page-konversi': [
+    '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/contoh-prompt-karsa-umkm',
+    '/artikel/seo-website-umkm',
   ],
 };
 
