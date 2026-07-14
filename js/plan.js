@@ -56,8 +56,8 @@ const Plan = (() => {
     try {
       const res = await fetch('/api/superuser-sync', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email }),
+        headers: await Auth.authHeaders(),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (data.superuser) {

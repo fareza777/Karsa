@@ -7,6 +7,7 @@ import {
 import { isSuperuserEmail } from '../lib/superuser.js';
 import { trackPublish } from '../lib/analytics.js';
 import { originAllowed, clientIp, rateLimitOnce } from '../lib/ratelimit.js';
+import { userFromRequest } from '../lib/supabase-auth.js';
 
 const MAX_HTML = 1.5 * 1024 * 1024;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
@@ -85,7 +86,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { slug: rawSlug, html, name, customDomain: rawDomain, previousDomain: rawPrev, proCode, email: rawEmail } = req.body || {};
+  const { slug: rawSlug, html, name, customDomain: rawDomain, previousDomain: rawPrev, proCode } = req.body || {};
   const slug = normalizeSlug(rawSlug);
   const slugErr = validateSlug(slug);
   if (slugErr) {
@@ -101,9 +102,10 @@ export default async function handler(req, res) {
     return;
   }
 
+  const user = await userFromRequest(req);
   const skipWatermark = process.env.KARSA_WATERMARK === 'off' ||
     (process.env.KARSA_PRO_TOKEN && proCode === process.env.KARSA_PRO_TOKEN) ||
-    isSuperuserEmail(rawEmail);
+    isSuperuserEmail(user?.email);
   const finalHtml = skipWatermark ? html : watermark(html);
 
   const htmlRes = await kvSet('karsa:pub:' + slug + ':html', finalHtml);

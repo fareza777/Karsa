@@ -12,7 +12,8 @@ let chromium;
 try {
   ({ chromium } = await import('playwright'));
 } catch (e) {
-  console.log('[browser-e2e] SKIP — playwright belum terpasang (npm i -D playwright).');
+  console.error('[browser-e2e] Playwright belum terpasang (npm i -D playwright).');
+  if (process.env.CI) process.exit(1);
   process.exit(0);
 }
 
@@ -152,8 +153,9 @@ let browser;
 try {
   browser = await chromium.launch(execPath ? { executablePath: execPath } : {});
 } catch (e) {
-  console.log('[browser-e2e] SKIP — Chromium tidak tersedia (npx playwright install chromium).');
+  console.error('[browser-e2e] Chromium tidak tersedia (npx playwright install chromium).');
   server.close();
+  if (process.env.CI) process.exit(1);
   process.exit(0);
 }
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -196,7 +198,7 @@ const ok = (cond, label) => {
 console.log('=== 1) MUAT APP (tanpa error JS) ===');
 await page.goto('http://127.0.0.1:' + PORT + '/app.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('#btn-new-project', { timeout: 10000 });
-await page.waitForTimeout(600);
+await page.waitForSelector('body[data-karsa-ready="true"]', { timeout: 10000 });
 ok(pageErrors.length === 0, 'app.html termuat tanpa error (' + pageErrors.join(' | ').slice(0, 200) + ')');
 
 // Tur onboarding muncul ~1.1 dtk setelah load — tunggu lalu tutup (Esc + Lewati),
@@ -220,8 +222,15 @@ await page.waitForTimeout(1500);
 const viewState = await page.evaluate(() => ({
   dashHidden: document.querySelector('#view-dashboard')?.classList.contains('hidden'),
   ideHidden: document.querySelector('#view-ide')?.classList.contains('hidden'),
+  promptValue: document.querySelector('#hero-prompt-input')?.value,
+  onboardingOpen: !!document.querySelector('.ob-overlay'),
+  projects: typeof State !== 'undefined' && State.getProjects ? State.getProjects().length : -1,
+  currentProject: typeof State !== 'undefined' && State.getCurrentProject ? State.getCurrentProject()?.id || null : null,
 }));
 ok(viewState.dashHidden && !viewState.ideHidden, 'proyek dibuat otomatis dari ide (promptToApp) & IDE terbuka');
+if (!(viewState.dashHidden && !viewState.ideHidden)) {
+  console.log('   diagnostik promptToApp: ' + JSON.stringify({ ...viewState, pageErrors }));
+}
 await dismissTour();
 const applyLatest = async () => {
   const btn = page.locator('.ai-apply-box button', { hasText: 'Terapkan' }).last();
@@ -286,7 +295,7 @@ ok(after3.btnBg === 'rgb(22, 163, 74)', 'app TETAP bergaya setelah percobaan des
 
 console.log('=== 6) WORKFLOW PLAY STORE: ide → Expo → setup otomatis → siap upload ===');
 await page.click('#btn-home');
-await page.waitForTimeout(600);
+await page.waitForSelector('#view-dashboard:not(.hidden)', { timeout: 8000 });
 await dismissTour();
 await page.fill('#hero-prompt-input', 'buatkan aplikasi kasir warung untuk di-upload ke play store');
 await page.click('#hero-prompt-send');

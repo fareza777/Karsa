@@ -108,8 +108,6 @@ const Publish = (() => {
     if (customDomain) body.customDomain = customDomain;
     if (previousDomain) body.previousDomain = previousDomain;
     if (Plan.isPro() || Plan.isSuperuser()) {
-      const user = typeof Auth !== 'undefined' ? Auth.getUser() : null;
-      if (user?.email) body.email = user.email;
       const code = await fetchProCode();
       if (code) body.proCode = code;
     }
@@ -117,7 +115,7 @@ const Publish = (() => {
     try {
       const res = await fetch('/api/publish', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: typeof Auth !== 'undefined' ? await Auth.authHeaders() : { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       // Respons error sering bukan JSON (mis. halaman 502/504 dari gateway).

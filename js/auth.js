@@ -354,8 +354,21 @@ function authRedirectUrl() {
 
   function getClient() { return client; }
 
+  async function getAccessToken() {
+    if (!client) return null;
+    const { data } = await client.auth.getSession();
+    return data.session?.access_token || null;
+  }
+
+  async function authHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = await getAccessToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
+  }
+
   return {
     init, bindTriggers, getUser, getClient, isLoggedIn, isEnabled,
-    openAuthDialog, openUserMenu, signOut,
+    getAccessToken, authHeaders, openAuthDialog, openUserMenu, signOut,
   };
 })();
