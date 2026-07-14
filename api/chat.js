@@ -3,6 +3,7 @@
 import { trackAiUsage, trackChatOutcome } from '../lib/analytics.js';
 import { getAiConfig, resolveChatModel, buildModelCandidates } from '../lib/ai-config.js';
 import { checkChatLimits } from '../lib/ratelimit.js';
+import { fetchWithTimeout, readWithIdleTimeout } from '../lib/ai-upstream.js';
 
 // Wajib: tanpa ini Vercel mem-buffer seluruh respons sebelum dikirim ke browser,
 // sehingga streaming tidak pernah tampil dan permintaan panjang mati kena timeout.
@@ -16,6 +17,8 @@ const MAX_MESSAGES = 40;
 const MAX_TEXT_CHARS = 200000;
 const MAX_TOTAL_CHARS = 3500000; // termasuk gambar data-URL (batas body Vercel ±4,5 MB)
 const MAX_OUTPUT_TOKENS_DEFAULT = Number(process.env.KARSA_AI_MAX_TOKENS) || 65536;
+const CONNECT_TIMEOUT_MS = 25000;
+const STREAM_IDLE_TIMEOUT_MS = 75000;
 
 // Konten boleh string, atau array bagian {type:'text'}|{type:'image_url'} (vision)
 function contentSize(content) {
@@ -163,19 +166,20 @@ export default async function handler(req, res) {
 
   let upstream = null;
   let lastErr = '';
+  let lastConnectTimedOut = false;
   let usedFallback = false;
   for (let i = 0; i < candidates.length; i++) {
     const m = candidates[i];
     let resp;
     try {
-      resp = await fetch(upstreamUrl, {
+      resp = await fetchWithTimeout(fetch, upstreamUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
         body: makeBody(m),
-        signal: ac.signal,
-      });
+      }, CONNECT_TIMEOUT_MS, ac.signal);
     } catch (err) {
       lastErr = err.message;
+      lastConnectTimedOut = err.code === 'AI_CONNECT_TIMEOUT';
       if (ac.signal.aborted) return; // klien pergi — tak perlu coba model lain
       continue; // error jaringan → coba model berikutnya
     }
@@ -191,7 +195,16 @@ export default async function handler(req, res) {
   }
 
   if (!upstream) {
-    res.status(502).json({ error: 'Gagal menghubungi KARSA AI: ' + lastErr });
+    res.status(lastConnectTimedOut ? 504 : 502).json({
+      error: lastConnectTimedOut
+        ? 'KARSA AI terlalu lama merespons. Silakan coba lagi.'
+        : 'Gagal menghubungi KARSA AI: ' + lastErr,
+    });
+    return;
+  }
+
+  if (!upstream.body) {
+    res.status(502).json({ error: 'KARSA AI mengirim respons tanpa stream.' });
     return;
   }
 
@@ -210,6 +223,21 @@ export default async function handler(req, res) {
   let finishReason = null;
   let usage = { prompt_tokens: 0, completion_tokens: 0 };
   let gotFirstByte = false;
+  function parseSseLine(line) {
+    if (!line.startsWith('data:')) return;
+    const payload = line.slice(5).trim();
+    if (!payload || payload === '[DONE]') return;
+    try {
+      const json = JSON.parse(payload);
+      if (json.usage) {
+        usage.prompt_tokens = json.usage.prompt_tokens || usage.prompt_tokens;
+        usage.completion_tokens = json.usage.completion_tokens || usage.completion_tokens;
+      }
+      if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
+      const delta = json.choices?.[0]?.delta?.content;
+      if (typeof delta === 'string') outputChars += delta.length;
+    } catch (_) { /* chunk parsial */ }
+  }
   // #A7 Heartbeat: kirim komentar SSE (": ping") tiap 10 dtk sebelum byte
   // pertama dari model — cegah proxy/CDN memutus koneksi saat M3 "berpikir".
   // Baris diawali ":" diabaikan parser klien, jadi aman.
@@ -219,7 +247,7 @@ export default async function handler(req, res) {
   }, 10000);
   try {
     for (;;) {
-      const { done, value } = await reader.read();
+      const { done, value } = await readWithIdleTimeout(reader, STREAM_IDLE_TIMEOUT_MS);
       if (done) break;
       gotFirstByte = true;
       try {
@@ -235,24 +263,23 @@ export default async function handler(req, res) {
       while ((nl = sseBuffer.indexOf('\n')) !== -1) {
         const line = sseBuffer.slice(0, nl).trim();
         sseBuffer = sseBuffer.slice(nl + 1);
-        if (!line.startsWith('data:')) continue;
-        const payload = line.slice(5).trim();
-        if (payload === '[DONE]') continue;
-        try {
-          const json = JSON.parse(payload);
-          if (json.usage) {
-            usage.prompt_tokens = json.usage.prompt_tokens || usage.prompt_tokens;
-            usage.completion_tokens = json.usage.completion_tokens || usage.completion_tokens;
-          }
-          if (json.choices?.[0]?.finish_reason) finishReason = json.choices[0].finish_reason;
-          const delta = json.choices?.[0]?.delta?.content;
-          if (typeof delta === 'string') outputChars += delta.length;
-        } catch (_) { /* chunk parsial */ }
+        parseSseLine(line);
       }
     }
+    sseBuffer += decoder.decode();
+    if (sseBuffer.trim()) parseSseLine(sseBuffer.trim());
   } catch (err) {
+    if (err.code === 'AI_STREAM_IDLE') {
+      if (!res.writableEnded) {
+        try {
+          res.write('data: ' + JSON.stringify({ error: 'KARSA AI berhenti merespons. Coba lanjutkan lagi.' }) + '\n\n');
+        } catch (_) { /* soket tertutup */ }
+      }
+      try { await reader.cancel(err); } catch (_) { /* abaikan */ }
+      try { ac.abort(err); } catch (_) { /* abaikan */ }
+    }
     // Abort karena klien pergi bukan error sungguhan — jangan coba tulis lagi.
-    if (!ac.signal.aborted && !res.writableEnded) {
+    else if (!ac.signal.aborted && !res.writableEnded) {
       try { res.write('data: ' + JSON.stringify({ error: 'Stream terputus: ' + err.message }) + '\n\n'); } catch (_) { /* soket tertutup */ }
     }
   } finally {
