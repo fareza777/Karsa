@@ -50,6 +50,17 @@ describe('workflow produksi', () => {
     expect(browserRunner).toContain('bootstrap siap');
     expect(browserRunner).toContain('readyMs < 10000');
   });
+
+  it('menunggu apply-box respons baru, bukan mengklik respons lama', () => {
+    expect(browserRunner).toContain('let appliedResponseCount = 0');
+    expect(browserRunner).toContain("querySelectorAll('.ai-apply-box').length > expected");
+    expect(browserRunner.match(/appliedResponseCount = 0/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('menunggu proyek benar-benar terbuka setelah ide dikirim', () => {
+    expect(browserRunner).toContain('async function waitForProjectOpen()');
+    expect(browserRunner.match(/await page\.waitForTimeout\(1500\);/g)).toHaveLength(1);
+  });
 });
 
 describe('kontrak autentikasi klien', () => {

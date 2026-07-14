@@ -216,12 +216,21 @@ async function dismissTour() {
     await page.waitForTimeout(300);
   }
 }
+async function waitForProjectOpen() {
+  await page.waitForFunction(() => {
+    const dashboard = document.querySelector('#view-dashboard');
+    const ide = document.querySelector('#view-ide');
+    return dashboard?.classList.contains('hidden') &&
+      !ide?.classList.contains('hidden') &&
+      typeof State !== 'undefined' && !!State.getCurrentProject?.();
+  }, null, { timeout: 10000 });
+}
 await dismissTour(); // jaring pengaman kalau tur tetap muncul
 
 console.log('=== 2+3) VIBECODING NYATA: ide di dashboard → proyek + AI otomatis ===');
 await page.fill('#hero-prompt-input', 'buatkan website scanner makanan bayi, tampilan seperti app HP');
 await page.click('#hero-prompt-send');
-await page.waitForTimeout(1500);
+await waitForProjectOpen();
 const viewState = await page.evaluate(() => ({
   dashHidden: document.querySelector('#view-dashboard')?.classList.contains('hidden'),
   ideHidden: document.querySelector('#view-ide')?.classList.contains('hidden'),
@@ -235,8 +244,16 @@ if (!(viewState.dashHidden && !viewState.ideHidden)) {
   console.log('   diagnostik promptToApp: ' + JSON.stringify({ ...viewState, pageErrors }));
 }
 await dismissTour();
+let appliedResponseCount = 0;
 const applyLatest = async () => {
-  const btn = page.locator('.ai-apply-box button', { hasText: 'Terapkan' }).last();
+  await page.waitForFunction(
+    (expected) => document.querySelectorAll('.ai-apply-box').length > expected,
+    appliedResponseCount,
+    { timeout: 20000 },
+  );
+  appliedResponseCount = await page.locator('.ai-apply-box').count();
+  const btn = page.locator('.ai-apply-box').nth(appliedResponseCount - 1)
+    .locator('button', { hasText: 'Terapkan' });
   await btn.waitFor({ state: 'visible', timeout: 20000 });
   await btn.click();
   await page.waitForTimeout(1400);
@@ -300,9 +317,10 @@ console.log('=== 6) WORKFLOW PLAY STORE: ide → Expo → setup otomatis → sia
 await page.click('#btn-home');
 await page.waitForSelector('#view-dashboard:not(.hidden)', { timeout: 8000 });
 await dismissTour();
+appliedResponseCount = 0;
 await page.fill('#hero-prompt-input', 'buatkan aplikasi kasir warung untuk di-upload ke play store');
 await page.click('#hero-prompt-send');
-await page.waitForTimeout(1500);
+await waitForProjectOpen();
 const psType = await page.evaluate(() => {
   const p = State.getCurrentProject();
   return p ? p.projectType : null;
