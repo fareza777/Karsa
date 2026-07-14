@@ -72,6 +72,9 @@ describe('publish integration contract', () => {
     expect(client).toContain('body.ownerToken = ownerToken');
     expect(client).toContain('body.previousPublishedAt = project.publish.publishedAt');
     expect(client).toContain('ownerToken: data.ownerToken || ownerToken');
+    const persist = client.indexOf('State.updateProject(project.id, { publish: { ...prev, ownerToken } })');
+    const request = client.indexOf('const data = await doPublish');
+    expect(persist).toBeGreaterThan(-1);
+    expect(persist).toBeLessThan(request);
   });
 });
-

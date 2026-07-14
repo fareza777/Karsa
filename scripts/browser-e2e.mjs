@@ -196,9 +196,12 @@ const ok = (cond, label) => {
 };
 
 console.log('=== 1) MUAT APP (tanpa error JS) ===');
+const bootstrapStartedAt = performance.now();
 await page.goto('http://127.0.0.1:' + PORT + '/app.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('#btn-new-project', { timeout: 10000 });
 await page.waitForSelector('body[data-karsa-ready="true"]', { timeout: 10000 });
+const readyMs = performance.now() - bootstrapStartedAt;
+ok(readyMs < 10000, 'bootstrap siap dalam ' + Math.round(readyMs) + ' ms (budget 10000 ms)');
 ok(pageErrors.length === 0, 'app.html termuat tanpa error (' + pageErrors.join(' | ').slice(0, 200) + ')');
 
 // Tur onboarding muncul ~1.1 dtk setelah load — tunggu lalu tutup (Esc + Lewati),

@@ -474,6 +474,9 @@ const Publish = (() => {
             setButtonLoading(pbtn, true, 'Mempublish…');
             try {
               const ownerToken = ensureOwnerToken(project);
+              if (prev.ownerToken !== ownerToken) {
+                State.updateProject(project.id, { publish: { ...prev, ownerToken } });
+              }
               const data = await doPublish(
                 slug, project, customDomain || null, prev.customDomain || null, ownerToken,
               );

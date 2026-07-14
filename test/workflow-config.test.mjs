@@ -36,6 +36,20 @@ describe('workflow produksi', () => {
     expect(browserRunner).toContain("body[data-karsa-ready=\"true\"]");
     expect(browserRunner).not.toContain('await page.waitForTimeout(600);');
   });
+
+  it('memuat seluruh script source secara deferred dan membuka koneksi CDN lebih awal', () => {
+    const scriptTags = appHtml.match(/<script\b[^>]*\bsrc=[^>]*>/gi) || [];
+    expect(scriptTags.length).toBeGreaterThan(20);
+    for (const tag of scriptTags) expect(tag).toMatch(/\bdefer\b/i);
+    expect(appHtml).toContain('<link rel="preconnect" href="https://cdnjs.cloudflare.com"');
+    expect(appHtml).toContain('<link rel="preconnect" href="https://cdn.jsdelivr.net"');
+  });
+
+  it('mengukur bootstrap browser dan menjaga budget di bawah 10 detik', () => {
+    expect(browserRunner).toContain('performance.now()');
+    expect(browserRunner).toContain('bootstrap siap');
+    expect(browserRunner).toContain('readyMs < 10000');
+  });
 });
 
 describe('kontrak autentikasi klien', () => {
