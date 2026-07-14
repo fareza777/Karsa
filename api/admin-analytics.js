@@ -1,6 +1,7 @@
 /* ===== KARSA — dashboard analitik + pengaturan LLM (superuser only) ===== */
 
 import { isSuperuserEmail } from '../lib/superuser.js';
+import { requireUser } from '../lib/supabase-auth.js';
 import { analyticsEnabled, getStatsRange, getRecentActivity } from '../lib/analytics.js';
 import { getAdminOverview, adminConfigured } from '../lib/supabase-admin.js';
 import { kvConfigured } from '../lib/kv.js';
@@ -11,11 +12,11 @@ import {
   maskAiConfig,
 } from '../lib/ai-config.js';
 
-async function handleAiConfig(req, res) {
+async function handleAiConfig(req, res, user) {
   const action = String(req.body?.action || 'ai-get');
 
   if (action === 'ai-save') {
-    const result = await saveAiConfig(req.body.config || {}, req.body.email);
+    const result = await saveAiConfig(req.body.config || {}, user.email);
     if (result.error) {
       res.status(400).json({ error: result.error });
       return;
@@ -50,7 +51,9 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'POST saja.' });
     return;
   }
-  const email = String(req.body?.email || '').trim().toLowerCase();
+  const user = await requireUser(req, res);
+  if (!user) return;
+  const email = String(user.email || '').trim().toLowerCase();
   if (!isSuperuserEmail(email)) {
     res.status(403).json({ error: 'Akses admin ditolak.' });
     return;
@@ -58,7 +61,7 @@ export default async function handler(req, res) {
 
   const action = String(req.body?.action || 'stats');
   if (action === 'ai-get' || action === 'ai-save') {
-    await handleAiConfig(req, res);
+    await handleAiConfig(req, res, user);
     return;
   }
 

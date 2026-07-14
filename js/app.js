@@ -573,6 +573,9 @@ const App = (() => {
     Editor.init();
     setupResizers();
     bindEvents();
+    $('#hero-prompt-send').removeAttribute('disabled');
+    $('#hero-prompt-send').removeAttribute('aria-busy');
+    document.body.dataset.karsaReady = 'true';
     try { setupInstallPrompt(); } catch (e) { /* abaikan */ }
     showDashboard();
 

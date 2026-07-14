@@ -14,7 +14,9 @@ jobs:
         with:
           node-version: 20
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+      - name: Install Chromium for browser E2E
+        run: npx playwright install chromium
       - name: Generate SEO assets
         run: npm run generate-seo
       - name: Syntax check
@@ -25,3 +27,5 @@ jobs:
         run: npm run e2e
       - name: Smoke (halaman + aset balas 200)
         run: npm run smoke
+      - name: Browser E2E (real user workflow)
+        run: npm run e2e:browser

@@ -2,6 +2,7 @@
 
 import { activateLicense } from '../lib/lemon.js';
 import { setProByUserId, adminConfigured } from '../lib/supabase-admin.js';
+import { requireUser } from '../lib/supabase-auth.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -14,18 +15,16 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { licenseKey, userId } = req.body || {};
+  const user = await requireUser(req, res);
+  if (!user) return;
+
+  const { licenseKey } = req.body || {};
   const key = String(licenseKey || '').trim();
-  const uid = String(userId || '').trim();
+  const uid = String(user.id || '').trim();
   if (!key) {
     res.status(400).json({ error: 'License key wajib diisi.' });
     return;
   }
-  if (!uid) {
-    res.status(400).json({ error: 'Login dulu sebelum aktivasi license.' });
-    return;
-  }
-
   try {
     const license = await activateLicense(key, `karsa-${uid.slice(0, 8)}`);
     if (!license.valid) {

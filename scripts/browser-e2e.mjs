@@ -12,7 +12,8 @@ let chromium;
 try {
   ({ chromium } = await import('playwright'));
 } catch (e) {
-  console.log('[browser-e2e] SKIP — playwright belum terpasang (npm i -D playwright).');
+  console.error('[browser-e2e] Playwright belum terpasang (npm i -D playwright).');
+  if (process.env.CI) process.exit(1);
   process.exit(0);
 }
 
@@ -152,8 +153,9 @@ let browser;
 try {
   browser = await chromium.launch(execPath ? { executablePath: execPath } : {});
 } catch (e) {
-  console.log('[browser-e2e] SKIP — Chromium tidak tersedia (npx playwright install chromium).');
+  console.error('[browser-e2e] Chromium tidak tersedia (npx playwright install chromium).');
   server.close();
+  if (process.env.CI) process.exit(1);
   process.exit(0);
 }
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -194,9 +196,12 @@ const ok = (cond, label) => {
 };
 
 console.log('=== 1) MUAT APP (tanpa error JS) ===');
+const bootstrapStartedAt = performance.now();
 await page.goto('http://127.0.0.1:' + PORT + '/app.html', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('#btn-new-project', { timeout: 10000 });
-await page.waitForTimeout(600);
+await page.waitForSelector('body[data-karsa-ready="true"]', { timeout: 10000 });
+const readyMs = performance.now() - bootstrapStartedAt;
+ok(readyMs < 10000, 'bootstrap siap dalam ' + Math.round(readyMs) + ' ms (budget 10000 ms)');
 ok(pageErrors.length === 0, 'app.html termuat tanpa error (' + pageErrors.join(' | ').slice(0, 200) + ')');
 
 // Tur onboarding muncul ~1.1 dtk setelah load — tunggu lalu tutup (Esc + Lewati),
@@ -211,20 +216,44 @@ async function dismissTour() {
     await page.waitForTimeout(300);
   }
 }
+async function waitForProjectOpen() {
+  await page.waitForFunction(() => {
+    const dashboard = document.querySelector('#view-dashboard');
+    const ide = document.querySelector('#view-ide');
+    return dashboard?.classList.contains('hidden') &&
+      !ide?.classList.contains('hidden') &&
+      typeof State !== 'undefined' && !!State.getCurrentProject?.();
+  }, null, { timeout: 10000 });
+}
 await dismissTour(); // jaring pengaman kalau tur tetap muncul
 
 console.log('=== 2+3) VIBECODING NYATA: ide di dashboard → proyek + AI otomatis ===');
 await page.fill('#hero-prompt-input', 'buatkan website scanner makanan bayi, tampilan seperti app HP');
 await page.click('#hero-prompt-send');
-await page.waitForTimeout(1500);
+await waitForProjectOpen();
 const viewState = await page.evaluate(() => ({
   dashHidden: document.querySelector('#view-dashboard')?.classList.contains('hidden'),
   ideHidden: document.querySelector('#view-ide')?.classList.contains('hidden'),
+  promptValue: document.querySelector('#hero-prompt-input')?.value,
+  onboardingOpen: !!document.querySelector('.ob-overlay'),
+  projects: typeof State !== 'undefined' && State.getProjects ? State.getProjects().length : -1,
+  currentProject: typeof State !== 'undefined' && State.getCurrentProject ? State.getCurrentProject()?.id || null : null,
 }));
 ok(viewState.dashHidden && !viewState.ideHidden, 'proyek dibuat otomatis dari ide (promptToApp) & IDE terbuka');
+if (!(viewState.dashHidden && !viewState.ideHidden)) {
+  console.log('   diagnostik promptToApp: ' + JSON.stringify({ ...viewState, pageErrors }));
+}
 await dismissTour();
+let appliedResponseCount = 0;
 const applyLatest = async () => {
-  const btn = page.locator('.ai-apply-box button', { hasText: 'Terapkan' }).last();
+  await page.waitForFunction(
+    (expected) => document.querySelectorAll('.ai-apply-box').length > expected,
+    appliedResponseCount,
+    { timeout: 20000 },
+  );
+  appliedResponseCount = await page.locator('.ai-apply-box').count();
+  const btn = page.locator('.ai-apply-box').nth(appliedResponseCount - 1)
+    .locator('button', { hasText: 'Terapkan' });
   await btn.waitFor({ state: 'visible', timeout: 20000 });
   await btn.click();
   await page.waitForTimeout(1400);
@@ -286,11 +315,12 @@ ok(after3.btnBg === 'rgb(22, 163, 74)', 'app TETAP bergaya setelah percobaan des
 
 console.log('=== 6) WORKFLOW PLAY STORE: ide → Expo → setup otomatis → siap upload ===');
 await page.click('#btn-home');
-await page.waitForTimeout(600);
+await page.waitForSelector('#view-dashboard:not(.hidden)', { timeout: 8000 });
 await dismissTour();
+appliedResponseCount = 0;
 await page.fill('#hero-prompt-input', 'buatkan aplikasi kasir warung untuk di-upload ke play store');
 await page.click('#hero-prompt-send');
-await page.waitForTimeout(1500);
+await waitForProjectOpen();
 const psType = await page.evaluate(() => {
   const p = State.getCurrentProject();
   return p ? p.projectType : null;

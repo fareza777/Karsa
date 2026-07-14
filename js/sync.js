@@ -117,8 +117,8 @@ const CloudSync = (() => {
         try {
           const res = await fetch('/api/superuser-sync', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'delete-project', projectId: id, accessToken: token }),
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ action: 'delete-project', projectId: id }),
           });
           const data = await res.json().catch(() => ({}));
           if (res.ok && data.ok) {

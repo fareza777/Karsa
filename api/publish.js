@@ -1,12 +1,14 @@
 /* ===== KARSA — publish situs web ke /p/:slug (Vercel KV) ===== */
 
-import { kvConfigured, kvGet, kvSet, kvDel } from '../lib/kv.js';
+import { kvConfigured, kvGet, kvSet, kvSetNx, kvDel } from '../lib/kv.js';
 import {
   cnameTarget, normalizeDomain, subdomainUrl, validateCustomDomain,
 } from '../lib/domains.js';
 import { isSuperuserEmail } from '../lib/superuser.js';
 import { trackPublish } from '../lib/analytics.js';
 import { originAllowed, clientIp, rateLimitOnce } from '../lib/ratelimit.js';
+import { userFromRequest } from '../lib/supabase-auth.js';
+import { hashOwnerToken, ownerMatches, ownerTokenValid } from '../lib/publish-owner.js';
 
 const MAX_HTML = 1.5 * 1024 * 1024;
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
@@ -42,6 +44,50 @@ function watermark(html) {
     ' · Dari ide, jadi aplikasi</footer>';
   if (/<\/body>/i.test(html)) return html.replace(/<\/body>/i, foot + '\n</body>');
   return html + foot;
+}
+
+async function authorizePublishOwner(slug, ownerToken, previousPublishedAt) {
+  if (!ownerTokenValid(ownerToken)) {
+    return { status: 400, error: 'Bukti kepemilikan publish tidak valid.' };
+  }
+
+  const ownerKey = 'karsa:pub:' + slug + ':owner';
+  const [owner, existingHtml] = await Promise.all([
+    kvGet(ownerKey),
+    kvGet('karsa:pub:' + slug + ':html'),
+  ]);
+  if (owner.error || existingHtml.error) {
+    return { status: 502, error: owner.error || existingHtml.error };
+  }
+
+  if (owner.value) {
+    return ownerMatches(ownerToken, owner.value)
+      ? { ok: true }
+      : { status: 409, error: 'Alamat ini dimiliki proyek lain.' };
+  }
+
+  if (existingHtml.value) {
+    const metaHit = await kvGet('karsa:pub:' + slug + ':meta');
+    if (metaHit.error) return { status: 502, error: metaHit.error };
+    let meta = {};
+    try { meta = JSON.parse(metaHit.value || '{}'); } catch { /* metadata lama rusak */ }
+    if (!previousPublishedAt || String(previousPublishedAt) !== String(meta.publishedAt || '')) {
+      return {
+        status: 409,
+        error: 'Alamat lama perlu diterbitkan ulang dari perangkat/proyek yang pertama kali memublikasikannya.',
+      };
+    }
+  }
+
+  const claim = await kvSetNx(ownerKey, hashOwnerToken(ownerToken));
+  if (claim.error) return { status: 502, error: claim.error };
+  if (claim.claimed) return { ok: true };
+
+  const racedOwner = await kvGet(ownerKey);
+  if (racedOwner.error) return { status: 502, error: racedOwner.error };
+  return ownerMatches(ownerToken, racedOwner.value)
+    ? { ok: true }
+    : { status: 409, error: 'Alamat ini baru saja diklaim proyek lain.' };
 }
 
 export default async function handler(req, res) {
@@ -85,7 +131,10 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { slug: rawSlug, html, name, customDomain: rawDomain, previousDomain: rawPrev, proCode, email: rawEmail } = req.body || {};
+  const {
+    slug: rawSlug, html, name, customDomain: rawDomain, previousDomain: rawPrev,
+    previousPublishedAt, ownerToken, proCode,
+  } = req.body || {};
   const slug = normalizeSlug(rawSlug);
   const slugErr = validateSlug(slug);
   if (slugErr) {
@@ -101,16 +150,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  const skipWatermark = process.env.KARSA_WATERMARK === 'off' ||
-    (process.env.KARSA_PRO_TOKEN && proCode === process.env.KARSA_PRO_TOKEN) ||
-    isSuperuserEmail(rawEmail);
-  const finalHtml = skipWatermark ? html : watermark(html);
-
-  const htmlRes = await kvSet('karsa:pub:' + slug + ':html', finalHtml);
-  if (htmlRes.error) {
-    res.status(502).json({ error: htmlRes.error });
-    return;
-  }
   let customDomain = null;
   let dns = null;
   const domain = normalizeDomain(rawDomain);
@@ -129,18 +168,44 @@ export default async function handler(req, res) {
       res.status(409).json({ error: 'Domain "' + domain + '" sudah dipakai proyek lain.' });
       return;
     }
+    customDomain = domain;
+    dns = { type: 'CNAME', name: domain, value: cnameTarget() };
+  }
+
+  const ownership = await authorizePublishOwner(slug, ownerToken, previousPublishedAt);
+  if (!ownership.ok) {
+    res.status(ownership.status).json({ error: ownership.error });
+    return;
+  }
+
+  const user = await userFromRequest(req);
+  const skipWatermark = process.env.KARSA_WATERMARK === 'off' ||
+    (process.env.KARSA_PRO_TOKEN && proCode === process.env.KARSA_PRO_TOKEN) ||
+    isSuperuserEmail(user?.email);
+  const finalHtml = skipWatermark ? html : watermark(html);
+
+  const htmlRes = await kvSet('karsa:pub:' + slug + ':html', finalHtml);
+  if (htmlRes.error) {
+    res.status(502).json({ error: htmlRes.error });
+    return;
+  }
+
+  if (domain) {
     const mapRes = await kvSet('karsa:domain:' + domain, slug);
     if (mapRes.error) {
       res.status(502).json({ error: mapRes.error });
       return;
     }
-    customDomain = domain;
-    dns = { type: 'CNAME', name: domain, value: cnameTarget() };
   }
 
   const prev = normalizeDomain(rawPrev);
   if (prev && prev !== domain) {
-    await kvDel('karsa:domain:' + prev);
+    const prevMapping = await kvGet('karsa:domain:' + prev);
+    if (prevMapping.error) {
+      res.status(502).json({ error: prevMapping.error });
+      return;
+    }
+    if (prevMapping.value === slug) await kvDel('karsa:domain:' + prev);
   }
 
   const metaObj = {

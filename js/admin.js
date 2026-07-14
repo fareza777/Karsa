@@ -321,8 +321,8 @@
     if (!user?.email) return null;
     const res = await fetch('/api/admin-analytics', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email, action: 'ai-get' }),
+      headers: await Auth.authHeaders(),
+      body: JSON.stringify({ action: 'ai-get' }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Gagal memuat pengaturan AI');
@@ -393,8 +393,8 @@
     try {
       const res = await fetch('/api/admin-analytics', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, action: 'ai-save', config }),
+        headers: await Auth.authHeaders(),
+        body: JSON.stringify({ action: 'ai-save', config }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Gagal menyimpan');
@@ -465,8 +465,8 @@
     if (!user?.email) throw new Error('not_logged_in');
     const res = await fetch('/api/admin-analytics', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email }),
+      headers: await Auth.authHeaders(),
+      body: JSON.stringify({ action: 'stats' }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Gagal memuat analitik');

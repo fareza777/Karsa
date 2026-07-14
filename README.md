@@ -100,8 +100,22 @@ KARSA_ALLOWED_ORIGINS=        # origin tambahan yang diizinkan (pisah koma)
 npm install
 npm test        # unit test engine AI + rate-limit (Vitest)
 npm run check   # syntax check
+npm run verify  # workflow penuh: generate, syntax, unit, E2E, smoke, browser
 npm run stamp   # cache-busting: stamp ?v= aset js/css dgn hash commit/timestamp
 ```
+
+Untuk menjalankan verifikasi penuh dari checkout baru:
+
+```bash
+npm ci
+npx playwright install chromium
+npm run verify
+```
+
+Browser E2E boleh dilewati di mesin developer yang belum memiliki Chromium, tetapi
+akan gagal tegas saat `CI=true`. Endpoint admin, superuser, aktivasi lisensi, dan
+pengecualian watermark membutuhkan sesi Supabase aktif dan mengirim access token
+melalui header `Authorization: Bearer ...`.
 
 > Jalankan `npm run stamp` sebelum deploy (atau set sebagai build command Vercel:
 > `node scripts/stamp-version.mjs` dengan output directory `.`) agar browser

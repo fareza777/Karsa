@@ -2,38 +2,18 @@
 
 import { isSuperuserEmail } from '../lib/superuser.js';
 import { setProByEmail, adminConfigured, deleteUserProject } from '../lib/supabase-admin.js';
+import { requireUser } from '../lib/supabase-auth.js';
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const ANON_KEY = process.env.SUPABASE_ANON_KEY;
-
-async function userFromAccessToken(accessToken) {
-  if (!SUPABASE_URL || !ANON_KEY || !accessToken) return null;
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      apikey: ANON_KEY,
-    },
-  });
-  if (!res.ok) return null;
-  return res.json();
-}
-
-async function handleProjectDelete(req, res) {
+async function handleProjectDelete(req, res, user) {
   if (!adminConfigured()) {
     res.status(503).json({ error: 'Hapus cloud belum dikonfigurasi di server.' });
     return;
   }
 
-  const { projectId, accessToken } = req.body || {};
+  const { projectId } = req.body || {};
   const pid = String(projectId || '').trim();
   if (!pid) {
     res.status(400).json({ error: 'projectId wajib.' });
-    return;
-  }
-
-  const user = await userFromAccessToken(String(accessToken || '').trim());
-  if (!user?.id) {
-    res.status(401).json({ error: 'Sesi tidak valid. Login ulang lalu coba lagi.' });
     return;
   }
 
@@ -51,11 +31,14 @@ export default async function handler(req, res) {
     return;
   }
 
+  const user = await requireUser(req, res);
+  if (!user) return;
+
   if (req.body?.action === 'delete-project') {
-    return handleProjectDelete(req, res);
+    return handleProjectDelete(req, res, user);
   }
 
-  const email = String(req.body?.email || '').trim().toLowerCase();
+  const email = String(user.email || '').trim().toLowerCase();
   if (!email) {
     res.status(400).json({ error: 'Email wajib.' });
     return;
