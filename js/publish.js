@@ -40,6 +40,15 @@ const Publish = (() => {
     return 'https://' + slug + '.' + cfg.publishHost;
   }
 
+  function ensureOwnerToken(project) {
+    const existing = project && project.publish && project.publish.ownerToken;
+    if (/^[a-f0-9]{64}$/i.test(existing || '')) return existing;
+
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  }
+
   async function checkSlug(slug, statusEl) {
     if (!slug || slug.length < 3) {
       statusEl.textContent = '';
@@ -84,7 +93,7 @@ const Publish = (() => {
     return issues;
   }
 
-  async function doPublish(slug, project, customDomain, previousDomain) {
+  async function doPublish(slug, project, customDomain, previousDomain, ownerToken) {
     const html = Preview.buildBundle(project);
     const problems = validateBeforePublish(project, html);
     if (problems.length) {
@@ -105,6 +114,10 @@ const Publish = (() => {
       if (!proceed) throw new Error('Dibatalkan — perbaiki dulu lalu publish lagi.');
     }
     const body = { slug, html, name: project.name };
+    body.ownerToken = ownerToken;
+    if (project.publish && project.publish.publishedAt) {
+      body.previousPublishedAt = project.publish.publishedAt;
+    }
     if (customDomain) body.customDomain = customDomain;
     if (previousDomain) body.previousDomain = previousDomain;
     if (Plan.isPro() || Plan.isSuperuser()) {
@@ -460,7 +473,10 @@ const Publish = (() => {
             const pbtn = $('.modal-foot .btn-primary'); // #B9 status loading tombol
             setButtonLoading(pbtn, true, 'Mempublish…');
             try {
-              const data = await doPublish(slug, project, customDomain || null, prev.customDomain || null);
+              const ownerToken = ensureOwnerToken(project);
+              const data = await doPublish(
+                slug, project, customDomain || null, prev.customDomain || null, ownerToken,
+              );
               State.updateProject(project.id, {
                 publish: {
                   slug: data.slug,
@@ -469,6 +485,7 @@ const Publish = (() => {
                   customDomain: data.customDomain || null,
                   customUrl: data.customUrl || null,
                   publishedAt: data.publishedAt,
+                  ownerToken: data.ownerToken || ownerToken,
                 },
               });
               closeModal();
