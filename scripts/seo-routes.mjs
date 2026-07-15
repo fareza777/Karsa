@@ -18,6 +18,7 @@ export const ARTICLE_PATHS = [
   '/artikel/prototype-aplikasi-startup',
   '/artikel/seo-website-umkm',
   '/artikel/prompt-landing-page-konversi',
+  '/artikel/website-toko-pakaian-thrift',
 ];
 
 /** @type {string[]} */
@@ -371,6 +372,27 @@ export const SEO_ROUTES = {
     category: 'Panduan',
     readMinutes: 7,
   },
+  '/artikel/website-toko-pakaian-thrift': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Toko Pakaian Thrift dengan AI — KARSA',
+    description:
+      'Panduan bikin website toko pakaian thrift: katalog produk, filter ukuran, harga, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.',
+    canonical: `${SITE}/artikel/website-toko-pakaian-thrift`,
+    keywords:
+      'website toko thrift, toko pakaian thrift online, katalog thrift shop, jualan thrift online, website baju bekas, KARSA thrift',
+    headline: 'Website toko pakaian thrift: dari jualan chat jadi etalase digital',
+    cardTitle: 'Website toko pakaian thrift',
+    cardExcerpt: 'Katalog thrift, filter ukuran, harga, dan tombol WhatsApp — link permanen untuk jualan baju thrift.',
+    ogTitle: 'Website Toko Pakaian Thrift dengan AI',
+    ogDescription:
+      'Bikin website toko thrift lengkap: katalog, filter ukuran, harga, dan tombol WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-toko-pakaian-thrift.png`,
+    ogImageAlt: 'Panduan bikin website toko pakaian thrift dengan KARSA',
+    datePublished: '2026-07-15',
+    dateModified: '2026-07-15',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -450,6 +472,11 @@ export const RELATED_ARTICLES = {
     '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/contoh-prompt-karsa-umkm',
     '/artikel/seo-website-umkm',
+  ],
+  '/artikel/website-toko-pakaian-thrift': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
   ],
 };
 

@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Mon, 13 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 15 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Website Toko Pakaian Thrift dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/website-toko-pakaian-thrift</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/website-toko-pakaian-thrift</guid>
+      <description>Panduan bikin website toko pakaian thrift: katalog produk, filter ukuran, harga, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.</description>
+      <pubDate>Wed, 15 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Prompt Landing Page Konversi Tinggi untuk UMKM — KARSA</title>
       <link>https://karsa.work/artikel/prompt-landing-page-konversi</link>
