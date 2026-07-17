@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Wed, 15 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 17 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Katalog Menu Restoran Online dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/katalog-menu-restoran-online</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/katalog-menu-restoran-online</guid>
+      <description>Panduan bikin katalog menu restoran online: daftar hidangan, foto, harga, tombol pesan via WhatsApp, dan contoh prompt KARSA bahasa Indonesia untuk UMKM kuliner.</description>
+      <pubDate>Fri, 17 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Website Toko Pakaian Thrift dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/website-toko-pakaian-thrift</link>

@@ -19,6 +19,7 @@ export const ARTICLE_PATHS = [
   '/artikel/seo-website-umkm',
   '/artikel/prompt-landing-page-konversi',
   '/artikel/website-toko-pakaian-thrift',
+  '/artikel/katalog-menu-restoran-online',
 ];
 
 /** @type {string[]} */
@@ -393,6 +394,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/katalog-menu-restoran-online': {
+    ogType: 'article',
+    title: 'Cara Bikin Katalog Menu Restoran Online dengan AI — KARSA',
+    description:
+      'Panduan bikin katalog menu restoran online: daftar hidangan, foto, harga, tombol pesan via WhatsApp, dan contoh prompt KARSA bahasa Indonesia untuk UMKM kuliner.',
+    canonical: `${SITE}/artikel/katalog-menu-restoran-online`,
+    keywords:
+      'katalog menu restoran online, menu restoran digital, katalog kuliner UMKM, menu online WhatsApp, daftar menu restoran, KARSA resto',
+    headline: 'Katalog menu restoran online: dari daftar PDF jadi etalase yang bisa diklik',
+    cardTitle: 'Katalog menu restoran online',
+    cardExcerpt: 'Daftar hidangan, foto, harga, dan tombol pesan via WhatsApp — link permanen untuk resto dan kafe.',
+    ogTitle: 'Katalog Menu Restoran Online dengan AI',
+    ogDescription:
+      'Ubah daftar menu PDF atau pajangan dinding jadi katalog online rapi dengan KARSA — prompt bahasa Indonesia, publish gratis.',
+    ogImage: `${SITE}/og/katalog-menu-restoran-online.png`,
+    ogImageAlt: 'Panduan bikin katalog menu restoran online dengan KARSA untuk UMKM kuliner',
+    datePublished: '2026-07-17',
+    dateModified: '2026-07-17',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -477,6 +499,11 @@ export const RELATED_ARTICLES = {
     '/artikel/katalog-produk-online-umkm',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/bikin-landing-page-dengan-ai',
+  ],
+  '/artikel/katalog-menu-restoran-online': [
+    '/artikel/website-warung-makan',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/katalog-produk-online-umkm',
   ],
 };
 
