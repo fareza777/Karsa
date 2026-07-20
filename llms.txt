@@ -31,6 +31,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Prompt landing page konversi: struktur hero-hook-CTA yang menghasilkan klik](https://karsa.work/artikel/prompt-landing-page-konversi): Kumpulan prompt landing page konversi untuk UMKM: struktur hero-hook-CTA terbukti menghasilkan klik, contoh prompt bahasa Indonesia, dan iterasi di KARSA.
 - [Website toko pakaian thrift: dari jualan chat jadi etalase digital](https://karsa.work/artikel/website-toko-pakaian-thrift): Panduan bikin website toko pakaian thrift: katalog produk, filter ukuran, harga, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.
 - [Katalog menu restoran online: dari daftar PDF jadi etalase yang bisa diklik](https://karsa.work/artikel/katalog-menu-restoran-online): Panduan bikin katalog menu restoran online: daftar hidangan, foto, harga, tombol pesan via WhatsApp, dan contoh prompt KARSA bahasa Indonesia untuk UMKM kuliner.
+- [Landing page jasa freelance: ubah portofolio jadi mesin pencari klien](https://karsa.work/artikel/landing-page-jasa-freelance): Panduan bikin landing page jasa freelance yang meyakinkan: susun portofolio, paket layanan, testimoni, CTA WhatsApp, dan contoh prompt KARSA.
 
 ## Kontak
 

@@ -20,6 +20,7 @@ export const ARTICLE_PATHS = [
   '/artikel/prompt-landing-page-konversi',
   '/artikel/website-toko-pakaian-thrift',
   '/artikel/katalog-menu-restoran-online',
+  '/artikel/landing-page-jasa-freelance',
 ];
 
 /** @type {string[]} */
@@ -415,6 +416,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/landing-page-jasa-freelance': {
+    ogType: 'article',
+    title: 'Cara Bikin Landing Page Jasa Freelance dengan AI — KARSA',
+    description:
+      'Panduan bikin landing page jasa freelance yang meyakinkan: susun portofolio, paket layanan, testimoni, CTA WhatsApp, dan contoh prompt KARSA.',
+    canonical: `${SITE}/artikel/landing-page-jasa-freelance`,
+    keywords:
+      'landing page jasa freelance, website freelancer, portofolio jasa online, landing page freelancer, promosi jasa freelance, KARSA',
+    headline: 'Landing page jasa freelance: ubah portofolio jadi mesin pencari klien',
+    cardTitle: 'Landing page jasa freelance',
+    cardExcerpt: 'Susun portofolio, paket layanan, testimoni, dan CTA WhatsApp dalam satu halaman yang meyakinkan.',
+    ogTitle: 'Landing Page Jasa Freelance dengan AI',
+    ogDescription:
+      'Buat landing page freelance yang menjelaskan keahlian, bukti kerja, paket layanan, dan cara menghubungi kamu.',
+    ogImage: `${SITE}/og/landing-page-jasa-freelance.png`,
+    ogImageAlt: 'Panduan bikin landing page jasa freelance dengan KARSA',
+    datePublished: '2026-07-20',
+    dateModified: '2026-07-20',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -504,6 +526,11 @@ export const RELATED_ARTICLES = {
     '/artikel/website-warung-makan',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/katalog-produk-online-umkm',
+  ],
+  '/artikel/landing-page-jasa-freelance': [
+    '/artikel/prompt-landing-page-konversi',
+    '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/seo-website-umkm',
   ],
 };
 

@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Fri, 17 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 20 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Landing Page Jasa Freelance dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/landing-page-jasa-freelance</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/landing-page-jasa-freelance</guid>
+      <description>Panduan bikin landing page jasa freelance yang meyakinkan: susun portofolio, paket layanan, testimoni, CTA WhatsApp, dan contoh prompt KARSA.</description>
+      <pubDate>Mon, 20 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Katalog Menu Restoran Online dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/katalog-menu-restoran-online</link>
