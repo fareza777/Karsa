@@ -21,6 +21,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-toko-pakaian-thrift',
   '/artikel/katalog-menu-restoran-online',
   '/artikel/landing-page-jasa-freelance',
+  '/artikel/website-salon-kecantik',
 ];
 
 /** @type {string[]} */
@@ -437,6 +438,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/website-salon-kecantik': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Salon Kecantikan dengan AI — KARSA',
+    description:
+      'Panduan bikin website salon kecantikan: layanan, harga, galeri hasil, jam buka, dan tombol booking via WhatsApp. Contoh prompt KARSA untuk UMKM.',
+    canonical: `${SITE}/artikel/website-salon-kecantik`,
+    keywords:
+      'website salon kecantikan, website salon UMKM, booking salon online, katalog layanan salon, galeri salon, KARSA',
+    headline: 'Website salon kecantikan: dari pelanggan lewat jadi pelanggan setia',
+    cardTitle: 'Website salon kecantikan',
+    cardExcerpt: 'Layanan, harga, galeri hasil, dan tombol booking — link permanen untuk salon dan barbershop kecil.',
+    ogTitle: 'Website Salon Kecantikan dengan AI',
+    ogDescription:
+      'Bikin website salon lengkap: layanan, harga, galeri hasil, dan tombol booking via WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-salon-kecantik.png`,
+    ogImageAlt: 'Panduan bikin website salon kecantikan dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-07-22',
+    dateModified: '2026-07-22',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -531,6 +553,11 @@ export const RELATED_ARTICLES = {
     '/artikel/prompt-landing-page-konversi',
     '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/seo-website-umkm',
+  ],
+  '/artikel/website-salon-kecantik': [
+    '/artikel/form-booking-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/katalog-produk-online-umkm',
   ],
 };
 

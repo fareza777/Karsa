@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Mon, 20 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 22 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Website Salon Kecantikan dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/website-salon-kecantik</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/website-salon-kecantik</guid>
+      <description>Panduan bikin website salon kecantikan: layanan, harga, galeri hasil, jam buka, dan tombol booking via WhatsApp. Contoh prompt KARSA untuk UMKM.</description>
+      <pubDate>Wed, 22 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Landing Page Jasa Freelance dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/landing-page-jasa-freelance</link>
