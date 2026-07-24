@@ -22,6 +22,7 @@ export const ARTICLE_PATHS = [
   '/artikel/katalog-menu-restoran-online',
   '/artikel/landing-page-jasa-freelance',
   '/artikel/website-salon-kecantik',
+  '/artikel/katalog-kerajinan-tangan',
 ];
 
 /** @type {string[]} */
@@ -459,6 +460,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/katalog-kerajinan-tangan': {
+    ogType: 'article',
+    title: 'Cara Bikin Katalog Kerajinan Tangan Online dengan AI — KARSA',
+    description:
+      'Panduan bikin katalog kerajinan tangan online: susun koleksi, cerita produk, harga, opsi custom, foto, dan tombol WhatsApp dengan bantuan KARSA.',
+    canonical: `${SITE}/artikel/katalog-kerajinan-tangan`,
+    keywords:
+      'katalog kerajinan tangan, katalog produk handmade, jual kerajinan online, website produk handmade, katalog UMKM kreatif, KARSA',
+    headline: 'Katalog kerajinan tangan online: tampilkan karya dan cerita di satu tempat',
+    cardTitle: 'Katalog kerajinan tangan online',
+    cardExcerpt: 'Susun koleksi, cerita produk, opsi custom, dan tombol WhatsApp dalam etalase digital yang rapi.',
+    ogTitle: 'Katalog Kerajinan Tangan Online dengan AI',
+    ogDescription:
+      'Buat katalog produk handmade yang menampilkan karya, cerita pembuat, harga, opsi custom, dan cara pesan.',
+    ogImage: `${SITE}/og/katalog-kerajinan-tangan.png`,
+    ogImageAlt: 'Panduan membuat katalog kerajinan tangan online dengan KARSA untuk UMKM kreatif',
+    datePublished: '2026-07-24',
+    dateModified: '2026-07-24',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -558,6 +580,11 @@ export const RELATED_ARTICLES = {
     '/artikel/form-booking-online-umkm',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/katalog-produk-online-umkm',
+  ],
+  '/artikel/katalog-kerajinan-tangan': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/cara-publish-website-karsa',
   ],
 };
 
