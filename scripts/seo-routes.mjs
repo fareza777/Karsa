@@ -23,6 +23,7 @@ export const ARTICLE_PATHS = [
   '/artikel/landing-page-jasa-freelance',
   '/artikel/website-salon-kecantik',
   '/artikel/katalog-kerajinan-tangan',
+  '/artikel/website-rental-mobil',
 ];
 
 /** @type {string[]} */
@@ -481,6 +482,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/website-rental-mobil': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Rental Mobil dengan AI — KARSA',
+    description:
+      'Panduan bikin website rental mobil: katalog armada, harga harian, syarat sewa, cek ketersediaan, dan tombol booking WhatsApp. Contoh prompt KARSA untuk UMKM.',
+    canonical: `${SITE}/artikel/website-rental-mobil`,
+    keywords:
+      'website rental mobil, rental mobil online, sewa mobil UMKM, booking rental mobil, katalog mobil sewa, KARSA',
+    headline: 'Website rental mobil: dari WhatsApp manual jadi sistem booking yang rapi',
+    cardTitle: 'Website rental mobil dengan AI',
+    cardExcerpt: 'Katalog armada, harga harian, syarat sewa, dan tombol booking WhatsApp untuk rental kecil.',
+    ogTitle: 'Website Rental Mobil dengan AI',
+    ogDescription:
+      'Bikin website rental mobil lengkap: katalog armada, tarif harian, syarat sewa, dan booking WhatsApp otomatis.',
+    ogImage: `${SITE}/og/website-rental-mobil.png`,
+    ogImageAlt: 'Panduan bikin website rental mobil dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-07-27',
+    dateModified: '2026-07-27',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -585,6 +607,11 @@ export const RELATED_ARTICLES = {
     '/artikel/katalog-produk-online-umkm',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/cara-publish-website-karsa',
+  ],
+  '/artikel/website-rental-mobil': [
+    '/artikel/form-booking-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/katalog-produk-online-umkm',
   ],
 };
 
