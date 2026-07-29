@@ -558,4 +558,45 @@ export const ARTICLE_BODY = {
       <p>Kuncinya adalah halaman yang dijaga: update status unit setiap hari, tampilkan promo weekday atau peak season, dan respon chat dalam hitungan menit. Website rental bukan pengganti keramahan, tapi pendukung yang membuat pelanggan baru percaya untuk pesan pertama kali.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti nama rental, daftar armada, dan nomor WhatsApp sesuai kondisi bisnis kamu, lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi awal tanpa keluar biaya. Pelajari juga <a href="/artikel/seo-website-umkm">panduan SEO website UMKM</a> supaya muncul di pencarian "sewa mobil [kota]" dan <a href="/artikel/cara-publish-website-karsa">cara publish website dari KARSA</a> untuk go-live. Link permanen membuat rental kecil terlihat profesional — pelanggan cukup ingat satu tautan.</p>`,
+  'landing-page-event': `
+      <p>Event organizer, komunitas, atau tim HR yang sering bikin acara punya masalah klasik: broadcast chat WhatsApp tenggelam, info tersebar di banyak grup, peserta lupa jadwal, dan pendaftar tidak tertangkap rapi. Solusinya satu halaman yang shareable, rapi, dan bisa diisi sendiri — landing page event.</p>
+      <h2>Section wajib di landing page event</h2>
+      <p>Sebelum bicara desain, tentukan dulu isi. Pengunjung datang untuk menjawab tiga hal: acaranya apa, kapan, dan berapa. Susun section dalam urutan logis ini:</p>
+      <ul>
+        <li><strong>Hero</strong> — judul acara, tanggal, lokasi, dan tombol "Daftar Sekarang"</li>
+        <li><strong>Tentang acara</strong> — tiga sampai empat kalimat siapa yang cocok hadir dan benefit apa yang dibawa pulang</li>
+        <li><strong>Jadwal &amp; pembicara</strong> — rundown singkat dengan foto, nama, dan topik tiap sesi</li>
+        <li><strong>Tiket &amp; harga</strong> — paling dua sampai tiga tier (early bird, reguler, VIP) dengan benefit tiap tier</li>
+        <li><strong>Form pendaftaran</strong> — nama, email, WhatsApp, dan pertanyaan singkat soal preferensi</li>
+        <li><strong>FAQ singkat</strong> — pertanyaan yang selalu muncul di chat: parkir, sertifikat, rekaman</li>
+      </ul>
+      <p>Urutan ini mengikuti cara orang memindai halaman dari atas ke bawah. Yang penting di atas, detail setelahnya, CTA diulang di section terakhir.</p>
+      <h2>Contoh prompt KARSA untuk landing page event</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt spesifik. Semakin lengkap data yang kamu berikan, semakin sedikit revisi yang dibutuhkan. Contoh untuk seminar dua hari di Jakarta:</p>
+      <p><em>"Buat landing page seminar 'UMKM Go Digital 2026'. Hero dengan headline 'Bersiap Jadi UMKM Kelas Nasional', subheadline 'Seminar 2 hari + workshop + sertifikat', tanggal 15–16 Agustus 2026 di Hotel Aryaduta Jakarta, tombol 'Daftar Sekarang' ke Google Form. Section 'Mengapa hadir' 4 poin: strategi digital marketing, cara dapat modal, diskusi dengan founder sukses, networking dengan 200 UMKM. Section jadwal hari pertama: 09.00 registrasi, 10.00 pembicara 1 (Budi Santoso, 'Iklan Facebook untuk UMKM'), 12.00 makan siang, 13.00 pembicara 2 (Sari Indah, 'Branding tanpa agency'), 15.00 workshop paralel. Hari kedua: lanjutan workshop + sesi tanya jawab. Section tiket 3 tier: Early Bird Rp 350.000 (hingga 1 Agustus, 100 tiket), Reguler Rp 500.000 (150 tiket), VIP Rp 1.200.000 (maks 30 peserta, makan malam pembicara). Tiap tier menampilkan benefit. Section pembicara dengan foto placeholder dan bio 2 kalimat. Section FAQ 5 pertanyaan. Footer dengan kontak WhatsApp 081234567890 dan link Instagram @umkmgodigital. Warna utama biru navy dan putih, mobile-first."</em></p>
+      <p>Setelah preview muncul, iterasi per bagian: <em>"ganti palet jadi hijau tua dan krem"</em>, <em>"tambah section sponsor dengan 6 logo placeholder"</em>, atau <em>"tampilkan countdown timer ke tanggal acara di hero"</em>. Tiap iterasi cukup satu kalimat.</p>
+      <h2>Detail kecil yang bikin event terasa profesional</h2>
+      <p>Tiga hal yang membedakan landing event yang dapat banyak pendaftar dan yang banyak ditinggalkan: konsistensi informasi harga di semua section (jangan tulis "Early Bird 350K" di satu tempat dan "Rp 350.000" di tempat lain), countdown timer menuju tanggal acara di hero (mendorong pendaftaran lebih cepat), dan konfirmasi otomatis yang langsung dikirim setelah form diisi (email atau pesan WhatsApp terformat). Untuk webinar, sertakan info rekaman dan slide di section FAQ; untuk event offline, info parkir, transport, dan rekomendasi hotel terdekat.</p>
+      <p>Pastikan formulir pendaftaran sesingkat mungkin. Setiap field tambahan menurunkan conversion sekitar 5–10%. Cukup nama, WhatsApp, email, dan kalau perlu asal kota. Pertanyaan detail tentang preferensi topik bisa dikirim lewat email setelah formulir utama diisi, bukan di awal yang bisa menggugurkan pendaftaran.</p>
+      <h2>Cara menyebarkan link event</h2>
+      <p>Setelah preview sesuai, klik Publish di KARSA. Landing page live di <code>umkm-go-digital.karsa.work</code> atau domain sendiri kalau EO sudah punya. Panduan publish lengkap di <a href="/artikel/cara-publish-website-karsa">cara publish website dari KARSA</a>. Sebarkan link itu di:</p>
+      <ul>
+        <li>Bio Instagram akun EO dan akun komunitas partner</li>
+        <li>Header WhatsApp Business dan broadcast berkala ke database peserta lama</li>
+        <li>Grup Telegram atau LINE komunitas topik terkait</li>
+        <li>Email newsletter ke list peserta acara sebelumnya</li>
+        <li>LinkedIn dengan post pendek dan hashtag acara</li>
+      </ul>
+      <p>Setiap kali broadcast, sertakan call-to-action spesifik yang sesuai audiens — bukan cuma "lihat acaranya". Misalnya: "Buat owner UMKM di Jakarta, 2 hari ini bisa ganti cara pandang soal digital marketing. Kuota early bird tinggal 23 tiket. Daftar: [link]".</p>
+      <h2>Kesalahan yang sering terjadi</h2>
+      <ul>
+        <li><strong>Informasi harga tidak konsisten</strong> — early bird di hero Rp 350K, di section tiket Rp 350.000, di FAQ "Rp 350rb". Bikin orang ragu apakah ini benar. Pilih satu format.</li>
+        <li><strong>Form terlalu panjang</strong> — sepuluh field di halaman pertama bikin 60% pendaftar kabur. Maksimal 4–5 field.</li>
+        <li><strong>Tidak ada countdown atau deadline early bird</strong> — pendaftaran ditunda ke besok, besok, besok. Tampilkan deadline eksplisit.</li>
+        <li><strong>CTA tenggelam</strong> — tombol "Daftar" cuma ada di hero. Ulangi sebelum jadwal, sebelum tiket, dan setelah FAQ.</li>
+        <li><strong>Tidak mobile-friendly</strong> — 80% peserta buka dari HP. Cek preview di viewport kecil sebelum publish.</li>
+      </ul>
+      <p>Yang paling penting setelah landing page live adalah konsistensi update. Kalau ada perubahan jadwal, update halaman dalam 24 jam dan broadcast ulang. Kalau early bird habis, tampilkan status sold-out dengan jelas dan arahkan ke tier berikutnya. Landing page yang hidup membangun trust jauh lebih cepat dari halaman yang statis.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail acara kamu, lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk optimasi halaman supaya banyak yang daftar, baca <a href="/artikel/prompt-landing-page-konversi">prompt landing page konversi tinggi</a> dan <a href="/artikel/bikin-landing-page-dengan-ai">cara bikin landing page dengan AI</a>. Setelah publish, link permanen bisa dipakai di semua materi promosi — broadcast, poster, story, dan email — tanpa biaya tambahan per event.</p>`,
 };

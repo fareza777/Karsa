@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Mon, 27 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 29 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Landing Page Event dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/landing-page-event</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/landing-page-event</guid>
+      <description>Panduan bikin landing page event yang menarik peserta: jadwal, pembicara, harga tiket, dan form daftar. Contoh prompt KARSA bahasa Indonesia untuk EO dan komunitas.</description>
+      <pubDate>Wed, 29 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Website Rental Mobil dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/website-rental-mobil</link>

@@ -24,6 +24,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-salon-kecantik',
   '/artikel/katalog-kerajinan-tangan',
   '/artikel/website-rental-mobil',
+  '/artikel/landing-page-event',
 ];
 
 /** @type {string[]} */
@@ -503,6 +504,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/landing-page-event': {
+    ogType: 'article',
+    title: 'Cara Bikin Landing Page Event dengan AI — KARSA',
+    description:
+      'Panduan bikin landing page event yang menarik peserta: jadwal, pembicara, harga tiket, dan form daftar. Contoh prompt KARSA bahasa Indonesia untuk EO dan komunitas.',
+    canonical: `${SITE}/artikel/landing-page-event`,
+    keywords:
+      'landing page event, landing page acara, halaman pendaftaran event, landing page webinar, landing page seminar, KARSA event',
+    headline: 'Landing page event: dari broadcast chat jadi halaman pendaftaran yang rapi',
+    cardTitle: 'Landing page event dengan AI',
+    cardExcerpt: 'Jadwal, pembicara, harga tiket, dan form daftar dalam satu halaman yang shareable.',
+    ogTitle: 'Landing Page Event dengan AI',
+    ogDescription:
+      'Bikin landing page event lengkap: jadwal, pembicara, harga tiket, form daftar, dan tombol WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/landing-page-event.png`,
+    ogImageAlt: 'Panduan bikin landing page event dengan KARSA untuk EO dan komunitas Indonesia',
+    datePublished: '2026-07-29',
+    dateModified: '2026-07-29',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -612,6 +634,11 @@ export const RELATED_ARTICLES = {
     '/artikel/form-booking-online-umkm',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/katalog-produk-online-umkm',
+  ],
+  '/artikel/landing-page-event': [
+    '/artikel/prompt-landing-page-konversi',
+    '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/form-booking-online-umkm',
   ],
 };
 
