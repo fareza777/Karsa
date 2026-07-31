@@ -599,4 +599,48 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah landing page live adalah konsistensi update. Kalau ada perubahan jadwal, update halaman dalam 24 jam dan broadcast ulang. Kalau early bird habis, tampilkan status sold-out dengan jelas dan arahkan ke tier berikutnya. Landing page yang hidup membangun trust jauh lebih cepat dari halaman yang statis.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail acara kamu, lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk optimasi halaman supaya banyak yang daftar, baca <a href="/artikel/prompt-landing-page-konversi">prompt landing page konversi tinggi</a> dan <a href="/artikel/bikin-landing-page-dengan-ai">cara bikin landing page dengan AI</a>. Setelah publish, link permanen bisa dipakai di semua materi promosi — broadcast, poster, story, dan email — tanpa biaya tambahan per event.</p>`,
+  'form-pendaftaran-seminar': `
+      <p>Event organizer dan tim komunitas yang sering gelar seminar serta webinar pasti kenal ritual ini: link Google Form disebar di broadcast, peserta rebutan kursi, panitia rekap manual dari spreadsheet, dan banyak data bolak-balik di chat. Solusinya satu halaman form pendaftaran seminar yang rapi dan mobile-friendly — bisa kamu buat dengan KARSA dalam hitungan menit tanpa coding.</p>
+      <h2>Field wajib di form pendaftaran seminar</h2>
+      <p>Sebelum bicara desain, tentukan field yang benar-benar kamu butuhkan. Setiap field tambahan menurunkan rasio pendaftar, jadi lebih baik form singkat dengan data yang cukup untuk operasional:</p>
+      <ul>
+        <li><strong>Nama lengkap</strong> — untuk sertifikat, absensi, dan label name tag</li>
+        <li><strong>Email</strong> — kirim invoice, link Zoom, dan rekaman acara</li>
+        <li><strong>Nomor WhatsApp</strong> — kontak utama untuk reminder H-1 dan info mendadak</li>
+        <li><strong>Asal kota / instansi</strong> — berguna untuk catering dan sesi networking</li>
+        <li><strong>Pilihan sesi atau tiket</strong> — kalau acaranya paralel atau bertingkat (early bird, reguler, VIP)</li>
+        <li><strong>Metode pembayaran</strong> — QRIS, transfer bank, atau kartu (opsional, bisa dikonfirmasi via chat)</li>
+        <li><strong>Persetujuan penggunaan data</strong> — checkbox kecil untuk kepatuhan perlindungan data pribadi</li>
+      </ul>
+      <p>Jangan tambahin field yang tidak operasional, seperti "pekerjaan spesifik" atau "pendapatmu tentang acara ini". Itu bisa dikirim sebagai survei setelah acara selesai, bukan di gerbang pendaftaran.</p>
+      <h2>Contoh prompt KARSA untuk form seminar</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt spesifik ini. Semakin lengkap data yang kamu berikan, semakin sedikit revisi yang dibutuhkan:</p>
+      <p><em>"Buat halaman form pendaftaran seminar 'UMKM Naik Kelas 2026' di Jakarta, 20 Agustus 2026. Hero sederhana dengan judul seminar, tanggal, dan tagline 'Kelas Satu Hari untuk Owner UMKM'. Section 'Benefit peserta' 4 poin: template bisnis plan, konsultasi 30 menit dengan mentor, e-sertifikat, dan grup alumni WhatsApp. Section form: nama lengkap, email, WhatsApp, asal kota, dropdown pilihan paket (Reguler Rp 500.000 atau VIP Rp 1.500.000 termasuk makan siang dan konsultasi 1 jam), checkbox persetujuan menerima informasi acara, dan textarea singkat 'Apa tantangan utama bisnismu' maksimal 200 karakter. Tombol submit ke WhatsApp 081234567890 dengan pesan template: 'Halo, saya [nama] dari [kota] mau daftar paket [paket]. Email: [email]. WA: [wa].'. Setelah submit tampilkan halaman konfirmasi berisi nomor WhatsApp untuk konfirmasi pembayaran dan rekening bank. Mobile-first, warna utama biru navy dan oranye, footer menyebut Penyelenggara: Komunitas UMKM Maju."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"tambah field pekerjaan di form"</em>, <em>"ganti tombol submit jadi kirim ke email organizers@kabarumkm.id"</em>, atau <em>"tampilkan sesi-sesi seminar di atas form biar peserta tahu isi acaranya"</em>. Cukup satu kalimat per iterasi.</p>
+      <h2>Cara mengumpulkan data pendaftar dengan rapi</h2>
+      <p>Ada tiga pola yang sering dipakai EO di Indonesia, masing-masing dengan kelebihan:</p>
+      <ul>
+        <li><strong>Submit ke WhatsApp Panitia</strong> — paling cocok untuk acara di bawah 100 peserta. Pesan WhatsApp otomatis terformat dengan data peserta, panitia tinggal reply konfirmasi. Hindari spam karena data tetap lewat chat.</li>
+        <li><strong>Submit ke Google Sheets via webhook</strong> — untuk acara 200+ peserta. KARSA bisa diarahkan ke endpoint sederhana yang append row ke spreadsheet, jadi panitia punya basis data terstruktur tanpa ketik manual.</li>
+        <li><strong>Submit ke email + autoresponder</strong> — untuk webinar gratis atau acara komunitas. Peserta dapat email konfirmasi instan berisi link Zoom atau dokumen briefing.</li>
+      </ul>
+      <p>Pilih satu pola yang paling cocok dengan volume pesertamu. Kalau EO kamu biasanya handle 30–80 orang per event, WhatsApp Panitia sudah lebih dari cukup dan paling minim setup. Kalau kamu rutin gelar event 500+ atau menerima hibah yang butuh laporan data terstruktur, investasi ke integrasi spreadsheet.</p>
+      <h2>Konfirmasi dan reminder yang bikin peserta datang</h2>
+      <p>Sebagian besar peserta yang terlambat atau lupa datang bukan karena tidak tertarik, tapi karena tidak ada reminder. Pasang dua touch point sederhana:</p>
+      <ol>
+        <li><strong>Konfirmasi instan</strong> — langsung setelah submit, kirim WhatsApp otomatis berisi detail acara dan kontak panitia. Peserta yang dapat konfirmasi cepat 3× lebih mungkin benar-benar hadir.</li>
+        <li><strong>Reminder H-1</strong> — broadcast WhatsApp ke seluruh peserta esok harinya, berisi rundown singkat, lokasi map, dan dress code kalau ada. Ini memotong no-show sampai 40% di acara gratis.</li>
+      </ol>
+      <p>Hindari email blast generik. Peserta cenderung mengabaikan yang tidak personal. Cukup dua pesan di atas — instan dan H-1 — yang sudah terbukti paling efektif di EO kecil dan menengah. Untuk pola komunikasi lain dengan peserta — seperti form konfirmasi kehadiran atau jadwal alternatif — pelajari juga contoh form <a href="/artikel/form-booking-online-umkm">booking online untuk UMKM</a> di panduan KARSA.</p>
+      <h2>Kesalahan yang sering terjadi</h2>
+      <ul>
+        <li><strong>Form terlalu panjang</strong> — sepuluh field bikin 50–60% pendaftar kabur. Maksimal 5–7 field inti, sisanya setelah mereka konfirmasi hadir.</li>
+        <li><strong>Tidak ada konfirmasi setelah submit</strong> — peserta tidak tahu apakah pendaftarannya berhasil, dan panitia harus cek manual. Selalu tampilkan halaman terima kasih dengan info jelas.</li>
+        <li><strong>Nomor WhatsApp panitia salah</strong> — pastikan nomor yang dituju benar dan aktif (kode negara, bukan awalan 0 saja untuk internasional).</li>
+        <li><strong>Lupa sebut deadline</strong> — kalau ada batas pendaftaran, tampilkan di hero form dan di pesan submit, bukan cuma di landing utama.</li>
+        <li><strong>Tidak mobile-friendly</strong> — lebih dari 80% pendaftar buka dari HP. Cek preview di viewport kecil sebelum publish.</li>
+      </ul>
+      <p>Yang paling penting setelah form live adalah konsistensi data. Setiap pendaftar yang masuk lewat form otomatis terstruktur dan rapi. Kalau biasanya EO kamu rekap manual dari screenshot chat, halaman KARSA menggantikan itu sekaligus.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail seminar atau webinar kamu, lalu lihat preview halaman form dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk halaman lengkap yang juga memuat jadwal dan tiket, padukan dengan <a href="/artikel/landing-page-event">panduan landing page event</a>. Setelah publish, link permanen form bisa kamu pasang di broadcast WhatsApp, bio Instagram, dan email newsletter — semua pendaftar masuk ke satu pintu yang rapi.</p>`,
 };

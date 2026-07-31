@@ -25,6 +25,7 @@ export const ARTICLE_PATHS = [
   '/artikel/katalog-kerajinan-tangan',
   '/artikel/website-rental-mobil',
   '/artikel/landing-page-event',
+  '/artikel/form-pendaftaran-seminar',
 ];
 
 /** @type {string[]} */
@@ -525,6 +526,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/form-pendaftaran-seminar': {
+    ogType: 'article',
+    title: 'Cara Bikin Form Pendaftaran Seminar dengan AI — KARSA',
+    description:
+      'Panduan bikin form pendaftaran seminar dan webinar online: nama, email, nomor WhatsApp, pilih sesi, sampai kirim bukti bayar. Contoh prompt KARSA untuk EO.',
+    canonical: `${SITE}/artikel/form-pendaftaran-seminar`,
+    keywords:
+      'form pendaftaran seminar, form seminar online, form pendaftaran webinar, form EO, halaman seminar, form daftar acara, KARSA',
+    headline: 'Form pendaftaran seminar: dari grup WhatsApp jadi halaman daftar yang rapi',
+    cardTitle: 'Form pendaftaran seminar dengan AI',
+    cardExcerpt: 'Nama, email, pilih sesi, kirim bukti bayar — panitia terima data peserta dalam spreadsheet rapi.',
+    ogTitle: 'Form Pendaftaran Seminar dengan AI',
+    ogDescription:
+      'Bikin form daftar seminar online lengkap: data peserta, pilih sesi, dan notifikasi WhatsApp ke panitia.',
+    ogImage: `${SITE}/og/form-pendaftaran-seminar.png`,
+    ogImageAlt: 'Panduan bikin form pendaftaran seminar online dengan KARSA untuk EO dan komunitas',
+    datePublished: '2026-07-31',
+    dateModified: '2026-07-31',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -638,6 +660,11 @@ export const RELATED_ARTICLES = {
   '/artikel/landing-page-event': [
     '/artikel/prompt-landing-page-konversi',
     '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/form-booking-online-umkm',
+  ],
+  '/artikel/form-pendaftaran-seminar': [
+    '/artikel/landing-page-event',
+    '/artikel/prompt-landing-page-konversi',
     '/artikel/form-booking-online-umkm',
   ],
 };

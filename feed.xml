@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Wed, 29 Jul 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 31 Jul 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Form Pendaftaran Seminar dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/form-pendaftaran-seminar</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/form-pendaftaran-seminar</guid>
+      <description>Panduan bikin form pendaftaran seminar dan webinar online: nama, email, nomor WhatsApp, pilih sesi, sampai kirim bukti bayar. Contoh prompt KARSA untuk EO.</description>
+      <pubDate>Fri, 31 Jul 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Landing Page Event dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/landing-page-event</link>
