@@ -26,6 +26,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-rental-mobil',
   '/artikel/landing-page-event',
   '/artikel/form-pendaftaran-seminar',
+  '/artikel/website-komunitas-hobi',
 ];
 
 /** @type {string[]} */
@@ -547,6 +548,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/website-komunitas-hobi': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Komunitas Hobi dengan AI — KARSA',
+    description:
+      'Panduan bikin website komunitas hobi: halaman anggota, jadwal kopdar, galeri kegiatan, dan form daftar anggota baru. Contoh prompt KARSA bahasa Indonesia.',
+    canonical: `${SITE}/artikel/website-komunitas-hobi`,
+    keywords:
+      'website komunitas, website komunitas hobi, website komunitas Indonesia, komunitas online, buat website komunitas, KARSA komunitas',
+    headline: 'Website komunitas hobi: dari grup chat jadi rumah digital bersama',
+    cardTitle: 'Website komunitas hobi dengan AI',
+    cardExcerpt: 'Halaman anggota, jadwal kopdar, galeri kegiatan, dan form daftar anggota baru dalam satu tempat.',
+    ogTitle: 'Website Komunitas Hobi dengan AI',
+    ogDescription:
+      'Bikin website komunitas lengkap: profil anggota, jadwal kopdar, galeri kegiatan, dan form daftar anggota baru dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-komunitas-hobi.png`,
+    ogImageAlt: 'Panduan bikin website komunitas hobi dengan KARSA untuk komunitas Indonesia',
+    datePublished: '2026-08-03',
+    dateModified: '2026-08-03',
+    category: 'Panduan',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -666,6 +688,11 @@ export const RELATED_ARTICLES = {
     '/artikel/landing-page-event',
     '/artikel/prompt-landing-page-konversi',
     '/artikel/form-booking-online-umkm',
+  ],
+  '/artikel/website-komunitas-hobi': [
+    '/artikel/landing-page-event',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/pembuat-aplikasi-tanpa-coding',
   ],
 };
 

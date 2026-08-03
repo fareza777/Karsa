@@ -643,4 +643,48 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah form live adalah konsistensi data. Setiap pendaftar yang masuk lewat form otomatis terstruktur dan rapi. Kalau biasanya EO kamu rekap manual dari screenshot chat, halaman KARSA menggantikan itu sekaligus.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail seminar atau webinar kamu, lalu lihat preview halaman form dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk halaman lengkap yang juga memuat jadwal dan tiket, padukan dengan <a href="/artikel/landing-page-event">panduan landing page event</a>. Setelah publish, link permanen form bisa kamu pasang di broadcast WhatsApp, bio Instagram, dan email newsletter — semua pendaftar masuk ke satu pintu yang rapi.</p>`,
+  'website-komunitas-hobi': `
+      <p>Komunitas hobi Indonesia tumbuh subur — lari pagi, plant parent, board game, sampai vintage camera. Tapi hampir semua masih mengandalkan grup WhatsApp atau Telegram untuk koordinasi. Chat cepat tenggelam, foto kegiatan susah dicari lagi, dan anggota baru bingung harus mulai dari mana. <strong>Website komunitas hobi</strong> adalah rumah digital bersama: satu link yang menjelaskan siapa kalian, jadwal rutin, galeri kegiatan, dan cara gabung — tanpa scroll ribuan chat lama.</p>
+      <h2>Kenapa komunitas butuh website, bukan cuma grup chat</h2>
+      <p>Grup chat memang cepat untuk diskusi harian, tapi buruk untuk tiga hal: onboarding anggota baru (mereka tidak bisa lihat sejarah), dokumentasi kegiatan (foto dan cerita kopdar hilang setelah beberapa hari), dan kesan pertama untuk calon anggota atau sponsor (grup chat terlalu informal). Website sederhana dengan 4–5 section sudah cukup untuk mengatasi semuanya. Anggap saja website adalah etalase formal, grup chat adalah dapur internal.</p>
+      <p>Untuk komunitas 20–500 anggota, one-page dengan section terstruktur biasanya lebih praktis dibanding blog multi-halaman. Pengunjung scroll, dapat info penting, lalu klik gabung.</p>
+      <h2>Halaman penting di website komunitas</h2>
+      <p>Sebelum mulai, tentukan section wajib. Struktur minimum paling efektif:</p>
+      <ul>
+        <li><strong>Hero / About</strong> — nama komunitas, tagline, deskripsi 2–3 kalimat tentang siapa kalian dan misi</li>
+        <li><strong>Jadwal rutin</strong> — hari, jam, lokasi, dan link Google Maps untuk kopdar mingguan</li>
+        <li><strong>Galeri kegiatan</strong> — foto kopdar terakhir, dokumentasi event, atau showcase karya anggota</li>
+        <li><strong>Tim inti / founder</strong> — 3–6 foto dan peran biar calon anggota tahu siapa menjalankan komunitas</li>
+        <li><strong>Cara gabung</strong> — form daftar atau link WhatsApp dengan template pertanyaan singkat</li>
+        <li><strong>Footer</strong> — kontak, media sosial, dan link grup WhatsApp/Telegram untuk chat harian</li>
+      </ul>
+      <p>Tidak perlu section blog atau artikel di awal. Fungsinya memperkenalkan, mengajak gabung, dan memusatkan info. Kalau konten perlu diarsipkan mendalam, tambahkan nanti setelah komunitas stabil.</p>
+      <h2>Contoh prompt KARSA untuk website komunitas</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt kontekstual berikut. Semakin spesifik datanya, semakin sedikit revisi yang kamu butuhkan:</p>
+      <p><em>"Buat landing page untuk komunitas 'Jakarta Plant Swap' — komunitas tukar tanaman hias di Jabodetabek. Hero dengan judul besar, tagline 'Tukar Tanaman, Tambah Teman, Belajar Bareng', dan tombol 'Gabung Sekarang' warna hijau. Section 'Tentang Kami' 3 paragraf pendek: siapa kami, misi, dan jumlah anggota aktif (sekitar 350 orang). Section 'Jadwal Kopdar' card 3 pertemuan berikutnya: tanggal, jam, lokasi (Taman Suropati / Ragunan / Kemang), dan link Google Maps. Section 'Galeri' grid 6 foto kegiatan sebelumnya dari Unsplash tema tanaman. Section 'Tim Inti' 4 foto placeholder dengan nama dan peran (Founder, Koordinator Lokasi, Admin Galeri, Bendahara). Section 'Cara Gabung' form: nama, WhatsApp, domisili, dropdown 'Pengalaman Tanaman Hias' (Pemula/Menengah/Hobi Serius), textarea 'Cerita singkat kenapa mau gabung' maksimal 150 karakter. Tombol submit kirim ke WhatsApp 081234567890 dengan template pesan. Footer dengan link Instagram @jakartaplantswap dan link grup WhatsApp. Mobile-first, warna dominan hijau sage dan krem, font Inter dan Syne, ilustrasi daun kecil sebagai dekorasi."</em></p>
+      <p>Setelah preview muncul, iterasi per bagian dengan kalimat pendek: <em>"tambah section FAQ"</em>, <em>"ganti warna jadi biru pastel"</em>, atau <em>"tampilkan counter anggota aktif yang update otomatis"</em>. Tiap iterasi biasanya hanya 10–20 detik.</p>
+      <h2>Memilih domain untuk komunitas</h2>
+      <p>Untuk langkah awal, subdomain gratis dari KARSA seperti <code>jakartaplantswap.karsa.work</code> sudah lebih dari cukup. Bagus untuk uji coba dan lihat apakah website dipakai. Setelah 2–3 bulan dan trafik stabil, baru pertimbangkan domain sendiri seperti <code>jakartaplantswap.id</code> — identitas lebih kuat dan profesional untuk sponsorship.</p>
+      <p>Pastikan slug konsisten dengan username Instagram atau nama grup WhatsApp biar anggota tidak bingung. Detail propagasi domain dan setup DNS bisa dibaca di <a href="/artikel/custom-domain-karsa">panduan custom domain KARSA</a>.</p>
+      <h2>Memasukkan website ke kegiatan operasional komunitas</h2>
+      <p>Website yang bagus adalah yang dipakai. Setelah publish, integrasikan ke ritual yang sudah ada:</p>
+      <ul>
+        <li>Set sebagai pinned message di grup WhatsApp dan Telegram: "Info resmi & galeri ada di sini"</li>
+        <li>Tambahkan ke bio Instagram dan link-in-bio tools (Linktree atau Sendspark)</li>
+        <li>Sebut di setiap kopdar: "Foto kegiatan akan diupload ke website, cek halaman Galeri minggu depan"</li>
+        <li>Gunakan form gabung sebagai filter utama — calon anggota isi form, admin cek, baru invite ke grup chat</li>
+        <li>Update jadwal dan galeri 1–2 minggu sekali, jangan sampai website terasa mati</li>
+      </ul>
+      <p>Admin website (1–2 orang) dapat tugas rutin update galeri dan jadwal. Anggap seperti notulensi kopdar — kalau tidak diupdate, anggota mulai lupa kegiatannya. Untuk event khusus seperti kopdar akbar, padukan dengan <a href="/artikel/landing-page-event">panduan landing page event</a>.</p>
+      <h2>Kesalahan yang sering terjadi</h2>
+      <ul>
+        <li><strong>Terlalu banyak section di awal</strong> — 10 section bikin anggota baru overwhelmed. Mulai dari 5 section utama, tambah kalau sudah perlu.</li>
+        <li><strong>Form gabung tidak jelas prosesnya</strong> — calon anggota bingung setelah submit. Selalu tampilkan halaman konfirmasi: "Admin akan reply dalam 1×24 jam".</li>
+        <li><strong>Foto galeri tidak dikurasi</strong> — foto blur, gelap, atau tidak relevan bikin kesan tidak profesional. Maksimal 12 foto terbaik per periode.</li>
+        <li><strong>Tidak ada admin website</strong> — kalau cuma satu orang yang bisa edit dan dia sibuk, website mati. Siapkan minimal 2 admin.</li>
+        <li><strong>Lupa mobile preview</strong> — 80% anggota buka dari HP. Cek preview di viewport kecil sebelum publish.</li>
+      </ul>
+      <p>Yang paling penting setelah live adalah konsistensi. Update kecil tiap 1–2 minggu sudah cukup untuk menjaga website tetap hidup. Komunitas bukan perusahaan, jadi tidak perlu posting setiap hari. Yang penting ada ritme yang jelas.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail komunitasmu, lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk dasar vibecoding, baca juga <a href="/artikel/apa-itu-vibecoding">penjelasan vibecoding untuk pemula</a>. Setelah publish, share link permanen ke grup chat, bio Instagram, dan setiap kopdar — biarkan website yang bekerja memperkenalkan komunitasmu 24 jam, sementara kamu fokus menjalankan kegiatannya.</p>`,
 };
