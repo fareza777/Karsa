@@ -687,4 +687,43 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah live adalah konsistensi. Update kecil tiap 1–2 minggu sudah cukup untuk menjaga website tetap hidup. Komunitas bukan perusahaan, jadi tidak perlu posting setiap hari. Yang penting ada ritme yang jelas.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail komunitasmu, lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk dasar vibecoding, baca juga <a href="/artikel/apa-itu-vibecoding">penjelasan vibecoding untuk pemula</a>. Setelah publish, share link permanen ke grup chat, bio Instagram, dan setiap kopdar — biarkan website yang bekerja memperkenalkan komunitasmu 24 jam, sementara kamu fokus menjalankan kegiatannya.</p>`,
+  'katalog-buku-bekas': `
+      <p>Penjual buku bekas di Indonesia — dari toko kecil di gang kota sampai seller rumahan di Bukalapak, Tokopedia, dan Instagram — punya satu masalah klasik: stok buku banyak, tapi calon pembeli tidak punya cara browse yang rapi. Foto di chat cepat hilang, story 24 jam, dan daftar PDF di WhatsApp bikin orang scroll tanpa ujung. Solusinya sederhana: satu halaman katalog buku bekas online yang permanen, mobile-friendly, dan bisa dibuka dari mana saja. KARSA memungkinkan kamu bikin etalase itu dalam hitungan menit, tanpa coding.</p>
+      <h2>Kenapa katalog online layak, bukan cuma arsip foto</h2>
+      <p>Katalog online bukan sekadar galeri foto — ini adalah alat jualan. Link permanen bisa kamu tempel di bio Instagram, pesan otomatis WhatsApp Business, marketplace, sampai nama domain sendiri. Tidak hilang setelah 24 jam, tidak tenggelam di antara ribuan chat, dan yang paling penting: calon pembeli bisa search, filter, dan langsung kontak kamu saat tertarik. Untuk seller buku bekas, etalase digital sering mengalahkan toko marketplace karena tidak ada komisi 5–10% per transaksi, brandingnya milik sendiri, dan kamu pegang hubungan langsung dengan pelanggan tetap. Seller yang andalkan chat saja sering kehilangan 80% buyer karena lupa — katalog online bikin calon pembeli eksplor sendiri, kamu duduk terima chat dari yang benar-benar tertarik.</p>
+      <h2>Struktur katalog buku bekas yang bikin closing</h2>
+      <p>Tidak perlu keranjang belanja dan payment gateway di tahap awal. Cukup halaman yang informatif, gampang di-scroll, dan ada jalur jelas ke WhatsApp. Komponen wajibnya:</p>
+      <ul>
+        <li><strong>Header</strong> — nama toko, tagline (mis. "Buku bekas langka &amp; best seller, kondisi 80–95%"), tombol WhatsApp melayang</li>
+        <li><strong>Grid buku</strong> — foto cover, judul, penulis, kondisi, harga, label kategori</li>
+        <li><strong>Detail buku</strong> — foto besar, sinopsis 1 paragraf, ISBN, tahun, kondisi, berat, tombol chat untuk negosiasi</li>
+        <li><strong>Filter dan search</strong> — kategori, penulis, rentang harga, kata kunci judul</li>
+        <li><strong>Section info</strong> — cara order, ongkir rata-rata, metode pembayaran, kebijakan retur</li>
+        <li><strong>Footer</strong> — alamat toko, jam buka, link marketplace, Instagram, kontak WhatsApp</li>
+      </ul>
+      <p>Yang membedakan katalog buku bekas dari katalog fashion adalah label kondisi. Pembeli butuh tahu apakah buku 90% mulus atau ada coretan. Tampilkan label ini jelas di kartu grid dan detail — tidak perlu di belakang halaman.</p>
+      <h2>Contoh prompt KARSA untuk toko buku bekas</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt spesifik ini. Semakin lengkap konteks yang kamu berikan, semakin sedikit revisi yang dibutuhkan. Contoh untuk toko buku bekas yang jual fiksi impor dan lawas:</p>
+      <p><em>"Buat katalog online untuk toko buku bekas 'Rak Buku Bekas' di Jakarta. Header dengan logo teks berwarna coklat tua dan tagline 'Buku bekas berkualitas, harga mahasiswa'. Floating button WhatsApp ke 081234567890. Hero section berisi banner lebar dengan foto tumpukan buku dan CTA 'Browse Katalog'. Section filter dengan dropdown kategori (Fiksi, Nonfiksi, Anak, Langka, Paket Bundling), input search, dan slider rentang harga Rp 10.000–Rp 500.000. Grid 3 kolom berisi 9 contoh buku, masing-masing dengan card berisi foto cover, judul, penulis, label kondisi (90% / 70% / Baca dulu), harga coret dan harga baru, badge 'Langka' atau 'Best Seller' untuk buku tertentu. Klik card buka halaman detail dengan foto besar, sinopsis, ISBN, tahun, berat, kondisi, dan tombol 'Pesan via WhatsApp' yang pre-fill pesan. Section 'Cara Order' 4 langkah, footer dengan alamat, jam buka, dan link Tokopedia. Mobile-first, warna coklat tua dan krem."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"tambah filter berdasarkan penulis"</em> atau <em>"ganti warna jadi hijau sage"</em>. Cukup satu kalimat per iterasi — itu kekuatan vibecoding. Pola vibecoding ini sama dengan bikin <a href="/artikel/contoh-prompt-karsa-umkm">katalog produk UMKM</a> pada umumnya, tinggal sesuaikan konteksnya.</p>
+      <h2>Tips mengelola katalog yang tetap hidup</h2>
+      <ul>
+        <li><strong>Update mingguan</strong> — tambahkan 5–10 buku baru per minggu, hapus yang sudah terjual</li>
+        <li><strong>Foto natural light</strong> — pakai cahaya jendela, latar kayu atau kain</li>
+        <li><strong>Label kondisi jujur</strong> — tulis "bekas 85%, ada highlight halaman 30–40" daripada sekadar "bekas"</li>
+        <li><strong>Paket bundling</strong> — grup 3–5 buku dengan tema (paket sastra, paket bisnis) jadi nilai lebih</li>
+        <li><strong>Testimoni di homepage</strong> — screenshot chat positif dari pelanggan, tampilkan apa adanya</li>
+      </ul>
+      <p>Untuk seller yang sudah punya 100+ judul, pertimbangkan filter berdasarkan genre dan label "Langka" atau "Best Seller" — itu yang membedakan toko profesional dari yang amatir di mata kolektor.</p>
+      <h2>Kesalahan yang sering bikin katalog buku bekas tidak laku</h2>
+      <ul>
+        <li><strong>Foto gelap atau blur</strong> — foto ulang di cahaya terang sebelum publish</li>
+        <li><strong>Tidak ada harga</strong> — orang enggan chat hanya untuk tanya harga. Tampilkan harga di grid</li>
+        <li><strong>Tombol WhatsApp rusak</strong> — nomor salah, tidak pakai kode negara, atau link tidak auto-prefill pesan</li>
+        <li><strong>Tidak mobile preview</strong> — 80% buyer buka dari HP. Grid 3 kolom di desktop sering overflow</li>
+        <li><strong>Kategori asal buat</strong> — "Lain-lain" menumpuk 50% buku. Pecah jadi "Langka", "Best Seller", "Bundling"</li>
+      </ul>
+      <p>Yang paling penting setelah live adalah konsistensi. Katalog buku bekas yang tidak di-update 3 bulan akan terasa mati dan tidak dipercaya. Jadwalkan 30 menit setiap akhir pekan untuk update stok, rotasi foto, dan tambah 5–10 buku baru.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail tokomu (nama, kota, nomor WhatsApp, contoh judul), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk dasar menyusun katalog produk UMKM, baca juga <a href="/artikel/katalog-produk-online-umkm">panduan katalog produk online</a>. Setelah publish, link permanen bisa kamu tempel di bio Instagram, pesan otomatis WhatsApp Business, dan listing marketplace — biar satu etalase digital bekerja memperkenalkan tokomu 24 jam, sementara kamu fokus carikan buku langka yang dicari kolektor.</p>`,
 };

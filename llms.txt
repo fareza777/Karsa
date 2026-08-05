@@ -38,6 +38,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Landing page event: dari broadcast chat jadi halaman pendaftaran yang rapi](https://karsa.work/artikel/landing-page-event): Panduan bikin landing page event yang menarik peserta: jadwal, pembicara, harga tiket, dan form daftar. Contoh prompt KARSA bahasa Indonesia untuk EO dan komunitas.
 - [Form pendaftaran seminar: dari grup WhatsApp jadi halaman daftar yang rapi](https://karsa.work/artikel/form-pendaftaran-seminar): Panduan bikin form pendaftaran seminar dan webinar online: nama, email, nomor WhatsApp, pilih sesi, sampai kirim bukti bayar. Contoh prompt KARSA untuk EO.
 - [Website komunitas hobi: dari grup chat jadi rumah digital bersama](https://karsa.work/artikel/website-komunitas-hobi): Panduan bikin website komunitas hobi: halaman anggota, jadwal kopdar, galeri kegiatan, dan form daftar anggota baru. Contoh prompt KARSA bahasa Indonesia.
+- [Katalog buku bekas online: dari rak berdebu jadi etalase digital yang laris](https://karsa.work/artikel/katalog-buku-bekas): Panduan bikin katalog buku bekas online untuk seller UMKM: judul, penulis, kondisi, harga, foto cover, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia.
 
 ## Kontak
 

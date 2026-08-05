@@ -27,6 +27,7 @@ export const ARTICLE_PATHS = [
   '/artikel/landing-page-event',
   '/artikel/form-pendaftaran-seminar',
   '/artikel/website-komunitas-hobi',
+  '/artikel/katalog-buku-bekas',
 ];
 
 /** @type {string[]} */
@@ -569,6 +570,27 @@ export const SEO_ROUTES = {
     category: 'Panduan',
     readMinutes: 6,
   },
+  '/artikel/katalog-buku-bekas': {
+    ogType: 'article',
+    title: 'Cara Bikin Katalog Buku Bekas Online dengan AI — KARSA',
+    description:
+      'Panduan bikin katalog buku bekas online untuk seller UMKM: judul, penulis, kondisi, harga, foto cover, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia.',
+    canonical: `${SITE}/artikel/katalog-buku-bekas`,
+    keywords:
+      'katalog buku bekas, jual buku bekas online, etalase buku second, toko buku bekas UMKM, katalog online buku, KARSA',
+    headline: 'Katalog buku bekas online: dari rak berdebu jadi etalase digital yang laris',
+    cardTitle: 'Katalog buku bekas online',
+    cardExcerpt: 'Judul, penulis, kondisi, harga, foto cover, dan tombol WhatsApp — link permanen untuk seller buku bekas.',
+    ogTitle: 'Katalog Buku Bekas Online dengan AI',
+    ogDescription:
+      'Bikin katalog buku bekas lengkap: judul, penulis, kondisi, harga, foto cover, dan tombol pesan via WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/katalog-buku-bekas.png`,
+    ogImageAlt: 'Panduan bikin katalog buku bekas online untuk UMKM dengan KARSA',
+    datePublished: '2026-08-05',
+    dateModified: '2026-08-05',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -693,6 +715,11 @@ export const RELATED_ARTICLES = {
     '/artikel/landing-page-event',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/pembuat-aplikasi-tanpa-coding',
+  ],
+  '/artikel/katalog-buku-bekas': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/cara-publish-website-karsa',
   ],
 };
 
