@@ -726,4 +726,43 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah live adalah konsistensi. Katalog buku bekas yang tidak di-update 3 bulan akan terasa mati dan tidak dipercaya. Jadwalkan 30 menit setiap akhir pekan untuk update stok, rotasi foto, dan tambah 5–10 buku baru.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail tokomu (nama, kota, nomor WhatsApp, contoh judul), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk dasar menyusun katalog produk UMKM, baca juga <a href="/artikel/katalog-produk-online-umkm">panduan katalog produk online</a>. Setelah publish, link permanen bisa kamu tempel di bio Instagram, pesan otomatis WhatsApp Business, dan listing marketplace — biar satu etalase digital bekerja memperkenalkan tokomu 24 jam, sementara kamu fokus carikan buku langka yang dicari kolektor.</p>`,
+  'landing-page-produk-digital': `
+      <p>Kreator Indonesia — penulis ebook, desainer template Notion atau Canva, pembuat course singkat, sampai komunitas membership — sering mengandalkan link chat panjang, broadcast WhatsApp, atau landing page gratisan yang templatenya kaku. Hasilnya: copy jadi tidak konsisten, diskon tenggelam di antara pesan lain, dan calon pembeli bingung mau klik apa. Solusinya bukan platform mahal: satu halaman landing page produk digital yang kamu tulis sendiri dengan KARSA, mobile-friendly, dan publish ke link permanen dalam hitungan menit. Tidak perlu WordPress, tidak perlu plugin, tidak perlu langganan bulan.</p>
+      <h2>Apa bedanya landing page produk digital dengan katalog biasa</h2>
+      <p>Katalog cocok untuk barang fisik yang sudah jadi — pembeli lihat, tanya, transaksi. Landing page produk digital berbeda: halaman ini menggabungkan <strong>cerita</strong> (kenapa produk ini penting), <strong>bukti</strong> (testimoni, cuplikan, hasil), dan <strong>tombol aksi</strong> (beli, daftar, unduh, atau join membership) dalam satu alur scroll. Karena produk digital tidak bisa dipegang, halaman harus menjelaskan value lebih panjang, mengatasi keberatan, dan memperlihatkan sampel. Untuk kreator yang menjual ebook, template, course, membership, atau preset Lightroom, landing page yang terstruktur biasanya meningkatkan konversi 2–4× dibanding chat biasa — hanya karena orang punya waktu eksplor sendiri sebelum memutuskan.</p>
+      <h2>Struktur landing page yang closing</h2>
+      <p>Tidak perlu 10 section. Cukup 6 blok yang terbukti bekerja untuk produk digital Indonesia. Urutannya:</p>
+      <ul>
+        <li><strong>Hero</strong> — judul masalah + solusi 1 kalimat, sub-judul yang spesifik, CTA utama, mockup produk di kanan</li>
+        <li><strong>Masalah &amp; solusi</strong> — 3 poin singkat: apa yang buyer rasakan sebelum beli, apa yang produk kamu ubah</li>
+        <li><strong>Isi produk</strong> — daftar bab, modul, atau file, plus visual cuplikan 2–3 halaman</li>
+        <li><strong>Untuk siapa</strong> — bullet spesifik (bukan "semua orang"), sertakan yang TIDAK cocok</li>
+        <li><strong>Testimoni &amp; FAQ</strong> — 3 testimoni dengan nama, 4–5 pertanyaan keberatan (garansi, refund, format, dukungan)</li>
+        <li><strong>Harga &amp; CTA akhir</strong> — harga jelas, bonus, tombol bayar/link WhatsApp, FAQ terakhir</li>
+      </ul>
+      <p>Yang sering dilupakan kreator adalah blok "Untuk siapa TIDAK cocok". Trik kecil ini meningkatkan konversi karena calon pembeli merasa jujur dengan mereka — dan yang merasa cocok lebih yakin klik beli.</p>
+      <h2>Contoh prompt KARSA untuk landing page produk digital</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt ini. Semakin lengkap detail yang kamu berikan, semakin sedikit revisi yang dibutuhkan. Contoh untuk ebook panduan UMKM:</p>
+      <p><em>"Buat landing page untuk ebook 'Pandumu Buka Toko Online' karya Rina Wulandari. Hero section dengan headline 'Buka toko online tanpa stok barang, modal Rp 0', sub-judul 1 kalimat, CTA 'Beli Sekarang Rp 99.000', dan mockup ebook 3D di kanan. Section 'Masalah &amp; Solusi' 3 poin: pusing urus stok, tidak tahu cara foto produk, tidak paham ongkir. Section 'Isi Ebook' 6 bab (Riset Pasar, Foto dari HP, Copywriting WhatsApp, Ongkir &amp; Margin, Ads Sederhana, Scale Up) dengan ikon. Section 'Untuk Siapa' — bullet 'UMKM baru, freelancer, ibu rumah tangga yang ingin cuan', plus 'TIDAK untuk: yang sudah punya toko online berjalan'. Section Testimoni 3 testimoni dengan nama dan foto profil. Section FAQ 5 pertanyaan (format file, garansi refund 7 hari, akses selamanya, grup diskusi, update gratis). Footer harga dengan strikethrough Rp 199.000 jadi Rp 99.000, CTA ke checkout, dan badge '30 hari uang kembali'. Warna utama hijau sage, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"ganti foto mockup jadi lebih minimalis"</em> atau <em>"tambah countdown diskon 24 jam di hero"</em>. Cukup satu kalimat per iterasi. Pola vibecoding ini juga dipakai di <a href="/artikel/prompt-landing-page-konversi">prompt landing page konversi</a> untuk variasi struktur hero-hook-CTA.</p>
+      <h2>Tips landing page yang tahan uji kreator</h2>
+      <ul>
+        <li><strong>Mockup realistis</strong> — bukan foto mockup dari Google, tapi hasil kamu sendiri (mockup Canva gratis cukup)</li>
+        <li><strong>Spesifik di testimonial</strong> — "omzet naik 3× di bulan pertama" lebih dipercaya daripada "sangat membantu"</li>
+        <li><strong>Harga &amp; bonus jelas</strong> — tampilkan harga akhir, bonus apa saja, dan total nilai (Rp 350.000, sekarang Rp 99.000)</li>
+        <li><strong>FAQ jawab keberatan utama</strong> — refund, format file, akses selamanya selalu ditanyakan</li>
+        <li><strong>Tombol CTA di 3 titik</strong> — hero, setelah isi produk, dan footer. Mobile user butuh banyak kesempatan klik</li>
+      </ul>
+      <p>Untuk kreator yang sudah punya audiens, tambahkan section "Sudah dipakai oleh" dengan logo follower atau pelanggan, plus counter (1.200+ eksemplar terjual). Angka spesifik selalu lebih dipercaya daripada "banyak".</p>
+      <h2>Kesalahan umum landing page produk digital</h2>
+      <ul>
+        <li><strong>Terlalu panjang tanpa visual</strong> — paragraf panjang di section pertama bikin orang kabur. Pecah jadi ikon + 1 kalimat</li>
+        <li><strong>Harga di belakang</strong> — orang enggan scroll sampai bawah. Tampilkan harga di hero dan setelah isi</li>
+        <li><strong>Testimoni tidak spesifik</strong> — testimoni generic ("keren banget") tidak dipercaya. Minta testimoni dengan hasil konkret</li>
+        <li><strong>Tombol bayar tidak jelas</strong> — link WA ke nomor salah, atau ke checkout yang rusak. Cek tombol sebelum publish</li>
+        <li><strong>Tidak mobile preview</strong> — 80% buyer buka dari HP. Cek viewport kecil, pastikan CTA tidak ketutup nav</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah iterasi. Landing page produk digital yang di-update tiap 2–4 minggu dengan testimoni baru, FAQ baru, atau bonus musiman biasanya stabil di konversi 3–5%. Buat versi 2 setelah 30 hari dengan A/B sederhana: ganti hero headline, atau tambah video pendek di section pertama.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail produkmu (judul, harga, testimoni, FAQ), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk kreatif menjual jasa, baca juga <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> agar kamu tahu perbedaan struktur saat menjual jasa vs produk digital. Setelah publish, link permanen bisa kamu tempel di bio Instagram, broadcast WhatsApp, dan linktree — biar satu halaman bekerja menjelaskan produkmu 24 jam, sementara kamu fokus bikin karya berikutnya.</p>`,
 };

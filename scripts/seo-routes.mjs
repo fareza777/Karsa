@@ -28,6 +28,7 @@ export const ARTICLE_PATHS = [
   '/artikel/form-pendaftaran-seminar',
   '/artikel/website-komunitas-hobi',
   '/artikel/katalog-buku-bekas',
+  '/artikel/landing-page-produk-digital',
 ];
 
 /** @type {string[]} */
@@ -591,6 +592,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/landing-page-produk-digital': {
+    ogType: 'article',
+    title: 'Cara Bikin Landing Page Produk Digital dengan AI — KARSA',
+    description:
+      'Panduan bikin landing page produk digital: ebook, template, course, membership. Struktur yang konversi, contoh prompt KARSA, dan publish cepat untuk kreator Indonesia.',
+    canonical: `${SITE}/artikel/landing-page-produk-digital`,
+    keywords:
+      'landing page produk digital, jual ebook online, jual template digital, halaman jual course, kreator Indonesia digital, KARSA',
+    headline: 'Landing page produk digital: dari link chat panjang jadi halaman yang closing',
+    cardTitle: 'Landing page produk digital',
+    cardExcerpt: 'Ebook, template, course, membership — halaman jual yang jelas, mobile-friendly, dan bisa publish hari ini juga.',
+    ogTitle: 'Landing Page Produk Digital dengan AI',
+    ogDescription:
+      'Bikin landing page untuk ebook, template, course, atau membership dalam hitungan menit — contoh prompt KARSA bahasa Indonesia.',
+    ogImage: `${SITE}/og/landing-page-produk-digital.png`,
+    ogImageAlt: 'Panduan bikin landing page produk digital dengan KARSA untuk kreator Indonesia',
+    datePublished: '2026-08-07',
+    dateModified: '2026-08-07',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -720,6 +742,11 @@ export const RELATED_ARTICLES = {
     '/artikel/katalog-produk-online-umkm',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/cara-publish-website-karsa',
+  ],
+  '/artikel/landing-page-produk-digital': [
+    '/artikel/prompt-landing-page-konversi',
+    '/artikel/bikin-landing-page-dengan-ai',
+    '/artikel/landing-page-jasa-freelance',
   ],
 };
 

@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Wed, 05 Aug 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 07 Aug 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Landing Page Produk Digital dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/landing-page-produk-digital</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/landing-page-produk-digital</guid>
+      <description>Panduan bikin landing page produk digital: ebook, template, course, membership. Struktur yang konversi, contoh prompt KARSA, dan publish cepat untuk kreator Indonesia.</description>
+      <pubDate>Fri, 07 Aug 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Katalog Buku Bekas Online dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/katalog-buku-bekas</link>
