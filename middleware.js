@@ -27,6 +27,14 @@ export default async function middleware(request) {
   const host = request.headers.get('host')?.split(':')[0]?.toLowerCase() || '';
   if (isMainAppHost(host)) return;
 
+  const path = new URL(request.url).pathname;
+  if (path === '/robots.txt') {
+    return new Response(
+      'User-agent: *\nAllow: /\n',
+      { status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' } },
+    );
+  }
+
   let slug = slugFromSubdomain(host);
   if (!slug) slug = await lookupCustomSlug(host, new URL(request.url).origin);
   if (!slug) {

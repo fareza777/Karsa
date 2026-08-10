@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
-Disallow: /app
-Disallow: /admin
+Allow: /artikel/
+Allow: /panduan
+Allow: /p/
+Disallow: /admin$
+Disallow: /admin/
 Disallow: /api/
 
 Sitemap: https://karsa.work/sitemap.xml
