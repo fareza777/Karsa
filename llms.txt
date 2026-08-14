@@ -40,6 +40,9 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Website komunitas hobi: dari grup chat jadi rumah digital bersama](https://karsa.work/artikel/website-komunitas-hobi): Panduan bikin website komunitas hobi: halaman anggota, jadwal kopdar, galeri kegiatan, dan form daftar anggota baru. Contoh prompt KARSA bahasa Indonesia.
 - [Katalog buku bekas online: dari rak berdebu jadi etalase digital yang laris](https://karsa.work/artikel/katalog-buku-bekas): Panduan bikin katalog buku bekas online untuk seller UMKM: judul, penulis, kondisi, harga, foto cover, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia.
 - [Landing page produk digital: dari link chat panjang jadi halaman yang closing](https://karsa.work/artikel/landing-page-produk-digital): Panduan bikin landing page produk digital: ebook, template, course, membership. Struktur yang konversi, contoh prompt KARSA, dan publish cepat untuk kreator Indonesia.
+- [Website jasa konsultan: tampilkan keahlian, jadwal, dan cara booking dalam satu halaman](https://karsa.work/artikel/website-jasa-konsultan): Panduan bikin website jasa konsultan profesional: layanan, keahlian, jam konsultasi, CTA booking, dan contoh prompt KARSA bahasa Indonesia untuk UMKM.
+- [Katalog perlengkapan bayi online: dari kiriman chat jadi etalase yang tenang dilihat orang tua](https://karsa.work/artikel/katalog-perlengkapan-bayi): Panduan bikin katalog perlengkapan bayi online untuk UMKM: kategori produk, foto, harga, stok, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia.
+- [Website toko oleh-oleh: dari etalase etalase jadi link permanen untuk pelancong](https://karsa.work/artikel/website-toko-oleh-oleh): Panduan bikin website toko oleh-oleh khas daerah: etalase produk, kategori, harga, dan tombol pesan via WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.
 
 ## Kontak
 

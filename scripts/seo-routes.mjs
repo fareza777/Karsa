@@ -29,6 +29,9 @@ export const ARTICLE_PATHS = [
   '/artikel/website-komunitas-hobi',
   '/artikel/katalog-buku-bekas',
   '/artikel/landing-page-produk-digital',
+  '/artikel/website-jasa-konsultan',
+  '/artikel/katalog-perlengkapan-bayi',
+  '/artikel/website-toko-oleh-oleh',
 ];
 
 /** @type {string[]} */
@@ -613,6 +616,69 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/website-jasa-konsultan': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Jasa Konsultan dengan AI — KARSA',
+    description:
+      'Panduan bikin website jasa konsultan profesional: layanan, keahlian, jam konsultasi, CTA booking, dan contoh prompt KARSA bahasa Indonesia untuk UMKM.',
+    canonical: `${SITE}/artikel/website-jasa-konsultan`,
+    keywords:
+      'website jasa konsultan, konsultan profesional Indonesia, landing page konsultan, jasa konsultasi UMKM, website konsultasi bisnis, KARSA konsultan',
+    headline: 'Website jasa konsultan: tampilkan keahlian, jadwal, dan cara booking dalam satu halaman',
+    cardTitle: 'Website jasa konsultan',
+    cardExcerpt: 'Layanan, keahlian, jam konsultasi, dan tombol booking — link permanen untuk konsultan profesional.',
+    ogTitle: 'Website Jasa Konsultan dengan AI',
+    ogDescription:
+      'Bikin website jasa konsultan lengkap: profil ahli, layanan, jam konsultasi, dan tombol booking dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-jasa-konsultan.png`,
+    ogImageAlt: 'Panduan bikin website jasa konsultan profesional dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-08-10',
+    dateModified: '2026-08-10',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
+  '/artikel/katalog-perlengkapan-bayi': {
+    ogType: 'article',
+    title: 'Cara Bikin Katalog Perlengkapan Bayi Online dengan AI — KARSA',
+    description:
+      'Panduan bikin katalog perlengkapan bayi online untuk UMKM: kategori produk, foto, harga, stok, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia.',
+    canonical: `${SITE}/artikel/katalog-perlengkapan-bayi`,
+    keywords:
+      'katalog perlengkapan bayi, etalase produk bayi, toko bayi online, katalog stroller, katalog baju bayi, KARSA baby shop',
+    headline: 'Katalog perlengkapan bayi online: dari kiriman chat jadi etalase yang tenang dilihat orang tua',
+    cardTitle: 'Katalog perlengkapan bayi online',
+    cardExcerpt: 'Kategori produk, foto, harga, stok, dan tombol WhatsApp — link permanen untuk toko bayi dan Mom & Baby shop.',
+    ogTitle: 'Katalog Perlengkapan Bayi Online dengan AI',
+    ogDescription:
+      'Bikin katalog produk bayi lengkap: kategori, foto, harga, stok, dan tombol pesan via WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/katalog-perlengkapan-bayi.png`,
+    ogImageAlt: 'Panduan bikin katalog perlengkapan bayi online dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-08-12',
+    dateModified: '2026-08-12',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
+  '/artikel/website-toko-oleh-oleh': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Toko Oleh-Oleh dengan AI — KARSA',
+    description:
+      'Panduan bikin website toko oleh-oleh khas daerah: etalase produk, kategori, harga, dan tombol pesan via WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.',
+    canonical: `${SITE}/artikel/website-toko-oleh-oleh`,
+    keywords:
+      'website toko oleh-oleh, oleh-oleh khas daerah, UMKM oleh-oleh, toko oleh-oleh online, katalog oleh-oleh, KARSA UMKM',
+    headline: 'Website toko oleh-oleh: dari etalase etalase jadi link permanen untuk pelancong',
+    cardTitle: 'Website toko oleh-oleh',
+    cardExcerpt: 'Etalase produk khas daerah, kategori, harga, dan tombol WhatsApp untuk traveler dan kirim luar kota.',
+    ogTitle: 'Website Toko Oleh-Oleh dengan AI',
+    ogDescription:
+      'Bikin website toko oleh-oleh lengkap: etalase produk khas, kategori, harga, dan tombol pesan via WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-toko-oleh-oleh.png`,
+    ogImageAlt: 'Panduan bikin website toko oleh-oleh khas daerah dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-08-14',
+    dateModified: '2026-08-14',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -747,6 +813,21 @@ export const RELATED_ARTICLES = {
     '/artikel/prompt-landing-page-konversi',
     '/artikel/bikin-landing-page-dengan-ai',
     '/artikel/landing-page-jasa-freelance',
+  ],
+  '/artikel/website-jasa-konsultan': [
+    '/artikel/landing-page-jasa-freelance',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
+  ],
+  '/artikel/katalog-perlengkapan-bayi': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
+  ],
+  '/artikel/website-toko-oleh-oleh': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/katalog-kerajinan-tangan',
   ],
 };
 

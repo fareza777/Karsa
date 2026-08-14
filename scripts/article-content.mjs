@@ -764,5 +764,123 @@ export const ARTICLE_BODY = {
       </ul>
       <p>Yang paling penting setelah publish adalah iterasi. Landing page produk digital yang di-update tiap 2–4 minggu dengan testimoni baru, FAQ baru, atau bonus musiman biasanya stabil di konversi 3–5%. Buat versi 2 setelah 30 hari dengan A/B sederhana: ganti hero headline, atau tambah video pendek di section pertama.</p>
       <h2>Mulai sekarang</h2>
-      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail produkmu (judul, harga, testimoni, FAQ), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk kreatif menjual jasa, baca juga <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> agar kamu tahu perbedaan struktur saat menjual jasa vs produk digital. Setelah publish, link permanen bisa kamu tempel di bio Instagram, broadcast WhatsApp, dan linktree — biar satu halaman bekerja menjelaskan produkmu 24 jam, sementara kamu fokus bikin karya berikutnya.</p>`,
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail produkmu (judul, harga, testimoni, FAQ), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk kreatif menjual jasa, baca juga <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> agar kamu tahu perbedaan struktur saat menjual jasa vs produk digital. Setelah publish, link permanen bisa kamu tempel di bio Instagram, broadcast WhatsApp, dan linktree — biar satu halaman bekerja menjelaskan produkmu 24 jam, sambil kamu fokus bikin karya berikutnya.</p>`,
+  'website-jasa-konsultan': `
+      <p>Konsultan pajak, hukum, IT, bisnis, SDM, dan keuangan di Indonesia masih banyak mengandalkan chat WhatsApp + LinkedIn satu-satu untuk dapat klien. Cara itu membuat jam kerja habis untuk menjawab pertanyaan yang sama berulang, dan calon klien tidak punya gambaran paket, tarif, maupun jadwal kosongmu. Solusinya bukan kalender online mahal: satu <strong>website jasa konsultan</strong> yang kamu tulis sendiri dengan KARSA, mobile-friendly, publish ke link permanen dalam hitungan menit. Tidak perlu WordPress, tidak perlu plugin, tidak perlu desain ulang tiap ada perubahan paket.</p>
+      <h2>Apa bedanya website konsultan dengan landing page biasa</h2>
+      <p>Landing page UMKM jualan produk fokus pada katalog dan tombol beli. <strong>Website jasa konsultan</strong> berbeda: halaman ini menggabungkan <strong>otoritas</strong> (siapa kamu, pengalaman, sertifikasi), <strong>layanan</strong> (apa yang dikerjakan, untuk siapa, berapa), dan <strong>cara booking</strong> (jadwal, formulir, atau WhatsApp). Karena jasa konsultasi tidak bisa disentuh, calon klien butuh lebih banyak bukti sebelum rela transfer DP. Website yang terstruktur biasanya mempersingkat siklus closing dari 2–4 minggu jadi 5–10 hari, hanya karena pertanyaan awal sudah terjawab sebelum mereka chat.</p>
+      <h2>Struktur halaman jasa konsultan yang bikin klien percaya</h2>
+      <p>Tidak perlu 12 section. Cukup 7 blok yang terbukti bekerja untuk konsultan independen dan konsultan UMKM di Indonesia. Urutannya:</p>
+      <ul>
+        <li><strong>Hero</strong> — headline berisi spesialisasi + benefit, sub-judul 1 kalimat, CTA utama "Konsultasi 30 Menit", foto profesional di kanan</li>
+        <li><strong>Tentang singkat</strong> — 3–4 baris: siapa kamu, berapa tahun pengalaman, siapa klien utama. Hindari biografi panjang</li>
+        <li><strong>Layanan</strong> — 3–5 paket jelas (misal: review laporan pajak, pendampingan izin, audit 1 jam), masing-masing dengan harga atau "mulai dari"</li>
+        <li><strong>Untuk siapa</strong> — bullet spesifik (bukan "semua orang"), plus daftar yang TIDAK cocok kamu tangani</li>
+        <li><strong>Bukti &amp; kasus</strong> — 3 studi kasus ringkas (situasi, apa yang kamu lakukan, hasil angka), 2–3 testimoni dengan nama</li>
+        <li><strong>Cara booking</strong> — step 1-2-3 (pilih paket → isi form → dapat jadwal), link kalender atau WhatsApp</li>
+        <li><strong>FAQ</strong> — 5 pertanyaan keberatan (biaya, kerahasiaan, garansi, format konsultasi, refund)</li>
+      </ul>
+      <p>Yang sering dilupakan konsultan adalah blok "Untuk siapa TIDAK cocok". Trik ini meningkatkan trust karena calon klien merasa kamu jujur, dan mereka yang merasa cocok lebih yakin klik booking.</p>
+      <h2>Contoh prompt KARSA untuk website jasa konsultan</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt ini. Semakin lengkap detail yang kamu berikan, semakin sedikit revisi. Contoh untuk konsultan pajak UMKM:</p>
+      <p><em>"Buat website jasa konsultan untuk 'Konsultan Pajak UMKM Bandung' oleh Dewi Aryanti, S.E., Ak. CA — 8 tahun membantu UMKM di Jawa Barat. Hero headline 'Bikin Laporan Pajak UMKM Selesai 3 Hari, Mulai Rp 750 Ribu', sub-judul 'Pendampingan one-on-one dengan konsultan bersertifikat', CTA 'Booking Konsultasi 30 Menit', dan foto profesional di kanan. Section Tentang 4 baris (200+ UMKM, S2 Akuntansi UPI, anggota IAPI). Section Layanan 4 paket: Review Laporan Bulanan Rp 750K, Pendampingan SPT Tahunan Rp 2,5jt, Konsultasi Satu Soal Rp 150K/30 menit, Paket Tahunan UMKM Rp 6jt. Section 'Untuk Siapa' bullet UMKM omset 50jt–5M, founder baru go online, freelancer bingung PPh — TIDAK untuk: perusahaan Tbk, sengketa pajak besar. Section Bukti 3 studi singkat (misal 'Bantu kedai kopi di Cimahi hemat Rp 12jt dari restitusi PPN'), testimoni 3. Section Cara Booking 3 step. Section FAQ 5 pertanyaan (kerahasiaan, refund, format, garansi revisi, bahasa dokumen). Footer link WhatsApp + badge 'Anggota IAPI' + strip 'Konsultasi pertama gratis untuk UMKM baru'. Warna utama navy dan emas, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"ganti foto jadi siluet"</em> atau <em>"tambah badge 'IAPI Certified' di hero"</em>. Cukup satu kalimat per iterasi. Pola vibecoding ini juga berlaku untuk <a href="/artikel/bikin-landing-page-dengan-ai">landing page UMKM pada umumnya</a>.</p>
+      <h2>Tips website konsultan yang tahan uji klien profesional</h2>
+      <ul>
+        <li><strong>Foto profesional, bukan selfie</strong> — modal Rp 50–150K untuk foto studio dengan latar netral. Klien korporat lebih percaya wajah yang jelas</li>
+        <li><strong>Spesialisasi, bukan generalis</strong> — 'Konsultan pajak untuk F&B' lebih dipercaya daripada 'konsultan pajak semua orang'</li>
+        <li><strong>Tarif di halaman</strong> — orang enggan chat hanya untuk tanya harga. Tampilkan "mulai dari" atau paket tetap</li>
+        <li><strong>Bukti angka konkret</strong> — 'hemat Rp 12jt' lebih dipercaya daripada 'banyak klien puas'. Minta izin klien sebelumnya</li>
+        <li><strong>Kerahasiaan jadi FAQ</strong> — untuk konsultan pajak/hukum, kerahasiaan selalu ditanyakan. Jawab di FAQ, bukan di chat</li>
+      </ul>
+      <p>Untuk konsultan yang sudah punya banyak klien, tambahkan logo klien (dengan izin) atau counter "200+ UMKM telah dibantu". Angka spesifik lebih dipercaya daripada kata "banyak".</p>
+      <h2>Kesalahan umum website jasa konsultan</h2>
+      <ul>
+        <li><strong>Bahasa terlalu akademis</strong> — paragraf panjang dengan istilah hukum/pajak bikin calon klien kabur. Pecah jadi ikon + 1 kalimat</li>
+        <li><strong>Tarif tersembunyi</strong> — orang enggan chat hanya untuk tanya harga. Tampilkan paket di halaman</li>
+        <li><strong>Bukti tidak spesifik</strong> — testimoni generic ("sangat membantu") tidak dipercaya. Minta testimoni dengan hasil konkret</li>
+        <li><strong>Tidak ada cara booking</strong> — link WA ke nomor salah, atau tidak ada form. Cek tombol sebelum publish</li>
+        <li><strong>Tidak mobile preview</strong> — 70% klien buka dari HP. Cek viewport kecil, pastikan CTA tidak ketutup nav</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah iterasi. Website konsultan yang di-update tiap 1–2 bulan dengan studi kasus, FAQ, atau testimoni baru biasanya stabil di closing rate 8–15%. Buat versi 2 setelah 60 hari: ganti hero headline, atau tambah video perkenalan di section pertama.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail praktismu (nama, spesialisasi, tarif, testimoni, FAQ), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk portofolio dan paket jasa, bandingkan dengan <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> dan <a href="/artikel/vibecoding-untuk-umkm">panduan vibecoding UMKM</a> untuk konteks lebih luas. Setelah publish, link permanen bisa kamu tempel di bio LinkedIn, WhatsApp Business, dan kartu nama digital — biar satu halaman bekerja menjual keahlianmu 24 jam.</p>`,
+  'katalog-perlengkapan-bayi': `
+      <p>Owner toko bayi, Mom &amp; Baby shop, atau reseller stroller di Instagram biasanya melayani lewat DM, broadcast story, dan testimoni. Ortu muda cari rekomendasi dengan tenang — tidak mau terlihat cerewet, tapi tidak mau salah pilih. Solusinya: satu <strong>katalog perlengkapan bayi online</strong> yang mobile-friendly, kategori jelas, ada stok dan tombol WhatsApp, publish dalam hitungan menit dengan KARSA. Tidak perlu WordPress, tidak perlu plugin, tidak perlu desain ulang tiap stok berubah.</p>
+      <h2>Kenapa katalog bayi beda dari katalog fashion</h2>
+      <p>Produk bayi tidak seperti baju, sepatu, atau kuliner yang bersifat dekat dan emosional. Yang dicari ortu muda adalah <strong>keamanan, sertifikat, dan review</strong>. Rentang usia (0–3, 3–6, 6–12 bulan, 1–2, 2–4 tahun) membuat satu produk punya banyak varian. Stok cepat berubah karena ukuran pakai anak tidak bisa diulang. Katalog yang baik menampilkan usia, berat, bahan, dan nomor sertifikat (SNI untuk dot, BPOM untuk kosmetik bayi, ASTM untuk stroller). CTA-nya bukan "Beli" melainkan "Tanya ketersediaan", karena keputusan beli datang setelah chat. Pola umum ini juga berlaku untuk <a href="/artikel/katalog-produk-online-umkm">katalog produk UMKM pada umumnya</a>, hanya saja untuk bayi perlu kepastian ekstra.</p>
+      <h2>Struktur katalog bayi yang bikin orang tua tenang</h2>
+      <p>Cukup 7 blok terbukti bekerja untuk Mom &amp; Baby shop di Indonesia:</p>
+      <ul>
+        <li><strong>Hero</strong> — headline kategori usia (mis. "Toko Bayi 0–3 Tahun, COD Bandung"), foto bayi, CTA "Lihat Katalog"</li>
+        <li><strong>Kategori</strong> — box-grid 6–8: Stroller, Car Seat, Bouncer, Baju Bayi, Botol &amp; Dot, Mainan Edukatif, MPASI, Perawatan</li>
+        <li><strong>Produk Unggulan</strong> — 4–6 best-seller, foto rapi, harga, badge "SNI" atau "BPOM" bila ada, link WhatsApp</li>
+        <li><strong>Filter Usia</strong> — chip 0–3, 3–6, 6–12, 1–2, 2–4 tahun; ortu klik langsung lihat koleksi sesuai anaknya</li>
+        <li><strong>Bundle / Paket</strong> — newborn, MPASI, perjalanan (stroller + car seat). Paket meningkatkan rata-rata transaksi 30–50%</li>
+        <li><strong>Testimoni</strong> — 3 testimoni ortu dengan nama, usia anak, dan foto (dengan izin)</li>
+        <li><strong>FAQ &amp; Kebijakan</strong> — COD area mana, retur berapa hari, garansi car seat, konsultasi ukuran via WhatsApp</li>
+      </ul>
+      <p>Yang sering dilupakan adalah blok "Filter Usia". Ortu dengan bayi 4 bulan tidak mau scroll 40 produk hanya untuk cari dot usia 4+. Chip kategori usia menghemat 5–10 menit, dan itu yang membedakan katalog profesional dari foto produk acak.</p>
+      <h2>Contoh prompt KARSA untuk katalog perlengkapan bayi</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt ini. Semakin lengkap detail yang kamu berikan, semakin sedikit revisi. Contoh untuk toko bayi lokal di Jakarta:</p>
+      <p><em>"Buat katalog online untuk 'BabySteps Shop Jakarta' oleh Bu Rina, 3 tahun. Hero headline 'Perlengkapan Bayi 0–3 Tahun, COD Jakarta &amp; Bekasi', foto bayi, CTA 'Lihat Katalog'. Section 8 kategori: Stroller, Car Seat, Bouncer, Baju Bayi, Botol &amp; Dot, Mainan Edukatif, MPASI, Tidur. Section Produk Unggulan 6 item termasuk Stroller Cocolatte 3in1 Rp 1,8jt, Car Seat Cocolatte 0–4 tahun Rp 2,2jt, Bouncer Fisher Price Rp 650K, Baju Newborn 5pcs Rp 180K, Set Botol Pigeon 3pcs Rp 220K, Mainan Kayu Rp 95K. Section Filter Usia 5 chip. Section Bundle 3 paket: Newborn Essential Rp 350K, MPASI Starter Rp 175K, Travel Set Rp 4,1jt. Section Testimoni 3 (Bu Laras bayi 8 bulan, Pak Dedi bayi 1 tahun, Bu Sinta bayi 2 tahun). Section FAQ 5 (COD area, retur 7 hari, garansi car seat 1 tahun, konsultasi ukuran via WhatsApp, sertifikat SNI). Footer link WhatsApp + badge SNI + BPOM. Warna pastel pink, biru, putih, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"tambah badge BPOM di kosmetik"</em> atau <em>"ganti bundle jadi 4"</em>. Pola vibecoding ini juga dipakai untuk <a href="/artikel/vibecoding-untuk-umkm">katalog UMKM pada umumnya</a>.</p>
+      <h2>Tips katalog bayi yang tahan uji ortu profesional</h2>
+      <ul>
+        <li><strong>Foto produk, bukan fotostock</strong> — ortu muda percaya foto asli warehouse. Modal Rp 50–150K untuk foto produk dengan latar putih sudah cukup</li>
+        <li><strong>Kelompokkan usia, bukan merek</strong> — 'Baju 6–12 bulan' lebih dicari daripada 'Baju Brand A'. Pengalaman belanja sesuai tahap tumbuh kembang anak</li>
+        <li><strong>Tampilkan sertifikat</strong> — SNI untuk dot, ASTM untuk stroller, BPOM untuk kosmetik. Badge kecil sudah cukup membangun trust</li>
+        <li><strong>Stok real-time</strong> — update manual tiap 1–2 hari. Ortu yang kecewa karena "barang kosong" tidak kembali</li>
+        <li><strong>CTA tanya, bukan beli</strong> — 'Tanya ukuran untuk 8 bulan' lebih sopan daripada 'Beli'. Apalagi untuk produk mahal</li>
+      </ul>
+      <p>Untuk toko yang sudah ramai, tambahkan counter "500+ keluarga dibantu". Angka spesifik lebih dipercaya daripada kata "banyak". Minta izin pelanggan sebelum memajang foto bayi mereka di testimoni.</p>
+      <h2>Kesalahan umum katalog bayi online</h2>
+      <ul>
+        <li><strong>Tanpa filter usia</strong> — ortu scroll 50 produk hanya untuk cari dot. Tambahkan chip usia</li>
+        <li><strong>Tidak ada sertifikat</strong> — tanpa badge SNI/BPOM, ortu ragu. Tambahkan sticker kecil</li>
+        <li><strong>Foto tidak konsisten</strong> — latar beda-beda. Style guide: putih, posisi tengah, 800×800px</li>
+        <li><strong>Harga tidak jelas</strong> — "call for price" bikin ortu kabur. Tampilkan harga atau "mulai dari"</li>
+        <li><strong>Tidak ada kebijakan retur</strong> — untuk produk bayi, ortu wajib tahu cara tukar ukuran</li>
+        <li><strong>Tidak mobile preview</strong> — 80% ortu buka dari HP. Cek viewport kecil</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah iterasi. Katalog yang di-update tiap 2–4 minggu dengan produk baru, bundle musiman, dan testimoni biasanya stabil di conversion 4–7%. Buat versi 2 setelah 60 hari: tambah "Paket Hadiah Baby Shower", atau video unboxing singkat.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail tokomu, lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk variasi katalog lain, bandingkan dengan <a href="/artikel/katalog-kerajinan-tangan">panduan katalog kerajinan tangan</a> agar kamu tahu perbedaan struktur saat menjual karya handmade vs produk bayi. Setelah publish, link permanen bisa kamu tempel di bio Instagram, broadcast WhatsApp, dan linktree — biar satu etalase digital bekerja menjelaskan produkmu 24 jam, sementara kamu fokus packing pesanan.</p>`,
+  'website-toko-oleh-oleh': `
+      <p>Toko oleh-oleh di Bandung, Semarang, Yogyakarta, Bali, atau kota wisata lain biasanya mengandalkan etalase kaca di pinggir jalan dan testimoni mulut ke mulut dari traveler. Saat musim liburan rame, antrian panjang; saat sepi, showroom kosong. Pelancong zaman sekarang browsing dulu sebelum jalan, dan mereka cari kepastian: produk apa, harga berapa, bisa kirim ke Jakarta atau tidak. <strong>Website toko oleh-oleh</strong> yang mobile-friendly menjawab semua itu sekaligus — link permanen yang bisa dishare ke grup WhatsApp keluarga, broadcast travel agent, atau rekomendasi di TripAdvisor. Dengan KARSA kamu bisa publish etalase digital lengkap dalam hitungan menit, tanpa sewa developer.</p>
+      <h2>Kenapa toko oleh-oleh perlu website</h2>
+      <p>Etalase fisik bagus untuk impulse buyer yang lewat, tapi tidak untuk traveler yang pulang ke kota asal dan ingin kirim oleh-oleh untuk keluarga satu bulan kemudian. Tanpa link permanen, transaksi itu hilang. Website toko oleh-oleh menjawab tiga kebutuhan spesifik pelancong modern:</p>
+      <ul>
+        <li><strong>Browsing sebelum jalan</strong> — traveler riset daftar produk, harga, dan paket dari rumah. Tanpa website, kamu tidak muncul di pencarian "oleh-oleh Bandung enak"</li>
+        <li><strong>Kirim ke luar kota</strong> — banyak toko kecil tidak bisa kirim karena tidak ada form online. Padahal ongkir ke Jakarta bisa jadi margin tambahan</li>
+        <li><strong>Kepercayaan reseller</strong> — korporat yang kirim parcel ke klien butuh vendor dengan link tetap, bukan cuma akun Instagram</li>
+      </ul>
+      <p>Dengan satu link website, toko oleh-oleh di pinggir jalan bisa melayani pelancong dari Sabang sampai Merauke, plus reseller korporat dari LinkedIn. Pola ini mirip dengan <a href="/artikel/katalog-menu-restoran-online">katalog menu restoran online</a> yang juga mengandalkan link permanen untuk pelanggan yang tidak sempat mampir langsung.</p>
+      <h2>Struktur website toko oleh-oleh yang bikin traveler percaya</h2>
+      <p>Cukup 7 blok terbukti bekerja untuk toko oleh-oleh UMKM di Indonesia:</p>
+      <ul>
+        <li><strong>Hero</strong> — headline ciri khas daerah (mis. "Oleh-Oleh Khas Bandung Sejak 1998, Kirim Se-Indonesia"), foto etalase, CTA "Lihat Katalog"</li>
+        <li><strong>Best Seller</strong> — 6 produk terlaris dengan foto, harga, label "Best Seller"</li>
+        <li><strong>Kategori</strong> — box-grid 6–8: Makanan Kering, Kue Basah, Keripik, Sambal, Parcel, Minuman, Snack Import, Kerajinan</li>
+        <li><strong>Paket &amp; Parcel</strong> — paket hemat, parcel kantor, parcel hari raya. Margin paket biasanya lebih tinggi 20–30%</li>
+        <li><strong>Kirim ke Luar Kota</strong> — ekspedisi (JNE, J&amp;T, Paxel), ongkir estimasi, packing kayu untuk makanan</li>
+        <li><strong>Cerita Toko</strong> — kapan buka, kenapa khas, foto owner, plus sertifikasi (halal, BPOM, P-IRT)</li>
+        <li><strong>Testimoni &amp; FAQ</strong> — 3 testimoni pelancong (kota asal, produk), plus 5 FAQ (tahan berapa lama, retur, custom parcel, COD, gift wrapping)</li>
+      </ul>
+      <p>Blok "Kirim ke Luar Kota" sering dilupakan toko kecil. Padahal traveler dari Jakarta atau Surabaya enggan beli oleh-oleh yang tidak bisa dikirim. Tampilkan info ekspedisi + packing kayu agar trust naik 2–3x.</p>
+      <h2>Contoh prompt KARSA untuk website toko oleh-oleh</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt di bawah ini. Contoh untuk toko oleh-oleh di Bandung:</p>
+      <p><em>"Buat website toko oleh-oleh untuk 'Toko Acih Bandung' oleh Pak Asep, sejak 1998, di Jalan Asia Afrika 100. Hero headline 'Oleh-Oleh Khas Bandung Sejak 1998, Kirim Se-Indonesia', foto etalase toko, CTA 'Lihat Katalog'. Section Best Seller 6 item: Brownies Kukus Tiramisu Rp 85K, Batagor Frozen 10pcs Rp 65K, Keripik Tempe 250gr Rp 35K, Sambal Cibiuk Botol Rp 45K, Peuyeum Bandung 6pcs Rp 50K, Dodol Garut 500gr Rp 75K. Section Kategori 8. Section Paket &amp; Parcel 4 paket: Parcel A Rp 250K, Parcel B Rp 350K (premium box), Parcel Kantor Rp 450K (10 orang), Parcel Hari Raya Rp 550K. Section Kirim ke Luar Kota: JNE/J&amp;T/Paxel, packing kayu Rp 25K, estimasi 2–4 hari, COD Bandung. Section Cerita Toko: 3 paragraf (sejak 1998, resep turun temurun). Section Testimoni 3 (Bpk Hendra Jakarta, Ibu Lina Surabaya, Tour Leader Malaysia). Section FAQ 5 (tahan 3 hari suhu ruang, 2 minggu kulkas, retur 1 hari rusak, custom parcel 50pcs min, gift wrapping Rp 15K). Footer WhatsApp + IG + badge Halal + BPOM. Warna merah maroon dan krem, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"tambah section parcel Natal"</em> atau <em>"ganti foto hero jadi owner"</em>. Pola vibecoding seperti ini juga berlaku untuk <a href="/artikel/katalog-kerajinan-tangan">katalog kerajinan tangan</a> yang fokus pada cerita produk handmade.</p>
+      <h2>Tips website toko oleh-oleh yang tahan uji pelancong</h2>
+      <ul>
+        <li><strong>Foto asli produk</strong> — traveler percaya foto keranjang parcel asli lebih dari foto Pinterest. Modal Rp 50–100K foto produk dengan cahaya natural sudah cukup</li>
+        <li><strong>Tampilkan label halal &amp; BPOM</strong> — untuk makanan, badge kecil sudah cukup membangun trust</li>
+        <li><strong>Harga jujur</strong> — tampilkan "mulai dari Rp 35K" atau harga tetap. Traveler dari luar kota malas tawar</li>
+        <li><strong>Paket parcel lengkap</strong> — parcel 5–10 item meningkatkan rata-rata transaksi 30–50% daripada beli satuan</li>
+        <li><strong>Update stok musiman</strong> — saat Lebaran, parcel ludes. Tampilkan "Pre-order 7 hari" bila stok terbatas</li>
+      </ul>
+      <p>Untuk toko yang sudah ramai, tambahkan counter "20.000+ pelancong dilayani" atau logo travel agent yang pernah order. Angka spesifik lebih dipercaya daripada klaim "banyak pelanggan".</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail tokomu (nama, produk, parcel, ekspedisi), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk variasi UMKM kuliner lain, bandingkan dengan <a href="/artikel/katalog-menu-restoran-online">panduan katalog menu restoran online</a> agar kamu tahu perbedaan struktur saat menjual menu harian vs oleh-oleh tahan lama. Setelah publish, link permanen bisa kamu tempel di bio Instagram, Google Maps, dan banner toko fisik — biar satu etalase digital melayani pelancong 24 jam, sementara kamu fokus produksi dan packing parcel.</p>`,
 };
