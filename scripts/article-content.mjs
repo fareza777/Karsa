@@ -883,4 +883,50 @@ export const ARTICLE_BODY = {
       <p>Untuk toko yang sudah ramai, tambahkan counter "20.000+ pelancong dilayani" atau logo travel agent yang pernah order. Angka spesifik lebih dipercaya daripada klaim "banyak pelanggan".</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail tokomu (nama, produk, parcel, ekspedisi), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk variasi UMKM kuliner lain, bandingkan dengan <a href="/artikel/katalog-menu-restoran-online">panduan katalog menu restoran online</a> agar kamu tahu perbedaan struktur saat menjual menu harian vs oleh-oleh tahan lama. Setelah publish, link permanen bisa kamu tempel di bio Instagram, Google Maps, dan banner toko fisik — biar satu etalase digital melayani pelancong 24 jam, sementara kamu fokus produksi dan packing parcel.</p>`,
+  'website-laundry-sepatu': `
+      <p>Bisnis laundry sepatu dan sneaker care di Indonesia tumbuh pesat — dari Clean My Shoes, Sneakers Point, sampai ratusan UMKM rumahan yang layani antar-jemput. Sebagian besar masih rely pada Instagram, WhatsApp, dan Google Maps. Saat orderan rame, chat numpuk; saat sepi, pelanggan tidak bisa cek status cucian. <strong>Website laundry sepatu</strong> yang mobile-friendly menjawab semua itu sekaligus: etalase layanan, tarif per jenis, form serah terima, dan tombol WhatsApp — publish dalam hitungan menit dengan KARSA, tanpa sewa developer.</p>
+      <h2>Kenapa laundry sepatu perlu website</h2>
+      <p>Pelanggan sneaker care punya tiga pertanyaan sebelum order: "bisa cuci apa?", "berapa biayanya?", "berapa hari jadi?". Tanpa link permanen, mereka harus chat dulu — dan banyak yang akhirnya batal karena malas nunggu balesan. Website menjawab itu dalam 5 detik, plus:</p>
+      <ul>
+        <li><strong>tracking status cucian</strong> — pelanggan tinggal buka link, lihat "siap diambil" tanpa harus chat</li>
+        <li><strong>form serah terima</strong> — kurir antar-jemput punya data pelanggan, alamat, dan jenis sepatu sebelum dijemput</li>
+        <li><strong>testimoni before-after</strong> — foto hasil cuci lebih dipercaya daripada caption testimoni</li>
+      </ul>
+      <p>Dengan satu link, bisnis rumahan di gang kecil bisa melayani pelanggan se-kota via ojol, plus reseller sepatu preloved. Pola ini mirip dengan <a href="/artikel/form-booking-online-umkm">form booking online UMKM</a> yang juga mengandalkan link permanen untuk pelanggan yang tidak sempat datang.</p>
+      <h2>Struktur website laundry sepatu yang bikin customer order</h2>
+      <p>Cukup 7 blok terbukti bekerja untuk bisnis sneaker care UMKM di Indonesia:</p>
+      <ul>
+        <li><strong>Hero</strong> — headline jelas (mis. "Cuci Sepatu Premium, Same Day Service, Jemput Jabodetabek"), foto before-after, CTA "Cek Tarif"</li>
+        <li><strong>Layanan</strong> — box-grid 6–8: Fast Clean, Deep Clean, Whitening, Unyellowing, Reparasi Sol, Repaint, Treatment Kulit, Anti Bacterial</li>
+        <li><strong>Tarif per Jenis</strong> — tabel atau card Sneakers (Rp 35–55K), Kanvas (Rp 25–40K), Boots (Rp 60–90K), Suede (Rp 50–75K), Leather (Rp 70–120K)</li>
+        <li><strong>Tracking Status</strong> — input nomor order, tampilkan "Diterima / Dicuci / Dijemur / QC / Siap Diambil" — bahkan bisa statis manual tiap pagi</li>
+        <li><strong>Form Serah Terima</strong> — nama, WhatsApp, alamat jemput, jenis sepatu, jumlah, foto kondisi awal, jadwal jemput</li>
+        <li><strong>Before-After Gallery</strong> — 6–8 foto, kelompokkan Sneakers vs Kanvas vs Boots. Pola ini sama dengan <a href="/artikel/landing-page-jasa-freelance">landing page jasa</a> yang fokus pada bukti kerja</li>
+        <li><strong>FAQ &amp; Kebijakan</strong> — 5 FAQ (estimasi selesai, garansi noda balik, cara pembayaran, antar-jemput area mana, retur jika sepatu rusak)</li>
+      </ul>
+      <p>Blok "Tarif per Jenis" sering dilupakan bisnis kecil. Pelanggan malas chat hanya untuk tanya harga. Tampilkan harga dari Rp 25K sudah cukup untuk filter 50% pertanyaan. Diskon berlaku untuk paket 3 pasang atau lebih.</p>
+      <h2>Contoh prompt KARSA untuk website laundry sepatu</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt di bawah ini. Semakin lengkap detail yang kamu berikan, semakin sedikit revisi. Contoh untuk bisnis laundry sepatu di Jakarta:</p>
+      <p><em>"Buat website laundry sepatu untuk 'SneakerClean Jakarta' oleh Bang Dika, 4 tahun. Hero headline 'Cuci Sepatu Premium, Same Day Service, Jemput Jabodetabek', foto before-after sneakers putih, CTA 'Cek Tarif'. Section Layanan 8: Fast Clean, Deep Clean, Whitening, Unyellowing, Reparasi Sol, Repaint, Treatment Kulit, Anti Bacterial. Section Tarif per Jenis 5: Sneakers Rp 35–55K, Kanvas Rp 25–40K, Boots Rp 60–90K, Suede Rp 50–75K, Leather Rp 70–120K. Section Tracking Status: input nomor order, tampilkan 5 status. Section Form Serah Terima 7 field (nama, WhatsApp, alamat, jenis sepatu, jumlah, foto, jadwal). Section Before-After Gallery 6 foto. Section FAQ 5 (same day 6 jam, garansi noda balik 7 hari, transfer &amp; e-wallet, antar-jemput 10km, retur 1x24 jam). Footer WhatsApp + IG + testimoni 3. Warna hitam, putih, kuning neon, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"tambah paket hemat 3 pasang Rp 120K"</em> atau <em>"ganti foto hero jadi before-after kanvas"</em>. Pola vibecoding seperti ini juga berlaku untuk <a href="/artikel/katalog-menu-restoran-online">katalog UMKM kuliner</a> yang fokus pada etalase produk.</p>
+      <h2>Tips website laundry sepatu yang bikin pelanggan balik</h2>
+      <ul>
+        <li><strong>Foto before-after asli</strong> — pelanggan percaya foto nyata daripada stock photo. Modal Rp 0 karena HP sudah cukup</li>
+        <li><strong>Tampilkan estimasi waktu</strong> — same day, 2 hari, atau 5 hari. Pelanggan lebih tenang saat tau deadline</li>
+        <li><strong>Update tracking tiap pagi</strong> — 30 detik via spreadsheet yang di-screenshot. Bisa otomatis via Google Sheets embed</li>
+        <li><strong>Paket hemat</strong> — diskon 15–20% untuk 3 pasang. Rata-rata transaksi naik 40%</li>
+        <li><strong>Highlight sertifikasi</strong> — chemical-safe, hypoallergenic, atau brand produk yang dipakai (mis. Jason Markk, Kiwi)</li>
+      </ul>
+      <p>Untuk bisnis yang sudah ramai, tambahkan counter "5.000+ sepatu dicuci" atau "4.8 rating Google". Angka spesifik lebih dipercaya daripada klaim umum. Minta izin sebelum memajang foto sepatu branded pelanggan.</p>
+      <h2>Kesalahan umum laundry sepatu online</h2>
+      <ul>
+        <li><strong>Tanpa tarif</strong> — pelanggan kabur karena tidak tau harga. Tampilkan minimal range</li>
+        <li><strong>Tidak ada tracking</strong> — pelanggan chat tiap hari "udah jadi?". Tambahkan status sederhana</li>
+        <li><strong>Foto tidak konsisten</strong> — before-after angle beda. Style guide: angle 45°, cahaya natural, latar putih</li>
+        <li><strong>Form terlalu panjang</strong> — 7 field cukup. Lebih dari itu, pelanggan batal</li>
+        <li><strong>Tidak mobile preview</strong> — 80% pelanggan sneakers buka dari HP. Cek viewport kecil</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah iterasi. Website yang di-update tiap 2–4 minggu dengan foto before-after baru, promo musiman, dan testimoni biasanya stabil di conversion 5–8%. Versi 2 setelah 60 hari: tambah "pick-up gratis 5km" atau membership Rp 150K untuk 4 pasang.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail bisnismu (nama, tarif, area jemput, foto), lalu lihat preview dalam satu menit. Paket gratis termasuk 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Untuk variasi jasa UMKM lain, bandingkan dengan <a href="/artikel/form-booking-online-umkm">panduan form booking online UMKM</a> agar kamu tahu perbedaan struktur saat pelanggan booking jadwal vs memesan layanan. Setelah publish, link permanen bisa kamu tempel di bio Instagram, Google Maps, dan kartu nama — biar satu etalase digital bekerja menjelaskan layananmu 24 jam, sementara kamu fokus cuci dan antar-jemput pesanan.</p>`,
 };

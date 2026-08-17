@@ -32,6 +32,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-jasa-konsultan',
   '/artikel/katalog-perlengkapan-bayi',
   '/artikel/website-toko-oleh-oleh',
+  '/artikel/website-laundry-sepatu',
 ];
 
 /** @type {string[]} */
@@ -679,6 +680,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/website-laundry-sepatu': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Laundry Sepatu dengan AI — KARSA',
+    description:
+      'Panduan bikin website laundry sepatu: layanan, harga per jenis, cek status cucian, form serah terima, dan tombol WhatsApp. Contoh prompt KARSA UMKM Indonesia.',
+    canonical: `${SITE}/artikel/website-laundry-sepatu`,
+    keywords:
+      'website laundry sepatu, laundry sepatu online, cuci sepatu UMKM, website jasa laundry, website sneaker care, KARSA UMKM',
+    headline: 'Website laundry sepatu: dari antrian chat jadi link booking yang rapi',
+    cardTitle: 'Website laundry sepatu',
+    cardExcerpt: 'Layanan, harga per jenis, status cucian, dan form booking — link permanen untuk bisnis sneaker care.',
+    ogTitle: 'Website Laundry Sepatu dengan AI',
+    ogDescription:
+      'Bikin website laundry sepatu lengkap: layanan, tarif, tracking status, dan tombol booking WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-laundry-sepatu.png`,
+    ogImageAlt: 'Panduan bikin website laundry sepatu dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-08-17',
+    dateModified: '2026-08-17',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -828,6 +850,11 @@ export const RELATED_ARTICLES = {
     '/artikel/katalog-produk-online-umkm',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/katalog-kerajinan-tangan',
+  ],
+  '/artikel/website-laundry-sepatu': [
+    '/artikel/form-booking-online-umkm',
+    '/artikel/landing-page-jasa-freelance',
+    '/artikel/katalog-menu-restoran-online',
   ],
 };
 

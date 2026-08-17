@@ -43,6 +43,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Website jasa konsultan: tampilkan keahlian, jadwal, dan cara booking dalam satu halaman](https://karsa.work/artikel/website-jasa-konsultan): Panduan bikin website jasa konsultan profesional: layanan, keahlian, jam konsultasi, CTA booking, dan contoh prompt KARSA bahasa Indonesia untuk UMKM.
 - [Katalog perlengkapan bayi online: dari kiriman chat jadi etalase yang tenang dilihat orang tua](https://karsa.work/artikel/katalog-perlengkapan-bayi): Panduan bikin katalog perlengkapan bayi online untuk UMKM: kategori produk, foto, harga, stok, dan tombol chat WhatsApp. Contoh prompt KARSA bahasa Indonesia.
 - [Website toko oleh-oleh: dari etalase etalase jadi link permanen untuk pelancong](https://karsa.work/artikel/website-toko-oleh-oleh): Panduan bikin website toko oleh-oleh khas daerah: etalase produk, kategori, harga, dan tombol pesan via WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.
+- [Website laundry sepatu: dari antrian chat jadi link booking yang rapi](https://karsa.work/artikel/website-laundry-sepatu): Panduan bikin website laundry sepatu: layanan, harga per jenis, cek status cucian, form serah terima, dan tombol WhatsApp. Contoh prompt KARSA UMKM Indonesia.
 
 ## Kontak
 
