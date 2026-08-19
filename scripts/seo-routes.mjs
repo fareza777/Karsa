@@ -33,6 +33,7 @@ export const ARTICLE_PATHS = [
   '/artikel/katalog-perlengkapan-bayi',
   '/artikel/website-toko-oleh-oleh',
   '/artikel/website-laundry-sepatu',
+  '/artikel/landing-page-preorder',
 ];
 
 /** @type {string[]} */
@@ -701,6 +702,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/landing-page-preorder': {
+    ogType: 'article',
+    title: 'Cara Bikin Landing Page Preorder dengan AI — KARSA',
+    description:
+      'Panduan landing page preorder UMKM: countdown, slot terbatas, harga early bird, dan tips biar pembeli commit checkout. Contoh prompt KARSA bahasa Indonesia.',
+    canonical: `${SITE}/artikel/landing-page-preorder`,
+    keywords:
+      'landing page preorder, preorder UMKM, countdown preorder, halaman pre-order, tips preorder laris, KARSA',
+    headline: 'Landing page preorder: dari link chat jadi halaman yang bikin orang commit checkout',
+    cardTitle: 'Landing page preorder',
+    cardExcerpt: 'Countdown, slot terbatas, harga early bird, dan form pre-order — link permanen untuk jualan pre-order.',
+    ogTitle: 'Landing Page Preorder dengan AI',
+    ogDescription:
+      'Bikin halaman pre-order yang bikin pembeli komitmen: countdown, slot, harga early bird, dan form rapi dalam hitungan menit.',
+    ogImage: `${SITE}/og/landing-page-preorder.png`,
+    ogImageAlt: 'Panduan bikin landing page preorder dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-08-19',
+    dateModified: '2026-08-19',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -855,6 +877,11 @@ export const RELATED_ARTICLES = {
     '/artikel/form-booking-online-umkm',
     '/artikel/landing-page-jasa-freelance',
     '/artikel/katalog-menu-restoran-online',
+  ],
+  '/artikel/landing-page-preorder': [
+    '/artikel/landing-page-event',
+    '/artikel/landing-page-produk-digital',
+    '/artikel/prompt-landing-page-konversi',
   ],
 };
 

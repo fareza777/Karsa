@@ -929,4 +929,54 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah publish adalah iterasi. Website yang di-update tiap 2–4 minggu dengan foto before-after baru, promo musiman, dan testimoni biasanya stabil di conversion 5–8%. Versi 2 setelah 60 hari: tambah "pick-up gratis 5km" atau membership Rp 150K untuk 4 pasang.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt, ganti detail bisnismu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari, cukup untuk eksplorasi tanpa keluar biaya. Bandingkan dengan <a href="/artikel/form-booking-online-umkm">panduan form booking UMKM</a> untuk bedanya booking jadwal vs pesan layanan. Setelah publish, link permanen bisa kamu tempel di bio Instagram, Google Maps, dan kartu nama — biar satu etalase digital menjelaskan layananmu 24 jam, sementara kamu fokus cuci dan antar-jemput pesanan.</p>`,
+  'landing-page-preorder': `
+      <p>Pre-order selalu jadi cara jualan favorit saat produk belum ready: drops fashion, parcel Lebaran, bundling kopi spesial harvest, stok awal sneakers, sampai kursus online dengan peserta terbatas. Masalahnya, link chat WhatsApp sering hilang di antara broadcast dan DM lain. Pembeli niat checkout mundur karena ragu. <strong>Landing page preorder</strong> yang mobile-friendly mengubah niat itu jadi transaksi — countdown, slot tersisa, harga early bird, dan form pre-order rapi di satu halaman.</p>
+      <h2>Kapan UMKM butuh landing page preorder</h2>
+      <p>Kamu butuh landing page khusus saat produk belum ready dan mau commit jumlah produksi dari transaksi yang masuk lebih dulu. Paling sering dipakai:</p>
+      <ul>
+        <li><strong>Drops fashion</strong> — thrift, hijab, sneakers lokal, dengan slot terbatas per warna atau size</li>
+        <li><strong>Parcel musiman</strong> — Lebaran, Natal, Imlek, parcel korporat untuk klien perusahaan</li>
+        <li><strong>Produk digital batch</strong> — ebook update, template Notion baru, membership batch terbatas</li>
+        <li><strong>Pre-launch brand baru</strong> — founder mau cek demand sebelum produksi massal</li>
+        <li><strong>Event dan workshop</strong> — gelombang 1, 2, 3 dengan harga yang naik per gelombang</li>
+      </ul>
+      <p>Logika utamanya sama: pembeli commit lebih dulu, kamu produksi sesuai jumlah. Karena itu halaman harus menunjukkan scarcity (slot, deadline) dan trust (foto, testimoni) sekaligus. Tanpa keduanya, pre-order terasa gimmicky.</p>
+      <h2>Struktur landing page preorder yang bikin orang checkout</h2>
+      <p>Dari ratusan halaman pre-order UMKM yang convert di atas 5%, ada tujuh blok yang selalu muncul. Susun dalam urutan ini:</p>
+      <ul>
+        <li><strong>Hero + Countdown</strong> — headline benefit, foto produk, dan timer mundur ke deadline. Countdown di JavaScript sederhana</li>
+        <li><strong>Slot Counter</strong> — "tersisa 23 dari 100 slot", update real-time. Bikin orang takut kehabisan</li>
+        <li><strong>Harga &amp; Tier</strong> — early bird, reguler, dan bundle. Tampilkan harga coret kalau ada diskon</li>
+        <li><strong>Benefit &amp; What's Included</strong> — apa yang dapat, kapan dikirim, garansi, bonus kecil</li>
+        <li><strong>Trust Block</strong> — testimoni 3–5 orang, logo media yang meliput, atau jumlah follower</li>
+        <li><strong>Form Pre-order</strong> — nama, WhatsApp, alamat, varian, jumlah, dan catatan. Kirim ke WhatsApp owner</li>
+        <li><strong>FAQ &amp; Kebijakan</strong> — 5–7 pertanyaan: kapan dikirim, bagaimana jika batal, ongkir, retur</li>
+      </ul>
+      <p>Bagian countdown wajib mobile-friendly karena 80% traffic pre-order datang dari story IG. Timer yang tidak jelas di HP bikin orang scroll lewat. Paket gratis KARSA cukup untuk versi pertama; paket Pro menghapus watermark dan menambah AI prompt tanpa batas untuk iterasi.</p>
+      <h2>Contoh prompt KARSA untuk landing page preorder</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt berikut. Contoh untuk drops hijab dengan slot terbatas:</p>
+      <p><em>"Buat landing page pre-order hijab brand 'Luma Scarf' oleh Mbak Sari, Jakarta. Hero headline 'Drops 3: 5 Motif Eksklusif, Slot 100 Pembeli'. Foto model hijab warna sage, terracotta, lilac. Countdown timer mundur ke 20 Juni 2026 jam 23.59 WIB. Slot counter '67 / 100 terisi', update dari form submission. Section Harga 3 tier: Early Bird Rp 175K (50 slot), Reguler Rp 210K (35 slot), Bundle 3 pcs Rp 550K (15 slot). Tabel benefit early bird: free ongkir, bonus pouch, akses VIP grup WhatsApp. Section Trust: 4 testimoni pembeli sebelumnya, 12K follower IG, liputan di 3 media. Form Pre-order 7 field: nama, WhatsApp, alamat, pilih motif (dropdown 5), pilih tier (3 radio), jumlah (1–3), catatan. Kirim ke WhatsApp 0812xxx. Section FAQ 7: kapan dikirim (15 Juni), retur (7 hari), ongkir (Rp 15K), batal (uang kembali 100% sampai 5 hari), kualitas (sudah 3 batch), tracking (link WhatsApp). Footer WhatsApp + IG + e-mail. Warna cream, sage, terracotta, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"tambah popup konfirmasi setelah form submit"</em> atau <em>"ganti foto hero jadi shot flat-lay 5 motif"</em>. Pola vibecoding ini juga berlaku untuk <a href="/artikel/landing-page-event">landing page event</a> dan <a href="/artikel/landing-page-produk-digital">landing page produk digital</a>.</p>
+      <h2>Tips landing page preorder yang benar-benar convert</h2>
+      <ul>
+        <li><strong>Countdown harus asli</strong> — timer mundur ke deadline produksi yang sebenarnya. Timer palsu bikin audiens kabur</li>
+        <li><strong>Slot counter update</strong> — manual tiap 10 order dari spreadsheet, atau integrasi Google Sheets</li>
+        <li><strong>Harga early bird 15–25% lebih murah</strong> — beda tipis tidak cukup</li>
+        <li><strong>Foto produk pakai flat-lay atau model</strong> — angle konsistensi membangun trust. HP cukup, asal cahaya natural dan latar bersih</li>
+        <li><strong>Form 7 field maksimal</strong> — lebih dari itu, completion rate turun drastis. Sisanya bisa kamu follow-up via WhatsApp</li>
+        <li><strong>Tampilkan sosial proof</strong> — screenshoot testimoni, jumlah follower, atau jumlah drops sebelumnya. Bukti lebih kuat dari klaim</li>
+      </ul>
+      <p>Untuk drops yang sudah punya audiens, tambahkan blok "Bonus untuk 50 pembeli pertama" seperti e-book gratis atau akses VIP. Untuk parcel musiman, FAQ wajib detail soal ongkir dan retur.</p>
+      <h2>Kesalahan umum landing page preorder UMKM</h2>
+      <ul>
+        <li><strong>Tanpa countdown</strong> — pembeli tidak merasa urgensi. Slot terbatas tanpa timer biasanya kurang convert 50%</li>
+        <li><strong>Harga tidak jelas</strong> — tampilkan harga satuan dan bundle. Kalau ada ongkir terpisah, tulis eksplisit</li>
+        <li><strong>Form input alamat tidak perlu</strong> — untuk produk digital cukup e-mail + WhatsApp. Untuk barang fisik tetap perlu alamat</li>
+        <li><strong>Tidak mobile preview</strong> — 80% traffic dari HP. Cek viewport 360px (layar terkecil) sebelum publish</li>
+        <li><strong>Tanpa kebijakan refund</strong> — pre-order yang tidak jelas refund-nya bikin ragu. Tulis 1–2 kalimat saja</li>
+        <li><strong>CTA lemah</strong> — "Klik di sini" tidak cukup. Pakai "Pesan Slot Sekarang — Rp 175K" dengan tombol warna kontras</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah iterasi berdasarkan chat masuk. Versi 2 setelah 30 hari biasanya naik conversion 20–40% hanya karena menjawab keraguan yang muncul di DM.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail drops-mu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/landing-page-produk-digital">panduan landing page produk digital</a> untuk perbedaan saat menjual ebook atau membership. Setelah publish, tempel link di bio IG dan story — biar satu halaman menjelaskan produk, harga, dan countdown 24 jam.</p>`,
 };
