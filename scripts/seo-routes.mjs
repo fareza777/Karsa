@@ -34,6 +34,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-toko-oleh-oleh',
   '/artikel/website-laundry-sepatu',
   '/artikel/landing-page-preorder',
+  '/artikel/katalog-furniture-minimalis',
 ];
 
 /** @type {string[]} */
@@ -723,6 +724,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/katalog-furniture-minimalis': {
+    ogType: 'article',
+    title: 'Cara Bikin Katalog Furniture Minimalis Online dengan AI — KARSA',
+    description:
+      'Panduan bikin katalog furniture minimalis online untuk UMKM: foto produk, dimensi, material, harga, dan tombol pesan WhatsApp. Contoh prompt KARSA bahasa Indonesia.',
+    canonical: `${SITE}/artikel/katalog-furniture-minimalis`,
+    keywords:
+      'katalog furniture online, katalog furniture minimalis, jual furniture UMKM, katalog mebel online, etalase furniture, KARSA furniture',
+    headline: 'Katalog furniture minimalis online: dari showroom kota jadi etalase yang dicari Google',
+    cardTitle: 'Katalog furniture minimalis online',
+    cardExcerpt: 'Foto produk, dimensi, material, harga, dan tombol WhatsApp — link permanen untuk UMKM mebel.',
+    ogTitle: 'Katalog Furniture Minimalis Online dengan AI',
+    ogDescription:
+      'Bikin katalog furniture lengkap: foto, dimensi, material, harga, dan tombol pesan WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/katalog-furniture-minimalis.png`,
+    ogImageAlt: 'Panduan bikin katalog furniture minimalis online untuk UMKM dengan KARSA',
+    datePublished: '2026-08-21',
+    dateModified: '2026-08-21',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -882,6 +904,11 @@ export const RELATED_ARTICLES = {
     '/artikel/landing-page-event',
     '/artikel/landing-page-produk-digital',
     '/artikel/prompt-landing-page-konversi',
+  ],
+  '/artikel/katalog-furniture-minimalis': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
   ],
 };
 

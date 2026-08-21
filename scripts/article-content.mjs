@@ -979,4 +979,46 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah publish adalah iterasi berdasarkan chat masuk. Versi 2 setelah 30 hari biasanya naik conversion 20–40% hanya karena menjawab keraguan yang muncul di DM.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail drops-mu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/landing-page-produk-digital">panduan landing page produk digital</a> untuk perbedaan saat menjual ebook atau membership. Setelah publish, tempel link di bio IG dan story — biar satu halaman menjelaskan produk, harga, dan countdown 24 jam.</p>`,
+  'katalog-furniture-minimalis': `
+      <p>Showroom di kota besar menyewa mahal, catalog PDF dikirim via WhatsApp sering bingung saat pelanggan forward ke teman, dan foto produk tercecer di galeri HP. Katalog furniture minimalis online yang mobile-friendly memecahkan semuanya: satu link permanen yang bisa dibuka arsitek, desainer interior, maupun pelanggan rumahan dari HP mereka. Pelanggan tinggal scroll, klik produk yang mirip gaya, lalu chat WhatsApp untuk detail harga dan ongkir.</p>
+      <h2>Elemen wajib di katalog furniture online</h2>
+      <p>Katalog furniture bukan sekadar galeri foto. Pelanggan butuh informasi agar tidak balik nanya hal yang sama lewat chat. Blok yang selalu muncul di katalog yang closing:</p>
+      <ul>
+        <li><strong>Foto produk</strong> — minimal 3 angle: tampak depan, sudut 45°, dan detail sambungan atau finishing</li>
+        <li><strong>Nama dan kategori</strong> — lemari, meja, rak, sofa, kursi. Pakai istilah yang umum dicari Google</li>
+        <li><strong>Dimensi</strong> — panjang, lebar, tinggi dalam cm. Pelanggan tidak akan beli tanpa angka ini</li>
+        <li><strong>Material</strong> — kayu jati solid, plywood finishing HPL, besi hollow powder coating, rotan sintetis</li>
+        <li><strong>Harga</strong> — tampilkan eksplisit atau rentang "mulai Rp 2,4 juta". Tersembunyi = bounce</li>
+        <li><strong>Warna finishing</strong> — natural, walnut, black, whitewash. Pakai swatch kalau bisa</li>
+        <li><strong>Tombol WhatsApp</strong> — floating button ke nomor owner dengan pesan otomatis berisi nama produk</li>
+      </ul>
+      <p>Yang membedakan katalog profesional dari sekadar galeri foto adalah detail teknis. Pelanggan furniture butuh kepastian: muat di ruang tamu ukuran 3x4 meter, muat di pintu lift, tahan Rayap atau tidak, dan berapa lama garansi. Semakin lengkap sebelum klik WhatsApp, semakin sedikit round-trip chat.</p>
+      <h2>Contoh prompt KARSA untuk katalog furniture</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt berikut. Contoh untuk UMKM mebel minimalis di Jepara:</p>
+      <p><em>"Buat katalog furniture minimalis online untuk 'Studio Mebel Jati — Bu Lastri' di Jepara. Hero 'Furniture Jati Solid untuk Rumah Modern'. Grid 12 produk: Rak Dinding Jati 60cm Rp 850K, Meja Tamu Jati Bulat 80cm Rp 1,8 juta, Lemari Piring Jati 3 pintu Rp 3,4 juta, Kursi Jati Sandaran Lengkung Rp 1,2 juta, Nakas Jati 2 laci Rp 950K, Bufet Jati 4 laci Rp 2,8 juta, Meja Makan Jati 6 Kursi Rp 6,5 juta, Rak Buku Jati 5 susun Rp 2,1 juta, Tempat Tidur Jati Queen Rp 4,8 juta, Lemari Pakaian Jati 3 pintu Rp 5,2 juta, Bangku Teras Jati 120cm Rp 1,4 juta, Set Meja Kerja Jati Rp 1,9 juta. Tiap kartu: foto, nama, dimensi, material, harga, tombol WhatsApp ke 0812xxx dengan pesan otomatis nama produk. Section Tentang: bu Lastri 15 tahun pengrajin jati Jepara, garansi 2 tahun, kirim seluruh Indonesia via cargo. Section FAQ 6: cara pesan, ongkir, retur, custom ukuran, waktu produksi, kayu bersertifikat. Filter sidebar: kategori (rak/meja/kursi/lemari), rentang harga (di bawah 1 juta / 1-3 juta / 3-5 juta / di atas 5 juta), material (jati/plywood/besi). Warna cream, kayu, hitam, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi per bagian: <em>"tambah lightbox foto klik jadi besar"</em> atau <em>"tambah badge 'Best Seller' di 3 produk terlaris"</em>. Pola vibecoding ini berlaku juga untuk <a href="/artikel/katalog-produk-online-umkm">katalog produk UMKM</a> lain seperti kerajinan tangan dan thrift.</p>
+      <h2>Tips katalog furniture yang benar-benar closing</h2>
+      <ul>
+        <li><strong>Foto background putih atau kayu netral</strong> — warna ramai bikin produk kecil dan tidak kelihatan detail</li>
+        <li><strong>Tulis dimensi di kartu, bukan hanya di spec sheet</strong> — pelanggan malas buka dua halaman</li>
+        <li><strong>Tampilkan harga eksplisit</strong> — furniture yang harganya "call for price" convert 60% lebih rendah</li>
+        <li><strong>Pakai nama produk yang searchable</strong> — "Meja Tamu Jati Bulat 80cm" lebih baik dari "MD-12"</li>
+        <li><strong>Sertakan foto di ruangan nyata</strong> — staging di ruang tamu atau kamar bantu pelanggan membayangkan</li>
+        <li><strong>Filter wajib</strong> — katalog di atas 15 produk tanpa filter bikin orang scroll terlalu lama</li>
+        <li><strong>WhatsApp link pakai pesan otomatis</strong> — <code>https://wa.me/62812xxx?text=Halo%20Bu%20Lastri%2C%20saya%20tertarik%20Meja%20Tamu%20Jati%20Bulat%2080cm</code></li>
+      </ul>
+      <p>Untuk UMKM yang melayani interior designer atau kontraktor, tambahkan section "Proyek Kami" dengan foto before-after dan testimoni klien. Untuk ritel rumahan, fokus ke foto staging yang hangat dan harga eksplisit. Versi 2 setelah 60 hari biasanya punya konversi 2x lipat hanya karena menulis harga eksplisit dan dimensi lengkap.</p>
+      <h2>Kesalahan umum katalog furniture UMKM</h2>
+      <ul>
+        <li><strong>Foto produk tanpa konteks</strong> — katalog terasa seperti selembar foto produk, bukan toko. Tambah staging di ruangan</li>
+        <li><strong>Tidak ada dimensi</strong> — pelanggan furniture selalu tanya ukuran dulu. Tanpa dimensi, mereka pergi</li>
+        <li><strong>Harga tersembunyi</strong> — "hubungi untuk harga" bikin bounce. Tulis rentang minimal</li>
+        <li><strong>Tombol WhatsApp tidak ada</strong> — katalog tanpa CTA utama = etalase tanpa kasir</li>
+        <li><strong>Desain terlalu ramai</strong> — furniture minimalis butuh latar bersih. Hindari gradient dan banner besar</li>
+        <li><strong>Tidak SEO-friendly</strong> — page title dan meta description harus berisi kata kunci "katalog furniture online"</li>
+        <li><strong>Tanpa kebijakan ongkir</strong> — furniture besar butuh info cargo dan estimasi biaya. Tulis eksplisit</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah kecepatan memuat. Furniture katalog yang loading 5+ detik di HP 4G biasanya bounce 70%. Pakai foto dikompres ke WebP, ukur dengan PageSpeed, dan compress lagi kalau perlu. Versi mobile-first wajib diuji di viewport 360px.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail furniture kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/seo-website-umkm">panduan SEO website UMKM</a> untuk cara muncul di pencarian, dan <a href="/artikel/vibecoding-untuk-umkm">vibecoding untuk UMKM</a> untuk konteks vibecoding. Setelah publish, link permanen bisa kamu tempel di bio Instagram, Google Maps showroom, dan kartu nama — biar satu etalase digital menjelaskan koleksi, harga, dan kontak 24 jam tanpa harus angkat telepon.</p>`,
 };
