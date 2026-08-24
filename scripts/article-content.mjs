@@ -1021,4 +1021,46 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah publish adalah kecepatan memuat. Furniture katalog yang loading 5+ detik di HP 4G biasanya bounce 70%. Pakai foto dikompres ke WebP, ukur dengan PageSpeed, dan compress lagi kalau perlu. Versi mobile-first wajib diuji di viewport 360px.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail furniture kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/seo-website-umkm">panduan SEO website UMKM</a> untuk cara muncul di pencarian, dan <a href="/artikel/vibecoding-untuk-umkm">vibecoding untuk UMKM</a> untuk konteks vibecoding. Setelah publish, link permanen bisa kamu tempel di bio Instagram, Google Maps showroom, dan kartu nama — biar satu etalase digital menjelaskan koleksi, harga, dan kontak 24 jam tanpa harus angkat telepon.</p>`,
+  'website-jasa-fotografi': `
+      <p>Fotografer UMKM biasanya mengandalkan Instagram untuk pamer hasil jepretan. Masalahnya, algoritma feed berubah-ubah, story hilang 24 jam, dan klien potensial tidak mudah balik ke postingan enam bulan lalu. Website jasa fotografi adalah etalase permanen: portofolio tersusun rapi, paket layanan jelas, tombol booking selalu ada — dan calon klien yang menemukan lewat Google Search datang dengan niat lebih kuat daripada yang sekadar scroll IG.</p>
+      <h2>Elemen wajib website jasa fotografi</h2>
+      <p>Klien fotografer mengevaluasi tiga hal dalam hitungan detik: gaya visual, konsistensi, dan apakah vibes mereka cocok. Website yang closing selalu punya blok berikut:</p>
+      <ul>
+        <li><strong>Hero foto terbaik</strong> — satu gambar penuh gaya yang sedang kamu jual (wedding, product, keluarga, food, fashion)</li>
+        <li><strong>Galeri portofolio</strong> — minimal 6 sesi, dikelompokkan per kategori</li>
+        <li><strong>Paket dan harga</strong> — 3 tingkatan (basic, standard, premium) dengan ekspektasi output dan durasi</li>
+        <li><strong>Tentang fotografer</strong> — cerita singkat, gaya, kota domisili, bahasa yang dipakai klien</li>
+        <li><strong>Testimoni klien</strong> — 3–5 kutipan dengan nama dan tanggal acara</li>
+        <li><strong>FAQ</strong> — cara booking,DP, file delivery, revisi, pembatalan</li>
+        <li><strong>Tombol WhatsApp floating</strong> — link ke nomor kamu dengan pesan otomatis</li>
+      </ul>
+      <p>Yang membedakan fotografer profesional dari yang hobi adalah konsistensi presentasi. Warna font, layout grid, dan cara foto dikurasi harus terasa satu bahasa visual. Klien wedding misalnya, mau fotografer yang vibe-nya "calm elegant", bukan yang tampil ramai dengan terlalu banyak font dan warna.</p>
+      <h2>Contoh prompt KARSA untuk fotografer</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt spesifik. Semakin lengkap konteks yang kamu berikan, semakin akurat hasilnya. Contoh untuk fotografer wedding di Yogyakarta:</p>
+      <p><em>"Buat website jasa fotografi wedding untuk 'Sela & Lensa' di Yogyakarta. Hero full-screen foto pasangan di sawah Magelang saat golden hour dengan headline 'Dokumentasi Wedding yang Tenang dan Natural'. Section Tentang: Sela, 8 tahun memotret wedding outdoor di Jawa dan Bali, gaya candid &amp; warm tone, bahasa klien Indonesia dan Inggris. Galeri 6 sesi: Intimate Garden Wedding Bali 2025, Traditional Javanese Wedding Solo 2025, Beach Sunset Wedding Lombok 2024, Modern Rooftop Wedding Jakarta 2024, Engagement Candid Bandung 2024, Prewedding Ubud 2024. Paket: Bronze Rp 4,5 juta (4 jam, 1 fotografer, 150 edited foto, gallery online 90 hari); Silver Rp 7,5 juta (8 jam, 1 fotografer + 1 videografer, 300 foto + 3 menit highlight, gallery 1 tahun); Gold Rp 14 juta (full day, 2 fotografer + videografer, album hardcover 30 halaman, gallery 2 tahun). Section testimoni 4 kutipan. FAQ 6: cara pesan (DP 30%), file delivery (Google Drive + gallery private), revisi (color grading 1x), pembatalan (DP hangus H-30), coverage area (Jawa &amp; Bali), turnaround (3 minggu). Floating WhatsApp ke 0812xxx dengan pesan otomatis 'Halo Sela, saya tertarik paket [Bronze/Silver/Gold] untuk wedding [tanggal]'. Footer link Instagram @sela.lensa. Warna cream, sage, hitam, font serif untuk headline dan sans-serif untuk body, mobile-first."</em></p>
+      <p>Setelah preview muncul, iterasi per bagian dengan kalimat pendek: <em>"tambah section 'Jadwal Tersedia'"</em> atau <em>"buat galeri jadi lightbox saat diklik"</em>. Pola iterasi vibecoding ini berlaku juga untuk <a href="/artikel/landing-page-jasa-freelance">landing page jasa freelance</a> lain seperti desainer, ilustrator, atau videographer.</p>
+      <h2>Tips portofolio yang membuat klien booking</h2>
+      <ul>
+        <li><strong>Kurasi 6–9 foto terbaik per sesi</strong> — lebih baik 6 foto bagus daripada 30 foto mediocare</li>
+        <li><strong>Tampilkan konteks lokasi dan cerita</strong> — klien ingin merasakan vibe, bukan hanya komposisi</li>
+        <li><strong>Tulis nama venue atau kota</strong> — SEO lokal membantu klien di kota yang sama menemukan kamu</li>
+        <li><strong>Pakai foto konsisten warna</strong> — moodboard yang kohesi bikin portofolio terasa signature</li>
+        <li><strong>Tambahkan loading cepat</strong> — galeri berat bikin bounce 60%. Kompres ke WebP,ukur PageSpeed</li>
+        <li><strong>Tampilkan harga eksplisit</strong> — "mulai Rp 4,5 juta" lebih baik daripada "hubungi untuk harga"</li>
+        <li><strong>Tulis proses booking 3 langkah</strong> — konsultasi, DP, pemotretan. Clarity = trust</li>
+      </ul>
+      <p>Untuk fotografer yang melayani klien korporat atau produk UMKM, tambahkan section "Klien" dengan logo brand yang pernah kamu tangani. Untuk wedding, tampilkan timeline hari H dan highlight candid yang emosional. Versi kedua setelah 60 hari biasanya konversi naik 2x lipat hanya karena menulis harga eksplisit, testimoni nyata, dan menambahkan FAQ.</p>
+      <h2>Kesalahan umum website fotografer</h2>
+      <ul>
+        <li><strong>Galeri tanpa kategori</strong> — klien bingung lihat wedding diselingi foto produk. Kelompokkan sesi</li>
+        <li><strong>Tidak ada harga</strong> — "tanyakan via chat" bikin calon klien pindah ke fotografer lain yang lebih jelas</li>
+        <li><strong>Foto full auto-expose</strong> — foto terlalu terang atau gelap tanpa editing profesional menurunkan persepsi kualitas</li>
+        <li><strong>Tombol WhatsApp tidak ada</strong> — portofolio tanpa CTA utama = etalase tanpa kasir</li>
+        <li><strong>Desain terlalu rame</strong> — foto terbaik butuh whitespace. Hindari banner promo besar di atas galeri</li>
+        <li><strong>Tidak SEO-friendly</strong> — page title dan meta description harus berisi kata kunci "fotografer [kota]" dan "jasa foto [kategori]"</li>
+        <li><strong>Lupa mobile test</strong> — 80% calon klien buka dari HP. Versi desktop sempurna tapi mobile kacau = gagal</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah kecepatan memuat galeri. Foto full-res 5MB per gambar bikin bounce 70% di HP 4G. Pakai foto dikompres ke WebP, ukuran lebar 1200px cukup untuk layout grid, dan aktifkan lazy loading. Versi mobile-first wajib diuji di viewport 360px sebelum dianggap siap.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail portofolio dan paket kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> untuk portofolio non-fotografi, dan <a href="/artikel/vibecoding-untuk-umkm">vibecoding untuk UMKM</a> untuk konteks vibecoding. Setelah publish, link permanen bisa kamu tempel di bio Instagram, kartu nama, dan signature email — biar satu halaman menjelaskan gaya, harga, testimoni, dan cara booking 24 jam tanpa harus balas chat satu-satu.</p>`,
 };

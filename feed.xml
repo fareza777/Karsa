@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Fri, 21 Aug 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 24 Aug 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Website Jasa Fotografi dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/website-jasa-fotografi</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/website-jasa-fotografi</guid>
+      <description>Panduan bikin website jasa fotografi: portofolio, paket layanan, harga, galeri klien, dan tombol booking. Contoh prompt KARSA bahasa Indonesia untuk UMKM.</description>
+      <pubDate>Mon, 24 Aug 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Katalog Furniture Minimalis Online dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/katalog-furniture-minimalis</link>

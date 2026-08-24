@@ -35,6 +35,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-laundry-sepatu',
   '/artikel/landing-page-preorder',
   '/artikel/katalog-furniture-minimalis',
+  '/artikel/website-jasa-fotografi',
 ];
 
 /** @type {string[]} */
@@ -745,6 +746,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/website-jasa-fotografi': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Jasa Fotografi dengan AI — KARSA',
+    description:
+      'Panduan bikin website jasa fotografi: portofolio, paket layanan, harga, galeri klien, dan tombol booking. Contoh prompt KARSA bahasa Indonesia untuk UMKM.',
+    canonical: `${SITE}/artikel/website-jasa-fotografi`,
+    keywords:
+      'website jasa fotografi, portofolio fotografer, landing page fotografer, jasa foto UMKM, booking fotografer, KARSA fotografer',
+    headline: 'Website jasa fotografi: tampilkan portofolio dan cara booking dalam satu halaman',
+    cardTitle: 'Website jasa fotografi',
+    cardExcerpt: 'Portofolio, paket layanan, harga, dan tombol booking — link permanen untuk fotografer UMKM.',
+    ogTitle: 'Website Jasa Fotografi dengan AI',
+    ogDescription:
+      'Bikin website jasa fotografi lengkap: portofolio, paket layanan, harga, dan tombol booking WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-jasa-fotografi.png`,
+    ogImageAlt: 'Panduan bikin website jasa fotografi dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-08-24',
+    dateModified: '2026-08-24',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -907,6 +929,11 @@ export const RELATED_ARTICLES = {
   ],
   '/artikel/katalog-furniture-minimalis': [
     '/artikel/katalog-produk-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
+    '/artikel/bikin-landing-page-dengan-ai',
+  ],
+  '/artikel/website-jasa-fotografi': [
+    '/artikel/landing-page-jasa-freelance',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/bikin-landing-page-dengan-ai',
   ],
