@@ -1037,7 +1037,7 @@ export const ARTICLE_BODY = {
       <p>Yang membedakan fotografer profesional dari yang hobi adalah konsistensi presentasi. Warna font, layout grid, dan cara foto dikurasi harus terasa satu bahasa visual. Klien wedding misalnya, mau fotografer yang vibe-nya "calm elegant", bukan yang tampil ramai dengan terlalu banyak font dan warna.</p>
       <h2>Contoh prompt KARSA untuk fotografer</h2>
       <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, lalu ketik prompt spesifik. Semakin lengkap konteks yang kamu berikan, semakin akurat hasilnya. Contoh untuk fotografer wedding di Yogyakarta:</p>
-      <p><em>"Buat website jasa fotografi wedding untuk 'Sela & Lensa' di Yogyakarta. Hero full-screen foto pasangan di sawah Magelang saat golden hour dengan headline 'Dokumentasi Wedding yang Tenang dan Natural'. Section Tentang: Sela, 8 tahun memotret wedding outdoor di Jawa dan Bali, gaya candid &amp; warm tone, bahasa klien Indonesia dan Inggris. Galeri 6 sesi: Intimate Garden Wedding Bali 2025, Traditional Javanese Wedding Solo 2025, Beach Sunset Wedding Lombok 2024, Modern Rooftop Wedding Jakarta 2024, Engagement Candid Bandung 2024, Prewedding Ubud 2024. Paket: Bronze Rp 4,5 juta (4 jam, 1 fotografer, 150 edited foto, gallery online 90 hari); Silver Rp 7,5 juta (8 jam, 1 fotografer + 1 videografer, 300 foto + 3 menit highlight, gallery 1 tahun); Gold Rp 14 juta (full day, 2 fotografer + videografer, album hardcover 30 halaman, gallery 2 tahun). Section testimoni 4 kutipan. FAQ 6: cara pesan (DP 30%), file delivery (Google Drive + gallery private), revisi (color grading 1x), pembatalan (DP hangus H-30), coverage area (Jawa &amp; Bali), turnaround (3 minggu). Floating WhatsApp ke 0812xxx dengan pesan otomatis 'Halo Sela, saya tertarik paket [Bronze/Silver/Gold] untuk wedding [tanggal]'. Footer link Instagram @sela.lensa. Warna cream, sage, hitam, font serif untuk headline dan sans-serif untuk body, mobile-first."</em></p>
+      <p><em>"Buat website jasa fotografi wedding untuk 'Sela &amp; Lensa' di Yogyakarta. Hero full-screen foto pasangan di sawah Magelang saat golden hour dengan headline 'Dokumentasi Wedding yang Tenang dan Natural'. Section Tentang: Sela, 8 tahun memotret wedding outdoor di Jawa dan Bali, gaya candid &amp; warm tone, bahasa klien Indonesia dan Inggris. Galeri 6 sesi: Intimate Garden Wedding Bali 2025, Traditional Javanese Wedding Solo 2025, Beach Sunset Wedding Lombok 2024, Modern Rooftop Wedding Jakarta 2024, Engagement Candid Bandung 2024, Prewedding Ubud 2024. Paket: Bronze Rp 4,5 juta (4 jam, 1 fotografer, 150 edited foto, gallery online 90 hari); Silver Rp 7,5 juta (8 jam, 1 fotografer + 1 videografer, 300 foto + 3 menit highlight, gallery 1 tahun); Gold Rp 14 juta (full day, 2 fotografer + videografer, album hardcover 30 halaman, gallery 2 tahun). Section testimoni 4 kutipan. FAQ 6: cara pesan (DP 30%), file delivery (Google Drive + gallery private), revisi (color grading 1x), pembatalan (DP hangus H-30), coverage area (Jawa &amp; Bali), turnaround (3 minggu). Floating WhatsApp ke 0812xxx dengan pesan otomatis 'Halo Sela, saya tertarik paket [Bronze/Silver/Gold] untuk wedding [tanggal]'. Footer link Instagram @sela.lensa. Warna cream, sage, hitam, font serif untuk headline dan sans-serif untuk body, mobile-first."</em></p>
       <p>Setelah preview muncul, iterasi per bagian dengan kalimat pendek: <em>"tambah section 'Jadwal Tersedia'"</em> atau <em>"buat galeri jadi lightbox saat diklik"</em>. Pola iterasi vibecoding ini berlaku juga untuk <a href="/artikel/landing-page-jasa-freelance">landing page jasa freelance</a> lain seperti desainer, ilustrator, atau videographer.</p>
       <h2>Tips portofolio yang membuat klien booking</h2>
       <ul>
@@ -1063,4 +1063,55 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah publish adalah kecepatan memuat galeri. Foto full-res 5MB per gambar bikin bounce 70% di HP 4G. Pakai foto dikompres ke WebP, ukuran lebar 1200px cukup untuk layout grid, dan aktifkan lazy loading. Versi mobile-first wajib diuji di viewport 360px sebelum dianggap siap.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail portofolio dan paket kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> untuk portofolio non-fotografi, dan <a href="/artikel/vibecoding-untuk-umkm">vibecoding untuk UMKM</a> untuk konteks vibecoding. Setelah publish, link permanen bisa kamu tempel di bio Instagram, kartu nama, dan signature email — biar satu halaman menjelaskan gaya, harga, testimoni, dan cara booking 24 jam tanpa harus balas chat satu-satu.</p>`,
+  'form-survey-pelanggan': `
+      <p>UMKM sering menebak-nebak apa yang pelanggan rasakan: produk laku, tapi tidak tau kenapa pelanggan balik — atau kenapa berhenti setelah dua pesanan. Form survey pelanggan lewat WhatsApp mengubah tebakan jadi data: kepuasan, NPS, sampai masukan produk, masuk rapi dalam hitungan jam tanpa telepon satu-satu.</p>
+      <h2>Kapan UMKM butuh form survey pelanggan</h2>
+      <p>Survey bukan hanya untuk korporat besar. Begitu bisnis kamu punya lebih dari 50 pelanggan rutin, suara mereka sudah cukup beragam untuk menuntun keputusan produk. Situasi yang paling terasa:</p>
+      <ul>
+        <li><strong>Setelah pembelian pertama</strong> — cek apakah produk sesuai ekspektasi dan apa yang bisa diperbaiki</li>
+        <li><strong>Setelah layanan selesai</strong> — salon, bengkel, jasa konsultan: tanyakan kepuasan di hari yang sama</li>
+        <li><strong>Setelah 3–6 bulan</strong> — pelanggan lama: tanyakan apakah masih tertarik produk baru</li>
+        <li><strong>Saat akan rilis menu atau koleksi</strong> — uji konsep sebelum produksi besar</li>
+        <li><strong>Setelah ada komplain</strong> — pastikan masalah sudah selesai dan pelanggan merasa didengar</li>
+      </ul>
+      <p>Yang membuat survey UMKM sering gagal bukan tool-nya, tapi panjang dan tidak relevan. Form 20 pertanyaan membuat orang menutup sebelum selesai. Form 5 pertanyaan yang fokus biasanya punya completion rate 60–80% lewat WhatsApp.</p>
+      <h2>Struktur form survey yang bikin orang mau isi</h2>
+      <p>Survey yang dapat jawaban berkualitas selalu mengikuti pola tiga blok: konteks, pengukuran, dan ruang terbuka. Susun dalam urutan ini:</p>
+      <ul>
+        <li><strong>Pembuka singkat</strong> — siapa kamu, berapa lama waktu yang dibutuhkan (idealnya 60–90 detik), janji kerahasiaan</li>
+        <li><strong>Skala kepuasan</strong> — 1 sampai 5 atau 1 sampai 10 (NPS). Tanyakan hal spesifik: kecepatan, rasa produk, keramahan, harga</li>
+        <li><strong>Pilihan ganda tertutup</strong> — darimana tau produk, kategori produk yang sering dibeli, alasan berhenti membeli</li>
+        <li><strong>Pertanyaan terbuka 1–2</strong> — "Apa yang paling kamu suka?" dan "Apa satu hal yang ingin kami perbaiki?"</li>
+        <li><strong>Data responden (opsional)</strong> — nama, WhatsApp, kota, hanya jika pelanggan bersedia</li>
+        <li><strong>Penutup dan ucapan terima kasih</strong> — kupon diskon kecil, undian, atau cukup terima kasih tulus</li>
+      </ul>
+      <p>Total 8–12 field adalah sweet spot untuk WhatsApp. Lebih dari itu, drop-off melonjak. Triknya adalah menyimpan pertanyaan lanjutan untuk iterasi berikutnya. Setelah dua bulan, kirim survey baru dengan fokus berbeda.</p>
+      <h2>Contoh prompt KARSA untuk form survey pelanggan</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt berikut. Contoh untuk kedai kopi yang ingin tahu kepuasan pelanggan:</p>
+      <p><em>"Buat form survey pelanggan untuk 'Kopi Tetangga Bandung'. Hero 'Bantu Kami Bikin Kopi Lebih Enak — Isi 60 Detik'. Pembuka: 'Kami Pah Rianto, owner Kopi Tetangga. Mohon 60 detik untuk isi survey ini, jawabanmu sangat menentukan menu baru kami'. Section Skala Kepuasan 5 pertanyaan (1–5): kecepatan penyajian, keramahan barista, rasa kopi, harga dibanding tempat lain, kenyamanan tempat. Section Pilihan Ganda 4 pertanyaan: darimana tau Kopi Tetangga (IG/TikTok/Google Maps/teman/lainnya), berapa sering datang (harian/mingguan/bulanan/jarang), menu favorit (es kopi susu/kopi hitam/manual brew/makanan/cemilan), alasan utama datang (rasa/harga/lokasi/wifi/kerja). Section Terbuka 2 pertanyaan textarea: 'Apa hal yang paling kamu suka?' dan 'Satu hal yang ingin kami perbaiki?'. Section Data Responden 4 field opsional (nama, WhatsApp, email, kota). Section Penutup: 'Terima kasih! Sebagai ucapan, tunjukkan screenshot ke kasir untuk gratis upgrade ke Large di kunjungan berikutnya'. Footer WhatsApp + IG. Warna krem, coklat, hijau tua, mobile-first, single page."</em></p>
+      <p>Setelah preview muncul, iterasi per bagian: <em>"tambah checkbox 'Boleh hubungi saya untuk follow-up'"</em> atau <em>"ganti ucapan terima kasih jadi undian mingguan voucher Rp 50K"</em>. Pola vibecoding ini juga berlaku untuk <a href="/artikel/form-pendaftaran-seminar">form pendaftaran seminar</a> dan <a href="/artikel/form-booking-online-umkm">form booking UMKM</a>.</p>
+      <h2>Tips survey yang dapat jawaban berkualitas</h2>
+      <ul>
+        <li><strong>Pertanyaan singkat dan spesifik</strong> — "Apakah kopi kami cukup enak?" lebih baik daripada "Bagaimana pendapatmu tentang keseluruhan pengalaman?"</li>
+        <li><strong>Hindari pertanyaan majemuk</strong> — pisah jadi dua kalau membahas lebih dari satu hal</li>
+        <li><strong>Gunakan skala genap (1–4 atau 1–10)</strong> — skala ganjil bikin responden memilih tengah. NPS wajib 0–10</li>
+        <li><strong>Berikan insentif kecil</strong> — diskon 10%, free upgrade, atau undian. Response rate naik 2–3x</li>
+        <li><strong>Kirim di waktu yang tepat</strong> — H+1 setelah transaksi untuk produk, hari yang sama untuk jasa</li>
+        <li><strong>Personalisasi link</strong> — tambahkan nama pelanggan: "Halo Mbak Sari, boleh minta 60 detik?"</li>
+        <li><strong>Mobile-first</strong> — 80% responden buka dari HP. Cek viewport 360px dan keyboard-friendly</li>
+      </ul>
+      <p>Setelah dapat 30–50 jawaban, hitung rata-rata skor dan kelompokkan komentar terbuka menjadi 3 tema. Itu cukup untuk memutuskan satu perbaikan nyata di bulan depan. Survey yang tidak berakhir di tindakan hanya membuang waktu pelanggan.</p>
+      <h2>Kesalahan umum form survey UMKM</h2>
+      <ul>
+        <li><strong>Terlalu panjang</strong> — 20 pertanyaan membuat orang tutup sebelum selesai. Maksimal 12</li>
+        <li><strong>Tanpa tujuan jelas</strong> — survey yang tidak menghasilkan keputusan hanya formality. Tentukan dulu "satu hal yang ingin diketahui"</li>
+        <li><strong>Pertanyaan bias</strong> — "Apakah kopi kami luar biasa enak?" mengarah ke jawaban ya. Netralkan diksi</li>
+        <li><strong>Tidak ada insentif</strong> — tanpa motivasi, response rate 5–10%. Tambah benefit kecil naik ke 30–50%</li>
+        <li><strong>Kirim di waktu yang salah</strong> — subuh, tengah malam, atau terlalu lama setelah transaksi. Pilih H+1 atau H+2</li>
+        <li><strong>Lupa follow-up</strong> — pelanggan yang sudah kasih waktu layak dapat balasan: "Terima kasih, kami akan perbaiki X"</li>
+        <li><strong>Tidak mobile-friendly</strong> — keyboard pop-up menutupi field. Test di viewport kecil</li>
+      </ul>
+      <p>Yang paling penting setelah publish adalah konsistensi. Survey sekali jalan tidak cukup; tren kepuasan baru terlihat setelah 3–6 bulan berjalan. Buat versi ringkas (5 pertanyaan) untuk rutin, dan versi penuh (10–12) untuk momen khusus.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail kedai atau toko kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/vibecoding-untuk-umkm">panduan vibecoding UMKM</a> untuk konteks vibecoding, dan <a href="/artikel/form-booking-online-umkm">panduan form booking UMKM</a> untuk bedanya survey vs form booking. Setelah publish, kirim link lewat WhatsApp blast dan baca komentar terbuka tiap akhir pekan — biasanya di situ muncul satu ide produk yang tidak pernah kamu pikirkan sebelumnya.</p>`,
 };

@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Mon, 24 Aug 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 26 Aug 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Form Survey Pelanggan dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/form-survey-pelanggan</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/form-survey-pelanggan</guid>
+      <description>Panduan bikin form survey pelanggan online untuk UMKM: kepuasan, NPS, masukan produk. Contoh prompt KARSA bahasa Indonesia, hasil langsung di spreadsheet.</description>
+      <pubDate>Wed, 26 Aug 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Website Jasa Fotografi dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/website-jasa-fotografi</link>

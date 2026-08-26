@@ -36,6 +36,7 @@ export const ARTICLE_PATHS = [
   '/artikel/landing-page-preorder',
   '/artikel/katalog-furniture-minimalis',
   '/artikel/website-jasa-fotografi',
+  '/artikel/form-survey-pelanggan',
 ];
 
 /** @type {string[]} */
@@ -767,6 +768,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/form-survey-pelanggan': {
+    ogType: 'article',
+    title: 'Cara Bikin Form Survey Pelanggan dengan AI — KARSA',
+    description:
+      'Panduan bikin form survey pelanggan online untuk UMKM: kepuasan, NPS, masukan produk. Contoh prompt KARSA bahasa Indonesia, hasil langsung di spreadsheet.',
+    canonical: `${SITE}/artikel/form-survey-pelanggan`,
+    keywords:
+      'form survey pelanggan, survey kepuasan pelanggan, form NPS UMKM, survey online gratis, kuesioner pelanggan, KARSA form',
+    headline: 'Form survey pelanggan: dengar suara pembeli tanpa harus telepon satu-satu',
+    cardTitle: 'Form survey pelanggan dengan AI',
+    cardExcerpt: 'Kepuasan, NPS, masukan produk — link sekali kirim, hasil langsung rapi untuk UMKM.',
+    ogTitle: 'Form Survey Pelanggan dengan AI',
+    ogDescription:
+      'Bikin form survey kepuasan pelanggan lengkap: skala, pilihan ganda, dan textarea, kirim link via WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/form-survey-pelanggan.png`,
+    ogImageAlt: 'Panduan bikin form survey pelanggan untuk UMKM dengan KARSA',
+    datePublished: '2026-08-26',
+    dateModified: '2026-08-26',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -936,6 +958,11 @@ export const RELATED_ARTICLES = {
     '/artikel/landing-page-jasa-freelance',
     '/artikel/vibecoding-untuk-umkm',
     '/artikel/bikin-landing-page-dengan-ai',
+  ],
+  '/artikel/form-survey-pelanggan': [
+    '/artikel/form-pendaftaran-seminar',
+    '/artikel/form-booking-online-umkm',
+    '/artikel/vibecoding-untuk-umkm',
   ],
 };
 
