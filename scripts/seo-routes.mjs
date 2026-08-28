@@ -37,6 +37,7 @@ export const ARTICLE_PATHS = [
   '/artikel/katalog-furniture-minimalis',
   '/artikel/website-jasa-fotografi',
   '/artikel/form-survey-pelanggan',
+  '/artikel/website-portfolio-mahasiswa',
 ];
 
 /** @type {string[]} */
@@ -789,6 +790,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/website-portfolio-mahasiswa': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Portfolio Mahasiswa dengan AI — KARSA',
+    description:
+      'Panduan bikin website portfolio mahasiswa: biodata, proyek, sertifikat, skill, dan link magang. Contoh prompt KARSA bahasa Indonesia untuk fresh graduate.',
+    canonical: `${SITE}/artikel/website-portfolio-mahasiswa`,
+    keywords:
+      'website portfolio mahasiswa, portofolio online mahasiswa, CV online mahasiswa, website fresh graduate, portofolio tugas akhir, KARSA portofolio',
+    headline: 'Website portfolio mahasiswa: dari CV PDF jadi halaman yang bikin recruiter berhenti scroll',
+    cardTitle: 'Website portfolio mahasiswa dengan AI',
+    cardExcerpt: 'Biodata, proyek, sertifikat, skill, dan link magang dalam satu halaman yang shareable.',
+    ogTitle: 'Website Portfolio Mahasiswa dengan AI',
+    ogDescription:
+      'Bikin website portfolio mahasiswa lengkap: biodata, proyek, sertifikat, skill, dan link magang dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-portfolio-mahasiswa.png`,
+    ogImageAlt: 'Panduan bikin website portfolio mahasiswa dengan KARSA untuk fresh graduate Indonesia',
+    datePublished: '2026-08-28',
+    dateModified: '2026-08-28',
+    category: 'Panduan',
+    readMinutes: 7,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -963,6 +985,11 @@ export const RELATED_ARTICLES = {
     '/artikel/form-pendaftaran-seminar',
     '/artikel/form-booking-online-umkm',
     '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/website-portfolio-mahasiswa': [
+    '/artikel/prototype-aplikasi-startup',
+    '/artikel/landing-page-jasa-freelance',
+    '/artikel/pembuat-aplikasi-tanpa-coding',
   ],
 };
 

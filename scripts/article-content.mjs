@@ -1114,4 +1114,44 @@ export const ARTICLE_BODY = {
       <p>Yang paling penting setelah publish adalah konsistensi. Survey sekali jalan tidak cukup; tren kepuasan baru terlihat setelah 3–6 bulan berjalan. Buat versi ringkas (5 pertanyaan) untuk rutin, dan versi penuh (10–12) untuk momen khusus.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail kedai atau toko kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/vibecoding-untuk-umkm">panduan vibecoding UMKM</a> untuk konteks vibecoding, dan <a href="/artikel/form-booking-online-umkm">panduan form booking UMKM</a> untuk bedanya survey vs form booking. Setelah publish, kirim link lewat WhatsApp blast dan baca komentar terbuka tiap akhir pekan — biasanya di situ muncul satu ide produk yang tidak pernah kamu pikirkan sebelumnya.</p>`,
+  'website-portfolio-mahasiswa': `
+      <p>Mahasiswa Indonesia yang baru lulus sering kirim CV PDF panjang ke recruiter, lalu tidak pernah buka lagi. Recruiter HR Tech menerima ratusan lamaran seminggu; CV yang mereka ingat biasanya yang punya tautan ke portofolio online. Website portfolio mahasiswa adalah satu halaman berisi biodata, proyek, sertifikat, dan link magang — shareable lewat chat, mudah diingat, dan tetap hidup setelah kamu kirim email.</p>
+      <p>Artikel ini membahas kapan portfolio online lebih penting dari CV, struktur halaman yang membuat recruiter berhenti scroll, dan cara bikin versi pertama dalam satu sore pakai KARSA tanpa harus jago HTML.</p>
+      <h2>Kapan mahasiswa butuh website portfolio</h2>
+      <p>Portfolio online terasa overkill untuk semester awal, tapi mulai relevan begitu kamu punya minimal tiga hal untuk ditunjukkan: proyek kuliah, sertifikat magang atau kursus, atau pengalaman organisasi dengan output terukur. Situasi paling terasa:</p>
+      <ul>
+        <li>Sedang apply magang di startup atau korporat — recruiter ingin bukti kerja, bukan transkrip</li>
+        <li>Sudah lulus dan cari kerja pertama — banyak lowongan mensyaratkan "link portfolio" di formulir</li>
+        <li>Ingin freelance sembari kuliah — klien butuh cara cepat menilai gaya dan kecepatan kerja kamu</li>
+        <li>Membangun personal brand di LinkedIn atau Instagram — link di bio jadi etalase profesional</li>
+        <li>Melamar beasiswa atau kompetisi — beberapa program minta portofolio online, bukan PDF</li>
+      </ul>
+      <p>Recruiter HR Tech di Indonesia menerima 200–500 CV per lowongan. CV PDF tanpa link portfolio biasanya masuk tumpukan "lihat nanti" dan jarang dibuka dua kali. Website portfolio dengan domain rapi dan tiga proyek unggulan akan selalu muncul di urutan atas kandidat yang mereka ingat namanya.</p>
+      <h2>Struktur halaman portfolio yang bikin orang berhenti scroll</h2>
+      <p>Halaman portfolio yang efektif selalu mengikuti pola empat blok: hero, bukti kerja, tentang, dan cara kontak. Susun dalam urutan ini:</p>
+      <ul>
+        <li>Hero singkat — nama, satu kalimat posisi (contoh: "Mahasiswa Informatika angkatan 2023, tertarik ke product design"), tombol Lihat Proyek dan Download CV</li>
+        <li>Proyek unggulan 3–6 item — judul, deskripsi dua kalimat, peran, teknologi, link demo atau repo, screenshot kecil</li>
+        <li>Sertifikat dan skill — pill atau baris pendek, tidak perlu diagram radar yang menyesatkan</li>
+        <li>Pengalaman organisasi dan magang — nama tempat, periode, satu bullet kontribusi terukur</li>
+        <li>Testimoni dosen atau atasan magang 1–2 kalimat dengan foto kecil</li>
+        <li>Kontak — email, LinkedIn, GitHub, dan form singkat jika kamu ingin menerima brief langsung</li>
+      </ul>
+      <p>Panjang ideal adalah satu halaman scroll dengan navigasi anchor di atas. Recruiter menghabiskan rata-rata 30 detik di portofolio pertama. Kalau hero padat, proyek jelas, dan kontak mudah ditemukan, mereka akan bookmark dan balik lagi.</p>
+      <h2>Contoh prompt KARSA untuk website portfolio</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt berikut. Contoh untuk mahasiswa Informatika semester 6 yang baru selesai magang di startup fintech:</p>
+      <p><em>"Buat website portfolio untuk 'Aulia Rahmadhani, Mahasiswa Informatika Universitas Brawijaya angkatan 2022'. Hero dengan foto profil bundar, headline 'Product-minded informatics student, baru selesai magang di fintech', sub 'Tertarik pada riset pengguna dan desain antarmuka yang bisa dipakai oleh teman saya sendiri', dua tombol 'Lihat Proyek' dan 'Download CV PDF'. Section Proyek Unggulan 4 kartu: 'Riset Pengguna Aplikasi Banking UMKM' (magang, 3 bulan, hasil 12 insight prioritas), 'Website Komunitas Pencinta Tanaman Hias' (UKM, React + Tailwind, 1500 pengunjung pertama), 'Bot WhatsApp Stok Warung' (tugas akhir, Python + Flask), 'Katalog Donasi Buku Komunitas' (organisasi, dipakai 3 sekolah). Tiap kartu: judul, peran, teknologi sebagai pill, screenshot placeholder, tombol Demo dan Source. Section Skill sebagai pill baris: Figma, TypeScript, Python, SQL, user research, wireframing. Section Pengalaman 3 baris: 'Magang Product Research di FinTech XYZ' (Mar–Jun 2026), 'Bendahara UKM Coding' (2024–2025), 'Asisten Dosen Algoritma' (2023). Section Testimoni 2 kutip: 'Aulia paling teliti saat menghimpun insight dari 12 responden' — Bu Sari, Dosen; 'Ia eigen inisiatif saat membangun prototype bot' — Mas Doni, Supervisor Magang. Section Kontak dengan form nama, email, jenis kerja sama, pesan, dan link LinkedIn + GitHub + email langsung. Footer sederhana. Warna putih, aksen biru tua dan kuning lembut, font sans-serif, mobile-first, single page."</em></p>
+      <p>Setelah preview muncul, iterasi per bagian: <em>"ganti foto placeholder jadi inisial AR dengan background gradien"</em> atau <em>"tambah section blog dengan dua tulisan pendek tentang riset"</em>. Pola vibecoding ini juga berlaku untuk <a href="/artikel/prototype-aplikasi-startup">prototype aplikasi startup</a> dan <a href="/artikel/landing-page-jasa-freelance">landing page jasa freelance</a>.</p>
+      <h2>Tips portfolio yang dilirik recruiter</h2>
+      <ul>
+        <li>Tulis nama proyek dengan jelas — "Riset Pengguna Aplikasi Banking UMKM" lebih diingat daripada "Project 1"</li>
+        <li>Satu kalimat outcome terukur — "12 insight prioritas" lebih kuat daripada "banyak insight"</li>
+        <li>Tautkan ke demo yang bisa dibuka tanpa login — repo GitHub dengan README rapi lebih baik daripada folder Zip</li>
+        <li>Pakai foto asli bukan avatar default — wajah asli membangun trust 3x lebih cepat</li>
+        <li>Sertakan link LinkedIn dan GitHub — 70% recruiter Tech Indonesia cek keduanya</li>
+        <li>Mobile-friendly wajib — banyak HR lihat portofolio dari HP saat perjalanan ke kantor</li>
+      </ul>
+      <p>Setelah publish, link permanen bisa kamu pasang di bio LinkedIn, bio Instagram, dan signature email kampus. Bonus: domain rapi dari KARSA bisa kamu pakai bertahun-tahun, sehingga saat sudah kerja dan cari pekerjaan berikutnya, halaman yang sama tinggal di-update — bukan mulai dari nol.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail nama, kampus, dan proyek kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/prototype-aplikasi-startup">panduan prototype aplikasi startup</a> untuk konteks founder muda, dan <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> untuk portofolio yang fokus ke klien. Setelah publish, kirim link ke dosen pembimbing dan tambahkan ke bio LinkedIn — recruiter akan menemukan kamu bahkan saat kamu tidak sedang melamar.</p>`,
 };
