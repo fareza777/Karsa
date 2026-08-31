@@ -49,6 +49,7 @@ KARSA membantu pengguna Indonesia membuat landing page, katalog UMKM, dan protot
 - [Website jasa fotografi: tampilkan portofolio dan cara booking dalam satu halaman](https://karsa.work/artikel/website-jasa-fotografi): Panduan bikin website jasa fotografi: portofolio, paket layanan, harga, galeri klien, dan tombol booking. Contoh prompt KARSA bahasa Indonesia untuk UMKM.
 - [Form survey pelanggan: dengar suara pembeli tanpa harus telepon satu-satu](https://karsa.work/artikel/form-survey-pelanggan): Panduan bikin form survey pelanggan online untuk UMKM: kepuasan, NPS, masukan produk. Contoh prompt KARSA bahasa Indonesia, hasil langsung di spreadsheet.
 - [Website portfolio mahasiswa: dari CV PDF jadi halaman yang bikin recruiter berhenti scroll](https://karsa.work/artikel/website-portfolio-mahasiswa): Panduan bikin website portfolio mahasiswa: biodata, proyek, sertifikat, skill, dan link magang. Contoh prompt KARSA bahasa Indonesia untuk fresh graduate.
+- [Website CV online: dari dokumen terlampir jadi halaman yang bisa dibuka satu klik](https://karsa.work/artikel/website-cv-online): Panduan bikin website CV online profesional: biodata, pengalaman, skill, portofolio, dan link apply. Contoh prompt KARSA bahasa Indonesia untuk fresh graduate dan job seeker.
 
 ## Kontak
 

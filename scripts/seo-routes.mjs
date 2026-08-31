@@ -38,6 +38,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-jasa-fotografi',
   '/artikel/form-survey-pelanggan',
   '/artikel/website-portfolio-mahasiswa',
+  '/artikel/website-cv-online',
 ];
 
 /** @type {string[]} */
@@ -811,6 +812,27 @@ export const SEO_ROUTES = {
     category: 'Panduan',
     readMinutes: 7,
   },
+  '/artikel/website-cv-online': {
+    ogType: 'article',
+    title: 'Cara Bikin Website CV Online dengan AI — KARSA',
+    description:
+      'Panduan bikin website CV online profesional: biodata, pengalaman, skill, portofolio, dan link apply. Contoh prompt KARSA bahasa Indonesia untuk fresh graduate dan job seeker.',
+    canonical: `${SITE}/artikel/website-cv-online`,
+    keywords:
+      'website CV online, CV online profesional, buat CV online, CV digital, portofolio online job seeker, KARSA CV',
+    headline: 'Website CV online: dari dokumen terlampir jadi halaman yang bisa dibuka satu klik',
+    cardTitle: 'Website CV online dengan AI',
+    cardExcerpt: 'Biodata, pengalaman, skill, dan link apply — CV jadi halaman shareable yang gampang dibuka recruiter kapan saja.',
+    ogTitle: 'Website CV Online dengan AI',
+    ogDescription:
+      'Bikin website CV online lengkap: biodata, pengalaman, skill, dan portofolio dalam satu halaman yang shareable untuk job seeker.',
+    ogImage: `${SITE}/og/website-cv-online.png`,
+    ogImageAlt: 'Panduan bikin website CV online profesional dengan KARSA untuk job seeker Indonesia',
+    datePublished: '2026-08-31',
+    dateModified: '2026-08-31',
+    category: 'Publish',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -990,6 +1012,11 @@ export const RELATED_ARTICLES = {
     '/artikel/prototype-aplikasi-startup',
     '/artikel/landing-page-jasa-freelance',
     '/artikel/pembuat-aplikasi-tanpa-coding',
+  ],
+  '/artikel/website-cv-online': [
+    '/artikel/website-portfolio-mahasiswa',
+    '/artikel/landing-page-jasa-freelance',
+    '/artikel/cara-publish-website-karsa',
   ],
 };
 

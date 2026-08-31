@@ -1154,4 +1154,48 @@ export const ARTICLE_BODY = {
       <p>Setelah publish, link permanen bisa kamu pasang di bio LinkedIn, bio Instagram, dan signature email kampus. Bonus: domain rapi dari KARSA bisa kamu pakai bertahun-tahun, sehingga saat sudah kerja dan cari pekerjaan berikutnya, halaman yang sama tinggal di-update — bukan mulai dari nol.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail nama, kampus, dan proyek kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/prototype-aplikasi-startup">panduan prototype aplikasi startup</a> untuk konteks founder muda, dan <a href="/artikel/landing-page-jasa-freelance">panduan landing page jasa freelance</a> untuk portofolio yang fokus ke klien. Setelah publish, kirim link ke dosen pembimbing dan tambahkan ke bio LinkedIn — recruiter akan menemukan kamu bahkan saat kamu tidak sedang melamar.</p>`,
+  'website-cv-online': `
+      <p>Recruiter HR Tech Indonesia menerima 200–500 lamaran per lowongan. CV PDF yang terlampir di email sering dibuka di ponsel, terpotong di preview Gmail, dan hilang di folder Unduhan. Website CV online memecahkan itu: satu halaman berisi biodata, pengalaman, skill, dan link apply — bisa dibuka satu klik dari LinkedIn, WhatsApp, atau bio Instagram.</p>
+      <p>Artikel ini membahas kapan CV online lebih efektif dari CV PDF, struktur halaman yang membuat recruiter berhenti scroll, dan cara bikin versi pertama dalam satu sore pakai KARSA.</p>
+      <h2>Kapan CV online lebih efektif dari PDF</h2>
+      <p>CV PDF masih penting untuk attachment formal, tapi ada situasi di mana halaman CV online lebih unggul:</p>
+      <ul>
+        <li>Melamar lewat LinkedIn — kolom pesan cuma muat beberapa baris, link CV online lebih rapi</li>
+        <li>Share lewat WhatsApp ke HR — link tampil utuh, PDF sering gagal buka di HP lawas</li>
+        <li>Job fair dan career expo — QR code di name tag mengarah langsung ke CV interaktif</li>
+        <li>Bio Instagram, TikTok, atau X untuk personal brand kreator dan freelancer</li>
+        <li>Apply ke startup teknologi yang menilai inisiatif digital</li>
+        <li>Sudah lulus 2–5 tahun dan aktif networking — halaman statis tetap hidup, PDF cepat basi</li>
+      </ul>
+      <p>Bedanya dengan <a href="/artikel/website-portfolio-mahasiswa">website portfolio mahasiswa</a>: portfolio menonjolkan karya, sedangkan CV online fokus ke kronologi karier dan pencapaian terukur. Keduanya saling melengkapi untuk konteks berbeda.</p>
+      <h2>Struktur halaman CV online yang bikin recruiter berhenti scroll</h2>
+      <p>Halaman CV online yang efektif selalu mengikuti pola lima blok. Recruiter menghabiskan rata-rata 30 detik di CV pertama; kalau lima blok ini jelas, mereka akan bookmark dan baca ulang:</p>
+      <ul>
+        <li>Hero ringkas — nama, satu kalimat posisi, tombol Download CV PDF dan Hubungi WhatsApp</li>
+        <li>Ringkasan profesional 3–4 kalimat — spesialisasi dan pencapaian paling relevan</li>
+        <li>Pengalaman kerja kronologis terbalik — posisi, perusahaan, periode, 2–3 bullet kontribusi terukur</li>
+        <li>Pendidikan, sertifikat, dan skill — pill atau baris pendek, tidak perlu diagram radar</li>
+        <li>Kontak dan CTA — email, LinkedIn, GitHub, dan form singkat untuk interview request</li>
+      </ul>
+      <p>Panjang ideal satu halaman scroll dengan navigasi anchor di atas. Freelancer bisa tambah section portofolio singkat; pelamar korporat tambah sertifikasi industri (PMP, AWS, dll.) di bawah pendidikan.</p>
+      <h2>Contoh prompt KARSA untuk website CV online</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt berikut. Contoh untuk frontend developer 3 tahun yang baru resign dan cari kerja remote:</p>
+      <p><em>"Buat website CV online untuk 'Rangga Pradana, Frontend Developer 3 tahun'. Hero dengan foto profil bundar inisial RP, headline 'Frontend Developer dengan spesialisasi Vue 3 dan TypeScript', sub 'Tiga tahun di produk B2B SaaS, terakhir memimpin migrasi Vue 2 ke Vue 3 di tim 5 orang', dua tombol 'Download CV PDF' dan 'Hubungi via WhatsApp'. Section Ringkasan 4 kalimat: siapa, spesialisasi, pencapaian kuantitatif, tujuan karier. Section Pengalaman kronologis terbalik 3 posisi: 'Senior Frontend Developer di PT Solusi Digital' (2024–2026, migrasi 80 komponen Vue 2 ke Vue 3 dalam 4 bulan, turunkan bug regression 35%), 'Frontend Developer di Startup EduTech' (2023–2024, pimpin redesign dashboard, naikkan completion rate 22%), 'Frontend Intern di Konsultan TI' (2022–2023, kontribusi 12 modul reusable). Tiap posisi: nama, periode, 3 bullet kontribusi. Section Pendidikan: 'S1 Teknik Informatika Universitas Indonesia, IPK 3.72, 2022'. Section Sertifikat 4 pill: Vue 3 Composition API, TypeScript Advanced, Figma Auto Layout, AWS Cloud Practitioner. Section Skill pisah dua kolom — Hard (Vue, TypeScript, Tailwind, Vite) dan Soft (komunikasi async, code review). Section Kontak dengan form nama, email, jenis kerja sama, pesan, dan link LinkedIn + GitHub + email. Footer sederhana. Warna putih, aksen biru navy dan oranye lembut, font sans-serif, mobile-first, single page."</em></p>
+      <p>Setelah preview muncul, iterasi per bagian: <em>"ganti foto placeholder jadi monogram RP dengan gradien biru"</em>. Pola iterasi ini sama dengan <a href="/artikel/landing-page-jasa-freelance">landing page jasa freelance</a> — bedanya CV online fokus ke kredensial.</p>
+      <h2>Tips CV online yang dilirik recruiter</h2>
+      <ul>
+        <li>Headline spesifik — "Frontend Developer 3 tahun spesialisasi Vue" lebih diingat daripada "Web Developer berpengalaman"</li>
+        <li>Kontribusi dengan angka — "turunkan bug regression 35%" lebih kuat dari "memperbaiki bug"</li>
+        <li>Nama perusahaan lengkap — singkatan internal tidak dikenali recruiter luar</li>
+        <li>GitHub dan LinkedIn wajib terlihat — 70% recruiter Tech Indonesia cek keduanya</li>
+        <li>Sertifikat sebagai pill dengan ikon platform (AWS, Coursera) — lebih profesional</li>
+        <li>Mobile-friendly wajib — HR sering lihat CV dari HP di antara meeting</li>
+        <li>Tracking link di bio — tahu berapa recruiter benar-benar buka halaman</li>
+      </ul>
+      <p>Setelah publish, link permanen bisa kamu pasang di bio LinkedIn, signature email, dan QR code name tag untuk job fair. Domain rapi dari KARSA bisa dipakai bertahun-tahun; saat sudah kerja dan promosi, halaman yang sama tinggal di-update, bukan dibuat ulang dari nol.</p>
+      <h2>Cara publish dan promosikan CV online</h2>
+      <p>Publish ke subdomain gratis {slug}.karsa.work cukup untuk mulai. Kalau sudah dapat pekerjaan tetap, pertimbangkan custom domain dengan nama pribadi — recruiter menilai lebih serius dan halamanmu muncul di hasil pencarian Google ketika mereka mengetik namamu. Detail langkah DNS ada di panduan <a href="/artikel/custom-domain-karsa">custom domain KARSA</a>, dan submit sitemap dibahas di panduan <a href="/artikel/daftar-google-search-console">daftar Google Search Console</a>.</p>
+      <p>Setelah live, promosikan lewat tiga kanal: pesan LinkedIn ke recruiter dengan kalimat pembuka yang menyebut posisi spesifik, broadcast ke 10 teman terdekat minta mereka sebarkan ke koneksi HR, dan tambahkan ke signature Gmail. Jangan broadcast ke grup besar — terasa spam.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail nama, pengalaman, dan skill kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/website-portfolio-mahasiswa">panduan website portfolio mahasiswa</a> untuk konteks fresh graduate, dan <a href="/artikel/landing-page-jasa-freelance">landing page jasa freelance</a> untuk versi CV yang fokus ke klien. Setelah publish, kirim link ke tiga recruiter incar dan tambahkan ke bio LinkedIn.`,
 };
