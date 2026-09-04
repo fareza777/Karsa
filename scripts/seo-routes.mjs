@@ -39,6 +39,8 @@ export const ARTICLE_PATHS = [
   '/artikel/form-survey-pelanggan',
   '/artikel/website-portfolio-mahasiswa',
   '/artikel/website-cv-online',
+  '/artikel/landing-page-produk-herbal',
+  '/artikel/landing-page-kopi-spesialti',
 ];
 
 /** @type {string[]} */
@@ -833,6 +835,48 @@ export const SEO_ROUTES = {
     category: 'Publish',
     readMinutes: 6,
   },
+  '/artikel/landing-page-produk-herbal': {
+    ogType: 'article',
+    title: 'Cara Bikin Landing Page Produk Herbal dengan AI — KARSA',
+    description:
+      'Panduan landing page produk herbal UMKM: benefit, testimoni, nomor BPOM, dan tombol WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk jamu dan kapsul.',
+    canonical: `${SITE}/artikel/landing-page-produk-herbal`,
+    keywords:
+      'landing page produk herbal, jual produk herbal online, landing page jamu, produk herbal UMKM, herbal skincare online, KARSA herbal',
+    headline: 'Landing page produk herbal: dari testimoni chat jadi halaman yang meyakinkan pembeli',
+    cardTitle: 'Landing page produk herbal',
+    cardExcerpt: 'Benefit, testimoni, nomor BPOM, dan tombol pesan — link permanen untuk UMKM herbal.',
+    ogTitle: 'Landing Page Produk Herbal dengan AI',
+    ogDescription:
+      'Bikin landing page produk herbal lengkap: benefit, testimoni, legalitas, dan tombol pesan WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/landing-page-produk-herbal.png`,
+    ogImageAlt: 'Panduan bikin landing page produk herbal dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-09-02',
+    dateModified: '2026-09-02',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
+  '/artikel/landing-page-kopi-spesialti': {
+    ogType: 'article',
+    title: 'Cara Bikin Landing Page Kopi Spesialti dengan AI — KARSA',
+    description:
+      'Panduan landing page kopi spesialti UMKM: hero aroma, cerita origin, roast level, harga, dan tombol pesan. Contoh prompt KARSA bahasa Indonesia untuk roaster dan coffee shop.',
+    canonical: `${SITE}/artikel/landing-page-kopi-spesialti`,
+    keywords:
+      'landing page kopi spesialti, website roaster kopi, kopi single origin Indonesia, coffee shop UMKM, jual kopi spesialti online, KARSA kopi',
+    headline: 'Landing page kopi spesialti: dari posting Instagram jadi cerita origin yang membuat orang repeat order',
+    cardTitle: 'Landing page kopi spesialti',
+    cardExcerpt: 'Hero aroma, cerita origin, roast level, harga, dan tombol pesan — link permanen untuk roaster dan coffee shop kecil.',
+    ogTitle: 'Landing Page Kopi Spesialti dengan AI',
+    ogDescription:
+      'Bikin landing page kopi spesialti lengkap: hero aroma, cerita origin, roast level, harga, dan tombol pesan WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/landing-page-kopi-spesialti.png`,
+    ogImageAlt: 'Panduan bikin landing page kopi spesialti dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-09-04',
+    dateModified: '2026-09-04',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -1017,6 +1061,16 @@ export const RELATED_ARTICLES = {
     '/artikel/website-portfolio-mahasiswa',
     '/artikel/landing-page-jasa-freelance',
     '/artikel/cara-publish-website-karsa',
+  ],
+  '/artikel/landing-page-produk-herbal': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/landing-page-produk-digital',
+    '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/landing-page-kopi-spesialti': [
+    '/artikel/landing-page-preorder',
+    '/artikel/prompt-landing-page-konversi',
+    '/artikel/vibecoding-untuk-umkm',
   ],
 };
 

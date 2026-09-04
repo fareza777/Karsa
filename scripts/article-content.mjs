@@ -1198,4 +1198,99 @@ export const ARTICLE_BODY = {
       <p>Setelah live, promosikan lewat tiga kanal: pesan LinkedIn ke recruiter dengan kalimat pembuka yang menyebut posisi spesifik, broadcast ke 10 teman terdekat minta mereka sebarkan ke koneksi HR, dan tambahkan ke signature Gmail. Jangan broadcast ke grup besar — terasa spam.</p>
       <h2>Mulai sekarang</h2>
       <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti detail nama, pengalaman, dan skill kamu, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/website-portfolio-mahasiswa">panduan website portfolio mahasiswa</a> untuk konteks fresh graduate, dan <a href="/artikel/landing-page-jasa-freelance">landing page jasa freelance</a> untuk versi CV yang fokus ke klien. Setelah publish, kirim link ke tiga recruiter incar dan tambahkan ke bio LinkedIn.`,
-};
+  'landing-page-produk-herbal': `      <p>Penjual jamu, kapsul, dan skincare herbal Indonesia biasanya mengandalkan testimoni dari chat WhatsApp. Pelanggan pertama senang, kirim testimoni panjang, lalu hilang di antara ratusan pesan. Pembeli kedua ragu karena tidak ada bukti visual rapi, lalu batal checkout. <strong>Landing page produk herbal</strong> yang mobile-friendly memecahkan itu: satu halaman berisi benefit, komposisi, nomor BPOM, testimoni dengan foto, dan tombol pesan — bisa dibuka dari bio Instagram, story, atau status WhatsApp kapan saja.</p>
+      <p>Landing page produk herbal harus menjawab lima keraguan utama pembeli dalam 30 detik pertama: apa produknya, siapa yang cocok, aman atau tidak, sudah dipakai siapa, dan bagaimana cara pesan. Artikel ini membahas struktur yang menjawab kelima keraguan itu, contoh prompt KARSA bahasa Indonesia, dan tips yang sering diabaikan UMKM herbal pemula.</p>
+      <h2>Kapan UMKM herbal butuh landing page</h2>
+      <p>Tidak semua produk herbal butuh landing page. Katalog multi-produk cocok untuk etalase besar di marketplace, tapi landing page khusus sangat membantu saat satu produk sedang jadi fokus promo:</p>
+      <ul>
+        <li><strong>Produk andalan baru</strong> — jamu kunyit asam, kapsul temulawak, minuman herbal siap saji</li>
+        <li><strong>Skincare herbal lini tunggal</strong> — serum, sabun serai, masker kefir, lotion daun mint</li>
+        <li><strong>Peluncuran varian baru</strong> — rasa baru, kemasan baru, atau upgrade formula</li>
+        <li><strong>Pre-order batch terbatas</strong> — stok produk herbal sering tergantung musim panen</li>
+        <li><strong>Kerja sama reseller</strong> — landing page terpisah jadi materi promosi rapi untuk calon agen</li>
+      </ul>
+      <h2>Elemen wajib di landing page produk herbal</h2>
+      <p>Pembeli produk herbal lebih hati-hati dari pembeli fashion. Mereka cek komposisi, legalitas, dan testimoni sebelum checkout. Landing page yang convert di atas 3% selalu punya tujuh blok:</p>
+      <ul>
+        <li><strong>Hero dengan klaim utama</strong> — headline singkat, sub-benefit, dan foto produk close-up</li>
+        <li><strong>Komposisi dan cara kerja</strong> — daftar bahan, takaran, penjelasan sederhana, sertakan logo organik, halal, atau BPOM bila ada</li>
+        <li><strong>Nomor izin BPOM dan Halal</strong> — wajib terlihat di atas lipatan, trust booster terbesar</li>
+        <li><strong>Benefit terstruktur</strong> — 4–6 poin dengan ikon, singkat dan jelas</li>
+        <li><strong>Testimoni dengan foto</strong> — 3–5 testimoni, sertakan nama, usia, dan keluhan awal</li>
+        <li><strong>Cara pakai dan dosis</strong> — kapan diminum, berapa kali sehari, catatan khusus</li>
+        <li><strong>Form order atau tombol WhatsApp</strong> — form singkat 4–5 field, atau tombol langsung chat</li>
+      </ul>
+      <p>Yang sering dilupakan adalah blok FAQ. Produk herbal memicu pertanyaan berulang: amankah untuk asam lambung, boleh untuk anak, efek samping, kapan hasil terasa. FAQ 5–7 pertanyaan kurangi beban chat sampai 40%.</p>
+      <h2>Contoh prompt KARSA untuk landing page produk herbal</h2>
+      <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt berikut. Contoh untuk kapsul herbal daya tahan tubuh UMKM Bandung:</p>
+      <p><em>"Buat landing page single product kapsul herbal 'Sehat Akar Imun+', UMKM Bandung. Hero headline 'Imunitas Harian dari 7 Akar Nusantara', sub 'Kapsul 500mg, 60 kapsul, diminum 2x sehari'. Badge BPOM TRxxxxxxxxx dan Halal MUI di hero. Komposisi 7 bahan: jahe merah, temulawak, kunyit, serai, daun mint, kayu manis, meniran. 5 Benefit dengan ikon: naikkan imun, redakan masuk angin, bantu tidur, jaga stamina, redakan kembung. Aturan Pakai: 2 kapsul pagi, 1 malam, sesudah makan. Jangan diminum ibu hamil dan anak di bawah 12. Testimoni 4 orang: Bu Tini 52 tahun Jakarta, Pak Hendro 47 tahun Surabaya, Mbak Ratna 35 tahun Bandung, Mas Yoga 29 tahun Yogya — tiap ada nama, usia, kota, bintang 5. Harga 3 tier: 1 Botol Rp 145K, Bundle 3 Botol Rp 395K, Bundle 6 Botol Rp 749K free ongkir. FAQ 6: berapa lama hasil terasa (2 minggu rutin), efek samping (jarang), izin BPOM (ada, tertera), alergi (tanpa pengawet), ongkir (Rp 12K), garansi (uang kembali kalau segel rusak). Form Order 5 field: nama, WhatsApp, alamat singkat, pilih paket, jumlah. Submit kirim ke WhatsApp 0812xxx. Warna krem, hijau daun, aksen emas, mobile-first."</em></p>
+      <p>Setelah preview muncul, minta iterasi: <em>"tambah warning box kuning untuk peringatan ibu hamil dan anak"</em>. Pola vibecoding ini juga berlaku untuk <a href="/artikel/katalog-produk-online-umkm">katalog produk online UMKM</a> dan <a href="/artikel/landing-page-produk-digital">landing page produk digital</a>.</p>
+      <h2>Tips landing page produk herbal yang convert</h2>
+      <ul>
+        <li><strong>Klaim sesuai izin BPOM</strong> — jangan klaim "menyembuhkan" jika izin hanya "membantu menjaga daya tahan tubuh"</li>
+        <li><strong>Foto testimoni nyata</strong> — pembeli produk herbal curiga pada testimoni tanpa foto, minta izin pelanggan atau buat video 15 detik</li>
+        <li><strong>Tampilkan nomor izin</strong> — BPOM TR atau MD wajib terlihat tanpa scroll</li>
+        <li><strong>Harga tanpa ongkir mengecewakan</strong> — tulis ongkir eksplisit atau tawarkan free ongkir di atas Rp 300K</li>
+        <li><strong>Bundle hemat jelas</strong> — tampilkan harga satuan dan per kapsul. Herbal sering dibeli 1–3 bulan, bundle jadi penentu</li>
+        <li><strong>Mobile preview wajib</strong> — 75% traffic dari Instagram dan TikTok mobile, cek viewport 360px sebelum publish</li>
+      </ul>
+      <h2>Kesalahan umum landing page produk herbal UMKM</h2>
+      <ul>
+        <li><strong>Klaim berlebihan</strong> — "menyembuhkan diabetes" tanpa bukti klinis, BPOM bisa cabut izin</li>
+        <li><strong>Testimoni tanpa konteks</strong> — testimoni "mantap" tanpa nama dan foto tidak dipercaya, pembeli herbal cek detail kecil</li>
+        <li><strong>Tanpa komposisi jelas</strong> — formulasi proprietary sah, tapi tampilkan bahan utama</li>
+        <li><strong>Foto produk asal-asalan</strong> — foto blur di kamar mandi turunkan persepsi kualitas, minimal foto di meja kayu dengan cahaya alami</li>
+        <li><strong>Form terlalu panjang</strong> — alamat lengkap plus kode pos plus patokan terlalu berat</li>
+      </ul>
+      <p>Versi kedua biasanya naik konversi 30–50% setelah kamu mendengar 10 chat pertama. Catat pertanyaan berulang dan tambahkan ke FAQ.</p>
+      <h2>Mulai sekarang</h2>
+      <p>Buka <a href="/app">KARSA</a>, salin prompt, ganti detail produk dan nomor BPOM, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/katalog-produk-online-umkm">panduan katalog produk online UMKM</a> untuk etalase multi-produk, dan <a href="/artikel/landing-page-produk-digital">panduan landing page produk digital</a> untuk ebook atau membership. Setelah publish, tempel link di bio Instagram dan story — biar satu halaman menjelaskan produk, legalitas, testimoni, dan cara pesan dalam 30 detik.</p>
+      `,
+        'landing-page-kopi-spesialti': `
+            <p>Penjual kopi spesialti Indonesia sering mengandalkan postingan Instagram satu-satu: foto cangkir, V60, atau roasted beans. Hasilnya lumayan untuk sekali viral, tapi calon pelanggan baru sulit balik ke feed lama, dan ragu checkout karena tidak ada cerita lengkap soal origin, proses sangrai, dan cara seduh. <strong>Landing page kopi spesialti</strong> yang mobile-friendly memecahkan itu: satu halaman berisi hero aroma, profil origin, catatan rasa, roast level, harga, dan tombol pesan — bisa dibuka dari bio Instagram, story, atau broadcast WhatsApp kapan saja.</p>
+                  <p>Artikel ini membahas struktur yang menjawab enam pertanyaan calon pembeli dalam 30 detik pertama, contoh prompt KARSA bahasa Indonesia, dan tips yang membedakan halaman kopi spesialti dari sekadar katalog online.</p>
+            <h2>Kapan UMKM kopi butuh landing page</h2>
+            <p>Tidak semua produk kopi butuh landing page. Toko grosir multi-origin cocok untuk katalog besar di marketplace, sedangkan landing page khusus sangat membantu saat satu kopi sedang jadi fokus promo:</p>
+                  <ul>
+                    <li><strong>Single origin musiman</strong> — panen Gayo, Toraja, Mandheling, Java, atau Flores</li>
+                    <li><strong>Produk andalan roaster kecil</strong> — espresso blend rumah, cold brew botol, signature drip</li>
+                    <li><strong>Peluncuran metode baru</strong> — edisi anaerobic natural, washed honey, experimental fermentasi</li>
+                    <li><strong>Workshop atau cupping session</strong> — landing page terpisah untuk materi pendaftaran</li>
+                  </ul>
+            <p>Bedanya dengan <a href="/artikel/katalog-produk-online-umkm">katalog produk online UMKM</a>: katalog menonjolkan banyak SKU dalam satu etalase grid, sedangkan landing page kopi spesialti fokus menceritakan satu kopi dalam satu halaman. Cerita yang dalam membuat orang klik tombol pesan.</p>
+            <h2>Elemen wajib di landing page kopi spesialti</h2>
+            <p>Pembeli kopi spesialti membaca lebih teliti daripada pembeli fashion. Landing page yang menutup transaksi di hari yang sama selalu punya tujuh blok:</p>
+                  <ul>
+                    <li><strong>Hero aroma</strong> — headline singkat, foto close-up biji atau cangkir, satu tombol pesan WhatsApp</li>
+                    <li><strong>Profil singkat petani dan origin</strong> — nama petani, ketinggian, varietas, proses, cerita manusiawi</li>
+                    <li><strong>Catatan rasa dan roast level</strong> — 3–5 flavour notes, skala light-medium-dark, dan tanggal roast</li>
+                    <li><strong>Rekomendasi seduh</strong> — V60, French press, espresso, dengan takaran sederhana</li>
+                    <li><strong>Detail harga dan ukuran</strong> — 250g, 500g, 1kg, harga jelas, ongkir jujur</li>
+                    <li><strong>Testimoni dan rating</strong> — 3–5 testimoni pelanggan dengan nama dan kota</li>
+                    <li><strong>Tombol pesan berulang</strong> — CTA yang jelas, termasuk info langganan mingguan atau batch berikutnya</li>
+                  </ul>
+            <p>Tujuh blok ini menjawab enam pertanyaan calon pembeli sekaligus. Kopi specialty justru lebih dipercaya kalau tampilannya sederhana dan copy-nya spesifik, bukan template marketplace.</p>
+            <h2>Contoh prompt KARSA untuk landing page kopi spesialti</h2>
+            <p>Buka <a href="/app">KARSA</a>, buat proyek web baru, ketik prompt berikut. Contoh untuk roaster kecil Bandung yang baru rilis single origin Toraja Sapan:</p>
+            <p><em>"Buat landing page single product kopi Toraja Sapan edisi terbatas. Hero dengan foto close-up biji, headline 'Toraja Sapan — Cokelat, Blueberry, dan Akhir yang Bersih', sub '200kg dari petani Pak Duma, proses washed, roast light-medium tanggal 25 Agustus 2026'. Tombol 'Pesan 250g — Rp 145K' warna oranye gelap di atas lipatan. Section Profil Petani: foto placeholder portrait, nama Pak Duma, desa Sapan Minahasa, ketinggian 1650 mdpl, varietas Typica dan Bourbon, proses washed. Section Catatan Rasa: 4 pill — Cokelat 80%, Blueberry 70%, Caramel 65%, Tea-like Finish 60%. Section Roast: 'Light-medium, paling enak di 7–21 hari setelah roast date'. Section Rekomendasi Seduh: V60 15g kopi 220ml air 92°C 2.30 menit, French Press 30g kopi 350ml air 93°C 4 menit, Espresso 18g in 36g out 28 detik. Section Harga 3 tier: 250g Rp 145K, 500g Rp 275K (hemat 15K), 1kg Rp 525K (free ongkir Jabodetabek). Testimoni 4: Aulia 28 tahun Jakarta 'akhirnya ada Toraja yang bersih dan fruity', Rio 33 tahun Bandung 'akhir semana balik lagi', Sasa 31 tahun Surabaya 'bisa untuk V60 maupun espresso', Pak Yanto 45 tahun Denpasar 'pelanggan kafe saya selalu pesan ini'. Footer alamat workshop Bandung, jam buka, dan link Instagram. Warna krem, cokelat tua, aksen oranye, font serif modern, mobile-first."</em></p>
+            <p>Setelah preview muncul, iterasi per bagian: <em>"tambah section FAQ dengan 5 pertanyaan: kapan roast berikutnya, ongkir ke mana saja, apakah bisa subscription, refund policy, dan apakah ada edisi lain"</em>. Cara iterasi seperti ini juga berlaku untuk <a href="/artikel/prompt-landing-page-konversi">prompt landing page konversi</a> pada umumnya.</p>
+            <h2>Tips landing page kopi spesialti yang membuat orang repeat order</h2>
+            <ul>
+              <li><strong>Ceritakan petani dengan nama</strong> — 'Pak Duma di Toraja' lebih diingat daripada 'petani lokal Indonesia'</li>
+              <li><strong>Tanggal roast jelas terlihat</strong> — kopi spesialti paling enak 7–21 hari setelah roast, tulis tanggal bukan hanya bulan</li>
+              <li><strong>Catatan rasa dalam persentase</strong> — pembeli kopi pemula lebih mudah membandingkan antar-edisi</li>
+              <li><strong>Tombol langganan mingguan</strong> — 70% repeat order berasal dari pelanggan langganan, bukan pembeli dadakan</li>
+              <li><strong>Batch berikutnya jelas</strong> — tulis 'Batch 7: roast 22 September' agar pelanggan tahu kapan harus balik</li>
+            </ul>
+            <h2>Kesalahan umum landing page kopi spesialti UMKM</h2>
+            <ul>
+              <li><strong>Foto asal-asalan</strong> — foto blur di atas meja kayu dengan cahaya flash membuat origin bagus kelihatan murahan</li>
+              <li><strong>Catatan rasa terlalu puitis</strong> — 'nikmatnya menyentuh jiwa' tidak membantu pembeli pilih. Pakai flavour notes konkret</li>
+              <li><strong>Tanpa tanggal roast</strong> — kopi bulan lalu terasa beda dari kopi minggu ini. Tulis tanggal, bukan bulan</li>
+              <li><strong>CTA lemah</strong> — 'Klik di sini' tidak cukup. Pakai 'Pesan 250g — Rp 145K, Roast 25 Agustus' dengan tombol kontras</li>
+            </ul>
+            <p>Versi kedua biasanya naik konversi 20–40% setelah kamu mendengar 10 chat pertama. Catat pertanyaan berulang dan tambahkan ke FAQ — kopi spesialti punya pelanggan yang sangat teknis dan menghargai transparansi.</p>
+                  <h2>Mulai sekarang</h2>
+                  <p>Buka <a href="/app">KARSA</a>, salin prompt di atas, ganti nama petani dan origin, lihat preview dalam satu menit. Paket gratis 30 prompt AI per hari cukup untuk eksplorasi. Bandingkan dengan <a href="/artikel/landing-page-preorder">panduan landing page preorder</a> untuk strategi batch terbatas, dan <a href="/artikel/vibecoding-untuk-umkm">panduan vibecoding untuk UMKM</a>. Setelah publish, tempel link di bio Instagram dan story.</p>
+      `,
+      };
