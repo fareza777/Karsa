@@ -41,6 +41,7 @@ export const ARTICLE_PATHS = [
   '/artikel/website-cv-online',
   '/artikel/landing-page-produk-herbal',
   '/artikel/landing-page-kopi-spesialti',
+  '/artikel/website-toko-kue-tradisional',
 ];
 
 /** @type {string[]} */
@@ -877,6 +878,27 @@ export const SEO_ROUTES = {
     category: 'Tutorial',
     readMinutes: 6,
   },
+  '/artikel/website-toko-kue-tradisional': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Toko Kue Tradisional dengan AI — KARSA',
+    description:
+      'Panduan bikin website toko kue tradisional: etalase kue, resep legenda, harga, preorder, dan tombol pesan WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM.',
+    canonical: `${SITE}/artikel/website-toko-kue-tradisional`,
+    keywords:
+      'website toko kue tradisional, kue tradisional Indonesia, UMKM kue tradisional, toko kue online, jual kue tradisional online, KARSA kue',
+    headline: 'Website toko kue tradisional: dari etalase kaca jadi link permanen untuk pelanggan lama',
+    cardTitle: 'Website toko kue tradisional',
+    cardExcerpt: 'Etalase kue, resep legenda, harga, preorder, dan tombol WhatsApp — link permanen untuk UMKM kue tradisional Indonesia.',
+    ogTitle: 'Website Toko Kue Tradisional dengan AI',
+    ogDescription:
+      'Bikin website toko kue tradisional lengkap: etalase kue, resep legenda, harga, preorder, dan tombol pesan WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-toko-kue-tradisional.png`,
+    ogImageAlt: 'Panduan bikin website toko kue tradisional dengan KARSA untuk UMKM Indonesia',
+    datePublished: '2026-09-07',
+    dateModified: '2026-09-07',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -1070,6 +1092,11 @@ export const RELATED_ARTICLES = {
   '/artikel/landing-page-kopi-spesialti': [
     '/artikel/landing-page-preorder',
     '/artikel/prompt-landing-page-konversi',
+    '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/website-toko-kue-tradisional': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/landing-page-preorder',
     '/artikel/vibecoding-untuk-umkm',
   ],
 };
