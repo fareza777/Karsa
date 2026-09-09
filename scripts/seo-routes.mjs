@@ -42,6 +42,7 @@ export const ARTICLE_PATHS = [
   '/artikel/landing-page-produk-herbal',
   '/artikel/landing-page-kopi-spesialti',
   '/artikel/website-toko-kue-tradisional',
+  '/artikel/website-toko-bunga',
 ];
 
 /** @type {string[]} */
@@ -899,6 +900,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/website-toko-bunga': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Toko Bunga dengan AI — KARSA',
+    description:
+      'Panduan bikin website toko bunga: katalog bouquet, papan bunga, harga, preorder, dan tombol pesan WhatsApp. Contoh prompt KARSA bahasa Indonesia untuk UMKM florist.',
+    canonical: `${SITE}/artikel/website-toko-bunga`,
+    keywords:
+      'website toko bunga, toko bunga online, florist Indonesia UMKM, jual bouquet online, katalog bunga, KARSA florist',
+    headline: 'Website toko bunga: dari etalase gerai jadi etalase digital yang buka 24 jam',
+    cardTitle: 'Website toko bunga',
+    cardExcerpt: 'Katalog bouquet, papan bunga, harga, preorder, dan tombol WhatsApp — link permanen untuk florist UMKM.',
+    ogTitle: 'Website Toko Bunga dengan AI',
+    ogDescription:
+      'Bikin website toko bunga lengkap: katalog bouquet, papan bunga, harga, preorder, dan tombol pesan WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-toko-bunga.png`,
+    ogImageAlt: 'Panduan bikin website toko bunga dengan KARSA untuk UMKM florist Indonesia',
+    datePublished: '2026-09-09',
+    dateModified: '2026-09-09',
+    category: 'UMKM',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -1095,6 +1117,11 @@ export const RELATED_ARTICLES = {
     '/artikel/vibecoding-untuk-umkm',
   ],
   '/artikel/website-toko-kue-tradisional': [
+    '/artikel/katalog-produk-online-umkm',
+    '/artikel/landing-page-preorder',
+    '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/website-toko-bunga': [
     '/artikel/katalog-produk-online-umkm',
     '/artikel/landing-page-preorder',
     '/artikel/vibecoding-untuk-umkm',
