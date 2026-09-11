@@ -43,6 +43,7 @@ export const ARTICLE_PATHS = [
   '/artikel/landing-page-kopi-spesialti',
   '/artikel/website-toko-kue-tradisional',
   '/artikel/website-toko-bunga',
+  '/artikel/website-jasa-les-privat',
 ];
 
 /** @type {string[]} */
@@ -921,6 +922,27 @@ export const SEO_ROUTES = {
     category: 'UMKM',
     readMinutes: 6,
   },
+  '/artikel/website-jasa-les-privat': {
+    ogType: 'article',
+    title: 'Cara Bikin Website Jasa Les Privat dengan AI — KARSA',
+    description:
+      'Panduan bikin website jasa les privat: profil tutor, mata pelajaran, harga, dan form booking. Contoh prompt KARSA bahasa Indonesia untuk tutor dan bimbel.',
+    canonical: `${SITE}/artikel/website-jasa-les-privat`,
+    keywords:
+      'website jasa les privat, les privat online, tutor Indonesia, bimbel online, landing page tutor, KARSA jasa pendidikan',
+    headline: 'Website jasa les privat: dari flyer tempel jadi link booking yang dipercaya orang tua',
+    cardTitle: 'Website jasa les privat',
+    cardExcerpt: 'Profil tutor, mata pelajaran, harga, jadwal, dan form booking — link permanen untuk tutor dan bimbel kecil.',
+    ogTitle: 'Website Jasa Les Privat dengan AI',
+    ogDescription:
+      'Bikin website les privat lengkap: profil tutor, mata pelajaran, harga, jadwal, dan tombol booking WhatsApp dalam hitungan menit.',
+    ogImage: `${SITE}/og/website-jasa-les-privat.png`,
+    ogImageAlt: 'Panduan bikin website jasa les privat dengan KARSA untuk tutor dan bimbel Indonesia',
+    datePublished: '2026-09-11',
+    dateModified: '2026-09-11',
+    category: 'Tutorial',
+    readMinutes: 6,
+  },
 };
 
 /** @type {Record<string, string[]>} */
@@ -1124,6 +1146,11 @@ export const RELATED_ARTICLES = {
   '/artikel/website-toko-bunga': [
     '/artikel/katalog-produk-online-umkm',
     '/artikel/landing-page-preorder',
+    '/artikel/vibecoding-untuk-umkm',
+  ],
+  '/artikel/website-jasa-les-privat': [
+    '/artikel/form-booking-online-umkm',
+    '/artikel/website-portfolio-mahasiswa',
     '/artikel/vibecoding-untuk-umkm',
   ],
 };

@@ -5,8 +5,15 @@
     <link>https://karsa.work/</link>
     <description>Panduan pembuat aplikasi, vibecoding UMKM, dan publish website dari KARSA.</description>
     <language>id</language>
-    <lastBuildDate>Wed, 09 Sep 2026 01:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 11 Sep 2026 01:00:00 GMT</lastBuildDate>
     <atom:link href="https://karsa.work/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Cara Bikin Website Jasa Les Privat dengan AI — KARSA</title>
+      <link>https://karsa.work/artikel/website-jasa-les-privat</link>
+      <guid isPermaLink="true">https://karsa.work/artikel/website-jasa-les-privat</guid>
+      <description>Panduan bikin website jasa les privat: profil tutor, mata pelajaran, harga, dan form booking. Contoh prompt KARSA bahasa Indonesia untuk tutor dan bimbel.</description>
+      <pubDate>Fri, 11 Sep 2026 01:00:00 GMT</pubDate>
+    </item>
     <item>
       <title>Cara Bikin Website Toko Bunga dengan AI — KARSA</title>
       <link>https://karsa.work/artikel/website-toko-bunga</link>
